@@ -73,8 +73,6 @@ create_app_state.dag_board <- function(board) {
     # For code generation
     display_code = FALSE,
     # Dashboard
-    removed_from_dashboard = NULL,
-    add_to_dashboard = NULL,
     module_state = list()
   )
 }

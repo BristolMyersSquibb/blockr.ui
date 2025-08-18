@@ -19,6 +19,8 @@ dashboard_server.dag_board <- function(board, update, session, parent, ...) {
   isolate(
     {
       parent$in_grid <- list()
+      parent$added_to_dashboard <- NULL
+      parent$removed_from_dashboard <- NULL
     }
   )
 
