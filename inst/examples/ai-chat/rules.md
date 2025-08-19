@@ -14,7 +14,7 @@
 
 ### More detailed information
 
-- Whenever you're asked to import data from a location, say `/Users/davidgranjon/Downloads/15503683440_intervals.csv`, you can use the `new_filebrowser_block` block to read the data by replace the `file_path` with the provided path. Then append it a `new_csv_block` to parse the CSV file. If it were anoter format, you would use the corresponding block, for instance `new_excel_block` for Excel files. Parser blocks are defined as `new_<file_type>_block`, where `<file_type>` is extension of file to parse, such as `new_csv_block`. Available names
+- Whenever you're asked to import data from a location, say `/path/*.csv` ('*' being the file name), you can use the `new_filebrowser_block` block to read the data by replace the `file_path` with the provided path, `volume` will be set to `c(home = "/path")` (that is one level above the csv folder). Then append it a `new_csv_block` to parse the CSV file. If it were anoter format, you would use the corresponding block, for instance `new_excel_block` for Excel files. Parser blocks are defined as `new_<file_type>_block`, where `<file_type>` is extension of file to parse, such as `new_csv_block`. Available names
 are get by calling `available_block_names` tool.
 
 ## Adding block rules
