@@ -285,8 +285,8 @@ chat_mod_srv <- function(board, update, session, parent, ...) {
 
             # Feedback for the graph
             add_nodes_to_stack(
-              stack_id = stack_id,
-              nodes = block_id,
+              sprintf("combo-%s", stack_id),
+              block_id,
               board,
               parent,
               session
@@ -347,28 +347,6 @@ chat_mod_srv <- function(board, update, session, parent, ...) {
         chat_clear("prompt")
         # This also erase the chat memory and not just the UI
         #openai$set_turns(list())
-      })
-
-      observeEvent(res(), {
-        # Order append block
-        #if (app_request()$action == "add_block") {
-        #  # If the action is to set the board, we can update the parent with the new board
-        #  parent$scoutbar$action <- "add_block"
-        #  parent$scoutbar$value <- app_request()$data
-        #  if (app_request()$data$append) {
-        #    parent$append_block <- TRUE
-        #  }
-        #}
-        #else if (app_request()$action == "set_board") {
-        #  browser()
-        #  if (!length(board_blocks(board$board))) {
-        #    board_blocks(board$board) <- app_request()$data$blocks
-        #    board_links(board$board) <- app_request()$data$links
-        #    board_stacks(board$board) <- app_request()$data$stacks
-        #    cold_start(board, parent, session)
-        #  } else {}
-        #  # Are there existing blocks in the board?
-        #}
       })
     }
   )
