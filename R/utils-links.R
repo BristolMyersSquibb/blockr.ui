@@ -1007,8 +1007,6 @@ add_nodes_to_stack <- function(stack_id, nodes, rv, parent, session) {
     )
   })
 
-  browser()
-
   g6_proxy(ns("network")) |>
     g6_update_nodes(nodes) |>
     g6_fit_center()
