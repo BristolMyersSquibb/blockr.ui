@@ -122,8 +122,15 @@ board_option_from_userdata <- function(name, session) {
 
 #' @keywords internal
 list_snapshot_files <- function(board_id) {
+
+  opt <- get_board_option_or_null("snapshot")
+
+  if (is.null(opt)) {
+    return(character())
+  }
+
   list.files(
-    path = get_board_option_value("snapshot")$location,
+    path = opt$location,
     pattern = paste0("^", board_id, ".*\\.json$"),
     full.names = TRUE
   )
@@ -155,7 +162,15 @@ snapshot_board <- function(vals, rv, parent, session) {
       }
 
       file_name <- board_filename(rv)()
+
+      opt <- get_board_option_or_null("snapshot")
+
+      if (not_null(opt)) {
+        file_name <- file.path(opt$location, file_name)
+      }
+
       write_board_to_disk(rv, parent, session)(file_name)
+
       parent$backup_list <- list_snapshot_files(rv$board_id)
       vals$current_backup <- length(parent$backup_list)
     },

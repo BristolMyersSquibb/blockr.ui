@@ -36,7 +36,7 @@ ser_deser_server <- function(id, board, parent, ...) {
 
       # TBD -> add board option for auto_snapshot
 
-      if (isTRUE(isolate(get_board_option_value("snapshot")$auto))) {
+      if (isTRUE(isolate(get_board_option_or_null("snapshot")$auto))) {
         # Debounce so that we don't record too
         # many intermediate states as json. This also leaves
         # enough time for the network to stabilize properly
@@ -59,37 +59,37 @@ ser_deser_server <- function(id, board, parent, ...) {
             snapshot_board(vals, board, parent, session)
           }
         )
-
-        observeEvent(
-          c(vals$current_backup, parent$backup_list),
-          {
-            toggle_undo_redo(vals, parent)
-          },
-          ignoreNULL = TRUE
-        )
-
-        observeEvent(input$undo, {
-          vals$current_backup <- vals$current_backup - 1
-        })
-
-        observeEvent(input$redo, {
-          vals$current_backup <- vals$current_backup + 1
-        })
-
-        # Move from one snapshot to another
-        observeEvent(
-          c(input$undo, input$redo),
-          {
-            vals$auto_snapshot <- TRUE
-            restore_board(
-              parent$backup_list[[vals$current_backup]],
-              res,
-              parent
-            )
-          },
-          ignoreInit = TRUE
-        )
       }
+
+      observeEvent(
+        c(vals$current_backup, parent$backup_list),
+        {
+          toggle_undo_redo(vals, parent)
+        },
+        ignoreNULL = TRUE
+      )
+
+      observeEvent(input$undo, {
+        vals$current_backup <- vals$current_backup - 1L
+      })
+
+      observeEvent(input$redo, {
+        vals$current_backup <- vals$current_backup + 1L
+      })
+
+      # Move from one snapshot to another
+      observeEvent(
+        c(input$undo, input$redo),
+        {
+          restore_board(
+            parent$backup_list[[vals$current_backup]],
+            res,
+            parent
+          )
+        },
+        priority = -1,
+        ignoreInit = TRUE
+      )
 
       # Manual save
       observeEvent(req(parent$save_board), {

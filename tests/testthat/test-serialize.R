@@ -12,6 +12,8 @@ mock_add_block <- function(blk, rv, parent, session) {
   create_node(blk, parent, rv, FALSE, session)
 }
 
+temp <- withr::local_tempdir()
+
 testServer(
   ser_deser_server,
   args = list(
@@ -20,7 +22,6 @@ testServer(
       board = new_dag_board(),
       board_id = "board"
     ),
-    # dot_args
     parent = reactiveValues(
       network = list(),
       refreshed = NULL,
@@ -29,19 +30,27 @@ testServer(
     )
   ),
   {
-    browser()
+    session$userData[["snapshot"]] <- reactiveVal(
+      list(location = temp, auto = FALSE)
+    )
+
     expect_null(vals$current_backup)
     expect_length(vals$backup_list, 0L)
+
     # Add new block
     mock_add_block(
       new_dataset_block(dataset = "BOD"),
       board,
-      dot_args$parent,
+      parent,
       session
     )
-    dot_args$parent$selected_block <- board_block_ids(board$board)
+
+    parent$selected_block <- board_block_ids(board$board)
     parent$save_board <- TRUE
     session$flushReact()
+    parent$save_board <- FALSE
+    session$elapse(500)
+    Sys.sleep(0.5)
 
     # We now have 1 snapshot
     expect_identical(vals$current_backup, 1L)
@@ -49,43 +58,50 @@ testServer(
     mock_add_block(
       new_dataset_block(dataset = "CO2"),
       board,
-      dot_args$parent,
+      parent,
       session
     )
-    dot_args$parent$selected_block <- board_block_ids(board$board)[2]
+
+    parent$selected_block <- board_block_ids(board$board)[2]
+    parent$save_board <- TRUE
     session$flushReact()
-    Sys.sleep(1)
-    session$elapse(2000) # for debounce
+    parent$save_board <- FALSE
+    session$elapse(500)
+    Sys.sleep(0.5)
+
     # We should have 2 snaps
     expect_identical(vals$current_backup, 2L)
+
     # Restore previous snapshot
     session$setInputs(undo = 0)
-    expect_identical(vals$current_backup, 1)
+    session$flushReact()
+    expect_identical(vals$current_backup, 1L)
     expect_identical(
-      dot_args$parent$selected_block,
+      parent$selected_block,
       board_block_ids(board$board)[1]
     )
+
     # Restore latest
     session$setInputs(redo = 0)
-    expect_identical(vals$current_backup, 2)
+    session$flushReact()
+    expect_identical(vals$current_backup, 2L)
     expect_identical(
-      dot_args$parent$selected_block,
+      parent$selected_block,
       board_block_ids(board$board)[2]
     )
+
     # Manual restore
     session$setInputs(
-      restore = list(datapath = vals$backup_list[[1]])
+      restore = list(datapath = parent$backup_list[[1]])
     )
+
     expect_identical(
-      dot_args$parent$selected_block,
+      parent$selected_block,
       board_block_ids(board$board)[1]
     )
+
     # Manual serialize
     output$serialize
-    # cleanup
-    if (length(vals$backup_list)) {
-      lapply(vals$backup_list, file.remove)
-    }
   }
 )
 
