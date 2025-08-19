@@ -184,7 +184,6 @@ testServer(
 
     # TBD mock: g6_state to get input[["network-state"]]
     session$setInputs("network-state" = list())
-    expect_s3_class(parent$network, "network")
 
     # Check output
     output$network
@@ -321,7 +320,7 @@ testServer(
     expect_identical(parent$removed_from_dashboard, parent$selected_block)
 
     # Removed node and block
-    session$setInputs("removed_node" = "select_test")
+    session$setInputs("remove_node" = "select_test")
     expect_identical(parent$removed_block, "select_test")
     expect_identical(parent$removed_edge, board_links(board$board)$id)
     mock_remove_block(

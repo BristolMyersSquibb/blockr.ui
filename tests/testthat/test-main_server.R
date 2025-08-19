@@ -57,7 +57,7 @@ testServer(
   {
     expect_true(app_state$cold_start)
     expect_null(app_state$refreshed)
-    expect_s3_class(app_state$network, "network")
+    expect_length(app_state$network, 0)
     expect_false(app_state$append_block)
     expect_null(app_state$added_block)
     expect_null(app_state$removed_block)
