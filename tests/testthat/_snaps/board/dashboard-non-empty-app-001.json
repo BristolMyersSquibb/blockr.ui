@@ -144,16 +144,27 @@
 
       ],
       "display_code": false,
-      "removed_from_dashboard": null,
-      "added_to_dashboard": null,
-      "grid": [
-
-      ],
+      "module_state": {
+        "dashboard": [
+          "structure(function (x) ",
+          "{",
+          "    if (missing(x)) {",
+          "        rv$get()",
+          "    }",
+          "    else {",
+          "        force(x)",
+          "        rv$set(x)",
+          "    }",
+          "}, class = \"function\", label = \"reactiveVal8ec9db8b\", .impl = <environment>)"
+        ]
+      },
       "in_grid": {
         "a": false,
         "b": false,
         "c": false
-      }
+      },
+      "added_to_dashboard": null,
+      "removed_from_dashboard": null
     }
   }
 }

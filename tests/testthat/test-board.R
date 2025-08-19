@@ -74,7 +74,6 @@ testServer(
   {
     # Init
     expect_length(dot_args$parent$in_grid, 0)
-    expect_s3_class(dot_args$parent$grid, "dock")
 
     # Add block
     mock_add_block(
