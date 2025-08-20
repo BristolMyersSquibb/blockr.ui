@@ -30,7 +30,16 @@ dashboard_server.dag_board <- function(board, update, session, parent, ...) {
 
   res <- reactiveVal()
 
-  observeEvent(input$dock_state, res(input$dock_state))
+  observeEvent(
+    {
+      # Should not trigger on restore, only when the dashboard changes
+      req(is.null(parent$refreshed))
+      input$dock_state
+    },
+    {
+      res(input$dock_state)
+    }
+  )
 
   # Cleanup existing dock before restoring
   observeEvent(

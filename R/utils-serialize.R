@@ -122,7 +122,6 @@ board_option_from_userdata <- function(name, session) {
 
 #' @keywords internal
 list_snapshot_files <- function(board_id) {
-
   opt <- get_board_option_or_null("snapshot")
 
   if (is.null(opt)) {
@@ -215,7 +214,8 @@ restore_board <- function(path, res, parent) {
         showNotification(
           paste0(
             "Attempting to restore a board with missing module settings for: ",
-            paste_enum(miss), ". These will be reset."
+            paste_enum(miss),
+            ". These will be reset."
           ),
           duration = NA,
           type = "warning"
@@ -226,7 +226,8 @@ restore_board <- function(path, res, parent) {
         showNotification(
           paste0(
             "Attempting to restore a board with extra module settings for: ",
-            paste_enum(xtra), ". These will be ignored."
+            paste_enum(xtra),
+            ". These will be ignored."
           ),
           duration = NA,
           type = "warning"

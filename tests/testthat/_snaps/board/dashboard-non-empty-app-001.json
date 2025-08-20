@@ -5,7 +5,7 @@
   "export": {
     "main-res": {
       "cold_start": false,
-      "refreshed": "network",
+      "refreshed": null,
       "network": {
         "nodes": [
           {
