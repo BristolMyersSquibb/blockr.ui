@@ -17,6 +17,7 @@ new_board_module <- function(
   title,
   context_menu = list(),
   position = NULL,
+  options = new_board_options(),
   class = character()
 ) {
   if (is_context_menu_entry(context_menu)) {
@@ -33,7 +34,12 @@ new_board_module <- function(
   )
 
   structure(
-    list(server = server, ui = ui, context_menu = context_menu),
+    list(
+      server = server,
+      ui = ui,
+      context_menu = context_menu,
+      options = as_board_options(options)
+    ),
     id = id,
     title = title,
     position = position,
@@ -53,6 +59,11 @@ board_module_server <- function(x) {
 board_module_ui <- function(x) {
   stopifnot(is_board_module(x))
   x[["ui"]]
+}
+
+board_module_options <- function(x) {
+  stopifnot(is_board_module(x))
+  x[["options"]]
 }
 
 board_module_id <- function(x) {

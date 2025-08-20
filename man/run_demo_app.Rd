@@ -7,7 +7,12 @@
 \usage{
 run_demo_app(...)
 
-new_dag_board(..., modules = new_dashboard_module(), class = character())
+new_dag_board(
+  ...,
+  modules = new_dashboard_module(),
+  options = dag_board_options(),
+  class = character()
+)
 }
 \arguments{
 \item{...}{Forwarded to \link[blockr.core]{new_board}.}

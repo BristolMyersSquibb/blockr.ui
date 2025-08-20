@@ -18,6 +18,7 @@ run_demo_app <- function(...) {
 #' @rdname run_demo_app
 #' @export
 new_dag_board <- function(..., modules = new_dashboard_module(),
+                          options = dag_board_options(),
                           class = character()) {
 
   if (is_board_module(modules)) {
@@ -25,6 +26,23 @@ new_dag_board <- function(..., modules = new_dashboard_module(),
   }
 
   stopifnot(is.list(modules), all(lgl_ply(modules, is_board_module)))
+
+  opts <- c(
+    as_board_options(options),
+    lapply(modules, board_module_options)
+  )
+
+  new_board(
+    ...,
+    options = opts,
+    modules = modules,
+    class = c(class, "dag_board")
+  )
+}
+
+#' @rdname run_demo_app
+#' @export
+dag_board_options <- function() {
 
   n_stacks <- 40
   stacks_color_palette <- "spectral"
@@ -45,19 +63,14 @@ new_dag_board <- function(..., modules = new_dashboard_module(),
     auto_snapshot <- as.logical(Sys.getenv("AUTO_SNAPSHOT"))
   }
 
-  new_board(
-    ...,
-    options = new_board_options(
-      dark_mode = "light",
-      stacks_colors = hcl.colors(n_stacks, palette = stacks_color_palette),
-      dashboard_zoom = 1,
-      snapshot = list(
-        location = snapshot_location,
-        auto = auto_snapshot
-      )
-    ),
-    modules = modules,
-    class = c(class, "dag_board")
+  new_board_options(
+    dark_mode = "light",
+    stacks_colors = hcl.colors(n_stacks, palette = stacks_color_palette),
+    dashboard_zoom = 1,
+    snapshot = list(
+      location = snapshot_location,
+      auto = auto_snapshot
+    )
   )
 }
 

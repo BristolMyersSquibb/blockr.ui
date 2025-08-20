@@ -12,6 +12,7 @@ new_board_module(
   title,
   context_menu = list(),
   position = NULL,
+  options = new_board_options(),
   class = character()
 )
 
