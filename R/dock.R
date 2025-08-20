@@ -32,13 +32,27 @@ dashboard_server.dag_board <- function(board, update, session, parent, ...) {
 
   observeEvent(input$dock_state, res(input$dock_state))
 
-  # Restore dock from serialisation only when network is restored
+  # Cleanup existing dock before restoring
   observeEvent(
     {
       req(parent$refreshed == "network")
     },
     {
-      # Restore reactive values
+      # This has to happen in another reactive loop to let
+      # the dock input panel be updated before restoring the dashboard.
+      cleanup_dashboard(session)
+    }
+  )
+
+  # Restore dock from serialisation only when network is restored
+  observeEvent(
+    {
+      req(
+        parent$refreshed == "network" &&
+          !length(get_panels_ids("dock", session))
+      )
+    },
+    {
       restore_dashboard(board$board, board, parent, session)
     }
   )
@@ -55,7 +69,7 @@ dashboard_server.dag_board <- function(board, update, session, parent, ...) {
       # Signal to remove panel from dock.
       # Panel will be removed by manage_dashboard.
       parent$in_grid[[removed]] <- NULL
-      if (paste0("block-", removed) %in% get_panels_ids("dock")) {
+      if (paste0("block-", removed) %in% get_panels_ids("dock", session)) {
         remove_panel("dock", paste0("block-", removed))
       }
     })

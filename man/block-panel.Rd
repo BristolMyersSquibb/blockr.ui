@@ -5,7 +5,7 @@
 \alias{hide_block_panel}
 \title{Show a block panel}
 \usage{
-show_block_panel(id, parent, session)
+show_block_panel(id, parent, refreshed, session)
 
 hide_block_panel(id, session)
 }
@@ -13,6 +13,8 @@ hide_block_panel(id, session)
 \item{id}{Block id to show}
 
 \item{parent}{Parent reactive values.}
+
+\item{refreshed}{Reactive value to indicate if the board has been refreshed.}
 
 \item{session}{Shiny session object.}
 }
