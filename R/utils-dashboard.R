@@ -101,7 +101,7 @@ restore_dashboard.dag_board <- function(board, rv, parent, session) {
 
   # Don't restore if no blocks
   if (!length(ids)) {
-    parent$refreshed <- "grid"
+    parent$refreshed <- NULL
     return(NULL)
   }
 
@@ -111,6 +111,7 @@ restore_dashboard.dag_board <- function(board, rv, parent, session) {
     lapply(ids, \(id) {
       parent$in_grid[[id]] <- FALSE
     })
+    parent$refreshed <- NULL
     return(NULL)
   }
 
@@ -127,7 +128,7 @@ restore_dashboard.dag_board <- function(board, rv, parent, session) {
   lapply(ids[not_in_grid], \(id) {
     parent$in_grid[[id]] <- FALSE
   })
-  parent$refreshed <- "grid"
+  parent$refreshed <- NULL
 }
 
 #' Find blocks ids generic

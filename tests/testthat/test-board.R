@@ -150,7 +150,7 @@ testServer(
     # Manually simulate remove panel as the JS callback does not work
     # in the testServer context
     session$setInputs(dock_state = list(panels = list()))
-    expect_identical(dot_args$parent$refreshed, "grid")
+    expect_null(dot_args$parent$refreshed)
 
     # Scoutbar
     session$setInputs("scoutbar" = "dataset_block@add_block")
