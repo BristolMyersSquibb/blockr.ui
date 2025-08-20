@@ -49,7 +49,7 @@ process_app_state <- function(state) {
     lapply(names(state), \(nme) {
       if (nme == "network") {
         # drop the x and y coords as this may not be reproducible
-        if (length(state[[nme]]$nodes) > 0 || length(state[[nme]]$combos)) {
+        if (length(state[[nme]]$nodes) || length(state[[nme]]$combos)) {
           if (length(state[[nme]]$nodes)) {
             state[[nme]]$nodes <- lapply(
               state[[nme]]$nodes,

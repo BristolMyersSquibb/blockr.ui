@@ -1,3 +1,7 @@
+# blockr.ui 1.0.1
+
+- Added new API to manage board modules: refine serialisation of dock and other parts.
+
 # blockr.ui 1.0.0
 
 ## Breaking changes
