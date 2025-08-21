@@ -79,24 +79,31 @@ remove_blk_from_dashboard <- function(id, session) {
   output[[out_name]] <- NULL
 }
 
-#' @export
-#' @rdname restore-dashboard
-restore_dashboard.dag_board <- function(board, rv, parent, session) {
-  # cleanup old state
-  if (length(parent$in_grid)) {
-    lapply(names(parent$in_grid), \(id) {
+#'@keywords internal
+cleanup_dashboard <- function(session) {
+  # cleanup existing dock panels
+  panel_ids <- get_panels_ids("dock", session)
+  if (length(panel_ids)) {
+    panel_ids <- gsub("block-", "", panel_ids)
+    lapply(panel_ids, \(id) {
       remove_blk_from_dashboard(id, session)
     })
   }
+}
+
+#' @export
+#' @rdname restore-dashboard
+restore_dashboard.dag_board <- function(board, rv, parent, session) {
   parent$in_grid <- list()
   ids <- names(rv$blocks)
+  # Find blocks that should be in the dock
+  in_grid_ids <- find_blocks_ids(rv$board, parent, session)
 
+  # Don't restore if no blocks
   if (!length(ids)) {
-    parent$refreshed <- "grid"
+    parent$refreshed <- NULL
     return(NULL)
   }
-
-  in_grid_ids <- find_blocks_ids(rv$board, parent, session)
 
   # When the dock was empty, we still need to initialise the block state
   # and all values are false
@@ -104,15 +111,16 @@ restore_dashboard.dag_board <- function(board, rv, parent, session) {
     lapply(ids, \(id) {
       parent$in_grid[[id]] <- FALSE
     })
+    parent$refreshed <- NULL
     return(NULL)
   }
 
   # Otherwise we spread elements between the dock and the network
   not_in_grid <- which(!(ids %in% in_grid_ids))
 
+  # Regenerate the output for the block as well as dock panel
   lapply(in_grid_ids, \(id) {
     parent$in_grid[[id]] <- TRUE
-    # Regenerate the output for the block as well as dock panel
     generate_dashboard_blk_output(id, rv, session)
     add_blk_panel_to_dashboard(id, rv, session)
   })
@@ -120,7 +128,7 @@ restore_dashboard.dag_board <- function(board, rv, parent, session) {
   lapply(ids[not_in_grid], \(id) {
     parent$in_grid[[id]] <- FALSE
   })
-  parent$refreshed <- "grid"
+  parent$refreshed <- NULL
 }
 
 #' Find blocks ids generic
@@ -148,7 +156,7 @@ find_blocks_ids.dag_board <- function(
   if (!length(state) || !length(state$panels)) {
     return(NULL)
   }
-  chr_ply(strsplit(names(state$panels), "block-"), `[[`, 2L)
+  gsub("block-", "", names(state$panels))
 }
 
 #' Update dashboard zoom on the client

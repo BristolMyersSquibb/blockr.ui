@@ -1085,7 +1085,7 @@ restore_network <- function(rv, vals, session) {
   # Replace all graph data and re-render
   # This does not replace plugins and behaviors ...
   g6_proxy(ns("network")) |>
-    g6_set_data(unclass(vals$network)) |>
+    g6_set_data(vals$network) |>
     g6_fit_center()
 
   # TBD maybe restore the state of vals$stacks?

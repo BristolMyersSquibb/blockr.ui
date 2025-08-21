@@ -144,8 +144,13 @@ testServer(
 
     # Refresh
     dot_args$parent$refreshed <- "network"
-    session$flushReact()
-    expect_identical(dot_args$parent$refreshed, "grid")
+    # Manually setup the dashboard state as this is theoretically
+    # injected by the dashboard module
+    dot_args$parent$module_state$dashboard <- reactiveVal(NULL)
+    # Manually simulate remove panel as the JS callback does not work
+    # in the testServer context
+    session$setInputs(dock_state = list(panels = list()))
+    expect_null(dot_args$parent$refreshed)
 
     # Scoutbar
     session$setInputs("scoutbar" = "dataset_block@add_block")
