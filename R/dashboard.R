@@ -131,3 +131,122 @@ dashboard_server <- function(board, update, session, parent, ...) {
 
   res
 }
+
+new_dashboard_zoom_option <- function(
+  value = blockr_option("dashboard_zoom", 1), ...) {
+
+  new_board_option(
+    id = "dashboard_zoom",
+    default = value,
+    ui = function(id) {
+      numericInput(
+        NS(id, "dashboard_zoom"),
+        "Dashboard zoom factor",
+        value,
+        min = 0.5,
+        max = 2,
+        step = 0.1
+      )
+    },
+    server = function(board, session) {
+      observeEvent(
+        get_board_option_or_null("dashboard_zoom", session),
+        {
+          updateNumericInput(
+            session,
+            "dashboard_zoom",
+            value = get_board_option_value("dashboard_zoom", session)
+          )
+        }
+      )
+    },
+    transform = function(x) as.integer(x),
+    ...
+  )
+}
+
+#' @export
+validate_board_option.dashboard_zoom_option <- function(x) {
+
+  val <- board_option_default(NextMethod())
+
+  if (!is_number(val)) {
+    abort(
+      "Expecting `dashboard_zoom` to represent a scalar number.",
+      class = "board_options_dashboard_zoom_invalid"
+    )
+  }
+
+  invisible(x)
+}
+
+add_to_dashboard_ctxm <- new_context_menu_entry(
+  name = "Add to dashboard",
+  js = function(ns) {
+    sprintf(
+      "(value, target, current) => {
+      if (current.id === undefined) return;
+      Shiny.setInputValue('%s', current.id, {priority: 'event'});
+    }",
+      ns("add_to_dashboard")
+    )
+  },
+  action = function(input, output, session, board, update, parent) {
+    observeEvent(
+      input$add_to_dashboard,
+      {
+        parent$added_to_dashboard <- input$add_to_dashboard
+        parent$in_grid[[parent$added_to_dashboard]] <- TRUE
+      }
+    )
+  },
+  condition = function(board, parent, target) {
+    target$type == "node" &&
+      (!target$id %in% names(parent$in_grid) || !parent$in_grid[[target$id]])
+  }
+)
+
+remove_from_dashboard_ctxm <- new_context_menu_entry(
+  name = "Remove from dashboard",
+  js = function(ns) {
+    sprintf(
+      "(value, target, current) => {
+      if (current.id === undefined) return;
+      Shiny.setInputValue('%s', current.id, {priority: 'event'});
+    }",
+      ns("remove_from_dashboard")
+    )
+  },
+  action = function(input, output, session, board, update, parent) {
+    observeEvent(
+      input$remove_from_dashboard,
+      {
+        parent$removed_from_dashboard <- input$remove_from_dashboard
+        parent$in_grid[[parent$removed_from_dashboard]] <- FALSE
+      }
+    )
+  },
+  condition = function(board, parent, target) {
+    target$type == "node" &&
+      target$id %in% names(parent$in_grid) &&
+      parent$in_grid[[target$id]]
+  }
+)
+
+#' @export
+#' @rdname board-module
+new_dashboard_module <- function(id = "dashboard", title = "Dashboard") {
+  new_board_module(
+    dashboard_ui,
+    dashboard_server,
+    id = id,
+    title = title,
+    context_menu = list(
+      add_to_dashboard_ctxm,
+      remove_from_dashboard_ctxm
+    ),
+    options = new_dashboard_zoom_option(),
+    class = "dashboard_module"
+  )
+}
+

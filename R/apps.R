@@ -43,6 +43,11 @@ new_dag_board <- function(..., modules = new_dashboard_module(),
 #' @rdname run_demo_app
 #' @export
 dag_board_options <- function() {
+  c(
+    default_board_options(),
+    new_stack_colors_options(),
+    new_auto_snapshot_option()
+  )
 
   n_stacks <- 40
   stacks_color_palette <- "spectral"

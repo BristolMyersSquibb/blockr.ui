@@ -1,0 +1,133 @@
+new_stack_colors_option <- function(
+  n_stacks = blockr_option("n_stacks", 40L),
+  color_palette = blockr_option("stacks_palette", "spectral")) {
+	
+  new_board_option(
+    id = "stacks_colors",
+    default = list(n_stacks = n_stacks, color_palette = color_palette),
+    ui = function(id) {
+      span(
+        numericInput(
+          NS(id, "n_stacks"),
+          "Number of stack colors",
+          n_stacks,
+          min = 1L,
+          step = 1L
+        ),
+        selectInput(
+          NS(id, "color_palette"),
+          "Color palette",
+          grDevices::hcl.pals(),
+          color_palette
+        )
+      )
+    },
+    server = function(board, session) {
+      observeEvent(
+        get_board_option_or_null("stacks_colors", session),
+        {
+          opt <- get_board_option_value("stacks_colors", session)
+          updateNumericInput(
+            session,
+            "n_stacks",
+            value = attr(opt, "n_stacks")
+          )
+          updateSelectInput(
+            session,
+            "color_palette",
+            selected = attr(opt, "palette")
+          )
+        }
+      )
+    },
+    update_trigger = c("n_stacks", "color_palette"),
+    transform = function(x) {
+      structure(
+        grDevices::hcl.colors(x$n_stacks, palette = x$color_palette),
+        n_stacks = as.integer(x$n_stacks),
+        palette = x$color_palette
+      )
+    },
+    ...
+  )
+}
+
+#' @export
+validate_board_option.stack_colors_option <- function(x) {
+
+  val <- board_option_default(NextMethod())
+
+  nst <- attr(val, "n_stacks")
+  pal <- attr(val, "palette")
+
+  if (!is_count(nst)) {
+    abort(
+      "Expecting `n_stacks` to represent a count.",
+      class = "board_options_stack_colors_invalid"
+    )
+  }
+
+  if (!(is_string(pal) && pal %in% grDevices::hcl.pals())) {
+    abort(
+      "Expecting `color_palette` to represent a single valid color palette.",
+      class = "board_options_stack_colors_invalid"
+    )
+  }
+
+  if (!(is.character(val) && length(val) == nst)) {
+    abort(
+      paste0(
+        "Expecting `stack_colors` to be a character vector of length ", nst,
+        "."
+      ),
+      class = "board_options_stack_colors_invalid"
+    )
+  }
+
+  invisible(x)
+}
+
+new_auto_snapshot_option <- function(
+  value = blockr_option("auto_save", FALSE)) {
+
+  new_board_option(
+    id = "auto_snapshot",
+    default = value,
+    ui = function(id) {
+      bslib::input_switch(
+        NS(id, "auto_snapshot"),
+        "Enable auto-save",
+        value
+      )
+    },
+    server = function(board, session) {
+      observeEvent(
+        get_board_option_or_null("auto_snapshot", session),
+        {
+          bslib::toggle_switch(
+            "auto_snapshot",
+            value = get_board_option_value("auto_snapshot", session),
+            session = session
+          )
+        }
+      )
+    },
+    transform = function(x) as.logical(x),
+    ...
+  )
+}
+
+#' @export
+validate_board_option.auto_snapshot_option <- function(x) {
+
+  val <- board_option_default(NextMethod())
+
+  if (!is_bool(val)) {
+    abort(
+      "Expecting `auto_snapshot` to be a boolean.",
+      class = "board_options_auto_snapshot_invalid"
+    )
+  }
+
+  invisible(x)
+}

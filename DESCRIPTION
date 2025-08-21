@@ -33,12 +33,13 @@ Imports:
     bslib,
     scoutbaR,
     shinyWidgets,
-    blockr.core,
+    blockr.core (>= 0.1.1),
     shinyjs,
     jsonlite,
     htmltools,
     dockViewR (>= 0.2.1),
-    g6R (>= 0.1.0)
+    g6R (>= 0.1.0),
+    grDevices
 Remotes:
     BristolMyersSquibb/blockr.core,
     BristolMyersSquibb/blockr.dplyr,
