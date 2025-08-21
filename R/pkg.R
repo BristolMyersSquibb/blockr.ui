@@ -10,4 +10,5 @@
 #' @importFrom utils tail
 #' @import dockViewR
 #' @import g6R
+#' @import ellmer
 NULL

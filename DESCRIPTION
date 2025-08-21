@@ -38,7 +38,8 @@ Imports:
     jsonlite,
     htmltools,
     dockViewR (>= 0.2.1),
-    g6R (>= 0.1.0)
+    g6R (>= 0.1.0),
+    ellmer
 Remotes:
     BristolMyersSquibb/blockr.core,
     BristolMyersSquibb/blockr.dplyr,
