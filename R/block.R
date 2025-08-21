@@ -114,20 +114,21 @@ insert_block_ui.dag_board <- function(
 #'
 #' @param id Block id to show
 #' @param parent Parent reactive values.
+#' @param refreshed Reactive value to indicate if the board has been refreshed.
 #' @param session Shiny session object.
 #' @rdname block-panel
-show_block_panel <- function(id, parent, session) {
+show_block_panel <- function(id, parent, refreshed, session) {
   ns <- session$ns
 
   # Extract block panels
-  block_panels <- chr_ply(
-    grep("block", get_panels_ids("layout"), value = TRUE),
-    \(pane) {
-      strsplit(pane, "block-")[[1]][2]
-    }
+  all_panels <- get_panels_ids("layout", session)
+  block_panels <- gsub(
+    "block-",
+    "",
+    grep("block", all_panels, value = TRUE)
   )
   # Don't do anything if the block panel is already there
-  if (parent$selected_block %in% block_panels) {
+  if (!refreshed && parent$selected_block %in% block_panels) {
     return(NULL)
   }
 
@@ -143,12 +144,12 @@ show_block_panel <- function(id, parent, session) {
       # the linked block UIs and causes many issues.
       renderer = "always",
       position = list(
-        referencePanel = if (length(get_panels_ids("layout")) == 2) {
+        referencePanel = if (length(all_panels) == 2) {
           "dag"
         } else {
-          get_panels_ids("layout")[length(get_panels_ids("layout"))]
+          all_panels[length(all_panels)]
         },
-        direction = if (length(get_panels_ids("layout")) == 2) {
+        direction = if (length(all_panels) == 2) {
           "below"
         } else {
           "within"

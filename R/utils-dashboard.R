@@ -1,28 +1,14 @@
-#' Restore dashboard state from board state
-#'
-#' @param board Board object.
-#' @param rv Board reactive values object. Read-only
-#' @param parent Parent reactive values.
-#' @param session Shiny session object.
-#' Contains blocks coordinates, dimensions, ...
-#' @export
-#' @rdname restore-dashboard
 restore_dashboard <- function(board, rv, parent, session) {
-  # cleanup old state
-  if (length(parent$in_grid)) {
-    lapply(names(parent$in_grid), \(id) {
-      remove_blk_from_dashboard(id, session)
-    })
-  }
   parent$in_grid <- list()
   ids <- names(rv$blocks)
+  # Find blocks that should be in the dock
+  in_grid_ids <- find_blocks_ids(rv$board, parent, session)
 
+  # Don't restore if no blocks
   if (!length(ids)) {
-    parent$refreshed <- "grid"
+    parent$refreshed <- NULL
     return(NULL)
   }
-
-  in_grid_ids <- find_blocks_ids(rv$board, parent, session)
 
   # When the dock was empty, we still need to initialise the block state
   # and all values are false
@@ -30,15 +16,16 @@ restore_dashboard <- function(board, rv, parent, session) {
     lapply(ids, \(id) {
       parent$in_grid[[id]] <- FALSE
     })
+    parent$refreshed <- NULL
     return(NULL)
   }
 
   # Otherwise we spread elements between the dock and the network
   not_in_grid <- which(!(ids %in% in_grid_ids))
 
+  # Regenerate the output for the block as well as dock panel
   lapply(in_grid_ids, \(id) {
     parent$in_grid[[id]] <- TRUE
-    # Regenerate the output for the block as well as dock panel
     generate_dashboard_blk_output(id, rv, session)
     add_blk_panel_to_dashboard(id, rv, session)
   })
@@ -46,10 +33,9 @@ restore_dashboard <- function(board, rv, parent, session) {
   lapply(ids[not_in_grid], \(id) {
     parent$in_grid[[id]] <- FALSE
   })
-  parent$refreshed <- "grid"
+  parent$refreshed <- NULL
 }
 
-#' @keywords internal
 generate_dashboard_blk_output <- function(id, rv, session) {
   output <- session$output
   out_name <- sprintf(
@@ -85,7 +71,6 @@ generate_dashboard_blk_output <- function(id, rv, session) {
   )
 }
 
-#' @keywords internal
 add_blk_panel_to_dashboard <- function(id, rv, session) {
   ns <- session$ns
   dock_blk_ui <- block_ui(
@@ -109,7 +94,6 @@ add_blk_panel_to_dashboard <- function(id, rv, session) {
   )
 }
 
-#' @keywords internal
 remove_blk_from_dashboard <- function(id, session) {
   output <- session$output
   out_name <- sprintf("dock-%s-result", id)
@@ -117,10 +101,17 @@ remove_blk_from_dashboard <- function(id, session) {
   output[[out_name]] <- NULL
 }
 
-#' Find blocks ids
-#'
-#' @rdname restore-dashboard
-#' @export
+cleanup_dashboard <- function(session) {
+  # cleanup existing dock panels
+  panel_ids <- get_panels_ids("dock", session)
+  if (length(panel_ids)) {
+    panel_ids <- gsub("block-", "", panel_ids)
+    lapply(panel_ids, \(id) {
+      remove_blk_from_dashboard(id, session)
+    })
+  }
+}
+
 find_blocks_ids <- function(
   board,
   parent,
@@ -130,23 +121,16 @@ find_blocks_ids <- function(
   if (!length(state) || !length(state$panels)) {
     return(NULL)
   }
-  chr_ply(strsplit(names(state$panels), "block-"), `[[`, 2L)
+  gsub("block-", "", names(state$panels))
 }
 
-#' Update dashboard zoom on the client
-#'
-#' This allows to set different zoom level to handle more
-#' crowded dashboards.
-#'
-#' @param session Shiny session object
-#' @keywords internal
 handle_dashboard_zoom <- function(session) {
   ns <- session$ns
   session$sendCustomMessage(
     "update-dashboard-zoom",
     list(
       id = sprintf("#%s", ns("dashboard_zoom_target")),
-      zoom = get_board_option_value("dashboard_zoom")
+      zoom = get_board_option_value("dashboard_zoom", session = session)
     )
   )
 }

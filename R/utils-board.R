@@ -212,13 +212,55 @@ build_layout <- function(modules, plugins) {
     output <- session$output
     ns <- session$ns
 
-    # TBD: re-insert block panel ui if it was closed
+    refreshed <- reactiveVal(FALSE)
+
+    # Cleanup existing panels on restore
     observeEvent(
       {
-        req(parent$selected_block, length(parent$selected_block) == 1)
+        req(parent$refreshed == "network")
       },
       {
-        show_block_panel(parent$selected_block, parent, session)
+        block_panels <- gsub(
+          "block-",
+          "",
+          grep(
+            "block",
+            get_panels_ids("layout", session),
+            value = TRUE
+          )
+        )
+        remove_block_panels(block_panels)
+        refreshed(TRUE)
+      }
+    )
+
+    # Show block panel on board refresh if there was a selected block
+    observeEvent(
+      req(
+        refreshed() &&
+          !length(grep("block-", get_panels_ids("layout", session)))
+      ),
+      {
+        if (!length(parent$selected_block)) {
+          return(NULL)
+        }
+        show_block_panel(parent$selected_block, parent, TRUE, session)
+        refreshed(FALSE)
+      }
+    )
+
+    # Re-insert block panel ui if it was closed any time a block is selected.
+    # This work only for single selection (for now). TBD: I think we could easily loop
+    # over multiple selected blocks and show them all.
+    observeEvent(
+      {
+        req(
+          parent$selected_block,
+          length(parent$selected_block) == 1
+        )
+      },
+      {
+        show_block_panel(parent$selected_block, parent, FALSE, session)
       }
     )
 
