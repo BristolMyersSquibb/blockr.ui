@@ -36,7 +36,7 @@ ser_deser_server <- function(id, board, parent, ...) {
 
       # TBD -> add board option for auto_snapshot
 
-      if (isTRUE(isolate(get_board_option_or_null("snapshot")$auto))) {
+      if (isTRUE(isolate(get_board_option_or_null("snapshot")))) {
         # Debounce so that we don't record too
         # many intermediate states as json. This also leaves
         # enough time for the network to stabilize properly
@@ -157,7 +157,7 @@ ser_deser_ui <- function(id, board) {
 
   list(
     buttons = tagList(
-      if (isTRUE(board_option("snapshot", board)$auto)) {
+      if (isTRUE(as_board_options(board)[["snapshot"]])) {
         tagList(
           actionButton(
             NS(id, "undo"),

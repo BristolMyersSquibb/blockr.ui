@@ -130,7 +130,7 @@ list_snapshot_files <- function(board_id) {
   }
 
   list.files(
-    path = opt$location,
+    path = attr(opt, "location"),
     pattern = paste0("^", board_id, ".*\\.json$"),
     full.names = TRUE
   )
@@ -166,7 +166,7 @@ snapshot_board <- function(vals, rv, parent, session) {
       opt <- get_board_option_or_null("snapshot")
 
       if (not_null(opt)) {
-        file_name <- file.path(opt$location, file_name)
+        file_name <- file.path(attr(opt, "location"), file_name)
       }
 
       write_board_to_disk(rv, parent, session)(file_name)

@@ -10,4 +10,5 @@
 #' @importFrom utils tail
 #' @import dockViewR
 #' @import g6R
+#' @importFrom rlang abort warn inform
 NULL

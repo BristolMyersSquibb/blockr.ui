@@ -28,39 +28,16 @@ new_dag_board <- function(..., modules = new_dashboard_module(),
 #' @rdname run_demo_app
 #' @export
 dag_board_options <- function() {
-  c(
-    default_board_options(),
-    new_stack_colors_options(),
-    new_auto_snapshot_option()
-  )
-
-  n_stacks <- 40
-  stacks_color_palette <- "spectral"
-  if (nchar(Sys.getenv("N_STACKS_COLORS")) > 0) {
-    n_stacks <- Sys.getenv("N_STACKS_COLORS")
-  }
-  if (nchar(Sys.getenv("STACKS_COLOR_PALETTE")) > 0) {
-    stacks_color_palett <- Sys.getenv("STACKS_COLOR_PALETTE")
-  }
-
-  snapshot_location <- tempdir()
-  if (nchar(Sys.getenv("SNAPSHOT_LOCATION")) > 0) {
-    snapshot_location <- Sys.getenv("SNAPSHOT_LOCATION")
-  }
-
-  auto_snapshot <- FALSE
-  if (nchar(Sys.getenv("AUTO_SNAPSHOT")) > 0) {
-    auto_snapshot <- as.logical(Sys.getenv("AUTO_SNAPSHOT"))
-  }
-
   new_board_options(
-    dark_mode = "light",
-    stacks_colors = hcl.colors(n_stacks, palette = stacks_color_palette),
-    dashboard_zoom = 1,
-    snapshot = list(
-      location = snapshot_location,
-      auto = auto_snapshot
-    )
+    new_board_name_option(category = "Board options"),
+    new_n_rows_option(category = "Table options"),
+    new_page_size_option(category = "Table options"),
+    new_filter_rows_option(category = "Table options"),
+    new_thematic_option(category = "Theme options"),
+    new_dark_mode_option(blockr_option("dark_mode", FALSE),
+                         category = "Theme options"),
+    new_stack_colors_option(category = "Board options"),
+    new_snapshot_option(category = "Board options")
   )
 }
 

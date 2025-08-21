@@ -160,7 +160,7 @@ new_dashboard_zoom_option <- function(
         }
       )
     },
-    transform = function(x) as.integer(x),
+    transform = function(x) as.numeric(x),
     ...
   )
 }
@@ -168,11 +168,11 @@ new_dashboard_zoom_option <- function(
 #' @export
 validate_board_option.dashboard_zoom_option <- function(x) {
 
-  val <- board_option_default(NextMethod())
+  val <- board_option_value(NextMethod())
 
-  if (!is_number(val)) {
+  if (!is_number(val) || val <= 0) {
     abort(
-      "Expecting `dashboard_zoom` to represent a scalar number.",
+      "Expecting `dashboard_zoom` to represent a scalar positive number.",
       class = "board_options_dashboard_zoom_invalid"
     )
   }
@@ -247,7 +247,7 @@ new_dashboard_module <- function(id = "dashboard", title = "Dashboard") {
       add_to_dashboard_ctxm,
       remove_from_dashboard_ctxm
     ),
-    options = new_dashboard_zoom_option(),
+    options = new_dashboard_zoom_option(category = "Dashboard options"),
     class = "dashboard_module"
   )
 }

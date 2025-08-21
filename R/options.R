@@ -1,6 +1,7 @@
 new_stack_colors_option <- function(
   n_stacks = blockr_option("n_stacks", 40L),
-  color_palette = blockr_option("stacks_palette", "spectral")) {
+  color_palette = blockr_option("stacks_palette", "spectral"),
+  ...) {
 	
   new_board_option(
     id = "stacks_colors",
@@ -55,7 +56,7 @@ new_stack_colors_option <- function(
 #' @export
 validate_board_option.stack_colors_option <- function(x) {
 
-  val <- board_option_default(NextMethod())
+  val <- board_option_value(NextMethod())
 
   nst <- attr(val, "n_stacks")
   pal <- attr(val, "palette")
@@ -87,45 +88,54 @@ validate_board_option.stack_colors_option <- function(x) {
   invisible(x)
 }
 
-new_auto_snapshot_option <- function(
-  value = blockr_option("auto_save", FALSE)) {
+new_snapshot_option <- function(
+  auto_save = blockr_option("auto_save", FALSE),
+  location = blockr_option("save_location", tempdir()),
+  ...) {
 
   new_board_option(
-    id = "auto_snapshot",
-    default = value,
+    id = "snapshot",
+    default = auto_save,
     ui = function(id) {
       bslib::input_switch(
-        NS(id, "auto_snapshot"),
+        NS(id, "snapshot"),
         "Enable auto-save",
-        value
+        auto_save
       )
     },
     server = function(board, session) {
       observeEvent(
-        get_board_option_or_null("auto_snapshot", session),
+        get_board_option_or_null("snapshot", session),
         {
           bslib::toggle_switch(
-            "auto_snapshot",
-            value = get_board_option_value("auto_snapshot", session),
+            "snapshot",
+            value = get_board_option_value("snapshot", session),
             session = session
           )
         }
       )
     },
-    transform = function(x) as.logical(x),
+    transform = function(x) structure(as.logical(x), location = location),
     ...
   )
 }
 
 #' @export
-validate_board_option.auto_snapshot_option <- function(x) {
+validate_board_option.snapshot_option <- function(x) {
 
-  val <- board_option_default(NextMethod())
+  val <- board_option_value(NextMethod())
 
   if (!is_bool(val)) {
     abort(
-      "Expecting `auto_snapshot` to be a boolean.",
-      class = "board_options_auto_snapshot_invalid"
+      "Expecting `snapshot` to be a boolean.",
+      class = "board_options_snapshot_invalid"
+    )
+  }
+
+  if (!is_string(attr(val, "location"))) {
+    abort(
+      "Expecting snapshot location to be a string.",
+      class = "board_options_snapshot_invalid"
     )
   }
 

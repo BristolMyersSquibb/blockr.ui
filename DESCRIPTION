@@ -39,9 +39,10 @@ Imports:
     htmltools,
     dockViewR (>= 0.2.1),
     g6R (>= 0.1.0),
-    grDevices
+    grDevices,
+    rlang
 Remotes:
-    BristolMyersSquibb/blockr.core,
+    BristolMyersSquibb/blockr.core@66-opts,
     BristolMyersSquibb/blockr.dplyr,
     BristolMyersSquibb/blockr.io,
     BristolMyersSquibb/blockr.ai,
