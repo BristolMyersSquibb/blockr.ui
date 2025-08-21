@@ -3,6 +3,7 @@
 \name{run_demo_app}
 \alias{run_demo_app}
 \alias{new_dag_board}
+\alias{dag_board_options}
 \title{Demo app}
 \usage{
 run_demo_app(...)
@@ -13,6 +14,8 @@ new_dag_board(
   options = dag_board_options(),
   class = character()
 )
+
+dag_board_options()
 }
 \arguments{
 \item{...}{Forwarded to \link[blockr.core]{new_board}.}

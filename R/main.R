@@ -25,6 +25,44 @@ main_ui <- function(id, board, plugins) {
   )
 }
 
+create_app_state <- function(board) {
+  reactiveValues(
+    cold_start = length(board_blocks(board)),
+    refreshed = NULL,
+    network = list(),
+    # Blocks/nodes
+    append_block = FALSE,
+    added_block = NULL,
+    removed_block = NULL,
+    selected_block = NULL,
+    # Edges
+    cancelled_edge = NULL,
+    added_edge = NULL,
+    removed_edge = NULL,
+    # Stacks
+    added_stack = NULL,
+    stack_added_block = NULL,
+    stack_removed_block = NULL,
+    removed_stack = NULL,
+    stacks = NULL,
+    # scoutbar
+    open_scoutbar = FALSE,
+    scoutbar = list(
+      trigger = NULL,
+      action = NULL,
+      value = NULL,
+      is_open = FALSE
+    ),
+    # For snapshots
+    save_board = FALSE,
+    backup_list = list(),
+    # For code generation
+    display_code = FALSE,
+    # Dashboard
+    module_state = list()
+  )
+}
+
 #' Main server function
 #'
 #' Server module for board.
@@ -47,41 +85,7 @@ main_server <- function(id, board, plugins, modules) {
     function(input, output, session) {
       ns <- session$ns
 
-      app_state <- reactiveValues(
-        cold_start = length(board_blocks(board)),
-        refreshed = NULL,
-        network = list(),
-        # Blocks/nodes
-        append_block = FALSE,
-        added_block = NULL,
-        removed_block = NULL,
-        selected_block = NULL,
-        # Edges
-        cancelled_edge = NULL,
-        added_edge = NULL,
-        removed_edge = NULL,
-        # Stacks
-        added_stack = NULL,
-        stack_added_block = NULL,
-        stack_removed_block = NULL,
-        removed_stack = NULL,
-        stacks = NULL,
-        # scoutbar
-        open_scoutbar = FALSE,
-        scoutbar = list(
-          trigger = NULL,
-          action = NULL,
-          value = NULL,
-          is_open = FALSE
-        ),
-        # For snapshots
-        save_board = FALSE,
-        backup_list = list(),
-        # For code generation
-        display_code = FALSE,
-        # Dashboard
-        module_state = list()
-      )
+      app_state <- create_app_state(board)
 
       # For shinytest2 (don't remove)
       exportTestValues(res = process_app_state(app_state))

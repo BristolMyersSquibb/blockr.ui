@@ -8,7 +8,45 @@
 #' @export
 #' @rdname restore-dashboard
 restore_dashboard <- function(board, rv, parent, session) {
-  UseMethod("restore_dashboard", board)
+  # cleanup old state
+  if (length(parent$in_grid)) {
+    lapply(names(parent$in_grid), \(id) {
+      remove_blk_from_dashboard(id, session)
+    })
+  }
+  parent$in_grid <- list()
+  ids <- names(rv$blocks)
+
+  if (!length(ids)) {
+    parent$refreshed <- "grid"
+    return(NULL)
+  }
+
+  in_grid_ids <- find_blocks_ids(rv$board, parent, session)
+
+  # When the dock was empty, we still need to initialise the block state
+  # and all values are false
+  if (!length(in_grid_ids)) {
+    lapply(ids, \(id) {
+      parent$in_grid[[id]] <- FALSE
+    })
+    return(NULL)
+  }
+
+  # Otherwise we spread elements between the dock and the network
+  not_in_grid <- which(!(ids %in% in_grid_ids))
+
+  lapply(in_grid_ids, \(id) {
+    parent$in_grid[[id]] <- TRUE
+    # Regenerate the output for the block as well as dock panel
+    generate_dashboard_blk_output(id, rv, session)
+    add_blk_panel_to_dashboard(id, rv, session)
+  })
+
+  lapply(ids[not_in_grid], \(id) {
+    parent$in_grid[[id]] <- FALSE
+  })
+  parent$refreshed <- "grid"
 }
 
 #' @keywords internal
@@ -79,67 +117,11 @@ remove_blk_from_dashboard <- function(id, session) {
   output[[out_name]] <- NULL
 }
 
-#' @export
-#' @rdname restore-dashboard
-restore_dashboard.dag_board <- function(board, rv, parent, session) {
-  # cleanup old state
-  if (length(parent$in_grid)) {
-    lapply(names(parent$in_grid), \(id) {
-      remove_blk_from_dashboard(id, session)
-    })
-  }
-  parent$in_grid <- list()
-  ids <- names(rv$blocks)
-
-  if (!length(ids)) {
-    parent$refreshed <- "grid"
-    return(NULL)
-  }
-
-  in_grid_ids <- find_blocks_ids(rv$board, parent, session)
-
-  # When the dock was empty, we still need to initialise the block state
-  # and all values are false
-  if (!length(in_grid_ids)) {
-    lapply(ids, \(id) {
-      parent$in_grid[[id]] <- FALSE
-    })
-    return(NULL)
-  }
-
-  # Otherwise we spread elements between the dock and the network
-  not_in_grid <- which(!(ids %in% in_grid_ids))
-
-  lapply(in_grid_ids, \(id) {
-    parent$in_grid[[id]] <- TRUE
-    # Regenerate the output for the block as well as dock panel
-    generate_dashboard_blk_output(id, rv, session)
-    add_blk_panel_to_dashboard(id, rv, session)
-  })
-
-  lapply(ids[not_in_grid], \(id) {
-    parent$in_grid[[id]] <- FALSE
-  })
-  parent$refreshed <- "grid"
-}
-
-#' Find blocks ids generic
+#' Find blocks ids
 #'
 #' @rdname restore-dashboard
 #' @export
 find_blocks_ids <- function(
-  board,
-  parent,
-  session
-) {
-  UseMethod("find_blocks_ids", board)
-}
-
-#' Find blocks ids dock method
-#'
-#' @rdname restore-dashboard
-#' @export
-find_blocks_ids.dag_board <- function(
   board,
   parent,
   session
