@@ -180,6 +180,7 @@ validate_board_option.dashboard_zoom_option <- function(x) {
   invisible(x)
 }
 
+#' @include context-menu.R
 add_to_dashboard_ctxm <- new_context_menu_entry(
   name = "Add to dashboard",
   js = function(ns) {
@@ -206,6 +207,7 @@ add_to_dashboard_ctxm <- new_context_menu_entry(
   }
 )
 
+#' @include context-menu.R
 remove_from_dashboard_ctxm <- new_context_menu_entry(
   name = "Remove from dashboard",
   js = function(ns) {
