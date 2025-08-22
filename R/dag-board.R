@@ -44,8 +44,6 @@ dag_board_options <- function() {
 #' @export
 serve.dag_board <- function(x, id = "main", ...) {
 
-  Sys.setenv("blockr_dark_mode" = "light")
-
   modules <- board_modules(x)
 
   ctx_menu_items <- unlst(

@@ -48,11 +48,8 @@ generate_dashboard_blk_output <- function(id, rv, session) {
       req(id %in% board_block_ids(rv$board))
       rv$msgs()[[id]]
       rv$blocks[[id]]$server$result()
-      get_board_option_values(
-        "n_rows",
-        "page_size",
-        "filter_rows",
-        if_not_found = "null",
+      block_render_trigger(
+        board_blocks(rv$board)[[id]],
         session = session
       )
     },
