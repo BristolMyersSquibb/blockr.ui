@@ -991,10 +991,11 @@ add_nodes_to_stack <- function(stack_id, nodes, rv, parent, session) {
 
   if (is.null(nodes)) {
     if (is.null(input$new_stack_nodes)) {
-      nodes <- stack_blocks(board_stacks(rv$board)[[strsplit(
-        stack_id,
-        "combo-"
-      )[[1]][2]]])
+      nodes <- stack_blocks(board_stacks(rv$board)[[sub(
+        "combo-",
+        "",
+        stack_id
+      )]])
     } else {
       nodes <- input$new_stack_nodes
     }

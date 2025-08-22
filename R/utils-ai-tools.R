@@ -412,6 +412,26 @@ create_add_block_to_stack_tool <- function(
   provider$register_tool(add_block_to_stack)
 }
 
+create_block_builder_tool <- function(
+  provider,
+  app_request,
+  board,
+  parent,
+  session
+) {
+  block_builder <- tool(
+    function() {
+      blk <- NULL
+      return(app_request(list(action = "build_block", data = blk)))
+    },
+    name = "block_builder",
+    description = "Create a block constructor that people can use on the fly.",
+    arguments = list()
+  )
+
+  provider$register_tool(block_builder)
+}
+
 #' @keywords internal
 get_block_parameters <- function(ctor) {
   parms <- formals(ctor)
