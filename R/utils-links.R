@@ -921,7 +921,11 @@ show_stack_actions <- function(rv, session) {
             label = "Pick a color for the stack:",
             hue = FALSE,
             preview = FALSE,
-            swatches = board_option("stacks_colors", rv$board),
+            swatches = get_board_option_or_default(
+              "stacks_colors",
+              dag_board_options(),
+              session
+            ),
             theme = "nano",
             position = "right-end",
             useAsButton = TRUE
@@ -982,7 +986,11 @@ stack_nodes <- function(
 
   stack_color <- input$stack_color
   if (is.null(stack_color)) {
-    colors <- board_option("stacks_colors", rv$board)
+    colors <- get_board_option_or_default(
+      "stacks_colors",
+      dag_board_options(),
+      session
+    )
     if (length(parent$stacks) == 0) {
       stack_color <- colors[1]
     } else {
@@ -1192,7 +1200,11 @@ cold_start <- function(rv, parent, session) {
   combos_data <- create_combos_data_from_stacks(
     stacks,
     parent,
-    board_option("stacks_colors", rv$board)
+    get_board_option_or_default(
+      "stacks_colors",
+      dag_board_options(),
+      session
+    )
   )
   nodes_data <- create_nodes_data_from_blocks(blocks, stacks)
 

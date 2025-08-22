@@ -394,7 +394,16 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
                 id = sprintf("%s@restore_board", path),
                 label = strsplit(
                   path,
-                  path.expand(get_board_option_value("snapshot")$location),
+                  path.expand(
+                    attr(
+                      get_board_option_or_default(
+                        "snapshot",
+                        dag_board_options(),
+                        session
+                      ),
+                      "location"
+                    )
+                  ),
                   ""
                 )[[1]][2],
                 description = sprintf(
