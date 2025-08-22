@@ -47,11 +47,11 @@ generate_dashboard_blk_output <- function(id, rv, session) {
     {
       req(id %in% board_block_ids(rv$board))
       rv$msgs()[[id]]
-      rv$blocks[[id]]$server$result()
       block_render_trigger(
         board_blocks(rv$board)[[id]],
         session = session
       )
+      rv$blocks[[id]]$server$result()
     },
     {
       output[[out_name]] <- block_output(
