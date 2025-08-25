@@ -1,10 +1,10 @@
 new_stack_colors_option <- function(
   n_stacks = blockr_option("n_stacks", 40L),
-  color_palette = blockr_option("stacks_palette", "spectral"),
+  color_palette = blockr_option("stacks_palette", "Spectral"),
   ...) {
 	
   new_board_option(
-    id = "stacks_colors",
+    id = "stack_colors",
     default = list(n_stacks = n_stacks, color_palette = color_palette),
     ui = function(id) {
       span(
@@ -25,9 +25,9 @@ new_stack_colors_option <- function(
     },
     server = function(board, session) {
       observeEvent(
-        get_board_option_or_null("stacks_colors", session),
+        get_board_option_or_null("stack_colors", session),
         {
-          opt <- get_board_option_value("stacks_colors", session)
+          opt <- get_board_option_value("stack_colors", session)
           updateNumericInput(
             session,
             "n_stacks",
@@ -88,6 +88,19 @@ validate_board_option.stack_colors_option <- function(x) {
   invisible(x)
 }
 
+#' @export
+blockr_ser.stack_colors_option <- function(x, option = NULL, ...) {
+
+  res <- NextMethod()
+
+  res[["payload"]] <- list(
+    n_stacks = attr(res[["payload"]], "n_stacks"),
+    color_palette = attr(res[["payload"]], "palette")
+  )
+
+  res
+}
+
 new_snapshot_option <- function(
   auto_save = blockr_option("auto_save", FALSE),
   location = blockr_option("save_location", tempdir()),
@@ -140,4 +153,17 @@ validate_board_option.snapshot_option <- function(x) {
   }
 
   invisible(x)
+}
+
+#' @export
+blockr_ser.snapshot_option <- function(x, option = NULL, ...) {
+
+  res <- NextMethod()
+
+  res[["payload"]] <- list(
+    auto_save = c(res[["payload"]]),
+    location = attr(res[["payload"]], "location")
+  )
+
+  res
 }

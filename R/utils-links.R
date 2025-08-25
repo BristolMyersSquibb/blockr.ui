@@ -922,7 +922,7 @@ show_stack_actions <- function(rv, session) {
             hue = FALSE,
             preview = FALSE,
             swatches = get_board_option_or_default(
-              "stacks_colors",
+              "stack_colors",
               dag_board_options(),
               session
             ),
@@ -987,7 +987,7 @@ stack_nodes <- function(
   stack_color <- input$stack_color
   if (is.null(stack_color)) {
     colors <- get_board_option_or_default(
-      "stacks_colors",
+      "stack_colors",
       dag_board_options(),
       session
     )
@@ -1201,7 +1201,7 @@ cold_start <- function(rv, parent, session) {
     stacks,
     parent,
     get_board_option_or_default(
-      "stacks_colors",
+      "stack_colors",
       dag_board_options(),
       session
     )
