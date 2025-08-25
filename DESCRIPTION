@@ -49,7 +49,7 @@ Remotes:
     BristolMyersSquibb/blockr.sdtm,
     cynkra/g6R,
     cynkra/scoutbaR,
-    cynkra/dockViewR@fix-windows-shaking
+    cynkra/dockViewR
 Suggests: 
     shinytest2,
     testthat (>= 3.0.0),
