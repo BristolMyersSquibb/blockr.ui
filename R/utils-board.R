@@ -64,31 +64,42 @@ blk_choices <- function() {
 #' @rdname board_ui
 #' @export
 options_ui <- function(id, x, ...) {
-
   opts <- split(x, chr_ply(x, attr, "category"))
 
-  bslib::popover(
-    icon("gear"),
-    do.call(
-      accordion,
-      c(
-        list(
-          id = NS(id, "board_options"),
-          multiple = TRUE,
-          open = TRUE
-        ),
-        map(
-          do.call,
-          rep(list(accordion_panel), length(opts)),
+  offcanvas_id <- NS(id, "options-offcanvas")
+
+  tagList(
+    tags$a(
+      class = "btn btn-sm btn-white",
+      icon("gear"),
+      `data-bs-toggle` = "offcanvas",
+      `data-bs-target` = sprintf("#%s", offcanvas_id),
+      `aria-controls` = offcanvas_id
+    ),
+    off_canvas(
+      id = offcanvas_id,
+      position = "end",
+      title = "Board options",
+      do.call(
+        accordion,
+        c(
+          list(
+            id = NS(id, "board_options"),
+            multiple = TRUE,
+            open = TRUE
+          ),
           map(
-            list,
-            title = names(opts),
-            lapply(opts, lapply, board_option_ui, id)
+            do.call,
+            rep(list(accordion_panel), length(opts)),
+            map(
+              list,
+              title = names(opts),
+              lapply(opts, lapply, board_option_ui, id)
+            )
           )
         )
       )
-    ),
-    title = "Board options"
+    )
   )
 }
 
