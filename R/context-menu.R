@@ -126,4 +126,3 @@ validate_context_menu_entries <- function(x) {
 
   invisible(x)
 }
-

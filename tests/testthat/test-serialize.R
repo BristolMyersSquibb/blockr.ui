@@ -30,8 +30,11 @@ testServer(
     )
   ),
   {
-    session$userData[["snapshot"]] <- reactiveVal(
-      list(location = temp, auto = FALSE)
+    session$userData$board_options[["snapshot"]] <- reactiveVal(
+      structure(
+        TRUE,
+        location = temp
+      )
     )
 
     expect_null(vals$current_backup)

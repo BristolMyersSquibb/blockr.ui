@@ -1,8 +1,8 @@
 new_stack_colors_option <- function(
   n_stacks = blockr_option("n_stacks", 40L),
   color_palette = blockr_option("stacks_palette", "Spectral"),
-  ...) {
-	
+  ...
+) {
   new_board_option(
     id = "stack_colors",
     default = list(n_stacks = n_stacks, color_palette = color_palette),
@@ -55,7 +55,6 @@ new_stack_colors_option <- function(
 
 #' @export
 validate_board_option.stack_colors_option <- function(x) {
-
   val <- board_option_value(NextMethod())
 
   nst <- attr(val, "n_stacks")
@@ -78,7 +77,8 @@ validate_board_option.stack_colors_option <- function(x) {
   if (!(is.character(val) && length(val) == nst)) {
     abort(
       paste0(
-        "Expecting `stack_colors` to be a character vector of length ", nst,
+        "Expecting `stack_colors` to be a character vector of length ",
+        nst,
         "."
       ),
       class = "board_options_stack_colors_invalid"
@@ -90,7 +90,6 @@ validate_board_option.stack_colors_option <- function(x) {
 
 #' @export
 blockr_ser.stack_colors_option <- function(x, option = NULL, ...) {
-
   res <- NextMethod()
 
   res[["payload"]] <- list(
@@ -104,8 +103,8 @@ blockr_ser.stack_colors_option <- function(x, option = NULL, ...) {
 new_snapshot_option <- function(
   auto_save = blockr_option("auto_save", FALSE),
   location = blockr_option("save_location", tempdir()),
-  ...) {
-
+  ...
+) {
   new_board_option(
     id = "snapshot",
     default = auto_save,
@@ -135,7 +134,6 @@ new_snapshot_option <- function(
 
 #' @export
 validate_board_option.snapshot_option <- function(x) {
-
   val <- board_option_value(NextMethod())
 
   if (!is_bool(val)) {
@@ -157,7 +155,6 @@ validate_board_option.snapshot_option <- function(x) {
 
 #' @export
 blockr_ser.snapshot_option <- function(x, option = NULL, ...) {
-
   res <- NextMethod()
 
   res[["payload"]] <- list(

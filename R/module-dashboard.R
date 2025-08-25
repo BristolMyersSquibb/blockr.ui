@@ -156,8 +156,9 @@ dashboard_server <- function(board, update, session, parent, ...) {
 }
 
 new_dashboard_zoom_option <- function(
-  value = blockr_option("dashboard_zoom", 1), ...) {
-
+  value = blockr_option("dashboard_zoom", 1),
+  ...
+) {
   new_board_option(
     id = "dashboard_zoom",
     default = value,
@@ -190,7 +191,6 @@ new_dashboard_zoom_option <- function(
 
 #' @export
 validate_board_option.dashboard_zoom_option <- function(x) {
-
   val <- board_option_value(NextMethod())
 
   if (!is_number(val) || val <= 0) {
@@ -274,4 +274,3 @@ new_dashboard_module <- function(id = "dashboard", title = "Dashboard") {
     class = "dashboard_module"
   )
 }
-
