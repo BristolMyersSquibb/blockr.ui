@@ -80,44 +80,24 @@ write_board_to_disk <- function(rv, parent, session) {
     )
 
     opts <- lapply(
-      set_names(nm = list_board_options(rv$board)),
-      board_option_from_userdata,
+      set_names(nm = names(as_board_options(rv$board))),
+      get_board_option_or_null,
       session
     )
 
     json <- jsonlite::prettify(
       to_json(
         rv$board,
-        blocks,
-        opts,
-        parent$network,
-        parent$selected_block,
-        lapply(parent$module_state, reval)
+        blocks = blocks,
+        options = opts,
+        network = parent$network,
+        selected = parent$selected_block,
+        modules = lapply(parent$module_state, reval)
       )
     )
 
     writeLines(json, con)
   }
-}
-
-board_option_from_userdata <- function(name, session) {
-  rv <- get0(name, envir = session$userData, inherits = FALSE)
-
-  if (is.null(rv)) {
-    return(NULL)
-  }
-
-  res <- rv()
-
-  if (is.null(res)) {
-    return(NULL)
-  }
-
-  if (identical(name, "page_size")) {
-    res <- as.integer(res)
-  }
-
-  res
 }
 
 #' @keywords internal
@@ -129,7 +109,7 @@ list_snapshot_files <- function(board_id) {
   }
 
   list.files(
-    path = opt$location,
+    path = attr(opt, "location"),
     pattern = paste0("^", board_id, ".*\\.json$"),
     full.names = TRUE
   )
@@ -165,7 +145,7 @@ snapshot_board <- function(vals, rv, parent, session) {
       opt <- get_board_option_or_null("snapshot")
 
       if (not_null(opt)) {
-        file_name <- file.path(opt$location, file_name)
+        file_name <- file.path(attr(opt, "location"), file_name)
       }
 
       write_board_to_disk(rv, parent, session)(file_name)

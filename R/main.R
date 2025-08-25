@@ -25,23 +25,9 @@ main_ui <- function(id, board, plugins) {
   )
 }
 
-#' Create app state generic
-#'
-#' @param board Board object.
-#'
-#' @rdname main
-#' @export
 create_app_state <- function(board) {
-  UseMethod("create_app_state", board)
-}
-
-#' Create app state dock board method
-#'
-#' @rdname main
-#' @export
-create_app_state.dag_board <- function(board) {
   reactiveValues(
-    cold_start = TRUE,
+    cold_start = length(board_blocks(board)) == 0L,
     refreshed = NULL,
     network = list(),
     # Blocks/nodes
@@ -100,12 +86,6 @@ main_server <- function(id, board, plugins, modules) {
       ns <- session$ns
 
       app_state <- create_app_state(board)
-
-      # Indicate whether we start from an empty board or not
-      # This is needed by downtream plugins such as links ...
-      observeEvent(TRUE, {
-        if (length(board_blocks(board))) app_state$cold_start <- FALSE
-      })
 
       # For shinytest2 (don't remove)
       exportTestValues(res = process_app_state(app_state))

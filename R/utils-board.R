@@ -63,120 +63,33 @@ blk_choices <- function() {
 
 #' @rdname board_ui
 #' @export
-board_ui.board_options <- function(id, x, ...) {
-  ns <- NS(id)
+options_ui <- function(id, x, ...) {
+
+  opts <- split(x, chr_ply(x, attr, "category"))
 
   bslib::popover(
     icon("gear"),
-    accordion(
-      id = ns("board_options"),
-      multiple = TRUE,
-      open = TRUE,
-      accordion_panel(
-        title = "General options",
-        textInput(
-          ns("board_name"),
-          "Board name",
-          board_option("board_name", x)
-        )
-      ),
-      accordion_panel(
-        title = "Tables options",
-        numericInput(
-          ns("n_rows"),
-          "Preview rows",
-          board_option("n_rows", x),
-          min = 1L,
-          step = 1L
+    do.call(
+      accordion,
+      c(
+        list(
+          id = NS(id, "board_options"),
+          multiple = TRUE,
+          open = TRUE
         ),
-        selectInput(
-          ns("page_size"),
-          "Preview page size",
-          c(5, 10, 25, 50, 100),
-          board_option("page_size", x)
-        ),
-        bslib::input_switch(
-          ns("filter_rows"),
-          "Enable preview search",
-          board_option("filter_rows", x)
-        )
-      ),
-      accordion_panel(
-        title = "Dashboard options",
-        numericInput(
-          ns("dashboard_zoom"),
-          "Dashboard zoom",
-          board_option("dashboard_zoom", x),
-          min = 0.5,
-          max = 1.5,
-          step = 0.1
-        )
-      ),
-      accordion_panel(
-        title = "Theme options",
-        if (is_pkg_avail("thematic")) {
-          bslib::input_switch(
-            ns("thematic"),
-            "Enable thematic",
-            coal(board_option("thematic", x), FALSE)
-          )
-        },
-        span(
-          bslib::input_dark_mode(
-            id = ns("dark_mode"),
-            mode = board_option("dark_mode", x)
-          ),
-          tags$label(
-            "Light/dark mode",
-            style = "vertical-align: top; margin-top: 3px;"
+        map(
+          do.call,
+          rep(list(accordion_panel), length(opts)),
+          map(
+            list,
+            title = names(opts),
+            lapply(opts, lapply, board_option_ui, id)
           )
         )
       )
     ),
     title = "Board options"
   )
-}
-
-#' @rdname board_ui
-#' @param session Shiny session object.
-#' @export
-update_ui.board_options <- function(x, session, ...) {
-  updateTextInput(
-    session,
-    "board_name",
-    value = board_option("board_name", x)
-  )
-
-  updateNumericInput(
-    session,
-    "n_rows",
-    value = board_option("n_rows", x)
-  )
-
-  updateSelectInput(
-    session,
-    "page_size",
-    selected = board_option("page_size", x)
-  )
-
-  bslib::toggle_switch(
-    "filter_rows",
-    value = board_option("filter_rows", x),
-    session = session
-  )
-
-  bslib::toggle_dark_mode(
-    mode = board_option("dark_mode", x),
-    session = session
-  )
-
-  updateNumericInput(
-    session,
-    "dashboard_zoom",
-    value = board_option("dashboard_zoom", x)
-  )
-
-  invisible()
 }
 
 #' Board header
@@ -230,7 +143,7 @@ board_ui.dag_board <- function(id, x, plugins = list(), ...) {
   my_board_ui <- list(
     toolbar_ui = toolbar_ui,
     notifications = board_ui(id, plugins[["notify_user"]], x),
-    board_options_ui = board_ui(id, board_options(x))
+    board_options_ui = options_ui(id, as_board_options(x))
   )
 
   # If there are blocks at start, we need to generate the UI
@@ -481,7 +394,16 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
                 id = sprintf("%s@restore_board", path),
                 label = strsplit(
                   path,
-                  path.expand(get_board_option_value("snapshot")$location),
+                  path.expand(
+                    attr(
+                      get_board_option_or_default(
+                        "snapshot",
+                        dag_board_options(),
+                        session
+                      ),
+                      "location"
+                    )
+                  ),
                   ""
                 )[[1]][2],
                 description = sprintf(

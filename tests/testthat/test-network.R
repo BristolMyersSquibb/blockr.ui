@@ -379,7 +379,7 @@ test_that("create_edges_data_from_links works", {
 test_that("create_combos_data_from_stacks works", {
   stacks <- as_stacks(new_stack())
   parent <- list(stacks = NULL)
-  colors <- board_option("stacks_colors", new_dag_board())
+  colors <- dag_board_options()[["stack_colors"]]
   res <- create_combos_data_from_stacks(stacks, parent, colors)
   expect_type(res, "list")
   expect_length(res, 1)
