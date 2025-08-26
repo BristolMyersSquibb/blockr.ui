@@ -42,7 +42,7 @@ Imports:
     grDevices,
     rlang
 Remotes:
-    BristolMyersSquibb/blockr.core@66-opts,
+    BristolMyersSquibb/blockr.core,
     BristolMyersSquibb/blockr.dplyr,
     BristolMyersSquibb/blockr.io,
     BristolMyersSquibb/blockr.ai,
