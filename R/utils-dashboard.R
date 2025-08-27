@@ -46,7 +46,7 @@ generate_dashboard_blk_output <- function(id, rv, session) {
   observeEvent(
     {
       req(id %in% board_block_ids(rv$board))
-      rv$msgs()[[id]]
+      reactiveValuesToList(rv$blocks[[id]]$server$cond)
       block_render_trigger(
         board_blocks(rv$board)[[id]],
         session = session

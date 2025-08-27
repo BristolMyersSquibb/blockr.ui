@@ -4,15 +4,6 @@ library(blockr.dplyr)
 mock_add_block <- function(blk, rv, parent, session) {
   board_blocks(rv$board) <- c(board_blocks(rv$board), as_blocks(blk))
   attr(blk, "uid") <- tail(board_block_ids(rv$board), n = 1)
-  messages <- rv$msgs()
-  messages[[attr(blk, "uid")]] <- NULL
-  #list(
-  #  state = list(error = NULL),
-  #  data = list(error = NULL),
-  #  eval = list(error = NULL)
-  #)
-
-  rv$msgs(messages)
 
   rv$blocks[[attr(blk, "uid")]]$block <- blk
   rv$inputs[[attr(blk, "uid")]] <- if (!length(block_inputs(blk))) {
@@ -36,7 +27,6 @@ testServer(
       board_id = "board",
       inputs = list(),
       links = list(),
-      msgs = reactiveVal(),
       stacks = list()
     ),
     update = reactiveVal(),

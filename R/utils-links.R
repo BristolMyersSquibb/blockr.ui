@@ -662,8 +662,7 @@ register_node_validation <- function(id, rv, vals, session) {
         # Don't trigger if node is removed
         id %in% board_block_ids(rv$board)
       )
-      # For Nicolas: why does board$msgs() triggers infinitely?
-      rv$msgs()[[id]]
+      reactiveValuesToList(rv$blocks[[id]]$server$cond)
     },
     {
       apply_validation(id, vals, rv, session)
@@ -766,7 +765,7 @@ register_node_stack_link <- function(id, rv, vals, session) {
 #' @rdname node-validation
 #' @keywords internal
 apply_validation <- function(id, vals, rv, session) {
-  message <- rv$msgs()[[id]]
+  message <- reactiveValuesToList(rv$blocks[[id]]$server$cond)
   ns <- session$ns
   # Restore blue color if valid
   edges <- as.data.frame(board_links(rv$board))
@@ -803,38 +802,16 @@ apply_validation <- function(id, vals, rv, session) {
     }
   }
 
+  n_err <- sum(lengths(lst_xtr(message, "error")))
+
   # Color invalid nodes in red
-  if (
-    length(message$state$error) ||
-      length(message$data$error) ||
-      length(message$eval$error)
-  ) {
-    state_badge <- list()
-    if (length(message$state$error)) {
-      state_badge <- list(
-        text = sprintf("State errors: '%s'", length(message$state$error)),
-        placement = "right-top",
-        backgroundFill = "#ee705c"
-      )
-    }
+  if (n_err) {
 
-    data_badge <- list()
-    if (length(message$data$error)) {
-      data_badge <- list(
-        text = sprintf("Data errors: '%s'", length(message$data$error)),
-        placement = "right",
-        backgroundFill = "#edb528"
-      )
-    }
-
-    eval_badge <- list()
-    if (length(message$eval$error)) {
-      eval_badge <- list(
-        text = sprintf("Eval errors: '%s'", length(message$eval$error)),
-        placement = "right-bottom",
-        backgroundFill = "#85847e"
-      )
-    }
+    badge <- list(
+      text = format(n_err),
+      placement = "right-top",
+      backgroundFill = "#edb528"
+    )
 
     node_config <- list(
       list(
@@ -842,11 +819,7 @@ apply_validation <- function(id, vals, rv, session) {
         style = list(
           fill = "#ee705c",
           labelBackgroundFill = "#FFB6C1",
-          badges = list(
-            state_badge,
-            data_badge,
-            eval_badge
-          )
+          badges = list(badge)
         )
       )
     )
