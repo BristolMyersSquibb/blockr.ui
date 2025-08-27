@@ -155,9 +155,10 @@ show_block_panel <- function(id, session) {
   )
 }
 
-#' Show a block panel
+#' Create/Show a block panel
 #'
-#' Move block from offcanvas-body to a panel.
+#' If panel does not exist, create it and move the block UI from
+#' offcanvas to the panel container. If it exists, just select it.
 #'
 #' @param id Block id to show
 #' @param parent Parent reactive values.
@@ -176,14 +177,14 @@ create_or_show_block_panel <- function(id, parent, session) {
 
   # If the block panel is already there,
   # just select it.
-  browser()
   if (parent$selected_block %in% block_panels) {
-    show_block_panel(id, session)
+    # Only select panel
     dockViewR::select_panel(
       "layout",
       sprintf("block-%s", parent$selected_block)
     )
   } else {
+    # Or add it and move the block UI from offcanvas to the panel container
     add_block_panel(id, all_panels)
     show_block_panel(id, session)
   }
