@@ -245,15 +245,6 @@ cleanup_layout <- function(parent, session) {
   remove_block_panels(block_panels)
 }
 
-cleanup_board_offcanvas <- function(session) {
-  session$sendCustomMessage(
-    "clean-blocks",
-    list(
-      offcanvas = sprintf("#%s", session$ns("offcanvas"))
-    )
-  )
-}
-
 #' App layout
 #'
 #' @keywords internal
