@@ -86,7 +86,8 @@ options_ui <- function(id, x, ...) {
           list(
             id = NS(id, "board_options"),
             multiple = TRUE,
-            open = TRUE
+            open = TRUE,
+            class = "accordion-flush"
           ),
           map(
             do.call,
@@ -205,12 +206,52 @@ board_restore <- function(board, update, session, parent, ...) {
   observeEvent(
     board_refresh(),
     {
+      showNotification(
+        "Board restored",
+        type = "message",
+        duration = 1
+      )
       parent$refreshed <- "board"
     },
     ignoreInit = TRUE
   )
 
   NULL
+}
+
+get_block_panels <- function(session) {
+  gsub(
+    "block-",
+    "",
+    grep(
+      "block",
+      get_panels_ids("layout", session),
+      value = TRUE
+    )
+  )
+}
+
+cleanup_layout <- function(parent, session) {
+  parent$refreshed <- "clean-layout"
+  showNotification(
+    "Layout cleaned",
+    type = "message",
+    duration = 1
+  )
+  block_panels <- get_block_panels(session)
+  if (!length(block_panels)) {
+    return(NULL)
+  }
+  remove_block_panels(block_panels)
+}
+
+cleanup_board_offcanvas <- function(session) {
+  session$sendCustomMessage(
+    "clean-blocks",
+    list(
+      offcanvas = sprintf("#%s", session$ns("offcanvas"))
+    )
+  )
 }
 
 #' App layout
@@ -223,55 +264,44 @@ build_layout <- function(modules, plugins) {
     output <- session$output
     ns <- session$ns
 
-    refreshed <- reactiveVal(FALSE)
-
     # Cleanup existing panels on restore
     observeEvent(
       {
-        req(parent$refreshed == "network")
+        req(parent$refreshed == "restore-network")
       },
       {
-        block_panels <- gsub(
-          "block-",
-          "",
-          grep(
-            "block",
-            get_panels_ids("layout", session),
-            value = TRUE
-          )
-        )
-        remove_block_panels(block_panels)
-        refreshed(TRUE)
+        cleanup_layout(parent, session)
       }
     )
 
-    # Show block panel on board refresh if there was a selected block
-    observeEvent(
-      req(
-        refreshed() &&
-          !length(grep("block-", get_panels_ids("layout", session)))
-      ),
-      {
-        if (!length(parent$selected_block)) {
-          return(NULL)
-        }
-        show_block_panel(parent$selected_block, parent, TRUE, session)
-        refreshed(FALSE)
-      }
-    )
-
-    # Re-insert block panel ui if it was closed any time a block is selected.
-    # This work only for single selection (for now). TBD: I think we could easily loop
-    # over multiple selected blocks and show them all.
+    # Wait that the layout is cleaned so we can create and show
+    # any existing block panel
     observeEvent(
       {
         req(
-          parent$selected_block,
-          length(parent$selected_block) == 1
+          parent$refreshed == "clean-layout",
+          length(get_block_panels(session)) == 0
         )
       },
       {
-        show_block_panel(parent$selected_block, parent, FALSE, session)
+        parent$refreshed <- "restore-layout"
+      }
+    )
+
+    # Dynamic trigger that account for restore context
+    add_panel_trigger <- reactive({
+      if (is.null(parent$refreshed)) {
+        req(parent$selected_block, length(parent$selected_block) == 1)
+      } else if (parent$refreshed == "restore-layout") {
+        req(parent$refreshed == "restore-layout")
+      }
+    })
+
+    # Add or re-insert block panel ui
+    observeEvent(
+      add_panel_trigger(),
+      {
+        create_or_show_block_panel(parent$selected_block, parent, session)
       }
     )
 
@@ -279,12 +309,17 @@ build_layout <- function(modules, plugins) {
       input[["layout_panel-to-remove"]],
       {
         hide_block_panel(input[["layout_panel-to-remove"]], session)
+        # Send callback to links plugin to unselect the node
+        parent$unselected_block <- gsub(
+          "block-",
+          "",
+          input[["layout_panel-to-remove"]]
+        )
       }
     )
 
     # Remove block panel on block remove
-    # As we can remove multiple blocks at once, we
-    # need to loop over the removed blocks.
+    # We can remove multiple blocks at once
     observeEvent(parent$removed_block, {
       remove_block_panels(parent$removed_block)
     })

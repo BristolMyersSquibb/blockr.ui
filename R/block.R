@@ -95,6 +95,12 @@ insert_block_ui.dag_board <- function(
     blk <- blocks[i]
     blk_ui <- block_ui(id, x, blk)
 
+    # Cleanup any existing UI for this block if we are refreshing the UI
+    # from a snapshot.
+    removeUI(
+      sprintf("#%s", ns(names(blk))),
+      immediate = TRUE
+    )
     insertUI(
       sprintf(
         "#%s .offcanvas-body",
@@ -108,30 +114,7 @@ insert_block_ui.dag_board <- function(
   invisible(x)
 }
 
-#' Show a block panel
-#'
-#' Move block from offcanvas-body to a panel.
-#'
-#' @param id Block id to show
-#' @param parent Parent reactive values.
-#' @param refreshed Reactive value to indicate if the board has been refreshed.
-#' @param session Shiny session object.
-#' @rdname block-panel
-show_block_panel <- function(id, parent, refreshed, session) {
-  ns <- session$ns
-
-  # Extract block panels
-  all_panels <- get_panels_ids("layout", session)
-  block_panels <- gsub(
-    "block-",
-    "",
-    grep("block", all_panels, value = TRUE)
-  )
-  # Don't do anything if the block panel is already there
-  if (!refreshed && parent$selected_block %in% block_panels) {
-    return(NULL)
-  }
-
+add_block_panel <- function(id, panels) {
   add_panel(
     "layout",
     panel = dockViewR::panel(
@@ -144,12 +127,12 @@ show_block_panel <- function(id, parent, refreshed, session) {
       # the linked block UIs and causes many issues.
       renderer = "always",
       position = list(
-        referencePanel = if (length(all_panels) == 2) {
+        referencePanel = if (length(panels) == 2) {
           "dag"
         } else {
-          all_panels[length(all_panels)]
+          panels[length(panels)]
         },
-        direction = if (length(all_panels) == 2) {
+        direction = if (length(panels) == 2) {
           "below"
         } else {
           "within"
@@ -158,7 +141,10 @@ show_block_panel <- function(id, parent, refreshed, session) {
       remove = list(enable = TRUE, mode = "manual")
     )
   )
+}
 
+show_block_panel <- function(id, session) {
+  ns <- session$ns
   # Move UI from offcanvas to the new panel
   session$sendCustomMessage(
     "show-block",
@@ -167,6 +153,40 @@ show_block_panel <- function(id, parent, refreshed, session) {
       panel_id = sprintf("#%s", ns(paste0("layout-block-", id)))
     )
   )
+}
+
+#' Show a block panel
+#'
+#' Move block from offcanvas-body to a panel.
+#'
+#' @param id Block id to show
+#' @param parent Parent reactive values.
+#' @param session Shiny session object.
+#' @rdname block-panel
+create_or_show_block_panel <- function(id, parent, session) {
+  ns <- session$ns
+
+  # Extract block panels
+  all_panels <- get_panels_ids("layout", session)
+  block_panels <- gsub(
+    "block-",
+    "",
+    grep("block", all_panels, value = TRUE)
+  )
+
+  # If the block panel is already there,
+  # just select it.
+  browser()
+  if (parent$selected_block %in% block_panels) {
+    show_block_panel(id, session)
+    dockViewR::select_panel(
+      "layout",
+      sprintf("block-%s", parent$selected_block)
+    )
+  } else {
+    add_block_panel(id, all_panels)
+    show_block_panel(id, session)
+  }
 }
 
 #' Hide a block panel

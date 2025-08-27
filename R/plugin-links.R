@@ -191,10 +191,24 @@ gen_add_rm_link_server <- function(context_menu) {
             input[["network-selected_node"]]
           },
           {
+            # Reset refreshed to avoid loops during restore
+            # Only happens with manual click
+            parent$refreshed <- NULL
             parent$selected_block <- input[["network-selected_node"]]
           },
+          ignoreInit = TRUE,
           ignoreNULL = FALSE
         )
+
+        # Unselect node when panel is closed
+        observeEvent(parent$unselected_block, {
+          g6_proxy(ns("network")) %>%
+            g6_set_nodes(setNames(
+              list(selected = ""),
+              parent$unselected_block
+            ))
+          parent$unselected_block <- NULL
+        })
 
         observeEvent(parent$removed_block, {
           # Note: links are cleaned in the add_rm_blocks plugin

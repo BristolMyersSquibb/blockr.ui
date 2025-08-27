@@ -1089,7 +1089,13 @@ restore_network <- function(rv, vals, session) {
     session = session
   )
 
-  vals$refreshed <- "network"
+  showNotification(
+    "Network restored",
+    type = "message",
+    duration = 1
+  )
+
+  vals$refreshed <- "restore-network"
 
   vals
 }

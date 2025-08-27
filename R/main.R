@@ -35,6 +35,7 @@ create_app_state <- function(board) {
     added_block = NULL,
     removed_block = NULL,
     selected_block = NULL,
+    unselected_block = NULL,
     # Edges
     cancelled_edge = NULL,
     added_edge = NULL,
