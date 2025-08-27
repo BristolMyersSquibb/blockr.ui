@@ -37,7 +37,8 @@ dag_board_options <- function() {
     new_dark_mode_option(blockr_option("dark_mode", FALSE),
                          category = "Theme options"),
     new_stack_colors_option(category = "Board options"),
-    new_snapshot_option(category = "Board options")
+    new_snapshot_option(category = "Board options"),
+    new_show_conditions_option(category = "Board options")
   )
 }
 
