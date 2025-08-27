@@ -45,25 +45,10 @@ dashboard_server <- function(board, update, session, parent, ...) {
     }
   )
 
-  # Cleanup existing dock before restoring
-  observeEvent(
-    {
-      req(parent$refreshed == "restore-layout")
-    },
-    {
-      # This has to happen in another reactive loop to let
-      # the dock input panel be updated before restoring the dashboard.
-      cleanup_dashboard(parent, session)
-    }
-  )
-
   # Restore dock from serialisation only when network is restored
   observeEvent(
     {
-      req(
-        parent$refreshed == "clean-dashboard",
-        !length(get_panels_ids("dock", session))
-      )
+      req(parent$refreshed == "restore-network")
     },
     {
       restore_dashboard(board$board, board, parent, session)

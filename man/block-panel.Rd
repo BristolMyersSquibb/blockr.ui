@@ -3,7 +3,7 @@
 \name{create_or_show_block_panel}
 \alias{create_or_show_block_panel}
 \alias{hide_block_panel}
-\title{Show a block panel}
+\title{Create/Show a block panel}
 \usage{
 create_or_show_block_panel(id, parent, session)
 
@@ -17,7 +17,8 @@ hide_block_panel(id, session)
 \item{session}{Shiny session object.}
 }
 \description{
-Move block from offcanvas-body to a panel.
+If panel does not exist, create it and move the block UI from
+offcanvas to the panel container. If it exists, just select it.
 
 Move block from panel to offcanvas-body.
 }

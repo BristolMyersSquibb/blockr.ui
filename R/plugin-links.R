@@ -34,7 +34,7 @@ gen_add_rm_link_server <- function(context_menu) {
         )
 
         # Restore network from serialisation
-        observeEvent(req(parent$refreshed == "board"), {
+        observeEvent(req(parent$refreshed == "restore-layout"), {
           restore_network(board, parent, session)
         })
 
@@ -197,9 +197,6 @@ gen_add_rm_link_server <- function(context_menu) {
             input[["network-selected_node"]]
           },
           {
-            # Reset refreshed to avoid loops during restore
-            # Only happens with manual click
-            parent$refreshed <- NULL
             parent$selected_block <- input[["network-selected_node"]]
           },
           ignoreInit = TRUE,

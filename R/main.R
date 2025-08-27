@@ -30,6 +30,7 @@ create_app_state <- function(board) {
     cold_start = length(board_blocks(board)) == 0L,
     refreshed = NULL,
     network = list(),
+    app_layout = list(),
     # Blocks/nodes
     append_block = FALSE,
     added_block = NULL,

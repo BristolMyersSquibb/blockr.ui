@@ -4,7 +4,7 @@
 #' @param blocks Board blocks.
 #' @param options Board options.
 #' @param network visNetwork data.
-#' @param selected Selected node.
+#' @param layout App layout.
 #' @param modules Module state.
 #' @param ... Generic consistency.
 #' @export
@@ -14,7 +14,7 @@ blockr_ser.dag_board <- function(
   blocks = NULL,
   options = NULL,
   network = NULL,
-  selected = NULL,
+  layout = NULL,
   modules = NULL,
   ...
 ) {
@@ -22,7 +22,7 @@ blockr_ser.dag_board <- function(
     object = class(x),
     board = NextMethod(),
     network = network,
-    selected_block = selected,
+    layout = layout,
     modules = modules,
     version = as.character(utils::packageVersion(utils::packageName()))
   )
@@ -37,7 +37,7 @@ blockr_deser.dag_board <- function(x, data, ...) {
     # Other elements that are not part of the board
     # and need to be restored at the top level
     network = data[["network"]],
-    selected_block = data[["selected_block"]],
+    layout = data[["layout"]],
     modules = data[["modules"]]
   )
 }
@@ -91,7 +91,7 @@ write_board_to_disk <- function(rv, parent, session) {
         blocks = blocks,
         options = opts,
         network = parent$network,
-        selected = parent$selected_block,
+        layout = parent$app_layout,
         modules = lapply(parent$module_state, reval)
       )
     )
@@ -183,7 +183,7 @@ restore_board <- function(path, res, parent) {
       # Update parent node, grid, selected, mode
       # that were stored in the JSON but not part of the board object.
       parent$network <- tmp_res$network
-      parent$selected_block <- tmp_res$selected_block
+      parent$app_layout <- tmp_res$layout
 
       mods <- intersect(names(parent$module_state), names(tmp_res$modules))
 

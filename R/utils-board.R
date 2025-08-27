@@ -211,7 +211,7 @@ board_restore <- function(board, update, session, parent, ...) {
         type = "message",
         duration = 1
       )
-      parent$refreshed <- "board"
+      parent$refreshed <- "refresh-board"
     },
     ignoreInit = TRUE
   )
@@ -219,30 +219,30 @@ board_restore <- function(board, update, session, parent, ...) {
   NULL
 }
 
-get_block_panels <- function(session) {
+get_block_panels <- function(panels = get_panels_ids("layout", session)) {
   gsub(
     "block-",
     "",
     grep(
       "block",
-      get_panels_ids("layout", session),
+      panels,
       value = TRUE
     )
   )
 }
 
-cleanup_layout <- function(parent, session) {
-  parent$refreshed <- "clean-layout"
-  showNotification(
-    "Layout cleaned",
-    type = "message",
-    duration = 1
-  )
-  block_panels <- get_block_panels(session)
-  if (!length(block_panels)) {
-    return(NULL)
-  }
-  remove_block_panels(block_panels)
+restore_layout <- function(parent, session) {
+  # Restore layout
+  # TBD: it seems that restore dock has panel
+  # with the renderer set to visible. How to use the
+  # old setup?
+  restore_dock("layout", parent$app_layout)
+  # Move any existing block UI from the offcanvas to their panel
+  block_panels <- get_block_panels(names(parent$app_layout$panels))
+  lapply(block_panels, \(id) {
+    show_block_panel(id, session)
+  })
+  parent$refreshed <- "restore-layout"
 }
 
 #' App layout
@@ -255,42 +255,32 @@ build_layout <- function(modules, plugins) {
     output <- session$output
     ns <- session$ns
 
-    # Cleanup existing panels on restore
+    # Save layout on change
     observeEvent(
       {
-        req(parent$refreshed == "restore-network")
+        # Should not trigger on restore, only when the dashboard changes
+        req(is.null(parent$refreshed))
+        input$layout_state
       },
       {
-        cleanup_layout(parent, session)
+        parent$app_layout <- input$layout_state
       }
     )
 
-    # Wait that the layout is cleaned so we can create and show
-    # any existing block panel
+    # Restore layout from snapshot
     observeEvent(
       {
-        req(
-          parent$refreshed == "clean-layout",
-          length(get_block_panels(session)) == 0
-        )
+        req(parent$refreshed == "refresh-board")
       },
       {
-        parent$refreshed <- "restore-layout"
+        # No need to cleanup before
+        restore_layout(parent, session)
       }
     )
-
-    # Dynamic trigger that account for restore context
-    add_panel_trigger <- reactive({
-      if (is.null(parent$refreshed)) {
-        req(parent$selected_block, length(parent$selected_block) == 1)
-      } else if (parent$refreshed == "restore-layout") {
-        req(parent$refreshed == "restore-layout")
-      }
-    })
 
     # Add or re-insert block panel ui
     observeEvent(
-      add_panel_trigger(),
+      req(parent$selected_block, length(parent$selected_block) == 1),
       {
         create_or_show_block_panel(parent$selected_block, parent, session)
       }
