@@ -102,6 +102,12 @@ gen_add_rm_link_server <- function(context_menu) {
         # Auto-click on the right scoutbar page
         # to display the right scoutbar sub-page depending on the trigger
         observeEvent(req(parent$scoutbar$is_open), {
+          # cmd + K opens the scoutbar but in that
+          # case, we don't know what the user
+          # wants to do so we don't trigger any page.
+          if (is.null(parent$scoutbar$trigger)) {
+            return(NULL)
+          }
           session$sendCustomMessage(
             "select-scoutbar-page",
             list(
