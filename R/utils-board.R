@@ -232,14 +232,14 @@ get_block_panels <- function(panels = get_panels_ids("layout", session)) {
 }
 
 restore_layout <- function(parent, session) {
-  # Restore layout
-  # TBD: it seems that restore dock has panel
-  # with the renderer set to visible. How to use the
-  # old setup?
-  restore_dock("layout", parent$app_layout)
   # Move any existing block UI from the offcanvas to their panel
   block_panels <- get_block_panels(names(parent$app_layout$panels))
   lapply(block_panels, \(id) {
+    dockViewR::select_panel(
+      "layout",
+      sprintf("block-%s", id)
+    )
+    # Move block from offcanvas to panel
     show_block_panel(id, session)
   })
   parent$refreshed <- "restore-layout"
@@ -274,6 +274,27 @@ build_layout <- function(modules, plugins) {
       },
       {
         # No need to cleanup before
+        restore_dock("layout", parent$app_layout)
+        parent$refreshed <- "restore-dock"
+      }
+    )
+
+    # Wait for state to be synchronised
+    observeEvent(
+      {
+        req(
+          parent$refreshed == "restore-dock",
+          length(input$layout_state$panels) == length(parent$app_layout$panels)
+        )
+      },
+      {
+        # Ensure the default renderer is always on
+        # since restoring layout does not manage to preserve
+        # the individual panel renderer state.
+        dockViewR::update_dock_view(
+          "layout",
+          list(defaultRenderer = "always")
+        )
         restore_layout(parent, session)
       }
     )
