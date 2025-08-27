@@ -1244,6 +1244,6 @@ cold_start <- function(rv, parent, session) {
     session = session
   )
 
-  parent$refreshed <- "network"
+  parent$refreshed <- "restore-network"
   parent
 }

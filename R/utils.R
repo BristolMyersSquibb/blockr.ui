@@ -82,6 +82,17 @@ process_app_state <- function(state) {
       } else if (nme == "backup_list") {
         state[[nme]] <- list()
         state[[nme]]
+      } else if (nme == "app_layout") {
+        if (length(state[[nme]]$panels) > 0) {
+          state[[nme]]$panels <- lapply(
+            state[[nme]]$panels,
+            \(panel) {
+              panel$params <- NULL
+              panel
+            }
+          )
+        }
+        state[[nme]]
       } else {
         state[[nme]]
       }
