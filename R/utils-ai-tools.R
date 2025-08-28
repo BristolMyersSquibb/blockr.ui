@@ -32,7 +32,7 @@ setup_chat_task <- function() {
           stream = "content"
         )),
         function(stream) {
-          chat_append(ui_id, stream)
+          shinychat::chat_append(ui_id, stream)
         }
       )
     }
@@ -63,7 +63,7 @@ manage_chat <- function(provider, parent, session) {
   })
 
   observeEvent(input$prompt_clean, {
-    chat_clear("prompt")
+    shinychat::chat_clear("prompt")
     # This also erase the chat memory and not just the UI
     #openai$set_turns(list())
   })
@@ -410,26 +410,6 @@ create_add_block_to_stack_tool <- function(
     )
   )
   provider$register_tool(add_block_to_stack)
-}
-
-create_block_builder_tool <- function(
-  provider,
-  app_request,
-  board,
-  parent,
-  session
-) {
-  block_builder <- tool(
-    function() {
-      blk <- NULL
-      return(app_request(list(action = "build_block", data = blk)))
-    },
-    name = "block_builder",
-    description = "Create a block constructor that people can use on the fly.",
-    arguments = list()
-  )
-
-  provider$register_tool(block_builder)
 }
 
 #' @keywords internal
