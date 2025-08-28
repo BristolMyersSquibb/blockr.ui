@@ -11,19 +11,7 @@ chat_mod_ui <- function(id, board, ...) {
         icon("trash")
       )
     ),
-    chat_ui(
-      id = ns("prompt"),
-      messages = list(
-        list(
-          role = "assistant",
-          content = "Hi! I'll help you to build blockr.ui pipeline with OpenAI's `gpt-4o`. 
-          You can start with: Import iris data, select the Species 
-          column and stack the 2 blocks. 
-          Then filter Species to only account for 'virginica'. 
-          Add the new block to the previous stack."
-        )
-      )
-    )
+    uiOutput(ns("chat_ui"))
   )
 }
 
@@ -35,39 +23,80 @@ chat_mod_srv <- function(board, update, session, parent, ...) {
   moduleServer(
     "chat",
     function(input, output, session) {
-      # Maybe we want to replace this by ellmer::chat to allow for any provider. The provider name
-      # could be passed as a board option or so ...
-      openai <- setup_chat_provider()
-      res <- manage_chat(openai, parent, session)
-      chat_restore("prompt", openai)
-
-      create_block_names_tool(openai)
-
+      ns <- session$ns
+      # Dynamic provider support through board options
+      provider <- reactiveVal(NULL)
       # Request to store tool results
       app_request <- reactiveVal(NULL)
-      create_block_tool_factory(openai, app_request, board, parent, session)
-      create_remove_block_tool(openai, app_request, board, parent, session)
 
+      # Dynamic UI: this also somehow fixes an issue with shinychat
+      # if the provider choosen does not have enough credits
+      # then the chat isn't stuck and can be reset by changing the provider
+      output$chat_ui <- renderUI({
+        req(provider())
+        provider <- provider()$get_provider()
+        provider <- sprintf(
+          "%s/%s",
+          provider@name,
+          provider@model
+        )
+        chat_ui(
+          id = ns("prompt"),
+          messages = list(init_chat_message(provider))
+        )
+      })
+
+      # Update provider, tools
+      observeEvent(get_board_option_value("chat_provider", session), {
+        # Note: there is no-need to reset tools
+        provider(setup_chat_provider(get_board_option_value(
+          "chat_provider",
+          session
+        )))
+
+        create_block_names_tool(provider)
+
+        create_block_tool_factory(
+          provider,
+          app_request,
+          board,
+          parent,
+          session
+        )
+        create_remove_block_tool(
+          provider,
+          app_request,
+          board,
+          parent,
+          session
+        )
+
+        create_add_stack_tool(
+          provider,
+          stackable_blocks,
+          app_request,
+          board,
+          parent,
+          session
+        )
+        create_get_stackable_blocks_tool(provider, stackable_blocks)
+        create_get_stack_ids_tool(provider, board)
+        create_add_block_to_stack_tool(
+          provider,
+          stackable_blocks,
+          app_request,
+          board,
+          parent,
+          session
+        )
+      })
+
+      res <- manage_chat(provider, parent, session)
+      # We probably can comment this below
+      #chat_restore("prompt", provider())
+
+      # Useful info to create stacks
       stackable_blocks <- reactive(get_stackable_blocks(board))
-
-      create_add_stack_tool(
-        openai,
-        stackable_blocks,
-        app_request,
-        board,
-        parent,
-        session
-      )
-      create_get_stackable_blocks_tool(openai, stackable_blocks)
-      create_get_stack_ids_tool(openai, board)
-      create_add_block_to_stack_tool(
-        openai,
-        stackable_blocks,
-        app_request,
-        board,
-        parent,
-        session
-      )
 
       res
     }
@@ -94,6 +123,50 @@ new_chat_module <- function(id = "blockr_assistant", title = "AI chat") {
         }
       )
     ),
+    options = new_chat_provider_option(category = "Chat options"),
     class = "chat_module"
   )
+}
+
+new_chat_provider_option <- function(
+  value = blockr_option("chat_provider", "openai"),
+  ...
+) {
+  new_board_option(
+    id = "chat_provider",
+    default = value,
+    ui = function(id) {
+      selectInput(
+        NS(id, "chat_provider"),
+        tooltip(
+          trigger = list(
+            "Chat provider",
+            icon("info-circle")
+          ),
+          "You may need to set API keys in your environment variables."
+        ),
+        choices = get_ellmer_chat_providers(),
+        selected = value
+      )
+    },
+    server = function(board, session) {
+      observeEvent(
+        get_board_option_or_null("chat_provider", session),
+        {
+          updateSelectInput(
+            session,
+            "chat_provider",
+            selected = get_board_option_value("chat_provider", session)
+          )
+        }
+      )
+    },
+    ...
+  )
+}
+
+#' @export
+validate_board_option.chat_provider_option <- function(x) {
+  # There is no point to validate a select input with fixed valid choices
+  invisible(x)
 }

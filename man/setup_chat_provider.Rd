@@ -5,7 +5,7 @@
 \title{Utility functions to create AI tools for blockr.ui}
 \usage{
 setup_chat_provider(
-  provider = chat_openai,
+  provider,
   prompt = readLines(system.file("examples/ai-chat/rules.md", package = "blockr.ui")),
   ...
 )

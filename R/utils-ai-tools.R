@@ -1,3 +1,38 @@
+#' @keywords internal
+init_chat_message <- function(provider) {
+  list(
+    role = "assistant",
+    content = sprintf(
+      "Hi! I'll help you to build blockr.ui pipeline with %s. 
+      You can start with: Import iris data, select the Species 
+      column and stack the 2 blocks. 
+      Then filter Species to only account for 'virginica'. 
+      Add the new block to the previous stack.",
+      provider
+    )
+  )
+}
+
+#' @keywords internal
+get_ellmer_chat_providers <- function() {
+  if (!requireNamespace("ellmer", quietly = TRUE)) {
+    stop("elmer package is not installed")
+  }
+
+  # Get all exported functions
+  exports <- getNamespaceExports("ellmer")
+
+  # Filter for chat providers (functions starting with "chat_")
+  chat_funcs <- exports[grepl("^chat_", exports)]
+
+  # Verify they are actually functions
+  actual_providers <- chat_funcs[sapply(chat_funcs, function(x) {
+    is.function(get(x, envir = asNamespace("ellmer")))
+  })]
+
+  return(gsub("chat_", "", actual_providers))
+}
+
 #' Utility functions to create AI tools for blockr.ui
 #'
 #' @param provider AI provider function to use from ellmer.
@@ -6,17 +41,17 @@
 #' @param ... Additional arguments to pass to the provider.
 #' @keywords internal
 setup_chat_provider <- function(
-  provider = chat_openai,
+  provider,
   prompt = readLines(system.file(
     "examples/ai-chat/rules.md",
     package = "blockr.ui"
   )),
   ...
 ) {
-  stopifnot(is.function(provider))
-  provider(
-    system_prompt = prompt,
-    ...
+  chat(
+    name = provider,
+    ...,
+    system_prompt = prompt
   )
 }
 
@@ -59,7 +94,23 @@ manage_chat <- function(provider, parent, session) {
     # by a human. With AI this is slightly different and some of
     # these action should not happen.
     parent$ai_chat <- TRUE
-    append_stream_task$invoke(provider, "prompt", input$prompt_user_input)
+    append_stream_task$invoke(provider(), "prompt", input$prompt_user_input)
+  })
+
+  res <- reactive({
+    if (append_stream_task$status() == "success") {
+      provider()$last_turn()
+    }
+  })
+
+  observeEvent(req(append_stream_task$status() == "error"), {
+    tryCatch(append_stream_task$result(), error = function(e) {
+      showNotification(
+        sprintf("Error from AI provider: %s", e$body),
+        type = "error"
+      )
+    })
+    parent$ai_chat <- FALSE
   })
 
   observeEvent(input$prompt_clean, {
@@ -74,12 +125,6 @@ manage_chat <- function(provider, parent, session) {
     parent$ai_chat <- FALSE
     # Need to reset scoutbar
     parent$scoutbar$action <- parent$scoutbar$value <- NULL
-  })
-
-  res <- reactive({
-    if (append_stream_task$status() == "success") {
-      provider$last_turn()
-    }
   })
 
   return(res)
@@ -177,7 +222,7 @@ create_block_tool_factory <- function(
           )
         )
       )
-      provider$register_tool(block_tool)
+      isolate(provider()$register_tool(block_tool))
       return(NULL)
     },
     name = "create_block_tool_factory",
@@ -190,7 +235,7 @@ create_block_tool_factory <- function(
     )
   )
 
-  provider$register_tool(block_tool_factory)
+  provider()$register_tool(block_tool_factory)
 }
 
 #' Create a tool to list available block names
@@ -206,7 +251,7 @@ create_block_names_tool <- function(provider) {
     arguments = list()
   )
 
-  provider$register_tool(available_block_names)
+  provider()$register_tool(available_block_names)
 }
 
 #' Create a tool to remove a block by its id
@@ -243,7 +288,7 @@ create_remove_block_tool <- function(
     )
   )
 
-  provider$register_tool(remove_block)
+  provider()$register_tool(remove_block)
 }
 
 #' Create a tool to add a stack with given blocks
@@ -300,7 +345,7 @@ create_add_stack_tool <- function(
     )
   )
 
-  provider$register_tool(create_stack)
+  provider()$register_tool(create_stack)
 }
 
 #' Create a tool to get stackable blocks
@@ -317,7 +362,7 @@ create_get_stackable_blocks_tool <- function(provider, stackable_blocks) {
     arguments = list()
   )
 
-  provider$register_tool(get_stackable_blocks)
+  provider()$register_tool(get_stackable_blocks)
 }
 
 #' Create a tool to get stack ids
@@ -335,7 +380,7 @@ create_get_stack_ids_tool <- function(provider, board) {
     arguments = list()
   )
 
-  provider$register_tool(get_stack_ids)
+  provider()$register_tool(get_stack_ids)
 }
 
 #' Create a tool to add a block to an existing stack
@@ -409,7 +454,7 @@ create_add_block_to_stack_tool <- function(
       )
     )
   )
-  provider$register_tool(add_block_to_stack)
+  provider()$register_tool(add_block_to_stack)
 }
 
 #' @keywords internal
