@@ -95,18 +95,48 @@ insert_block_ui.dag_board <- function(
     blk <- blocks[i]
     blk_ui <- block_ui(id, x, blk)
 
-    # Cleanup any existing UI for this block if we are refreshing the UI
-    # from a snapshot.
-    removeUI(
-      sprintf("#%s", ns(names(blk))),
-      immediate = TRUE
-    )
     insertUI(
       sprintf(
         "#%s .offcanvas-body",
         ns("offcanvas")
       ),
       ui = blk_ui,
+      immediate = TRUE
+    )
+  })
+
+  invisible(x)
+}
+
+#' @rdname block_ui
+#' @export
+remove_block_ui.dag_board <- function(
+  id,
+  x,
+  blocks = NULL,
+  ...
+) {
+  session <- getDefaultReactiveDomain()
+  stopifnot(
+    is.character(id),
+    length(id) == 1,
+    is_board(x),
+    !is.null(session)
+  )
+
+  ns <- session$ns
+
+  if (is.null(blocks)) {
+    blocks <- board_blocks(x)
+  }
+
+  lapply(seq_along(blocks), \(i) {
+    blk <- blocks[i]
+
+    # Cleanup any existing UI for this block if we are refreshing the UI
+    # from a snapshot.
+    removeUI(
+      sprintf("#%s", ns(names(blk))),
       immediate = TRUE
     )
   })
@@ -203,12 +233,6 @@ hide_block_panel <- function(id, session) {
     )
   )
   remove_panel("layout", id)
-}
-
-#' @rdname block_ui
-#' @export
-remove_block_ui.dag_board <- function(id, x, blocks = NULL, ...) {
-  NULL
 }
 
 #' Get block info in registry
