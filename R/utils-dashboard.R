@@ -1,9 +1,4 @@
 restore_dashboard <- function(board, rv, parent, session) {
-  showNotification(
-    "Dashboard restored",
-    type = "message",
-    duration = 1
-  )
   parent$in_grid <- list()
   parent$refreshed <- NULL
   ids <- names(rv$blocks)

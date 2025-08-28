@@ -206,11 +206,6 @@ board_restore <- function(board, update, session, parent, ...) {
   observeEvent(
     board_refresh(),
     {
-      showNotification(
-        "Board restored",
-        type = "message",
-        duration = 1
-      )
       parent$refreshed <- "refresh-board"
     },
     ignoreInit = TRUE
@@ -219,7 +214,7 @@ board_restore <- function(board, update, session, parent, ...) {
   NULL
 }
 
-get_block_panels <- function(panels = get_panels_ids("layout", session)) {
+get_block_panels <- function(panels) {
   gsub(
     "block-",
     "",

@@ -169,11 +169,7 @@ create_or_show_block_panel <- function(id, parent, session) {
 
   # Extract block panels
   all_panels <- get_panels_ids("layout", session)
-  block_panels <- gsub(
-    "block-",
-    "",
-    grep("block", all_panels, value = TRUE)
-  )
+  block_panels <- get_block_panels(all_panels)
 
   # If the block panel is already there,
   # just select it.

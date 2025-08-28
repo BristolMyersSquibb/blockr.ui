@@ -205,7 +205,7 @@ gen_add_rm_link_server <- function(context_menu) {
 
         # Unselect node when panel is closed
         observeEvent(parent$unselected_block, {
-          g6_proxy(ns("network")) %>%
+          g6_proxy(ns("network")) |>
             g6_set_nodes(setNames(
               list(selected = ""),
               parent$unselected_block
