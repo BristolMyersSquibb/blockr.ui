@@ -1,11 +1,14 @@
 #' @param modules Further modules to pass.
 #' @param class Additional class(es).
+#' @param options Board options (see [dag_board_options()]).
 #' @rdname run_demo_app
 #' @export
-new_dag_board <- function(..., modules = new_dashboard_module(),
-                          options = dag_board_options(),
-                          class = character()) {
-
+new_dag_board <- function(
+  ...,
+  modules = new_dashboard_module(),
+  options = dag_board_options(),
+  class = character()
+) {
   if (is_board_module(modules)) {
     modules <- list(modules)
   }
@@ -34,8 +37,10 @@ dag_board_options <- function() {
     new_page_size_option(category = "Table options"),
     new_filter_rows_option(category = "Table options"),
     new_thematic_option(category = "Theme options"),
-    new_dark_mode_option(blockr_option("dark_mode", FALSE),
-                         category = "Theme options"),
+    new_dark_mode_option(
+      blockr_option("dark_mode", FALSE),
+      category = "Theme options"
+    ),
     new_stack_colors_option(category = "Board options"),
     new_snapshot_option(category = "Board options")
   )
@@ -43,7 +48,6 @@ dag_board_options <- function() {
 
 #' @export
 serve.dag_board <- function(x, id = "main", ...) {
-
   modules <- board_modules(x)
 
   ctx_menu_items <- unlst(

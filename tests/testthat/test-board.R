@@ -143,7 +143,7 @@ testServer(
     expect_null(dot_args$parent$in_grid[[dot_args$parent$removed_block]])
 
     # Refresh
-    dot_args$parent$refreshed <- "network"
+    dot_args$parent$refreshed <- "restore-network"
     # Manually setup the dashboard state as this is theoretically
     # injected by the dashboard module
     dot_args$parent$module_state$dashboard <- reactiveVal(NULL)

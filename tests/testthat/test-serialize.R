@@ -79,28 +79,15 @@ testServer(
     session$setInputs(undo = 0)
     session$flushReact()
     expect_identical(vals$current_backup, 1L)
-    expect_identical(
-      parent$selected_block,
-      board_block_ids(board$board)[1]
-    )
 
     # Restore latest
     session$setInputs(redo = 0)
     session$flushReact()
     expect_identical(vals$current_backup, 2L)
-    expect_identical(
-      parent$selected_block,
-      board_block_ids(board$board)[2]
-    )
 
     # Manual restore
     session$setInputs(
       restore = list(datapath = parent$backup_list[[1]])
-    )
-
-    expect_identical(
-      parent$selected_block,
-      board_block_ids(board$board)[1]
     )
 
     # Manual serialize

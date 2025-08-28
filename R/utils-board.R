@@ -86,7 +86,8 @@ options_ui <- function(id, x, ...) {
           list(
             id = NS(id, "board_options"),
             multiple = TRUE,
-            open = TRUE
+            open = TRUE,
+            class = "accordion-flush"
           ),
           map(
             do.call,
@@ -205,12 +206,38 @@ board_restore <- function(board, update, session, parent, ...) {
   observeEvent(
     board_refresh(),
     {
-      parent$refreshed <- "board"
+      parent$refreshed <- "refresh-board"
     },
     ignoreInit = TRUE
   )
 
   NULL
+}
+
+get_block_panels <- function(panels) {
+  gsub(
+    "block-",
+    "",
+    grep(
+      "block",
+      panels,
+      value = TRUE
+    )
+  )
+}
+
+restore_layout <- function(parent, session) {
+  # Move any existing block UI from the offcanvas to their panel
+  block_panels <- get_block_panels(names(parent$app_layout$panels))
+  lapply(block_panels, \(id) {
+    dockViewR::select_panel(
+      "layout",
+      sprintf("block-%s", id)
+    )
+    # Move block from offcanvas to panel
+    show_block_panel(id, session)
+  })
+  parent$refreshed <- "restore-layout"
 }
 
 #' App layout
@@ -223,55 +250,55 @@ build_layout <- function(modules, plugins) {
     output <- session$output
     ns <- session$ns
 
-    refreshed <- reactiveVal(FALSE)
-
-    # Cleanup existing panels on restore
+    # Save layout on change
     observeEvent(
       {
-        req(parent$refreshed == "network")
+        # Should not trigger on restore, only when the dashboard changes
+        req(is.null(parent$refreshed))
+        input$layout_state
       },
       {
-        block_panels <- gsub(
-          "block-",
-          "",
-          grep(
-            "block",
-            get_panels_ids("layout", session),
-            value = TRUE
-          )
-        )
-        remove_block_panels(block_panels)
-        refreshed(TRUE)
+        parent$app_layout <- input$layout_state
       }
     )
 
-    # Show block panel on board refresh if there was a selected block
+    # Restore layout from snapshot
     observeEvent(
-      req(
-        refreshed() &&
-          !length(grep("block-", get_panels_ids("layout", session)))
-      ),
       {
-        if (!length(parent$selected_block)) {
-          return(NULL)
-        }
-        show_block_panel(parent$selected_block, parent, TRUE, session)
-        refreshed(FALSE)
+        req(parent$refreshed == "refresh-board")
+      },
+      {
+        # No need to cleanup before
+        restore_dock("layout", parent$app_layout)
+        parent$refreshed <- "restore-dock"
       }
     )
 
-    # Re-insert block panel ui if it was closed any time a block is selected.
-    # This work only for single selection (for now). TBD: I think we could easily loop
-    # over multiple selected blocks and show them all.
+    # Wait for state to be synchronised
     observeEvent(
       {
         req(
-          parent$selected_block,
-          length(parent$selected_block) == 1
+          parent$refreshed == "restore-dock",
+          length(input$layout_state$panels) == length(parent$app_layout$panels)
         )
       },
       {
-        show_block_panel(parent$selected_block, parent, FALSE, session)
+        # Ensure the default renderer is always on
+        # since restoring layout does not manage to preserve
+        # the individual panel renderer state.
+        dockViewR::update_dock_view(
+          "layout",
+          list(defaultRenderer = "always")
+        )
+        restore_layout(parent, session)
+      }
+    )
+
+    # Add or re-insert block panel ui
+    observeEvent(
+      req(parent$selected_block, length(parent$selected_block) == 1),
+      {
+        create_or_show_block_panel(parent$selected_block, parent, session)
       }
     )
 
@@ -279,12 +306,17 @@ build_layout <- function(modules, plugins) {
       input[["layout_panel-to-remove"]],
       {
         hide_block_panel(input[["layout_panel-to-remove"]], session)
+        # Send callback to links plugin to unselect the node
+        parent$unselected_block <- gsub(
+          "block-",
+          "",
+          input[["layout_panel-to-remove"]]
+        )
       }
     )
 
     # Remove block panel on block remove
-    # As we can remove multiple blocks at once, we
-    # need to loop over the removed blocks.
+    # We can remove multiple blocks at once
     observeEvent(parent$removed_block, {
       remove_block_panels(parent$removed_block)
     })

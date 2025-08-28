@@ -27,6 +27,8 @@ new_board_module(
 
 \item{position}{Panel position}
 
+\item{options}{Module options (see \code{\link[blockr.core:new_board_options]{blockr.core::new_board_options()}}).}
+
 \item{class}{(Optional) additional class(es)}
 }
 \description{

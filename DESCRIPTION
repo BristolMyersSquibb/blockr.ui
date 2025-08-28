@@ -53,7 +53,6 @@ Remotes:
 Suggests: 
     shinytest2,
     testthat (>= 3.0.0),
-    rlang,
     blockr.dplyr,
     blockr.io,
     blockr.ai,

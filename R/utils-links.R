@@ -1089,7 +1089,7 @@ restore_network <- function(rv, vals, session) {
     session = session
   )
 
-  vals$refreshed <- "network"
+  vals$refreshed <- "restore-network"
 
   vals
 }
@@ -1238,6 +1238,6 @@ cold_start <- function(rv, parent, session) {
     session = session
   )
 
-  parent$refreshed <- "network"
+  parent$refreshed <- "restore-network"
   parent
 }
