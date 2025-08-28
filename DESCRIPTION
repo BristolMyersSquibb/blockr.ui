@@ -33,13 +33,15 @@ Imports:
     bslib,
     scoutbaR,
     shinyWidgets,
-    blockr.core,
+    blockr.core (>= 0.1.1),
     shinyjs,
     jsonlite,
     htmltools,
     dockViewR (>= 0.2.1),
     g6R (>= 0.1.0),
-    ellmer
+    ellmer,
+    grDevices,
+    rlang
 Remotes:
     BristolMyersSquibb/blockr.core,
     BristolMyersSquibb/blockr.dplyr,
@@ -48,11 +50,10 @@ Remotes:
     BristolMyersSquibb/blockr.sdtm,
     cynkra/g6R,
     cynkra/scoutbaR,
-    cynkra/dockViewR@fix-windows-shaking
+    cynkra/dockViewR
 Suggests: 
     shinytest2,
     testthat (>= 3.0.0),
-    rlang,
     blockr.dplyr,
     blockr.io,
     blockr.ai,
@@ -71,3 +72,29 @@ Depends:
 Config/Needs/website: rmarkdown
 VignetteBuilder:
   quarto
+Collate: 
+    'apps.R'
+    'block.R'
+    'blockr.ui-dependencies.R'
+    'busy-load-dependencies.R'
+    'context-menu.R'
+    'dag-board.R'
+    'main.R'
+    'module-dashboard.R'
+    'options.R'
+    'pkg.R'
+    'plugin-add_rm_blocks.R'
+    'plugin-code.R'
+    'plugin-links.R'
+    'plugin-serialize.R'
+    'plugin-stacks.R'
+    'registry.R'
+    'stacks.R'
+    'utils-board.R'
+    'utils-dashboard.R'
+    'utils-links.R'
+    'utils-module.R'
+    'utils-serialize.R'
+    'utils-ui.R'
+    'utils.R'
+    'zzz.R'

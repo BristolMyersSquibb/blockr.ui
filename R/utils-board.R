@@ -63,120 +63,45 @@ blk_choices <- function() {
 
 #' @rdname board_ui
 #' @export
-board_ui.board_options <- function(id, x, ...) {
-  ns <- NS(id)
+options_ui <- function(id, x, ...) {
+  opts <- split(x, chr_ply(x, attr, "category"))
 
-  bslib::popover(
-    icon("gear"),
-    accordion(
-      id = ns("board_options"),
-      multiple = TRUE,
-      open = TRUE,
-      accordion_panel(
-        title = "General options",
-        textInput(
-          ns("board_name"),
-          "Board name",
-          board_option("board_name", x)
-        )
-      ),
-      accordion_panel(
-        title = "Tables options",
-        numericInput(
-          ns("n_rows"),
-          "Preview rows",
-          board_option("n_rows", x),
-          min = 1L,
-          step = 1L
-        ),
-        selectInput(
-          ns("page_size"),
-          "Preview page size",
-          c(5, 10, 25, 50, 100),
-          board_option("page_size", x)
-        ),
-        bslib::input_switch(
-          ns("filter_rows"),
-          "Enable preview search",
-          board_option("filter_rows", x)
-        )
-      ),
-      accordion_panel(
-        title = "Dashboard options",
-        numericInput(
-          ns("dashboard_zoom"),
-          "Dashboard zoom",
-          board_option("dashboard_zoom", x),
-          min = 0.5,
-          max = 1.5,
-          step = 0.1
-        )
-      ),
-      accordion_panel(
-        title = "Theme options",
-        if (is_pkg_avail("thematic")) {
-          bslib::input_switch(
-            ns("thematic"),
-            "Enable thematic",
-            coal(board_option("thematic", x), FALSE)
-          )
-        },
-        span(
-          bslib::input_dark_mode(
-            id = ns("dark_mode"),
-            mode = board_option("dark_mode", x)
+  offcanvas_id <- NS(id, "options-offcanvas")
+
+  tagList(
+    tags$a(
+      class = "btn btn-sm btn-white",
+      icon("gear"),
+      `data-bs-toggle` = "offcanvas",
+      `data-bs-target` = sprintf("#%s", offcanvas_id),
+      `aria-controls` = offcanvas_id
+    ),
+    off_canvas(
+      id = offcanvas_id,
+      position = "end",
+      title = "Board options",
+      do.call(
+        accordion,
+        c(
+          list(
+            id = NS(id, "board_options"),
+            multiple = TRUE,
+            open = TRUE,
+            class = "accordion-flush"
           ),
-          tags$label(
-            "Light/dark mode",
-            style = "vertical-align: top; margin-top: 3px;"
+          map(
+            do.call,
+            rep(list(accordion_panel), length(opts)),
+            map(
+              list,
+              title = names(opts),
+              lapply(opts, lapply, board_option_ui, id)
+            )
           )
         )
       )
-    ),
-    title = "Board options"
+    )
   )
-}
-
-#' @rdname board_ui
-#' @param session Shiny session object.
-#' @export
-update_ui.board_options <- function(x, session, ...) {
-  updateTextInput(
-    session,
-    "board_name",
-    value = board_option("board_name", x)
-  )
-
-  updateNumericInput(
-    session,
-    "n_rows",
-    value = board_option("n_rows", x)
-  )
-
-  updateSelectInput(
-    session,
-    "page_size",
-    selected = board_option("page_size", x)
-  )
-
-  bslib::toggle_switch(
-    "filter_rows",
-    value = board_option("filter_rows", x),
-    session = session
-  )
-
-  bslib::toggle_dark_mode(
-    mode = board_option("dark_mode", x),
-    session = session
-  )
-
-  updateNumericInput(
-    session,
-    "dashboard_zoom",
-    value = board_option("dashboard_zoom", x)
-  )
-
-  invisible()
 }
 
 #' Board header
@@ -230,7 +155,7 @@ board_ui.dag_board <- function(id, x, plugins = list(), ...) {
   my_board_ui <- list(
     toolbar_ui = toolbar_ui,
     notifications = board_ui(id, plugins[["notify_user"]], x),
-    board_options_ui = board_ui(id, board_options(x))
+    board_options_ui = options_ui(id, as_board_options(x))
   )
 
   # If there are blocks at start, we need to generate the UI
@@ -281,12 +206,38 @@ board_restore <- function(board, update, session, parent, ...) {
   observeEvent(
     board_refresh(),
     {
-      parent$refreshed <- "board"
+      parent$refreshed <- "refresh-board"
     },
     ignoreInit = TRUE
   )
 
   NULL
+}
+
+get_block_panels <- function(panels) {
+  gsub(
+    "block-",
+    "",
+    grep(
+      "block",
+      panels,
+      value = TRUE
+    )
+  )
+}
+
+restore_layout <- function(parent, session) {
+  # Move any existing block UI from the offcanvas to their panel
+  block_panels <- get_block_panels(names(parent$app_layout$panels))
+  lapply(block_panels, \(id) {
+    dockViewR::select_panel(
+      "layout",
+      sprintf("block-%s", id)
+    )
+    # Move block from offcanvas to panel
+    show_block_panel(id, session)
+  })
+  parent$refreshed <- "restore-layout"
 }
 
 #' App layout
@@ -299,55 +250,55 @@ build_layout <- function(modules, plugins) {
     output <- session$output
     ns <- session$ns
 
-    refreshed <- reactiveVal(FALSE)
-
-    # Cleanup existing panels on restore
+    # Save layout on change
     observeEvent(
       {
-        req(parent$refreshed == "network")
+        # Should not trigger on restore, only when the dashboard changes
+        req(is.null(parent$refreshed))
+        input$layout_state
       },
       {
-        block_panels <- gsub(
-          "block-",
-          "",
-          grep(
-            "block",
-            get_panels_ids("layout", session),
-            value = TRUE
-          )
-        )
-        remove_block_panels(block_panels)
-        refreshed(TRUE)
+        parent$app_layout <- input$layout_state
       }
     )
 
-    # Show block panel on board refresh if there was a selected block
+    # Restore layout from snapshot
     observeEvent(
-      req(
-        refreshed() &&
-          !length(grep("block-", get_panels_ids("layout", session)))
-      ),
       {
-        if (!length(parent$selected_block)) {
-          return(NULL)
-        }
-        show_block_panel(parent$selected_block, parent, TRUE, session)
-        refreshed(FALSE)
+        req(parent$refreshed == "refresh-board")
+      },
+      {
+        # No need to cleanup before
+        restore_dock("layout", parent$app_layout)
+        parent$refreshed <- "restore-dock"
       }
     )
 
-    # Re-insert block panel ui if it was closed any time a block is selected.
-    # This work only for single selection (for now). TBD: I think we could easily loop
-    # over multiple selected blocks and show them all.
+    # Wait for state to be synchronised
     observeEvent(
       {
         req(
-          parent$selected_block,
-          length(parent$selected_block) == 1
+          parent$refreshed == "restore-dock",
+          length(input$layout_state$panels) == length(parent$app_layout$panels)
         )
       },
       {
-        show_block_panel(parent$selected_block, parent, FALSE, session)
+        # Ensure the default renderer is always on
+        # since restoring layout does not manage to preserve
+        # the individual panel renderer state.
+        dockViewR::update_dock_view(
+          "layout",
+          list(defaultRenderer = "always")
+        )
+        restore_layout(parent, session)
+      }
+    )
+
+    # Add or re-insert block panel ui
+    observeEvent(
+      req(parent$selected_block, length(parent$selected_block) == 1),
+      {
+        create_or_show_block_panel(parent$selected_block, parent, session)
       }
     )
 
@@ -355,12 +306,17 @@ build_layout <- function(modules, plugins) {
       input[["layout_panel-to-remove"]],
       {
         hide_block_panel(input[["layout_panel-to-remove"]], session)
+        # Send callback to links plugin to unselect the node
+        parent$unselected_block <- gsub(
+          "block-",
+          "",
+          input[["layout_panel-to-remove"]]
+        )
       }
     )
 
     # Remove block panel on block remove
-    # As we can remove multiple blocks at once, we
-    # need to loop over the removed blocks.
+    # We can remove multiple blocks at once
     observeEvent(parent$removed_block, {
       remove_block_panels(parent$removed_block)
     })
@@ -484,7 +440,16 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
                 id = sprintf("%s@restore_board", path),
                 label = strsplit(
                   path,
-                  path.expand(get_board_option_value("snapshot")$location),
+                  path.expand(
+                    attr(
+                      get_board_option_or_default(
+                        "snapshot",
+                        dag_board_options(),
+                        session
+                      ),
+                      "location"
+                    )
+                  ),
                   ""
                 )[[1]][2],
                 description = sprintf(

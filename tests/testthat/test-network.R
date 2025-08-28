@@ -179,7 +179,7 @@ testServer(
     # Cold start
     parent$cold_start <- FALSE
     session$flushReact()
-    expect_identical(parent$refreshed, "network")
+    expect_identical(parent$refreshed, "restore-network")
     # TBD does this even do something?
 
     # TBD mock: g6_state to get input[["network-state"]]
@@ -379,7 +379,7 @@ test_that("create_edges_data_from_links works", {
 test_that("create_combos_data_from_stacks works", {
   stacks <- as_stacks(new_stack())
   parent <- list(stacks = NULL)
-  colors <- board_option("stacks_colors", new_dag_board())
+  colors <- dag_board_options()[["stack_colors"]]
   res <- create_combos_data_from_stacks(stacks, parent, colors)
   expect_type(res, "list")
   expect_length(res, 1)

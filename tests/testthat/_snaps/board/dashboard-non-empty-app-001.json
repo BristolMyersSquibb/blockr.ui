@@ -123,10 +123,61 @@
           }
         ]
       },
+      "app_layout": {
+        "grid": {
+          "root": {
+            "type": "branch",
+            "data": [
+              {
+                "type": "leaf",
+                "data": {
+                  "views": [
+                    "dag"
+                  ],
+                  "activeView": "dag",
+                  "id": "1"
+                },
+                "size": 100
+              },
+              {
+                "type": "leaf",
+                "data": {
+                  "views": [
+                    "dashboard"
+                  ],
+                  "activeView": "dashboard",
+                  "id": "2"
+                },
+                "size": 100
+              }
+            ],
+            "size": 0
+          },
+          "width": 0,
+          "height": 0,
+          "orientation": "HORIZONTAL"
+        },
+        "panels": {
+          "dag": {
+            "id": "dag",
+            "contentComponent": "default",
+            "tabComponent": "custom",
+            "title": "Pipeline overview"
+          },
+          "dashboard": {
+            "id": "dashboard",
+            "contentComponent": "default",
+            "tabComponent": "custom",
+            "title": "Dashboard"
+          }
+        },
+        "activeGroup": "2"
+      },
       "append_block": false,
       "added_block": null,
       "removed_block": null,
       "selected_block": null,
+      "unselected_block": null,
       "cancelled_edge": null,
       "added_edge": null,
       "removed_edge": null,

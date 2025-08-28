@@ -11,4 +11,5 @@
 #' @import dockViewR
 #' @import g6R
 #' @import ellmer
+#' @importFrom rlang abort warn inform
 NULL

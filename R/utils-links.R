@@ -921,7 +921,11 @@ show_stack_actions <- function(rv, session) {
             label = "Pick a color for the stack:",
             hue = FALSE,
             preview = FALSE,
-            swatches = board_option("stacks_colors", rv$board),
+            swatches = get_board_option_or_default(
+              "stack_colors",
+              dag_board_options(),
+              session
+            ),
             theme = "nano",
             position = "right-end",
             useAsButton = TRUE
@@ -948,7 +952,11 @@ create_stack <- function(stack_id = NULL, rv, parent, session) {
 
   stack_color <- input$stack_color
   if (is.null(stack_color)) {
-    colors <- board_option("stacks_colors", rv$board)
+    colors <- get_board_option_or_default(
+      "stack_colors",
+      dag_board_options(),
+      session
+    )
     if (length(parent$stacks) == 0) {
       stack_color <- colors[1]
     } else {
@@ -1109,7 +1117,7 @@ restore_network <- function(rv, vals, session) {
     session = session
   )
 
-  vals$refreshed <- "network"
+  vals$refreshed <- "restore-network"
 
   vals
 }
@@ -1220,7 +1228,11 @@ cold_start <- function(rv, parent, session) {
   combos_data <- create_combos_data_from_stacks(
     stacks,
     parent,
-    board_option("stacks_colors", rv$board)
+    get_board_option_or_default(
+      "stack_colors",
+      dag_board_options(),
+      session
+    )
   )
   nodes_data <- create_nodes_data_from_blocks(blocks, stacks)
 
@@ -1254,6 +1266,6 @@ cold_start <- function(rv, parent, session) {
     session = session
   )
 
-  parent$refreshed <- "network"
+  parent$refreshed <- "restore-network"
   parent
 }

@@ -55,7 +55,7 @@ testServer(
     modules = modules
   ),
   {
-    expect_true(app_state$cold_start)
+    expect_false(app_state$cold_start)
     expect_null(app_state$refreshed)
     expect_length(app_state$network, 0)
     expect_false(app_state$append_block)
@@ -80,8 +80,5 @@ testServer(
     expect_false(app_state$display_code)
     expect_null(app_state$added_to_dashboard)
     expect_null(app_state$removed_from_dashboard)
-
-    session$flushReact()
-    expect_false(app_state$cold_start)
   }
 )

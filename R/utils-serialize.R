@@ -4,7 +4,7 @@
 #' @param blocks Board blocks.
 #' @param options Board options.
 #' @param network visNetwork data.
-#' @param selected Selected node.
+#' @param layout App layout.
 #' @param modules Module state.
 #' @param ... Generic consistency.
 #' @export
@@ -14,7 +14,7 @@ blockr_ser.dag_board <- function(
   blocks = NULL,
   options = NULL,
   network = NULL,
-  selected = NULL,
+  layout = NULL,
   modules = NULL,
   ...
 ) {
@@ -22,7 +22,7 @@ blockr_ser.dag_board <- function(
     object = class(x),
     board = NextMethod(),
     network = network,
-    selected_block = selected,
+    layout = layout,
     modules = modules,
     version = as.character(utils::packageVersion(utils::packageName()))
   )
@@ -37,7 +37,7 @@ blockr_deser.dag_board <- function(x, data, ...) {
     # Other elements that are not part of the board
     # and need to be restored at the top level
     network = data[["network"]],
-    selected_block = data[["selected_block"]],
+    layout = data[["layout"]],
     modules = data[["modules"]]
   )
 }
@@ -80,44 +80,24 @@ write_board_to_disk <- function(rv, parent, session) {
     )
 
     opts <- lapply(
-      set_names(nm = list_board_options(rv$board)),
-      board_option_from_userdata,
+      set_names(nm = names(as_board_options(rv$board))),
+      get_board_option_or_null,
       session
     )
 
     json <- jsonlite::prettify(
       to_json(
         rv$board,
-        blocks,
-        opts,
-        parent$network,
-        parent$selected_block,
-        lapply(parent$module_state, reval)
+        blocks = blocks,
+        options = opts,
+        network = parent$network,
+        layout = parent$app_layout,
+        modules = lapply(parent$module_state, reval)
       )
     )
 
     writeLines(json, con)
   }
-}
-
-board_option_from_userdata <- function(name, session) {
-  rv <- get0(name, envir = session$userData, inherits = FALSE)
-
-  if (is.null(rv)) {
-    return(NULL)
-  }
-
-  res <- rv()
-
-  if (is.null(res)) {
-    return(NULL)
-  }
-
-  if (identical(name, "page_size")) {
-    res <- as.integer(res)
-  }
-
-  res
 }
 
 #' @keywords internal
@@ -129,7 +109,7 @@ list_snapshot_files <- function(board_id) {
   }
 
   list.files(
-    path = opt$location,
+    path = attr(opt, "location"),
     pattern = paste0("^", board_id, ".*\\.json$"),
     full.names = TRUE
   )
@@ -165,7 +145,7 @@ snapshot_board <- function(vals, rv, parent, session) {
       opt <- get_board_option_or_null("snapshot")
 
       if (not_null(opt)) {
-        file_name <- file.path(opt$location, file_name)
+        file_name <- file.path(attr(opt, "location"), file_name)
       }
 
       write_board_to_disk(rv, parent, session)(file_name)
@@ -203,7 +183,7 @@ restore_board <- function(path, res, parent) {
       # Update parent node, grid, selected, mode
       # that were stored in the JSON but not part of the board object.
       parent$network <- tmp_res$network
-      parent$selected_block <- tmp_res$selected_block
+      parent$app_layout <- tmp_res$layout
 
       mods <- intersect(names(parent$module_state), names(tmp_res$modules))
 
