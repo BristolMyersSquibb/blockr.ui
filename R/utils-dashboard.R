@@ -1,12 +1,12 @@
 restore_dashboard <- function(board, rv, parent, session) {
   parent$in_grid <- list()
+  parent$refreshed <- NULL
   ids <- names(rv$blocks)
   # Find blocks that should be in the dock
   in_grid_ids <- find_blocks_ids(rv$board, parent, session)
 
   # Don't restore if no blocks
   if (!length(ids)) {
-    parent$refreshed <- NULL
     return(NULL)
   }
 
@@ -16,24 +16,25 @@ restore_dashboard <- function(board, rv, parent, session) {
     lapply(ids, \(id) {
       parent$in_grid[[id]] <- FALSE
     })
-    parent$refreshed <- NULL
     return(NULL)
   }
 
   # Otherwise we spread elements between the dock and the network
   not_in_grid <- which(!(ids %in% in_grid_ids))
 
-  # Regenerate the output for the block as well as dock panel
+  # Restore dock layout (panels positions and sizes). No need
+  # to cleanup before
+  dockViewR::restore_dock("dock", parent$module_state$dashboard())
+
+  # Regenerate the output for the block
   lapply(in_grid_ids, \(id) {
     parent$in_grid[[id]] <- TRUE
     generate_dashboard_blk_output(id, rv, session)
-    add_blk_panel_to_dashboard(id, rv, session)
   })
 
   lapply(ids[not_in_grid], \(id) {
     parent$in_grid[[id]] <- FALSE
   })
-  parent$refreshed <- NULL
 }
 
 generate_dashboard_blk_output <- function(id, rv, session) {
@@ -103,17 +104,6 @@ remove_blk_from_dashboard <- function(id, session) {
   out_name <- sprintf("dock-%s-result", id)
   remove_panel("dock", sprintf("block-%s", id))
   output[[out_name]] <- NULL
-}
-
-cleanup_dashboard <- function(session) {
-  # cleanup existing dock panels
-  panel_ids <- get_panels_ids("dock", session)
-  if (length(panel_ids)) {
-    panel_ids <- gsub("block-", "", panel_ids)
-    lapply(panel_ids, \(id) {
-      remove_blk_from_dashboard(id, session)
-    })
-  }
 }
 
 find_blocks_ids <- function(

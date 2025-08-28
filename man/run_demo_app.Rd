@@ -22,6 +22,8 @@ dag_board_options()
 
 \item{modules}{Further modules to pass.}
 
+\item{options}{Board options (see \code{\link[=dag_board_options]{dag_board_options()}}).}
+
 \item{class}{Additional class(es).}
 }
 \description{

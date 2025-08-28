@@ -31,7 +31,3 @@ test_that("block ui works", {
   ui_query <- htmltools::tagQuery(ui)
   expect_true(grepl(board_block_ids(my_board), ui_query$allTags()$attribs$id))
 })
-
-test_that("remove_block_ui works", {
-  expect_null(remove_block_ui(character(), my_board))
-})

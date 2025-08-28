@@ -10,7 +10,7 @@
   blocks = NULL,
   options = NULL,
   network = NULL,
-  selected = NULL,
+  layout = NULL,
   modules = NULL,
   ...
 )
@@ -26,7 +26,7 @@
 
 \item{network}{visNetwork data.}
 
-\item{selected}{Selected node.}
+\item{layout}{App layout.}
 
 \item{modules}{Module state.}
 

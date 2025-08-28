@@ -34,7 +34,7 @@ gen_add_rm_link_server <- function(context_menu) {
         )
 
         # Restore network from serialisation
-        observeEvent(req(parent$refreshed == "board"), {
+        observeEvent(req(parent$refreshed == "restore-layout"), {
           restore_network(board, parent, session)
         })
 
@@ -102,6 +102,12 @@ gen_add_rm_link_server <- function(context_menu) {
         # Auto-click on the right scoutbar page
         # to display the right scoutbar sub-page depending on the trigger
         observeEvent(req(parent$scoutbar$is_open), {
+          # cmd + K opens the scoutbar but in that
+          # case, we don't know what the user
+          # wants to do so we don't trigger any page.
+          if (is.null(parent$scoutbar$trigger)) {
+            return(NULL)
+          }
           session$sendCustomMessage(
             "select-scoutbar-page",
             list(
@@ -193,8 +199,19 @@ gen_add_rm_link_server <- function(context_menu) {
           {
             parent$selected_block <- input[["network-selected_node"]]
           },
+          ignoreInit = TRUE,
           ignoreNULL = FALSE
         )
+
+        # Unselect node when panel is closed
+        observeEvent(parent$unselected_block, {
+          g6_proxy(ns("network")) |>
+            g6_set_nodes(setNames(
+              list(selected = ""),
+              parent$unselected_block
+            ))
+          parent$unselected_block <- NULL
+        })
 
         observeEvent(parent$removed_block, {
           # Note: links are cleaned in the add_rm_blocks plugin
