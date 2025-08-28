@@ -32,7 +32,7 @@ setup_chat_task <- function() {
           stream = "content"
         )),
         function(stream) {
-          shinychat::chat_append(ui_id, stream)
+          chat_append(ui_id, stream)
         }
       )
     }
@@ -63,7 +63,7 @@ manage_chat <- function(provider, parent, session) {
   })
 
   observeEvent(input$prompt_clean, {
-    shinychat::chat_clear("prompt")
+    chat_clear("prompt")
     # This also erase the chat memory and not just the UI
     #openai$set_turns(list())
   })

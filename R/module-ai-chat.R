@@ -1,12 +1,5 @@
-library(blockr.core)
-library(blockr.dplyr)
-library(blockr.io)
-library(blockr.sdtm)
-library(blockr.ai)
-library(blockr.gt)
-library(shinychat)
-library(ellmer)
-
+#' Chat module UI
+#' @rdname ai-chat
 chat_mod_ui <- function(id, board, ...) {
   ns <- NS(NS(id, "chat"))
   card(
@@ -34,6 +27,10 @@ chat_mod_ui <- function(id, board, ...) {
   )
 }
 
+#' Chat module server
+#'
+#' @inheritParams dashboard_server
+#' @rdname ai-chat
 chat_mod_srv <- function(board, update, session, parent, ...) {
   moduleServer(
     "chat",
@@ -71,10 +68,14 @@ chat_mod_srv <- function(board, update, session, parent, ...) {
         parent,
         session
       )
+
+      res
     }
   )
 }
 
+#' @export
+#' @rdname board-module
 new_chat_module <- function(id = "blockr_assistant", title = "AI chat") {
   new_board_module(
     chat_mod_ui,
@@ -82,6 +83,7 @@ new_chat_module <- function(id = "blockr_assistant", title = "AI chat") {
     id = id,
     title = title,
     context_menu = list(
+      # TBD: do something better here ...
       new_context_menu_entry(
         name = "Open AI chat",
         js = "() => {
@@ -95,13 +97,3 @@ new_chat_module <- function(id = "blockr_assistant", title = "AI chat") {
     class = "chat_module"
   )
 }
-
-serve(
-  new_dag_board(
-    modules = list(
-      #dash = new_dashboard_module(),
-      chat = new_chat_module()
-    )
-  ),
-  "main"
-)

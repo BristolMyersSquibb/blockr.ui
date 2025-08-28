@@ -82,6 +82,7 @@ Collate:
     'context-menu.R'
     'dag-board.R'
     'main.R'
+    'module-ai-chat.R'
     'module-dashboard.R'
     'options.R'
     'pkg.R'

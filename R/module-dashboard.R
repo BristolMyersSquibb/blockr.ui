@@ -1,4 +1,4 @@
-#' Dashboard Ui generic
+#' Dashboard UI
 #' @param id Module id.
 #' @rdname dashboard
 dashboard_ui <- function(id, board, ...) {
