@@ -10,6 +10,7 @@ mock_add_block <- function(blk, rv, parent, session) {
     setNames(as_blocks(blk), attr(blk, "uid"))
   )
   rv$blocks[[attr(blk, "uid")]]$block <- blk
+  rv$blocks[[attr(blk, "uid")]]$server <- list(cond = reactiveValues())
   rv$inputs[[attr(blk, "uid")]] <- if (!length(block_inputs(blk))) {
     list()
   } else {
