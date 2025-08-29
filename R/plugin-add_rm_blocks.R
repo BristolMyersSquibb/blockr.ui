@@ -28,16 +28,8 @@ add_rm_block_server <- function(id, board, update, ...) {
         },
         {
           # Allow to create block with custom parameters
-          if (is.list(dot_args$parent$scoutbar$value)) {
-            new_blk <- as_blocks(
-              do.call(
-                create_block,
-                c(
-                  list(id = dot_args$parent$scoutbar$value$name),
-                  dot_args$parent$scoutbar$value$parms
-                )
-              )
-            )
+          if (is_blocks(dot_args$parent$scoutbar$value)) {
+            new_blk <- dot_args$parent$scoutbar$value
           } else {
             new_blk <- as_blocks(create_block(dot_args$parent$scoutbar$value))
           }

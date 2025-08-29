@@ -162,11 +162,22 @@ create_block_tool_factory <- function(
         }
         switch(
           typeof(parms[[name]]),
-          character = type_array(type_string()),
-          integer = type_array(type_integer()),
-          numeric = type_array(type_number()),
-          logical = type_array(type_boolean()),
-          list = type_object(),
+          # Setting required = FALSE to avoid having
+          # wrong values from the AI.
+          character = type_array(
+            type_string(required = FALSE),
+            required = FALSE
+          ),
+          integer = type_array(
+            type_integer(required = FALSE),
+            required = FALSE
+          ),
+          numeric = type_array(type_number(required = FALSE), required = FALSE),
+          logical = type_array(
+            type_boolean(required = FALSE),
+            required = FALSE
+          ),
+          list = type_object(.required = FALSE),
           NULL
         )
       })
@@ -178,16 +189,39 @@ create_block_tool_factory <- function(
           dat <- list(
             name = name,
             append = append,
-            parms = parms
+            parms = dropNulls(parms)
           )
 
           # Needs a reactive context... will happen once
           observeEvent(TRUE, {
-            parent$scoutbar$action <- "add_block"
-            parent$scoutbar$value <- dat
-            if (dat$append) {
-              parent$append_block <- TRUE
-            }
+            # TBD: check that the block can be built?
+            # Otherwise we can pass broken stuff to the
+            # add block plugin
+            tryCatch(
+              {
+                new_blk <- as_blocks(
+                  do.call(
+                    create_block,
+                    c(
+                      list(id = dat$name),
+                      dat$parms
+                    )
+                  )
+                )
+                parent$scoutbar$action <- "add_block"
+                parent$scoutbar$value <- new_blk
+                if (dat$append) {
+                  parent$append_block <- TRUE
+                }
+              },
+              error = function(e) {
+                showNotification(
+                  paste("Error while adding block:", e$message),
+                  type = "error",
+                  duration = NULL
+                )
+              }
+            )
           })
           return(app_request(list(action = "add_block", data = dat)))
         },
