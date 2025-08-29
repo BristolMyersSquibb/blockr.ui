@@ -12,6 +12,8 @@
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/add_rm_block.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/add_rm_g6_stack.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/add_rm_link.html</loc></url>
+<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/ai-chat-tool.html</loc></url>
+<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/ai-chat.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/blk_choices.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/blk_icon.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/block-panel.html</loc></url>
@@ -41,6 +43,7 @@
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/initialize_g6.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/list_empty_connections.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/main.html</loc></url>
+<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/manage_chat.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/node-validation.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/off_canvas.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/process_app_state.html</loc></url>
@@ -52,6 +55,8 @@
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/run_demo_app.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/save-board.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/ser_deser.html</loc></url>
+<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/setup_chat_provider.html</loc></url>
+<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/setup_chat_task.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/show_stack_actions.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/snapshot_board.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/stack-nodes.html</loc></url>
