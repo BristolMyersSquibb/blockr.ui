@@ -195,20 +195,9 @@
 
       ],
       "display_code": false,
-      "module_state": {
-        "dashboard": [
-          "structure(function (x) ",
-          "{",
-          "    if (missing(x)) {",
-          "        rv$get()",
-          "    }",
-          "    else {",
-          "        force(x)",
-          "        rv$set(x)",
-          "    }",
-          "}, class = \"function\", label = \"reactiveVal8ec9db8b\", .impl = <environment>)"
-        ]
-      },
+      "module_state": [
+
+      ],
       "in_grid": {
         "a": false,
         "b": false,

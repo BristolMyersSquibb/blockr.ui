@@ -93,6 +93,10 @@ process_app_state <- function(state) {
           )
         }
         state[[nme]]
+      } else if (nme == "module_state") {
+        # This contains unevaluated reactiveValues which should not be in a snapshot
+        state[[nme]] <- list()
+        state[[nme]]
       } else {
         state[[nme]]
       }
