@@ -1,20 +1,9 @@
-library(blockr.core)
-library(blockr.dplyr)
-
 mock_add_block <- function(blk, rv, parent, session) {
   board_blocks(rv$board) <- c(board_blocks(rv$board), as_blocks(blk))
   attr(blk, "uid") <- tail(board_block_ids(rv$board), n = 1)
-  messages <- rv$msgs()
-  messages[[attr(blk, "uid")]] <- NULL
-  #list(
-  #  state = list(error = NULL),
-  #  data = list(error = NULL),
-  #  eval = list(error = NULL)
-  #)
-
-  rv$msgs(messages)
 
   rv$blocks[[attr(blk, "uid")]]$block <- blk
+  rv$blocks[[attr(blk, "uid")]]$server <- list(cond = reactiveValues())
   rv$inputs[[attr(blk, "uid")]] <- if (!length(block_inputs(blk))) {
     list()
   } else {
@@ -28,7 +17,7 @@ mock_add_block <- function(blk, rv, parent, session) {
 }
 
 testServer(
-  blockr.ui::add_rm_stack_server,
+  add_rm_stack_server,
   args = list(
     board = reactiveValues(
       blocks = list(),
@@ -36,7 +25,6 @@ testServer(
       board_id = "board",
       inputs = list(),
       links = list(),
-      msgs = reactiveVal(),
       stacks = list()
     ),
     update = reactiveVal(),
@@ -102,6 +90,6 @@ testServer(
 )
 
 test_that("add_rm_stack_ui works", {
-  ui <- blockr.ui::add_rm_stack_ui("mod", new_board())
+  ui <- add_rm_stack_ui("mod", new_board())
   expect_s3_class(ui, "shiny.tag.list")
 })
