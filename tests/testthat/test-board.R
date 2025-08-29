@@ -118,7 +118,7 @@ testServer(
     output$dock
 
     # Change dashboard zoom
-    session$userData$dashboard_zoom <- 0.5
+    session$userData$board_options[["dashboard_zoom"]] <- 0.5
     session$flushReact()
 
     # Remove from dashboard

@@ -405,13 +405,16 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
   )
 
   # Open the scoutbar when append block
-  observeEvent(req(parent$append_block), {
-    update_scoutbar(
-      session,
-      "scoutbar",
-      revealScoutbar = TRUE
-    )
-  })
+  observeEvent(
+    req(parent$append_block, isFALSE(parent$ai_chat)),
+    {
+      update_scoutbar(
+        session,
+        "scoutbar",
+        revealScoutbar = TRUE
+      )
+    }
+  )
 
   # Update scoutbar action with snapshots taken in the serialise module
   observeEvent(

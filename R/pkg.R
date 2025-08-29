@@ -10,5 +10,7 @@
 #' @importFrom utils tail
 #' @import dockViewR
 #' @import g6R
+#' @import ellmer
 #' @importFrom rlang abort warn inform
+#' @import shinychat
 NULL
