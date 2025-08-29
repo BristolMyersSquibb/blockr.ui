@@ -15,10 +15,6 @@ init_chat_message <- function(provider) {
 
 #' @keywords internal
 get_ellmer_chat_providers <- function() {
-  if (!requireNamespace("ellmer", quietly = TRUE)) {
-    stop("elmer package is not installed")
-  }
-
   # Get all exported functions
   exports <- getNamespaceExports("ellmer")
 
@@ -351,7 +347,7 @@ create_add_stack_tool <- function(
 #' Create a tool to get stackable blocks
 #' @rdname ai-chat-tool
 #' @export
-create_get_stackable_blocks_tool <- function(provider, stackable_blocks) {
+create_stackable_blocks_tool <- function(provider, stackable_blocks) {
   get_stackable_blocks <- tool(
     function() {
       isolate(stackable_blocks())

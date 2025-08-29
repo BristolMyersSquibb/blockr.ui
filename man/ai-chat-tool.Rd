@@ -5,7 +5,7 @@
 \alias{create_block_names_tool}
 \alias{create_remove_block_tool}
 \alias{create_add_stack_tool}
-\alias{create_get_stackable_blocks_tool}
+\alias{create_stackable_blocks_tool}
 \alias{create_get_stack_ids_tool}
 \alias{create_add_block_to_stack_tool}
 \title{Create a block tool factory}
@@ -25,7 +25,7 @@ create_add_stack_tool(
   session
 )
 
-create_get_stackable_blocks_tool(provider, stackable_blocks)
+create_stackable_blocks_tool(provider, stackable_blocks)
 
 create_get_stack_ids_tool(provider, board)
 

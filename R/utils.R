@@ -80,7 +80,7 @@ process_app_state <- function(state) {
           state[[nme]]
         }
       } else if (nme == "backup_list") {
-        state[[nme]] <- list()
+        state[[nme]] <- NULL
         state[[nme]]
       } else if (nme == "app_layout") {
         if (length(state[[nme]]$panels) > 0) {
@@ -95,7 +95,7 @@ process_app_state <- function(state) {
         state[[nme]]
       } else if (nme == "module_state") {
         # This contains unevaluated reactiveValues which should not be in a snapshot
-        state[[nme]] <- list()
+        state[[nme]] <- NULL
         state[[nme]]
       } else {
         state[[nme]]

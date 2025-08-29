@@ -19,9 +19,9 @@ chat_mod_ui <- function(id, board, ...) {
 #'
 #' @inheritParams dashboard_server
 #' @rdname ai-chat
-chat_mod_srv <- function(board, update, session, parent, ...) {
+chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
   moduleServer(
-    "chat",
+    id,
     function(input, output, session) {
       ns <- session$ns
       # Dynamic provider support through board options
@@ -79,7 +79,7 @@ chat_mod_srv <- function(board, update, session, parent, ...) {
           parent,
           session
         )
-        create_get_stackable_blocks_tool(provider, stackable_blocks)
+        create_stackable_blocks_tool(provider, stackable_blocks)
         create_get_stack_ids_tool(provider, board)
         create_add_block_to_stack_tool(
           provider,

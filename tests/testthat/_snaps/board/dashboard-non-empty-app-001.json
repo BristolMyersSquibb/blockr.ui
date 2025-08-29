@@ -191,13 +191,9 @@
         "is_open": false
       },
       "save_board": false,
-      "backup_list": [
-
-      ],
+      "backup_list": null,
       "display_code": false,
-      "module_state": [
-
-      ],
+      "module_state": null,
       "in_grid": {
         "a": false,
         "b": false,
