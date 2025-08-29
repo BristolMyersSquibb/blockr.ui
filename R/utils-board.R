@@ -69,8 +69,8 @@ options_ui <- function(id, x, ...) {
   offcanvas_id <- NS(id, "options-offcanvas")
 
   tagList(
-    tags$a(
-      class = "btn btn-sm btn-white",
+    tags$button(
+      class = "blockr-fab",
       icon("gear"),
       `data-bs-toggle` = "offcanvas",
       `data-bs-target` = sprintf("#%s", offcanvas_id),
@@ -80,6 +80,8 @@ options_ui <- function(id, x, ...) {
       id = offcanvas_id,
       position = "end",
       title = "Board options",
+      ...,
+      hr(),
       do.call(
         accordion,
         c(
@@ -100,25 +102,6 @@ options_ui <- function(id, x, ...) {
           )
         )
       )
-    )
-  )
-}
-
-#' Board header
-#'
-#' Header layout.
-#'
-#' @param id Board id.
-#' @param board_ui Board ui.
-#' @rdname board-layout
-#' @keywords internal
-board_header <- function(id, board_ui) {
-  div(
-    class = "d-flex align-items-center justify-content-center mx-5 gap-3",
-    board_ui$toolbar_ui$preserve_board$restore,
-    div(
-      style = "margin-left: auto",
-      board_ui$board_options_ui
     )
   )
 }
@@ -155,7 +138,11 @@ board_ui.dag_board <- function(id, x, plugins = list(), ...) {
   my_board_ui <- list(
     toolbar_ui = toolbar_ui,
     notifications = board_ui(id, plugins[["notify_user"]], x),
-    board_options_ui = options_ui(id, as_board_options(x))
+    board_options_ui = options_ui(
+      id,
+      as_board_options(x),
+      toolbar_ui$preserve_board$restore
+    )
   )
 
   # If there are blocks at start, we need to generate the UI
@@ -182,7 +169,7 @@ board_ui.dag_board <- function(id, x, plugins = list(), ...) {
       title = "Board",
       blocks
     ),
-    board_header(id, my_board_ui),
+    my_board_ui$board_options_ui,
     dockViewOutput(
       paste0(id, "-layout"),
       width = "100%",
