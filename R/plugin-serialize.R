@@ -172,7 +172,8 @@ ser_deser_ui <- function(id, board) {
         )
       }
     ),
-    restore = tagList(
+    restore = div(
+      class = "d-flex justify-content-center align-items-center gap-1",
       import_btn,
       downloadButton(
         NS(id, "serialize"),
