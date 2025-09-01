@@ -783,30 +783,26 @@ apply_validation <- function(id, vals, rv, session) {
     )
   )
 
-  if (is.null(message)) {
-    # Reset connected edges
-    if (length(connected_edges) > 0) {
-      new_edges <- lapply(connected_edges, \(id) {
-        list(
-          id = id,
-          type = "fly-marker-cubic",
-          style = list(
-            stroke = "#000",
-            badgeText = NULL
-          ),
-          states = list()
-        )
-      })
-      g6_proxy(ns("network")) |>
-        g6_update_edges(new_edges)
-    }
+  if (length(connected_edges) > 0) {
+    edge_config <- lapply(connected_edges, \(id) {
+      list(
+        id = id,
+        type = "fly-marker-cubic",
+        style = list(
+          stroke = "#000",
+          badgeText = NULL
+        ),
+        states = list()
+      )
+    })
+    g6_proxy(ns("network")) |>
+      g6_update_edges(edge_config)
   }
 
   n_err <- sum(lengths(lst_xtr(message, "error")))
 
   # Color invalid nodes in red
   if (n_err) {
-
     badge <- list(
       text = format(n_err),
       placement = "right-top",
@@ -826,7 +822,7 @@ apply_validation <- function(id, vals, rv, session) {
 
     # Style connected edges
     if (length(connected_edges) > 0) {
-      new_edges <- lapply(connected_edges, \(id) {
+      edge_config <- lapply(connected_edges, \(id) {
         list(
           id = id,
           type = "cubic",
@@ -841,7 +837,7 @@ apply_validation <- function(id, vals, rv, session) {
         )
       })
       g6_proxy(ns("network")) |>
-        g6_update_edges(new_edges)
+        g6_update_edges(edge_config)
     }
   }
 
