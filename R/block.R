@@ -157,16 +157,10 @@ add_block_panel <- function(id, panels) {
       # the linked block UIs and causes many issues.
       renderer = "always",
       position = list(
-        referencePanel = if (length(panels) == 2) {
-          "dag"
-        } else {
-          panels[length(panels)]
-        },
-        direction = if (length(panels) == 2) {
-          "below"
-        } else {
-          "within"
-        }
+        referencePanel = get_board_option_value(
+          "blocks_position"
+        )$reference_panel,
+        direction = get_board_option_value("blocks_position")$direction
       ),
       remove = list(enable = TRUE, mode = "manual")
     )
