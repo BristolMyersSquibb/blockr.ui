@@ -9,18 +9,8 @@ mock_add_block <- function(blk, rv, parent, session) {
     board_blocks(rv$board),
     setNames(as_blocks(blk), attr(blk, "uid"))
   )
-  rv$msgs(c(
-    rv$msgs(),
-    setNames(
-      list(
-        state = list(error = NULL),
-        data = list(error = NULL),
-        eval = list(error = NULL)
-      ),
-      attr(blk, "uid")
-    )
-  ))
   rv$blocks[[attr(blk, "uid")]]$block <- blk
+  rv$blocks[[attr(blk, "uid")]]$server <- list(cond = reactiveValues())
   rv$inputs[[attr(blk, "uid")]] <- if (!length(block_inputs(blk))) {
     list()
   } else {
@@ -63,7 +53,6 @@ mock_remove_block <- function(id, rv, parent, session) {
   ]
   rv$blocks[[id]] <- NULL
   rv$inputs[[id]] <- NULL
-  #rv$msgs[[id]] <- NULL
 
   session$flushReact()
 }
@@ -133,7 +122,6 @@ testServer(
       board_id = "board",
       inputs = list(),
       links = list(),
-      msgs = reactiveVal(),
       stacks = list()
     ),
     update = reactiveVal(),
