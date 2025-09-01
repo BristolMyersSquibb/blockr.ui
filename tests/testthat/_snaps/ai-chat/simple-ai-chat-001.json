@@ -80,7 +80,7 @@
       "backup_list": null,
       "display_code": false,
       "module_state": null,
-      "ai_chat": false
+      "ai_chat": null
     }
   }
 }

@@ -406,7 +406,7 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
 
   # Open the scoutbar when append block
   observeEvent(
-    req(parent$append_block, isFALSE(parent$ai_chat)),
+    req(parent$append_block, is.null(parent$ai_chat)),
     {
       update_scoutbar(
         session,

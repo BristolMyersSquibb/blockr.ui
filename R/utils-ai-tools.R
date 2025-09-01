@@ -79,7 +79,7 @@ manage_chat <- function(provider, parent, session) {
 
   # Necessary to handle AI mode
   isolate({
-    parent$ai_chat <- FALSE
+    parent$ai_chat <- NULL
   })
 
   append_stream_task <- setup_chat_task()
@@ -106,7 +106,7 @@ manage_chat <- function(provider, parent, session) {
         type = "error"
       )
     })
-    parent$ai_chat <- FALSE
+    parent$ai_chat <- NULL
   })
 
   observeEvent(input$prompt_clean, {
@@ -118,7 +118,7 @@ manage_chat <- function(provider, parent, session) {
   observeEvent(res(), {
     # Once the response is received, we signal the app
     # that the AI chat is done.
-    parent$ai_chat <- FALSE
+    parent$ai_chat <- NULL
     # Need to reset scoutbar
     parent$scoutbar$action <- parent$scoutbar$value <- NULL
   })

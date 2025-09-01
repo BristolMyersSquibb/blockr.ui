@@ -60,7 +60,7 @@ testServer(
     expect_null(provider())
     expect_null(app_request())
     expect_null(res())
-    expect_false(parent$ai_chat)
+    expect_null(parent$ai_chat)
     expect_length(stackable_blocks(), 0)
 
     session$userData$board_options[["chat_provider"]] <- reactiveVal("openai")
