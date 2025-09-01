@@ -913,45 +913,11 @@ show_stack_actions <- function(rv, session) {
   )
 }
 
-
-#' Dynamically group nodes
-#'
-#' Given a set of selected nodes, add them to a unique group
-#' and apply unique color and labels.
-#'
-#' @param stack_id Stack id to attach nodes to.
-#' @param nodes Vector of node ids to stack.
-#' @param rv Board reactive values.
-#' @param parent Global scope (entire app) reactive values.
-#' @param session Shiny session object.
-#'
-#' @keywords internal
 #' @rdname stack-nodes
-stack_nodes <- function(
-  stack_id = NULL,
-  nodes = NULL,
-  rv,
-  parent,
-  session
-) {
+#' @keywords internal
+create_stack <- function(stack_id = NULL, rv, parent, session) {
   ns <- session$ns
   input <- session$input
-
-  if (is.null(stack_id)) {
-    stack_id <- tail(board_stack_ids(rv$board), n = 1)
-  }
-  # avoid duplicated id with edges
-  stack_id <- sprintf("combo-%s", stack_id)
-
-  nodes_to_stack <- nodes
-  if (is.null(nodes)) {
-    nodes_to_stack <- lapply(input$new_stack_nodes, \(node) {
-      list(
-        id = node,
-        combo = stack_id
-      )
-    })
-  }
 
   stack_color <- input$stack_color
   if (is.null(stack_color)) {
@@ -989,10 +955,72 @@ stack_nodes <- function(
         )
       )
     ) |>
-    g6_update_nodes(nodes_to_stack) |>
     g6_fit_center()
 
   parent
+}
+
+#' @rdname stack-nodes
+#' @keywords internal
+add_nodes_to_stack <- function(stack_id, nodes, rv, parent, session) {
+  ns <- session$ns
+  input <- session$input
+
+  if (is.null(nodes)) {
+    if (is.null(input$new_stack_nodes)) {
+      nodes <- stack_blocks(board_stacks(rv$board)[[sub(
+        "combo-",
+        "",
+        stack_id
+      )]])
+    } else {
+      nodes <- input$new_stack_nodes
+    }
+  }
+
+  nodes <- lapply(nodes, \(node) {
+    list(
+      id = node,
+      combo = stack_id
+    )
+  })
+
+  g6_proxy(ns("network")) |>
+    g6_update_nodes(nodes) |>
+    g6_fit_center()
+
+  parent
+}
+
+
+#' Dynamically group nodes
+#'
+#' Given a set of selected nodes, add them to a unique group
+#' and apply unique color and labels.
+#'
+#' @param stack_id Stack id to attach nodes to.
+#' @param nodes Vector of node ids to stack.
+#' @param rv Board reactive values.
+#' @param parent Global scope (entire app) reactive values.
+#' @param session Shiny session object.
+#'
+#' @keywords internal
+#' @rdname stack-nodes
+stack_nodes <- function(
+  stack_id = NULL,
+  nodes = NULL,
+  rv,
+  parent,
+  session
+) {
+  if (is.null(stack_id)) {
+    stack_id <- tail(board_stack_ids(rv$board), n = 1)
+  }
+  # avoid duplicated id with edges
+  stack_id <- sprintf("combo-%s", stack_id)
+
+  create_stack(stack_id, rv, parent, session)
+  add_nodes_to_stack(stack_id, nodes, rv, parent, session)
 }
 
 #' Unstack g6 nodes

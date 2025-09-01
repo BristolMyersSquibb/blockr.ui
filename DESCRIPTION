@@ -39,8 +39,11 @@ Imports:
     htmltools,
     dockViewR (>= 0.2.1),
     g6R (>= 0.1.0),
+    ellmer,
     grDevices,
-    rlang
+    rlang,
+    promises,
+    shinychat
 Remotes:
     BristolMyersSquibb/blockr.core,
     BristolMyersSquibb/blockr.dplyr,
@@ -79,6 +82,7 @@ Collate:
     'context-menu.R'
     'dag-board.R'
     'main.R'
+    'module-ai-chat.R'
     'module-dashboard.R'
     'options.R'
     'pkg.R'
@@ -89,6 +93,7 @@ Collate:
     'plugin-stacks.R'
     'registry.R'
     'stacks.R'
+    'utils-ai-tools.R'
     'utils-board.R'
     'utils-dashboard.R'
     'utils-links.R'
