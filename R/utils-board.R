@@ -88,7 +88,7 @@ options_ui <- function(id, x, ...) {
           list(
             id = NS(id, "board_options"),
             multiple = TRUE,
-            open = TRUE,
+            open = FALSE,
             class = "accordion-flush"
           ),
           map(
