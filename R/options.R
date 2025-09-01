@@ -164,3 +164,78 @@ blockr_ser.snapshot_option <- function(x, option = NULL, ...) {
 
   res
 }
+
+new_blocks_position_option <- function(
+  reference_panel = blockr_option("reference_panel", NULL),
+  direction = blockr_option("direction", "within"),
+  ...
+) {
+  new_board_option(
+    id = "blocks_position",
+    default = list(reference_panel = reference_panel, direction = direction),
+    ui = function(id) {
+      tagList(
+        h4("Blocks position"),
+        selectInput(
+          NS(id, "reference_panel"),
+          "Reference panel",
+          choices = list()
+        ),
+        selectInput(
+          NS(id, "direction"),
+          "Direction",
+          choices = c("within", "above", "below", "left", "right"),
+          selected = direction
+        )
+      )
+    },
+    server = function(board, session) {
+      observeEvent(
+        {
+          req(length(get_panels_ids("layout")) > 0)
+          get_board_option_or_null("blocks_position", session)
+        },
+        {
+          # Get existing layout panels
+          layout_panels <- grep(
+            get_panels_ids("layout"),
+            pattern = "^(?!.*block-).*$",
+            perl = TRUE,
+            value = TRUE
+          )
+
+          updateSelectInput(
+            session,
+            "reference_panel",
+            choices = layout_panels,
+            selected = layout_panels[2L]
+          )
+
+          opt <- get_board_option_value("blocks_position", session)
+
+          updateSelectInput(
+            session,
+            "direction",
+            selected = opt$direction
+          )
+        }
+      )
+    },
+    update_trigger = c("reference_panel", "direction"),
+    ...
+  )
+}
+
+#' @export
+validate_board_option.blocks_position_option <- function(x) {
+  val <- board_option_value(NextMethod())
+
+  if (!(val$direction %in% c("within", "above", "below", "left", "right"))) {
+    abort(
+      "Expecting `direction` to be a one of 'within', 'above', 'below', 'left', 'right'.",
+      class = "board_options_blocks_position_invalid"
+    )
+  }
+
+  invisible(x)
+}

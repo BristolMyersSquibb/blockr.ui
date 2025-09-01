@@ -43,7 +43,8 @@ dag_board_options <- function() {
     ),
     new_stack_colors_option(category = "Board options"),
     new_snapshot_option(category = "Board options"),
-    new_show_conditions_option(category = "Board options")
+    new_show_conditions_option(category = "Board options"),
+    new_blocks_position_option(category = "Layout options")
   )
 }
 

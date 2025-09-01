@@ -74,6 +74,18 @@ testServer(
   {
     # Init
     expect_length(dot_args$parent$in_grid, 0)
+    # Layout initial state
+    test_dock <- list()
+    test_dock[["panels"]] <- setNames(
+      list(id = "dashboard"),
+      "dashboard"
+    )
+
+    session$userData$board_options[["blocks_position"]] <- reactiveVal(
+      list(reference_panel = "dashboard", direction = "within")
+    )
+
+    session$setInputs(layout_state = test_dock)
 
     # Add block
     mock_add_block(
@@ -82,13 +94,6 @@ testServer(
       dot_args$parent,
       session
     )
-
-    test_dock <- list()
-    test_dock[["panels"]] <- setNames(
-      list(id = "dashboard"),
-      "dashboard"
-    )
-    session$setInputs(layout_state = test_dock)
 
     expect_true(is_block(dot_args$parent$added_block))
     expect_false(dot_args$parent$in_grid[[block_uid(
