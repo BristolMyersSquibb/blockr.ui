@@ -13,7 +13,7 @@
             "label": "dataset_block \n id: a",
             "style": {
               "labelBackgroundFill": "#a0cafa",
-              "zIndex": 1,
+              "zIndex": 3,
               "z": 0,
               "fill": "#1783FF",
               "badges": [
@@ -46,7 +46,7 @@
             "label": "merge_block \n id: c",
             "style": {
               "labelBackgroundFill": "#a0cafa",
-              "zIndex": 1,
+              "zIndex": 3,
               "z": 0,
               "fill": "#1783FF",
               "badges": [
@@ -67,11 +67,16 @@
             "target": "c",
             "label": "x",
             "style": {
-              "zIndex": 0,
+              "zIndex": 2,
+              "controlPoints": [
+                [
+                  48.5,
+                  182,
+                  0
+                ]
+              ],
               "stroke": "#000",
-              "badgeText": null,
-              "sourceNode": "a",
-              "targetNode": "c"
+              "badgeText": null
             },
             "data": {
 
@@ -87,9 +92,16 @@
             "target": "c",
             "label": "y",
             "style": {
-              "zIndex": 0,
+              "zIndex": 2,
+              "controlPoints": [
+                [
+                  77,
+                  182,
+                  0
+                ]
+              ],
               "sourceNode": "b",
-              "targetNode": "c",
+              "targetNode": "combo-ac",
               "stroke": "#000",
               "badgeText": null
             },
@@ -114,8 +126,9 @@
               "collapsedStroke": "#A71B4B",
               "iconFill": "#A71B4B",
               "labelPlacement": "top",
-              "zIndex": 0,
-              "z": 0
+              "zIndex": 2,
+              "z": 0,
+              "collapsed": true
             },
             "data": {
 

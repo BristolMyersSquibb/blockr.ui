@@ -165,7 +165,14 @@ initialize_g6 <- function(nodes = NULL, edges = NULL, ns, path, context_menu) {
     edges = edges
   ) |>
     default_g6_options() |>
-    g6_layout() |>
+    g6_layout(
+      layout = antv_dagre_layout(
+        begin = c(150, 150),
+        nodesep = 15,
+        ranksep = 75,
+        sortByCombo = TRUE
+      )
+    ) |>
     default_g6_behaviors(ns = ns) |>
     default_g6_plugins(ns = ns, path = path, context_menu = context_menu)
 }
@@ -200,7 +207,8 @@ default_g6_options <- function(graph, ...) {
       ),
       combo = list(
         animation = FALSE,
-        type = "circle-combo-with-extra-button",
+        badge = TRUE,
+        type = "rect",
         style = list(
           labelText = JS(
             "(d) => {
@@ -210,6 +218,7 @@ default_g6_options <- function(graph, ...) {
         )
       ),
       edge = list(
+        animation = FALSE,
         style = list(
           endArrow = TRUE,
           lineDash = c(5, 5),
@@ -239,6 +248,7 @@ default_g6_behaviors <- function(graph, ..., ns) {
       drag_element(dropEffect = "link"),
       click_select(multiple = TRUE),
       brush_select(),
+      collapse_expand(),
       # avoid conflict with internal function
       g6R::create_edge(
         onFinish = JS(
@@ -477,9 +487,6 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
 
   # Register add to stack/remove from stack behavior
   register_node_stack_link(block_uid(new), rv, vals, session)
-
-  g6_proxy(ns("network")) |>
-    g6_fit_center()
 
   vals
 }
@@ -954,8 +961,7 @@ create_stack <- function(stack_id = NULL, rv, parent, session) {
           )
         )
       )
-    ) |>
-    g6_fit_center()
+    )
 
   parent
 }
@@ -986,8 +992,7 @@ add_nodes_to_stack <- function(stack_id, nodes, rv, parent, session) {
   })
 
   g6_proxy(ns("network")) |>
-    g6_update_nodes(nodes) |>
-    g6_fit_center()
+    g6_update_nodes(nodes)
 
   parent
 }
@@ -1214,8 +1219,13 @@ cold_start <- function(rv, parent, session) {
   #graph_data <- jsonlite::toJSON(graph_data, pretty = TRUE)
   # Render all data all at once for better performances
   g6_proxy(ns("network")) |>
-    g6_set_data(graph_data) |>
-    g6_fit_center()
+    g6_set_data(graph_data)
+
+  # Collapse stacks
+  lapply(combos_data, \(combo) {
+    g6_proxy(ns("network")) |>
+      g6_collapse_combo(combo$id)
+  })
 
   # Re apply node validation
   lapply(
