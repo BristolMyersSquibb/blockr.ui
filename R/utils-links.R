@@ -164,7 +164,7 @@ initialize_g6 <- function(nodes = NULL, edges = NULL, ns, path, context_menu) {
     nodes = nodes,
     edges = edges
   ) |>
-    default_g6_options(autoFit = "view") |>
+    default_g6_options() |>
     g6_layout(
       layout = antv_dagre_layout(
         begin = c(150, 150),
