@@ -232,6 +232,29 @@ default_g6_options <- function(graph, ...) {
     )
 }
 
+#' Remove element from keyboard
+#'
+#' Register event to remove selected elements.
+#' Can be edge or nodes. At the moment only 1 edge
+#' can be removed at a time. Multiple nodes can be
+#' selected and removed at the same time.
+#'
+#' @keywords internal
+setup_remove_elements_kbd <- function(session) {
+  input <- session$input
+  ns <- session$ns
+  observeEvent(req(input[["network-initialized"]]), {
+    session$sendCustomMessage(
+      "setup-remove-els-keyboard",
+      # TBD: key can be a board option
+      list(
+        key = "Backspace",
+        ns = ns(NULL)
+      )
+    )
+  })
+}
+
 #' @rdname default-g6
 #' @keywords internal
 default_g6_behaviors <- function(graph, ..., ns) {
@@ -243,14 +266,35 @@ default_g6_behaviors <- function(graph, ..., ns) {
     g6_behaviors(
       ...,
       "zoom-canvas",
-      "drag-canvas",
+      drag_canvas(
+        enable = JS(
+          "(e) => {
+          return e.targetType === 'canvas' && !e.shiftKey && !e.altKey;
+          }"
+        )
+      ),
       # So we can add node to stack from the UI by drag and drop
-      drag_element(dropEffect = "link"),
+      drag_element(
+        enable = JS(
+          "(e) => {
+          return !e.shiftKey && !e.altKey;
+          }"
+        ),
+        dropEffect = "link"
+      ),
       click_select(multiple = TRUE),
-      brush_select(),
+      brush_select(
+        # Option key on mac
+        trigger = "Alt"
+      ),
       collapse_expand(),
       # avoid conflict with internal function
       g6R::create_edge(
+        enable = JS(
+          "(e) => {
+          return e.shiftKey;
+        }"
+        ),
         onFinish = JS(
           sprintf(
             "(edge) => {
@@ -261,14 +305,6 @@ default_g6_behaviors <- function(graph, ..., ns) {
                 graph.removeEdgeData([edge.id]);
               } else {
                 Shiny.setInputValue('%s', edge);
-                // Then we reset the behaviors so there is no conflict
-                graph.updateBehavior({
-                  key: 'create-edge', // Specify the behavior to update
-                  enable: false,
-                });
-                // Re-enable drag element bahaviors
-                graph.updateBehavior({ key: 'drag-element', enable: true });
-                graph.updateBehavior({ key: 'drag-element-force', enable: true });
               }
             }",
             ns("network"),

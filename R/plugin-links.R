@@ -16,6 +16,9 @@ gen_add_rm_link_server <- function(context_menu) {
       function(input, output, session) {
         ns <- session$ns
 
+        # Setup keyboard events
+        setup_remove_elements_kbd(session)
+
         # Signal to close the loading screen once the network is initialized
         observeEvent(input[["network-initialized"]], {
           session$sendCustomMessage("app-ready", list())
