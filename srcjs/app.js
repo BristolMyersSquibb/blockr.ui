@@ -38,4 +38,28 @@ export const setupApp = () => {
   Shiny.addCustomMessageHandler('show-block', (m) => {
     $(m.panel_id).append($(m.block_id));
   })
+
+  Shiny.addCustomMessageHandler('setup-remove-els-keyboard', (m) => {
+    $(document).on('keydown', function (e) {
+      if (e.key == m.key && e.ctrlKey) { // Ctrl + Delete
+        e.preventDefault();
+        let graph = HTMLWidgets.find(`#${m.ns}-network`).getWidget();
+        // Selected edge
+        let selectedEdge = Shiny.shinyapp.$inputValues[[`${m.ns}-network-selected_edge`]];
+        let selectedNodes = Shiny.shinyapp.$inputValues[[`${m.ns}-network-selected_node`]];
+
+        if (selectedEdge !== undefined && selectedEdge !== null) {
+          Shiny.setInputValue(`${m.ns}-remove_edge`, selectedEdge);
+          Shiny.setInputValue(`${m.ns}-network-selected_edge`, null);
+          graph.removeEdgeData([selectedEdge]);
+          graph.draw();
+        }
+        if (selectedNodes !== undefined && selectedNodes !== null) {
+          Shiny.setInputValue(`${m.ns}-remove_node`, selectedNodes);
+          Shiny.setInputValue(`${m.ns}-network-selected_node`, null);
+          // Node is removed in another place.
+        }
+      }
+    });
+  })
 } 
