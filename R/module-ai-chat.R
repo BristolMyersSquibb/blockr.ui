@@ -55,7 +55,6 @@ chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
         )))
 
         create_block_names_tool(provider)
-
         create_block_tool_factory(
           provider,
           app_request,
@@ -70,7 +69,6 @@ chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
           parent,
           session
         )
-
         create_add_stack_tool(
           provider,
           stackable_blocks,
@@ -84,6 +82,20 @@ chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
         create_add_block_to_stack_tool(
           provider,
           stackable_blocks,
+          app_request,
+          board,
+          parent,
+          session
+        )
+        create_add_to_dash_tool(
+          provider,
+          app_request,
+          board,
+          parent,
+          session
+        )
+        create_remove_from_dash_tool(
+          provider,
           app_request,
           board,
           parent,

@@ -318,6 +318,7 @@ build_layout <- function(modules, plugins) {
               panel(
                 id = "dag",
                 title = "Pipeline overview",
+                renderer = "always",
                 content = board_ui(
                   ns(NULL),
                   plugins["manage_links"]
@@ -334,6 +335,7 @@ build_layout <- function(modules, plugins) {
                 ns(NULL),
                 board$board
               ),
+              renderer = "always",
               position = board_module_positions(modules)
             )
           ),
