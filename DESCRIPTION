@@ -38,12 +38,12 @@ Imports:
     jsonlite,
     htmltools,
     dockViewR (>= 0.2.1),
-    g6R (>= 0.1.0),
-    ellmer,
+    g6R (>= 0.2.0),
+    ellmer (>= 0.3.0),
     grDevices,
     rlang,
     promises,
-    shinychat
+    shinychat (>= 0.2.0.9000)
 Remotes:
     BristolMyersSquibb/blockr.core,
     BristolMyersSquibb/blockr.dplyr,
@@ -52,7 +52,8 @@ Remotes:
     BristolMyersSquibb/blockr.sdtm,
     cynkra/g6R,
     cynkra/scoutbaR,
-    cynkra/dockViewR
+    cynkra/dockViewR,
+    posit-dev/shinychat/pkg-r
 Suggests: 
     shinytest2,
     testthat (>= 3.0.0),
