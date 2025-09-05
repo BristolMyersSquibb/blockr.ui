@@ -204,14 +204,17 @@ new_blocks_position_option <- function(
             value = TRUE
           )
 
+          opt <- get_board_option_value("blocks_position", session)
+          if (nchar(opt$reference_panel) == 0) {
+            opt$reference_panel <- layout_panels[2L]
+          }
+
           updateSelectInput(
             session,
             "reference_panel",
             choices = layout_panels,
-            selected = layout_panels[2L]
+            selected = opt$reference_panel
           )
-
-          opt <- get_board_option_value("blocks_position", session)
 
           updateSelectInput(
             session,

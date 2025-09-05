@@ -54,7 +54,10 @@ testServer(
       stacks = list()
     ),
     update = reactiveVal(),
-    parent = reactiveValues()
+    parent = reactiveValues(
+      append_block = FALSE,
+      scoutbar = list(action = NULL, value = NULL)
+    )
   ),
   {
     expect_null(provider())
@@ -74,6 +77,22 @@ testServer(
       `prompt_user_input` = "Import iris data"
     )
     expect_true(parent$ai_chat)
+
+    # Call provider to invoke tools
+    provider()$chat("Import iris data")
+    expect_true("add_new_dataset_block" %in% names(provider()$get_tools()))
+    session$flushReact()
+    expect_identical(parent$scoutbar$action, "add_block")
+    expect_identical(block_name(parent$scoutbar$value[[1]]), "Dataset block")
+    expect_snapshot(app_request())
+
+    # TBD: add block to board manually
+    board_blocks(board$board) <- c(
+      board_blocks(board$board),
+      parent$scoutbar$value
+    )
+    provider()$chat("Remove block aaaa.")
+    expect_snapshot(app_request())
 
     session$setInputs(
       `prompt_clean` = 0

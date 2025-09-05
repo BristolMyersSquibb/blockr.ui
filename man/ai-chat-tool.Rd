@@ -8,6 +8,8 @@
 \alias{create_stackable_blocks_tool}
 \alias{create_get_stack_ids_tool}
 \alias{create_add_block_to_stack_tool}
+\alias{create_add_to_dash_tool}
+\alias{create_remove_from_dash_tool}
 \title{Create a block tool factory}
 \usage{
 create_block_tool_factory(provider, app_request, board, parent, session)
@@ -37,6 +39,10 @@ create_add_block_to_stack_tool(
   parent,
   session
 )
+
+create_add_to_dash_tool(provider, app_request, board, parent, session)
+
+create_remove_from_dash_tool(provider, app_request, board, parent, session)
 }
 \arguments{
 \item{provider}{AI provider object.}

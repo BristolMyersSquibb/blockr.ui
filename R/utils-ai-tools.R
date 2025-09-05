@@ -192,38 +192,38 @@ create_block_tool_factory <- function(
             parms = dropNulls(parms)
           )
 
-          # Needs a reactive context... will happen once
-          observeEvent(TRUE, {
-            # TBD: check that the block can be built?
-            # Otherwise we can pass broken stuff to the
-            # add block plugin
-            tryCatch(
-              {
-                new_blk <- as_blocks(
-                  do.call(
-                    create_block,
-                    c(
-                      list(id = dat$name),
-                      dat$parms
-                    )
+          res <- list(action = "add_block", data = dat)
+          app_request(res)
+
+          # Check that the block can be built.
+          tryCatch(
+            {
+              new_blk <- as_blocks(
+                do.call(
+                  create_block,
+                  c(
+                    list(id = dat$name),
+                    dat$parms
                   )
                 )
-                parent$scoutbar$action <- "add_block"
-                parent$scoutbar$value <- new_blk
-                if (dat$append) {
-                  parent$append_block <- TRUE
-                }
-              },
-              error = function(e) {
-                showNotification(
-                  paste("Error while adding block:", e$message),
-                  type = "error",
-                  duration = NULL
-                )
-              }
-            )
+              )
+            },
+            error = function(e) {
+              res$error <- paste("Error while adding block:", e$message)
+              app_request(res)
+              return(res)
+            }
+          )
+
+          # Needs a reactive context... will happen once
+          observeEvent(TRUE, {
+            parent$scoutbar$action <- "add_block"
+            parent$scoutbar$value <- new_blk
+            if (dat$append) {
+              parent$append_block <- TRUE
+            }
           })
-          return(app_request(list(action = "add_block", data = dat)))
+          return(res)
         },
         name = paste0("add_", ctor),
         description = paste(
@@ -296,18 +296,18 @@ create_remove_block_tool <- function(
 ) {
   remove_block <- tool(
     function(id) {
-      # Needs a reactive context... will happen once
-      observeEvent(TRUE, {
-        if (!(id %in% board_block_ids(board$board))) {
-          showNotification(
-            paste("Block with id", id, "does not exist."),
-            type = "error"
-          )
-          return(FALSE)
-        }
-        parent$removed_block <- id
-      })
-      return(app_request(list(action = "remove_block", data = id)))
+      res <- list(action = "remove_block", data = id)
+      app_request(res)
+
+      # Check that id is valid
+      res <- check_block_id(id, board, res, app_request)
+      if (!is.null(res$error)) {
+        return(res)
+      }
+
+      parent$removed_block <- id
+
+      return(res)
     },
     name = "remove_block",
     description = "Remove a block by its id.",
@@ -337,40 +337,47 @@ create_add_stack_tool <- function(
 ) {
   create_stack <- tool(
     function(blocks) {
-      # Needs a reactive context... will happen once
-      observeEvent(TRUE, {
-        if (any(!(blocks %in% board_block_ids(board$board)))) {
-          showNotification(
-            "Some blocks do not exist in the board.",
-            type = "error"
-          )
-          return(FALSE)
-        }
-
-        if (any(!(blocks %in% stackable_blocks()))) {
-          non_stackable <- blocks[!(blocks %in% stackable_blocks())]
-          showNotification(
-            paste(
-              "Some blocks are already in stacks and cannot be stacked again:",
-              paste(non_stackable, collapse = ", ")
-            ),
-            type = "error"
-          )
-          return(FALSE)
-        }
-        parent$added_stack <- blocks
-      })
-      return(app_request(list(
+      res <- list(
         action = "add_stack",
         data = list(blocks = blocks)
-      )))
+      )
+      app_request(res)
+
+      block_ids <- isolate(board_block_ids(board$board))
+      if (any(!(blocks %in% block_ids))) {
+        invalid_ids <- blocks[!(blocks %in% block_ids)]
+        res$error <- paste(
+          "Some block ids do not exist in the board:",
+          paste(invalid_ids, collapse = ", ")
+        )
+        app_request(res)
+        return(res)
+      }
+
+      stackable_blocks <- isolate(stackable_blocks())
+
+      if (any(!(blocks %in% stackable_blocks))) {
+        non_stackable <- blocks[!(blocks %in% stackable_blocks)]
+        res$error <- paste(
+          "Some blocks are already in stacks and cannot be stacked again:",
+          paste(non_stackable, collapse = ", ")
+        )
+        app_request(res)
+        return(res)
+      }
+
+      # Needs a reactive context... will happen once
+      observeEvent(TRUE, {
+        parent$added_stack <- blocks
+      })
+      return(res)
     },
     name = "create_stack",
     description = "Create a stack with a given name and blocks.",
     arguments = list(
       blocks = type_array(type_string(
         "Ids of the blocks to include in the stack. IDs must exist in the board. You
-            can call `get_stackable_blocks` to get the list of available block IDs."
+        can call `get_stackable_blocks` to get the list of available block IDs."
       ))
     )
   )
@@ -427,30 +434,29 @@ create_add_block_to_stack_tool <- function(
   add_block_to_stack <- tool(
     function(stack_id, block_id) {
       # Needs a reactive context... will happen once
+
+      res <- list(
+        action = "add_block_to_stack",
+        data = list(stack_id = stack_id, node_id = block_id)
+      )
+      app_request(res)
+
+      res <- check_stack_id(stack_id, board, res, app_request)
+      if (!is.null(res$error)) {
+        return(res)
+      }
+      res <- check_block_id(block_id, board, res, app_request)
+      if (!is.null(res$error)) {
+        return(res)
+      }
+
+      if (!(block_id %in% isolate(stackable_blocks()))) {
+        res$error <- paste("Block with id", block_id, "is already in a stack.")
+        app_request(res)
+        return(res)
+      }
+
       observeEvent(TRUE, {
-        if (!(stack_id %in% names(board_stacks(board$board)))) {
-          showNotification(
-            paste("Stack with id", stack_id, "does not exist."),
-            type = "error"
-          )
-          return(FALSE)
-        }
-        if (!(block_id %in% board_block_ids(board$board))) {
-          showNotification(
-            paste("Block with id", block_id, "does not exist."),
-            type = "error"
-          )
-          return(FALSE)
-        }
-
-        if (!(block_id %in% stackable_blocks())) {
-          showNotification(
-            paste("Block with id", block_id, "is already in a stack."),
-            type = "error"
-          )
-          return(FALSE)
-        }
-
         # Feedback for the board
         parent$stack_added_node <- list(
           stack_id = stack_id,
@@ -466,10 +472,7 @@ create_add_block_to_stack_tool <- function(
           session
         )
       })
-      return(app_request(list(
-        action = "add_block_to_stack",
-        data = list(stack_id = stack_id, node_id = block_id)
-      )))
+      return(res)
     },
     name = "add_block_to_stack",
     description = "Add a block to an existing stack.",
@@ -485,6 +488,95 @@ create_add_block_to_stack_tool <- function(
     )
   )
   provider()$register_tool(add_block_to_stack)
+}
+
+#' Create a tool to add a block to the dashboard
+#' @rdname ai-chat-tool
+#' @export
+create_add_to_dash_tool <- function(
+  provider,
+  app_request,
+  board,
+  parent,
+  session
+) {
+  add_block_to_dashboard <- tool(
+    function(block_id) {
+      # Needs a reactive context... will happen once
+      res <- list(action = "add_to_dashboard", data = block_id)
+      app_request(res)
+
+      res <- check_block_id(block_id, board, res, app_request)
+      if (!is.null(res$error)) {
+        return(res)
+      }
+
+      # Block should not be already in the dashboard
+      res <- check_block_grid_status(block_id, parent, FALSE, res, app_request)
+      if (!is.null(res$error)) {
+        return(res)
+      }
+
+      observeEvent(TRUE, {
+        parent$added_to_dashboard <- block_id
+        parent$in_grid[[block_id]] <- TRUE
+      })
+      return(res)
+    },
+    name = "add_block_to_dashboard",
+    description = "Add a block to the dashboard module.",
+    arguments = list(
+      block_id = type_string(
+        "Id of the block to add to the dashboard."
+      )
+    )
+  )
+
+  provider()$register_tool(add_block_to_dashboard)
+}
+
+#' Create a tool to remove a block from the dashboard
+#' @rdname ai-chat-tool
+#' @export
+create_remove_from_dash_tool <- function(
+  provider,
+  app_request,
+  board,
+  parent,
+  session
+) {
+  remove_block_from_dashboard <- tool(
+    function(block_id) {
+      res <- list(action = "remove_from_dashboard", data = block_id)
+      app_request(res)
+
+      res <- check_block_id(block_id, board, res, app_request)
+      if (!is.null(res$error)) {
+        return(res)
+      }
+
+      # Block should be already in the dashboard
+      res <- check_block_grid_status(block_id, parent, TRUE, res, app_request)
+      if (!is.null(res$error)) {
+        return(res)
+      }
+
+      observeEvent(TRUE, {
+        parent$removed_from_dashboard <- block_id
+        parent$in_grid[[block_id]] <- FALSE
+      })
+      return(res)
+    },
+    name = "remove_block_from_dashboard",
+    description = "Remove a block from the dashboard module.",
+    arguments = list(
+      block_id = type_string(
+        "Id of the block to remove from the dashboard.."
+      )
+    )
+  )
+
+  provider()$register_tool(remove_block_from_dashboard)
 }
 
 #' @keywords internal
@@ -504,4 +596,46 @@ get_stackable_blocks <- function(board) {
     return(block_ids)
   }
   block_ids[!(block_ids %in% cannot_stack)]
+}
+
+#' @keywords internal
+check_block_id <- function(id, board, res, app_request) {
+  block_ids <- isolate(board_block_ids(board$board))
+  if (!(id %in% block_ids)) {
+    res$error <- paste("Block with id", id, "does not exist.")
+    app_request(res)
+  }
+  res
+}
+
+#' @keywords internal
+check_stack_id <- function(id, board, res, app_request) {
+  stack_names <- isolate(names(board_stacks(board$board)))
+  if (!(id %in% stack_names)) {
+    res$error <- paste("Stack with id", id, "does not exist.")
+    app_request(res)
+  }
+  res
+}
+
+#' @keywords internal
+check_block_grid_status <- function(
+  id,
+  parent,
+  should_be = TRUE,
+  res,
+  app_request
+) {
+  is_in_grid <- isolate(parent$in_grid[[id]])
+
+  if (is_in_grid == should_be) {
+    app_request(res)
+  } else {
+    res$error <- if (should_be) {
+      paste("Block with id", id, "is already in the dashboard.")
+    } else {
+      paste("Block with id", id, "is not in the dashboard.")
+    }
+  }
+  res
 }

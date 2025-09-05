@@ -29,6 +29,7 @@
                 "type": "leaf",
                 "data": {
                   "views": [
+                    "dashboard",
                     "blockr_assistant"
                   ],
                   "activeView": "blockr_assistant",
@@ -48,13 +49,22 @@
             "id": "dag",
             "contentComponent": "default",
             "tabComponent": "custom",
-            "title": "Pipeline overview"
+            "title": "Pipeline overview",
+            "renderer": "always"
+          },
+          "dashboard": {
+            "id": "dashboard",
+            "contentComponent": "default",
+            "tabComponent": "custom",
+            "title": "Dashboard",
+            "renderer": "always"
           },
           "blockr_assistant": {
             "id": "blockr_assistant",
             "contentComponent": "default",
             "tabComponent": "custom",
-            "title": "AI chat"
+            "title": "AI chat",
+            "renderer": "always"
           }
         },
         "activeGroup": "2"
@@ -80,6 +90,11 @@
       "backup_list": null,
       "display_code": false,
       "module_state": null,
+      "in_grid": [
+
+      ],
+      "added_to_dashboard": null,
+      "removed_from_dashboard": null,
       "ai_chat": null
     }
   }
