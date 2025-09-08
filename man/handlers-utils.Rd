@@ -4,6 +4,7 @@
 \alias{board_restore}
 \alias{build_layout}
 \alias{manage_scoutbar}
+\alias{update_block_ui}
 \title{Board restoration callback}
 \usage{
 board_restore(board, update, session, parent, ...)
@@ -11,12 +12,12 @@ board_restore(board, update, session, parent, ...)
 build_layout(modules, plugins)
 
 manage_scoutbar(board, update, session, parent, ...)
+
+update_block_ui(board, update, session, parent, ...)
 }
 \description{
-Board restoration callback
-
-App layout
-
-Scoutbar management callback
+Some elements of the block UI require server
+elements to be available. This can't be done
+from the board_ui as this one is done once.
 }
 \keyword{internal}

@@ -4,10 +4,12 @@
 \alias{blk_icon}
 \title{Create block icon}
 \usage{
-blk_icon(category)
+blk_icon(category, class = NULL)
 }
 \arguments{
 \item{category}{Block category. See \link[blockr.core]{available_blocks}.}
+
+\item{class}{Additional class to add to the icon, to change the size for example.}
 }
 \description{
 Blocks are categorized. This function

@@ -6,9 +6,10 @@
 #' or in the contextual menu (scoutbar) ...
 #'
 #' @param category Block category. See \link[blockr.core]{available_blocks}.
+#' @param class Additional class to add to the icon, to change the size for example.
 #'
 #' @keywords internal
-blk_icon <- function(category) {
+blk_icon <- function(category, class = NULL) {
   if (!length(category)) {
     res <- "reddit-alien"
   } else {
@@ -26,7 +27,7 @@ blk_icon <- function(category) {
 
   # FIXME: We can't use fontawesome in the scoutbaR
   # due to compatibility issue with the g6R toolbar...
-  icon(res)
+  icon(res, class)
 }
 
 #' Create block choices for scoutbaR widget
@@ -472,4 +473,126 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
   })
 
   NULL
+}
+
+#' @keywords internal
+update_blk_code_ui <- function(blk) {
+  observeEvent(
+    blk$server$expr(),
+    {
+      blk_code <- paste(
+        deparse(blk$server$expr()),
+        collapse = "\n"
+      )
+
+      bslib::accordion_panel_update(
+        id = paste0("accordion-", attr(blk, "uid")),
+        target = "code",
+        tagList(
+          pre(code(class = "language-r", blk_code)),
+          tags$script(HTML(
+            "setTimeout(function() {
+              if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+              }
+            }, 100);"
+          ))
+        )
+      )
+    }
+  )
+}
+
+#' @keywords internal
+update_blk_state_ui <- function(blk) {
+  conds <- names(blk$server$cond)
+
+  # Listen to blk$server$cond[["state"]], ...
+  lapply(conds, \(nme) {
+    observeEvent(blk$server$cond[[nme]], {
+      cond <- blk$server$cond[[nme]]
+      statuses <- lapply(names(cond), \(status) {
+        cl <- switch(
+          status,
+          "error" = "danger",
+          "warning" = "warning",
+          "message" = "info"
+        )
+
+        msgs <- NULL
+        if (length(cond[[status]])) {
+          msgs <- tags$div(
+            class = sprintf("alert alert-%s", cl),
+            HTML(cli::ansi_html(paste(
+              unlist(cond[[status]]),
+              collapse = "\n"
+            )))
+          )
+        }
+
+        nav_panel(
+          class = "p-3",
+          title = tagList(
+            paste0(firstup(status), "(s)"),
+            tags$span(
+              class = sprintf(
+                "badge text-bg-%s",
+                cl
+              ),
+              length(unlist(cond[[status]]))
+            )
+          ),
+          if (is.null(msgs)) tags$div("No issues detected.") else msgs,
+        )
+      })
+
+      bslib::accordion_panel_update(
+        id = paste0("accordion-", attr(blk, "uid")),
+        target = "state",
+        bslib::navset_pill(!!!statuses)
+      )
+    })
+  })
+}
+
+#' Update some pieces of the block UI
+#'
+#' Some elements of the block UI require server
+#' elements to be available. This can't be done
+#' from the board_ui as this one is done once.
+#'
+#' @keywords internal
+#' @rdname handlers-utils
+update_block_ui <- function(board, update, session, parent, ...) {
+  input <- session$input
+  ns <- session$ns
+
+  # Register update block UI callbacks for existing blocks
+  observeEvent(
+    req(!parent$cold_start),
+    {
+      lapply(
+        names(board$blocks),
+        \(id) {
+          blk <- board$blocks[[id]]
+          attr(blk, "uid") <- id
+          update_blk_code_ui(blk)
+          update_blk_state_ui(blk)
+        }
+      )
+    },
+    once = TRUE
+  )
+
+  # Each time a block is added, we should register the observers above
+  observeEvent(
+    parent$added_block,
+    {
+      blk <- board$blocks[[block_uid(parent$added_block)]]
+      attr(blk, "uid") <- block_uid(parent$added_block)
+      update_blk_code_ui(blk)
+      update_blk_state_ui(blk)
+    },
+    ignoreInit = TRUE
+  )
 }
