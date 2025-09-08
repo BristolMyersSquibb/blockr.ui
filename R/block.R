@@ -27,22 +27,16 @@ block_ui.dag_board <- function(id, x, block = NULL, ...) {
           tags$div(
             class = "card-body",
             tags$div(
-              class = "card-title",
-              div(
-                class = "hstack gap-3",
-                h4(sprintf(
-                  "%s (id: %s)",
-                  firstup(blk_info$name),
-                  gsub("block_", "", id)
-                )),
-                tooltip(
-                  icon("info-circle"),
-                  p(
-                    icon("lightbulb"),
-                    "How to use this block?",
-                  ),
-                  p(blk_info$description, ".")
-                )
+              class = "d-flex align-items-center justify-content-start card-title gap-2",
+              h4(firstup(blk_info$name)),
+              tags$small(sprintf("(id: %s)", gsub("block_", "", id))),
+              tooltip(
+                icon("info-circle"),
+                p(
+                  icon("lightbulb"),
+                  "How to use this block?",
+                ),
+                p(blk_info$description, ".")
               )
             ),
             # subtitle
