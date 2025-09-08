@@ -43,7 +43,8 @@ Imports:
     grDevices,
     rlang,
     promises,
-    shinychat (>= 0.2.0.9000)
+    shinychat (>= 0.2.0.9000),
+    cli
 Remotes:
     BristolMyersSquibb/blockr.core,
     BristolMyersSquibb/blockr.dplyr,
