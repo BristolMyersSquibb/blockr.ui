@@ -92,6 +92,7 @@ Collate:
     'plugin-links.R'
     'plugin-serialize.R'
     'plugin-stacks.R'
+    'prismjs-dependencies.R'
     'registry.R'
     'stacks.R'
     'utils-ai-tools.R'

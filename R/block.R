@@ -11,40 +11,80 @@ block_ui.dag_board <- function(id, x, block = NULL, ...) {
   block_card <- function(x, id, ns) {
     blk_id <- ns(paste0("block_", id))
     blk_info <- get_block_metadata(x)
-    card(
+
+    card_tag <- tags$div(
+      class = "card",
+      width = "100%",
       id = ns(id),
-      full_screen = TRUE,
-      card_header(
-        class = "d-flex justify-content-between",
-        card_title(
-          blk_icon(blk_info$category),
-          sprintf(
-            "Block: %s (id: %s)",
-            blk_info$name,
-            gsub("block_", "", id)
-          )
+      tags$div(
+        class = "row g-0 px-4",
+        tags$div(
+          class = "col-md-2 d-flex align-items-center justify-content-start",
+          blk_icon(blk_info$category, class = "fa-4x")
         ),
-        tooltip(
-          icon("info-circle"),
-          p(
-            icon("lightbulb"),
-            "How to use this block?",
-          ),
-          p(blk_info$description, ".")
+        tags$div(
+          class = "col-md-10",
+          tags$div(
+            class = "card-body",
+            tags$div(
+              class = "card-title",
+              div(
+                class = "hstack gap-3",
+                h4(sprintf(
+                  "%s (id: %s)",
+                  firstup(blk_info$name),
+                  gsub("block_", "", id)
+                )),
+                tooltip(
+                  icon("info-circle"),
+                  p(
+                    icon("lightbulb"),
+                    "How to use this block?",
+                  ),
+                  p(blk_info$description, ".")
+                )
+              )
+            ),
+            # subtitle
+            div(
+              class = "card-subtitle mb-2 text-body-secondary",
+              span(class = "badge bg-secondary", "Type:", blk_info$category),
+              span(class = "badge bg-secondary", "Package:", blk_info$package)
+            )
+          )
         )
       ),
-      # subtitle
-      div(
-        class = "card-subtitle mb-2 text-body-secondary",
-        sprintf(
-          "Type: %s; Package: %s",
-          blk_info$category,
-          blk_info$package
+      accordion(
+        id = ns(paste0("accordion-", id)),
+        multiple = TRUE,
+        class = "accordion-flush",
+        open = c("outputs", "state"),
+        accordion_panel(
+          icon = icon("sliders"),
+          title = "Block inputs",
+          value = "inputs",
+          expr_ui(blk_id, x)
+        ),
+        accordion_panel(
+          icon = icon("chart-simple"),
+          title = "Block output(s)",
+          value = "outputs",
+          style = "max-width: 100%; overflow-x: auto;",
+          block_ui(blk_id, x)
+        ),
+        accordion_panel(
+          title = "Block code",
+          value = "code",
+          icon = icon("code"),
+        ),
+        accordion_panel(
+          title = "Block state",
+          value = "state",
+          icon = icon("bug")
         )
-      ),
-      expr_ui(blk_id, x),
-      block_ui(blk_id, x)
+      )
     )
+    tagAppendAttributes(card_tag, class = "border border-0 shadow-none")
   }
 
   ns <- NS(id)
@@ -156,6 +196,11 @@ add_block_panel <- function(id, panels) {
       # which means updating one block does not update
       # the linked block UIs and causes many issues.
       renderer = "always",
+      # Remove padding and margin to use full space of the panel
+      style = list(
+        overflow = "auto",
+        height = "100%"
+      ),
       position = list(
         referencePanel = get_board_option_value(
           "blocks_position"
