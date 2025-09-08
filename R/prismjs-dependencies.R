@@ -15,8 +15,7 @@ add_prismjs_deps <- function(tag) {
     script = c("js/components/prism-r.min.js", "js/plugins/autoloader.min.js"),
     stylesheet = "css/themes/prism.min.css",
     package = "blockr.ui",
-    head = "<script>Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';</script>;
-    "
+    head = "<script>Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';</script>"
   )
   #nolint end
   tagList(tag, prismjs_deps)
