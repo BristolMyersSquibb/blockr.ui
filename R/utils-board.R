@@ -306,7 +306,7 @@ build_layout <- function(modules, plugins) {
     # Remove block panel on block remove
     # We can remove multiple blocks at once
     observeEvent(parent$removed_block, {
-      remove_block_panels(parent$removed_block)
+      remove_block_panels(parent$removed_block, parent$app_layout$panels)
     })
 
     output$layout <- renderDockView({
@@ -478,7 +478,10 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
 #' @keywords internal
 update_blk_code_ui <- function(blk) {
   observeEvent(
-    blk$server$expr(),
+    {
+      blk_expr <- try(blk$server$expr(), silent = TRUE)
+      req(!inherits(blk_expr, "try-error"))
+    },
     {
       blk_code <- paste(
         deparse(blk$server$expr()),
@@ -530,20 +533,22 @@ update_blk_state_ui <- function(blk) {
           )
         }
 
-        nav_panel(
-          class = "p-3",
-          title = tagList(
-            paste0(firstup(status), "(s)"),
-            tags$span(
-              class = sprintf(
-                "badge text-bg-%s",
-                cl
-              ),
-              length(unlist(cond[[status]]))
-            )
-          ),
-          if (is.null(msgs)) tags$div("No issues detected.") else msgs,
-        )
+        if (!is.null(msgs)) {
+          nav_panel(
+            class = "p-3",
+            title = tagList(
+              paste0(firstup(status), "(s)"),
+              tags$span(
+                class = sprintf(
+                  "badge text-bg-%s",
+                  cl
+                ),
+                length(unlist(cond[[status]]))
+              )
+            ),
+            msgs,
+          )
+        }
       })
 
       bslib::accordion_panel_update(

@@ -20,7 +20,7 @@ block_ui.dag_board <- function(id, x, block = NULL, ...) {
         class = "row g-0 px-4",
         tags$div(
           class = "col-md-2 d-flex align-items-center justify-content-start",
-          blk_icon(blk_info$category, class = "fa-4x")
+          blk_icon(blk_info$category, class = "fa-3x")
         ),
         tags$div(
           class = "col-md-10",
@@ -90,10 +90,17 @@ block_ui.dag_board <- function(id, x, block = NULL, ...) {
 }
 
 #' @keywords internal
-remove_block_panels <- function(id) {
-  stopifnot(is.character(id))
-  lapply(id, \(blk) {
-    remove_panel("layout", paste0("block-", blk))
+remove_block_panels <- function(ids, panels) {
+  stopifnot(is.character(ids))
+  # Only remove panels that are in the dock
+  in_dock <- which(ids %in% get_block_panels(names(panels)))
+  if (!length(in_dock)) {
+    return(NULL)
+  }
+  ids <- ids[in_dock]
+
+  lapply(ids, \(id) {
+    remove_panel("layout", paste0("block-", id))
   })
 }
 
