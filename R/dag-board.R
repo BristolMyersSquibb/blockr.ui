@@ -27,11 +27,11 @@ new_dag_board <- function(
     modules = modules,
     class = c(class, "dag_board")
   )
-  
+
   if (!is.null(json)) {
     attr(board, "json") <- json
   }
-  
+
   board
 }
 

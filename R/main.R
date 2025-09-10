@@ -89,7 +89,7 @@ main_server <- function(id, board, plugins, modules) {
       ns <- session$ns
 
       app_state <- create_app_state(board)
-      
+
       # Extract JSON path from board attribute
       json <- attr(board, "json", exact = TRUE)
       if (!is.null(json)) {
