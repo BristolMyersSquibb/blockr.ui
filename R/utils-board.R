@@ -156,7 +156,8 @@ board_ui.dag_board <- function(id, x, plugins = board_plugins(x), ...) {
       block_ui(
         id = id,
         x = x,
-        block = board_blocks(x)[blk_id]
+        block = board_blocks(x)[blk_id],
+        edit_ui = plugins[["edit_block"]]
       )
     }
   )
