@@ -31,6 +31,7 @@ create_app_state <- function(board) {
     refreshed = NULL,
     network = list(),
     app_layout = list(),
+    json = NULL,
     # Blocks/nodes
     append_block = FALSE,
     added_block = NULL,
@@ -88,6 +89,12 @@ main_server <- function(id, board, plugins, modules) {
       ns <- session$ns
 
       app_state <- create_app_state(board)
+      
+      # Extract JSON path from board attribute
+      json <- attr(board, "json", exact = TRUE)
+      if (!is.null(json)) {
+        app_state$json <- json
+      }
 
       # For shinytest2 (don't remove)
       exportTestValues(res = process_app_state(app_state))

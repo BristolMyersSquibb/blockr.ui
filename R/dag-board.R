@@ -7,7 +7,8 @@ new_dag_board <- function(
   ...,
   modules = new_dashboard_module(),
   options = dag_board_options(),
-  class = character()
+  class = character(),
+  json = NULL
 ) {
   if (is_board_module(modules)) {
     modules <- list(modules)
@@ -20,12 +21,18 @@ new_dag_board <- function(
     lapply(modules, board_module_options)
   )
 
-  new_board(
+  board <- new_board(
     ...,
     options = opts,
     modules = modules,
     class = c(class, "dag_board")
   )
+  
+  if (!is.null(json)) {
+    attr(board, "json") <- json
+  }
+  
+  board
 }
 
 #' @rdname run_demo_app
