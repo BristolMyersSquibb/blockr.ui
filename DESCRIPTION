@@ -89,6 +89,7 @@ Collate:
     'options.R'
     'pkg.R'
     'plugin-add_rm_blocks.R'
+    'plugin-block.R'
     'plugin-code.R'
     'plugin-links.R'
     'plugin-serialize.R'
