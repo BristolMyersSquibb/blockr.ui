@@ -78,7 +78,8 @@ serve.dag_board <- function(x, id = "main", ...) {
     ),
     manage_stacks(server = add_rm_stack_server, ui = add_rm_stack_ui),
     generate_code(server = generate_code_server, ui = generate_code_ui),
-    notify_user()
+    notify_user(),
+    edit_block(server = edit_block_server, ui = edit_block_ui)
   )
 
   ui <- do.call(

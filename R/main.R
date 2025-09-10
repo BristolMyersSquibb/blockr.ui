@@ -15,7 +15,8 @@ main_ui <- function(id, board, plugins) {
     "preserve_board",
     "manage_stacks",
     "generate_code",
-    "notify_user"
+    "notify_user",
+    "edit_block"
   )
 
   board_ui(
