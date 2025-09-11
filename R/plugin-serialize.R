@@ -34,6 +34,24 @@ ser_deser_server <- function(id, board, parent, ...) {
         parent$backup_list <- list_snapshot_files(board$board_id)
       })
 
+      # Auto-restore from JSON if provided
+      observeEvent(
+        TRUE,
+        {
+          json_value <- parent$json
+          if (!is.null(json_value)) {
+            json_file_path <- path.expand(json_value)
+            if (file.exists(json_file_path)) {
+              shinyjs::delay(10, {
+                restore_board(json_file_path, res, parent)
+              })
+            }
+          }
+        },
+        once = TRUE,
+        priority = 100
+      )
+
       # TBD -> add board option for auto_snapshot
 
       if (isTRUE(isolate(get_board_option_or_null("snapshot")))) {
