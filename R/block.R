@@ -140,7 +140,7 @@ insert_block_ui.dag_board <- function(
   # on demand ...
   lapply(seq_along(blocks), function(i) {
     blk <- blocks[i]
-    blk_ui <- block_ui(id, x, blk)
+    blk_ui <- block_ui(id, x, blk, ...)
 
     insertUI(
       sprintf(
