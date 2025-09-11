@@ -1,7 +1,6 @@
 test_that("setup_chat_provider", {
   # Test basic functionality with chat_openai
   result <- setup_chat_provider(
-    provider = "openai",
     prompt = "You are a helpful assistant"
   )
   expect_s3_class(result, "Chat")
@@ -11,17 +10,6 @@ test_that("setup_chat_provider", {
 test_that("setup_chat_task creates ExtendedTask", {
   result <- setup_chat_task()
   expect_s3_class(result, "ExtendedTask")
-})
-
-test_that("init_chat_message works", {
-  res <- init_chat_message(get_ellmer_chat_providers()[[1]])
-  expect_type(res, "list")
-  expect_named(res, c("role", "content"))
-})
-
-test_that("get_ellmer_chat_providers works", {
-  res <- get_ellmer_chat_providers()
-  expect_true(is.character(res))
 })
 
 test_that("new_chat_module works", {
@@ -66,7 +54,6 @@ testServer(
     expect_null(parent$ai_chat)
     expect_length(stackable_blocks(), 0)
 
-    session$userData$board_options[["chat_provider"]] <- reactiveVal("openai")
     session$flushReact()
 
     output$chat_ui
