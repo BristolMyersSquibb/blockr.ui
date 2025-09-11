@@ -13,42 +13,27 @@ init_chat_message <- function(provider) {
   )
 }
 
-#' @keywords internal
-get_ellmer_chat_providers <- function() {
-  # Get all exported functions
-  exports <- getNamespaceExports("ellmer")
-
-  # Filter for chat providers (functions starting with "chat_")
-  chat_funcs <- exports[grepl("^chat_", exports)]
-
-  # Verify they are actually functions
-  actual_providers <- chat_funcs[sapply(chat_funcs, function(x) {
-    is.function(get(x, envir = asNamespace("ellmer")))
-  })]
-
-  return(gsub("chat_", "", actual_providers))
+default_chat <- function(...) {
+  ellmer::chat_openai(..., model = "gpt-4o")
 }
 
 #' Utility functions to create AI tools for blockr.ui
 #'
-#' @param provider AI provider function to use from ellmer.
+#' @param chat [ellmer::chat()]-like function.
 #' @param prompt System prompt to use for the AI provider. Best
 #' to create a markdown file with instructions.
 #' @param ... Additional arguments to pass to the provider.
 #' @keywords internal
 setup_chat_provider <- function(
-  provider,
+  chat = blockr_option("chat_function", default_chat),
   prompt = readLines(system.file(
     "examples/ai-chat/rules.md",
     package = "blockr.ui"
   )),
   ...
 ) {
-  chat(
-    name = provider,
-    ...,
-    system_prompt = prompt
-  )
+
+  chat(..., system_prompt = prompt)
 }
 
 #' Create a task to append chat messages

@@ -5,13 +5,13 @@
 \title{Utility functions to create AI tools for blockr.ui}
 \usage{
 setup_chat_provider(
-  provider,
+  chat = blockr_option("chat_function", default_chat),
   prompt = readLines(system.file("examples/ai-chat/rules.md", package = "blockr.ui")),
   ...
 )
 }
 \arguments{
-\item{provider}{AI provider function to use from ellmer.}
+\item{chat}{\code{\link[ellmer:chat-any]{ellmer::chat()}}-like function.}
 
 \item{prompt}{System prompt to use for the AI provider. Best
 to create a markdown file with instructions.}

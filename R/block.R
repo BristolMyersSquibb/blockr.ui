@@ -58,7 +58,7 @@ block_ui.dag_board <- function(id, x, block = NULL, edit_ui = NULL, ...) {
         id = ns(paste0("accordion-", id)),
         multiple = TRUE,
         class = "accordion-flush",
-        open = c("outputs", "state"),
+        open = c("inputs", "outputs", "state"),
         accordion_panel(
           icon = icon("sliders"),
           title = "Block inputs",
