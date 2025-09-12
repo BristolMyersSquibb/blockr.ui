@@ -40,7 +40,6 @@ create_app_state <- function(board) {
     # Edges
     cancelled_edge = NULL,
     added_edge = NULL,
-    removed_edge = NULL,
     # Stacks
     added_stack = NULL,
     stack_added_block = NULL,

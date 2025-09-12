@@ -64,7 +64,6 @@ testServer(
     expect_null(app_state$selected_block)
     expect_null(app_state$cancelled_edge)
     expect_null(app_state$added_edge)
-    expect_null(app_state$removed_edge)
     expect_null(app_state$added_stack)
     expect_null(app_state$stack_added_block)
     expect_null(app_state$stack_removed_block)

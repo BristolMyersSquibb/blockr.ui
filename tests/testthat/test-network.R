@@ -137,7 +137,6 @@ testServer(
       # Edges
       cancelled_edge = NULL,
       added_edge = NULL,
-      removed_edge = NULL,
       # stacks
       added_stack = NULL,
       stack_added_block = NULL,
@@ -310,7 +309,7 @@ testServer(
     # Removed node and block
     session$setInputs("remove_node" = "select_test")
     expect_identical(parent$removed_block, "select_test")
-    expect_identical(parent$removed_edge, board_links(board$board)$id)
+    expect_identical(update()$links$rm, board_links(board$board)$id)
     mock_remove_block(
       "select_test",
       board,

@@ -219,7 +219,7 @@ gen_add_rm_link_server <- function(context_menu) {
         observeEvent(parent$removed_block, {
           # Note: links are cleaned in the add_rm_blocks plugin
           lapply(parent$removed_block, \(removed) {
-            cleanup_node(removed, parent, board, session)
+            cleanup_node(removed, update, board, session)
           })
         })
 

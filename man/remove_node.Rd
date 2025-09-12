@@ -4,12 +4,10 @@
 \alias{remove_node}
 \title{Remove a node}
 \usage{
-remove_node(selected, vals, session)
+remove_node(selected, session)
 }
 \arguments{
 \item{selected}{UID (character string) of node to remove.}
-
-\item{vals}{Global reactive values.}
 
 \item{session}{Shiny session object.}
 }
