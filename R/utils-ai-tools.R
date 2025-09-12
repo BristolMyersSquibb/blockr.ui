@@ -13,27 +13,13 @@ init_chat_message <- function(provider) {
   )
 }
 
-default_chat <- function(...) {
-  ellmer::chat_openai(..., model = "gpt-4o")
-}
-
 #' Utility functions to create AI tools for blockr.ui
 #'
-#' @param chat [ellmer::chat()]-like function.
-#' @param prompt System prompt to use for the AI provider. Best
-#' to create a markdown file with instructions.
-#' @param ... Additional arguments to pass to the provider.
 #' @keywords internal
-setup_chat_provider <- function(
-  chat = blockr_option("chat_function", default_chat),
-  prompt = readLines(system.file(
-    "examples/ai-chat/rules.md",
-    package = "blockr.ui"
-  )),
-  ...
-) {
-
-  chat(..., system_prompt = prompt)
+system_prompt <- function() {
+  readLines(
+    system.file("examples/ai-chat/rules.md", package = "blockr.ui")
+  )
 }
 
 #' Create a task to append chat messages
@@ -56,7 +42,7 @@ setup_chat_task <- function() {
 }
 
 #' Create a chat server callbacks
-#' @param provider AI provider object. See \url{setup_chat_provider}.
+#' @param provider AI provider object. See \url{system_prompt}.
 #' @param parent Parent global reactive values object.
 #' @param session Shiny session object.
 manage_chat <- function(provider, parent, session) {

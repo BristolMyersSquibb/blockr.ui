@@ -48,10 +48,10 @@ chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
 
       # Update provider, tools
       observeEvent(
-        TRUE,
+        get_board_option_or_null("llm_model", session),
         {
-          # Note: there is no-need to reset tools
-          provider(setup_chat_provider())
+          chat <- get_board_option_value("llm_model", session)
+          provider(chat(system_prompt = system_prompt()))
 
           create_block_names_tool(provider)
           create_block_tool_factory(
@@ -100,8 +100,7 @@ chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
             parent,
             session
           )
-        },
-        once = TRUE
+        }
       )
 
       res <- manage_chat(provider, parent, session)
@@ -119,6 +118,7 @@ chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
 #' @export
 #' @rdname board-module
 new_chat_module <- function(id = "blockr_assistant", title = "AI chat") {
+  need_llm_cfg_opts(TRUE)
   new_board_module(
     chat_mod_ui,
     chat_mod_srv,

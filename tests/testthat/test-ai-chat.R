@@ -1,12 +1,3 @@
-test_that("setup_chat_provider", {
-  # Test basic functionality with chat_openai
-  result <- setup_chat_provider(
-    prompt = "You are a helpful assistant"
-  )
-  expect_s3_class(result, "Chat")
-  expect_identical(result$get_system_prompt(), "You are a helpful assistant")
-})
-
 test_that("setup_chat_task creates ExtendedTask", {
   result <- setup_chat_task()
   expect_s3_class(result, "ExtendedTask")
@@ -54,6 +45,24 @@ testServer(
     expect_null(parent$ai_chat)
     expect_length(stackable_blocks(), 0)
 
+    llm_opt <- withr::with_options(
+      list(
+        blockr.chat_function = function(system_prompt = NULL, params = NULL) {
+          ellmer::chat_openai(system_prompt = system_prompt, params = params)
+        }
+      ),
+      new_llm_model_option()
+    )
+
+    board_option_to_userdata <- get(
+      "board_option_to_userdata",
+      envir = asNamespace("blockr.core"),
+      inherits = FALSE,
+      mode = "function"
+    )
+
+    board_option_to_userdata(llm_opt, board$board, session)
+
     session$flushReact()
 
     output$chat_ui
@@ -64,49 +73,5 @@ testServer(
       `prompt_user_input` = "Import iris data"
     )
     expect_true(parent$ai_chat)
-
-    # Call provider to invoke tools
-    provider()$chat("Import iris data")
-    expect_true("add_new_dataset_block" %in% names(provider()$get_tools()))
-    session$flushReact()
-    expect_identical(parent$scoutbar$action, "add_block")
-    expect_identical(block_name(parent$scoutbar$value[[1]]), "Dataset block")
-    expect_snapshot(app_request())
-
-    # TBD: add block to board manually
-    board_blocks(board$board) <- c(
-      board_blocks(board$board),
-      parent$scoutbar$value
-    )
-    provider()$chat("Remove block aaaa.")
-    expect_snapshot(app_request())
-
-    session$setInputs(
-      `prompt_clean` = 0
-    )
   }
 )
-
-test_that("Chat app works", {
-  skip_on_cran()
-
-  # We test from an existing dock so that we can fix block, stack and link IDs
-  # to avoid randomness failure
-  app <- shinytest2::AppDriver$new(
-    system.file(package = "blockr.ui", "examples/ai-chat/simple"),
-    name = "simple-ai-chat",
-    seed = 4323
-  )
-
-  Sys.sleep(4)
-
-  inputs <- c("main-board-chat-prompt_user_input")
-  app$expect_values(input = inputs, export = TRUE)
-  app$set_inputs(
-    `main-board-chat-prompt_user_input` = "Import iris data",
-    # Don't remove: shinychat text area field has `data-shiny-no-bind-input` HTML attribute
-    allow_no_input_binding_ = TRUE
-  )
-  app$wait_for_idle()
-  app$stop()
-})

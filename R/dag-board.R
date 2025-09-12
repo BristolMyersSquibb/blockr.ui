@@ -33,6 +33,7 @@ new_dag_board <- function(
 dag_board_options <- function() {
   new_board_options(
     new_board_name_option(category = "Board options"),
+    if (need_llm_cfg_opts()) new_llm_model_option(category = "Board options"),
     new_n_rows_option(category = "Table options"),
     new_page_size_option(category = "Table options"),
     new_filter_rows_option(category = "Table options"),
