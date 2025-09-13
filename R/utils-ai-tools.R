@@ -24,7 +24,7 @@ system_prompt <- function() {
 
 #' Create a task to append chat messages
 #' @keywords internal
-setup_chat_task <- function() {
+setup_chat_task <- function(session) {
   ExtendedTask$new(
     function(client, ui_id, user_input) {
       promises::then(
@@ -34,7 +34,7 @@ setup_chat_task <- function() {
           stream = "content"
         )),
         function(stream) {
-          chat_append(ui_id, stream)
+          chat_append(ui_id, stream, session = session)
         }
       )
     }
@@ -53,7 +53,7 @@ manage_chat <- function(provider, parent, session) {
     parent$ai_chat <- NULL
   })
 
-  append_stream_task <- setup_chat_task()
+  append_stream_task <- setup_chat_task(session)
 
   observeEvent(input$prompt_user_input, {
     # Switch to AI mode. This is used to avoid certain behavior
@@ -81,7 +81,7 @@ manage_chat <- function(provider, parent, session) {
   })
 
   observeEvent(input$prompt_clean, {
-    chat_clear("prompt")
+    chat_clear("prompt", session)
     # This also erase the chat memory and not just the UI
     #openai$set_turns(list())
   })

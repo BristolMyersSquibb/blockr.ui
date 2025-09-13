@@ -49,7 +49,7 @@ testServer(
       "MockChat",
       inherit = asNamespace("ellmer")[["Chat"]],
       public = list(
-        chat = function(message, ...) {
+        stream_async = function(message, ...) {
           if (identical(message, "Import iris data")) {
             self$get_tools()[["create_block_tool_factory"]](
               ctor = "new_dataset_block"
@@ -59,7 +59,7 @@ testServer(
               append = FALSE,
               parms = list(dataset = "iris", package = "datasets")
             )
-          } else if (identical(message, "Remove block aaaa.")) {
+          } else if (identical(message, "Remove block aaaa")) {
             self$get_tools()[["remove_block"]](
               id = "aaaa"
             )
@@ -100,8 +100,6 @@ testServer(
     )
     expect_true(parent$ai_chat)
 
-    # Call provider to invoke tools
-    provider()$chat("Import iris data")
     expect_true("add_new_dataset_block" %in% names(provider()$get_tools()))
     session$flushReact()
     expect_identical(parent$scoutbar$action, "add_block")
@@ -113,7 +111,9 @@ testServer(
       board_blocks(board$board),
       parent$scoutbar$value
     )
-    provider()$chat("Remove block aaaa.")
+    session$setInputs(
+      `prompt_user_input` = "Remove block aaaa"
+    )
     expect_snapshot(app_request())
 
     session$setInputs(
