@@ -63,7 +63,9 @@ testServer(
             self$get_tools()[["remove_block"]](
               id = "aaaa"
             )
-          } else stop("Unknown request: ", message)
+          } else {
+            stop("Unknown request: ", message)
+          }
         }
       )
     )
@@ -119,3 +121,58 @@ testServer(
     )
   }
 )
+
+test_that("Chat app works", {
+  skip_on_cran()
+
+  # We test from an existing dock so that we can fix block, stack and link IDs
+  # to avoid randomness failure
+  app <- shinytest2::AppDriver$new(
+    system.file(package = "blockr.ui", "examples/ai-chat/simple"),
+    name = "simple-ai-chat",
+    seed = 4323,
+    options = list(
+      blockr.chat_function = function(system_prompt = NULL, params = NULL) {
+        R6::R6Class(
+          "MockChat",
+          inherit = asNamespace("ellmer")[["Chat"]],
+          public = list(
+            stream_async = function(message, ...) {
+              if (identical(message, "Import iris data")) {
+                self$get_tools()[["create_block_tool_factory"]](
+                  ctor = "new_dataset_block"
+                )
+                self$get_tools()[["add_new_dataset_block"]](
+                  name = "dataset_block",
+                  append = FALSE,
+                  parms = list(dataset = "iris", package = "datasets")
+                )
+                coro::async_generator(
+                  function(x) for (elt in x) coro::yield(elt)
+                )(
+                  c("Successfully", "added a block", "that loads \"iris\".")
+                )
+              } else {
+                stop("Unknown request: ", message)
+              }
+            }
+          )
+        )$new(
+          ellmer::Provider("test", "test", "test")
+        )
+      }
+    )
+  )
+
+  Sys.sleep(4)
+
+  inputs <- c("main-board-chat-prompt_user_input")
+  app$expect_values(input = inputs, export = TRUE)
+  app$set_inputs(
+    `main-board-chat-prompt_user_input` = "Import iris data",
+    # Don't remove: shinychat text area field has `data-shiny-no-bind-input` HTML attribute
+    allow_no_input_binding_ = TRUE
+  )
+  app$wait_for_idle()
+  app$stop()
+})
