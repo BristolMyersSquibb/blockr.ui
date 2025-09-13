@@ -1,0 +1,101 @@
+{
+  "input": {
+
+  },
+  "export": {
+    "main-res": {
+      "cold_start": true,
+      "refreshed": null,
+      "network": [
+
+      ],
+      "app_layout": {
+        "grid": {
+          "root": {
+            "type": "branch",
+            "data": [
+              {
+                "type": "leaf",
+                "data": {
+                  "views": [
+                    "dag"
+                  ],
+                  "activeView": "dag",
+                  "id": "1"
+                },
+                "size": 100
+              },
+              {
+                "type": "leaf",
+                "data": {
+                  "views": [
+                    "dashboard",
+                    "blockr_assistant"
+                  ],
+                  "activeView": "blockr_assistant",
+                  "id": "2"
+                },
+                "size": 100
+              }
+            ],
+            "size": 0
+          },
+          "width": 0,
+          "height": 0,
+          "orientation": "HORIZONTAL"
+        },
+        "panels": {
+          "dag": {
+            "id": "dag",
+            "contentComponent": "default",
+            "tabComponent": "custom",
+            "title": "Pipeline overview",
+            "renderer": "always"
+          },
+          "dashboard": {
+            "id": "dashboard",
+            "contentComponent": "default",
+            "tabComponent": "custom",
+            "title": "Dashboard",
+            "renderer": "always"
+          },
+          "blockr_assistant": {
+            "id": "blockr_assistant",
+            "contentComponent": "default",
+            "tabComponent": "custom",
+            "title": "AI chat",
+            "renderer": "always"
+          }
+        },
+        "activeGroup": "2"
+      },
+      "append_block": false,
+      "added_block": null,
+      "removed_block": null,
+      "selected_block": null,
+      "unselected_block": null,
+      "cancelled_edge": null,
+      "added_edge": null,
+      "removed_edge": null,
+      "added_stack": null,
+      "stack_added_block": null,
+      "stack_removed_block": null,
+      "removed_stack": null,
+      "stacks": null,
+      "open_scoutbar": false,
+      "scoutbar": {
+        "is_open": false
+      },
+      "save_board": false,
+      "backup_list": null,
+      "display_code": false,
+      "module_state": null,
+      "in_grid": [
+
+      ],
+      "added_to_dashboard": null,
+      "removed_from_dashboard": null,
+      "ai_chat": null
+    }
+  }
+}
