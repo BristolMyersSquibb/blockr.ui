@@ -45,10 +45,34 @@ testServer(
     expect_null(parent$ai_chat)
     expect_length(stackable_blocks(), 0)
 
+    MockChat <- R6::R6Class(
+      "MockChat",
+      inherit = asNamespace("ellmer")[["Chat"]],
+      public = list(
+        chat = function(message, ...) {
+          if (identical(message, "Import iris data")) {
+            self$get_tools()[["create_block_tool_factory"]](
+              ctor = "new_dataset_block"
+            )
+            self$get_tools()[["add_new_dataset_block"]](
+              name = "dataset_block",
+              append = FALSE,
+              parms = list(dataset = "iris", package = "datasets")
+            )
+          } else if (identical(message, "Remove block aaaa.")) {
+            self$get_tools()[["remove_block"]](
+              id = "aaaa"
+            )
+          } else stop("Unknown request: ", message)
+        }
+      )
+    )
+
     llm_opt <- withr::with_options(
       list(
         blockr.chat_function = function(system_prompt = NULL, params = NULL) {
-          ellmer::chat_openai(system_prompt = system_prompt, params = params)
+          #ellmer::chat_openai(system_prompt = system_prompt, params = params)
+          MockChat$new(ellmer::Provider("test", "test", "test"))
         }
       ),
       new_llm_model_option()
@@ -73,5 +97,25 @@ testServer(
       `prompt_user_input` = "Import iris data"
     )
     expect_true(parent$ai_chat)
+
+    # Call provider to invoke tools
+    provider()$chat("Import iris data")
+    expect_true("add_new_dataset_block" %in% names(provider()$get_tools()))
+    session$flushReact()
+    expect_identical(parent$scoutbar$action, "add_block")
+    expect_identical(block_name(parent$scoutbar$value[[1]]), "Dataset block")
+    expect_snapshot(app_request())
+
+    # TBD: add block to board manually
+    board_blocks(board$board) <- c(
+      board_blocks(board$board),
+      parent$scoutbar$value
+    )
+    provider()$chat("Remove block aaaa.")
+    expect_snapshot(app_request())
+
+    session$setInputs(
+      `prompt_clean` = 0
+    )
   }
 )
