@@ -7,7 +7,7 @@
 manage_chat(provider, parent, session)
 }
 \arguments{
-\item{provider}{AI provider object. See \url{setup_chat_provider}.}
+\item{provider}{AI provider object. See \url{system_prompt}.}
 
 \item{parent}{Parent global reactive values object.}
 

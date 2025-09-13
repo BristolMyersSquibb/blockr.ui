@@ -1,12 +1,3 @@
-test_that("setup_chat_provider", {
-  # Test basic functionality with chat_openai
-  result <- setup_chat_provider(
-    prompt = "You are a helpful assistant"
-  )
-  expect_s3_class(result, "Chat")
-  expect_identical(result$get_system_prompt(), "You are a helpful assistant")
-})
-
 test_that("setup_chat_task creates ExtendedTask", {
   result <- setup_chat_task()
   expect_s3_class(result, "ExtendedTask")
@@ -54,6 +45,50 @@ testServer(
     expect_null(parent$ai_chat)
     expect_length(stackable_blocks(), 0)
 
+    MockChat <- R6::R6Class(
+      "MockChat",
+      inherit = asNamespace("ellmer")[["Chat"]],
+      public = list(
+        stream_async = function(message, ...) {
+          if (identical(message, "Import iris data")) {
+            self$get_tools()[["create_block_tool_factory"]](
+              ctor = "new_dataset_block"
+            )
+            self$get_tools()[["add_new_dataset_block"]](
+              name = "dataset_block",
+              append = FALSE,
+              parms = list(dataset = "iris", package = "datasets")
+            )
+          } else if (identical(message, "Remove block aaaa")) {
+            self$get_tools()[["remove_block"]](
+              id = "aaaa"
+            )
+          } else {
+            stop("Unknown request: ", message)
+          }
+        }
+      )
+    )
+
+    llm_opt <- withr::with_options(
+      list(
+        blockr.chat_function = function(system_prompt = NULL, params = NULL) {
+          #ellmer::chat_openai(system_prompt = system_prompt, params = params)
+          MockChat$new(ellmer::Provider("test", "test", "test"))
+        }
+      ),
+      new_llm_model_option()
+    )
+
+    board_option_to_userdata <- get(
+      "board_option_to_userdata",
+      envir = asNamespace("blockr.core"),
+      inherits = FALSE,
+      mode = "function"
+    )
+
+    board_option_to_userdata(llm_opt, board$board, session)
+
     session$flushReact()
 
     output$chat_ui
@@ -65,8 +100,6 @@ testServer(
     )
     expect_true(parent$ai_chat)
 
-    # Call provider to invoke tools
-    provider()$chat("Import iris data")
     expect_true("add_new_dataset_block" %in% names(provider()$get_tools()))
     session$flushReact()
     expect_identical(parent$scoutbar$action, "add_block")
@@ -78,7 +111,9 @@ testServer(
       board_blocks(board$board),
       parent$scoutbar$value
     )
-    provider()$chat("Remove block aaaa.")
+    session$setInputs(
+      `prompt_user_input` = "Remove block aaaa"
+    )
     expect_snapshot(app_request())
 
     session$setInputs(
@@ -95,7 +130,38 @@ test_that("Chat app works", {
   app <- shinytest2::AppDriver$new(
     system.file(package = "blockr.ui", "examples/ai-chat/simple"),
     name = "simple-ai-chat",
-    seed = 4323
+    seed = 4323,
+    options = list(
+      blockr.chat_function = function(system_prompt = NULL, params = NULL) {
+        R6::R6Class(
+          "MockChat",
+          inherit = asNamespace("ellmer")[["Chat"]],
+          public = list(
+            stream_async = function(message, ...) {
+              if (identical(message, "Import iris data")) {
+                self$get_tools()[["create_block_tool_factory"]](
+                  ctor = "new_dataset_block"
+                )
+                self$get_tools()[["add_new_dataset_block"]](
+                  name = "dataset_block",
+                  append = FALSE,
+                  parms = list(dataset = "iris", package = "datasets")
+                )
+                coro::async_generator(
+                  function(x) for (elt in x) coro::yield(elt)
+                )(
+                  c("Successfully", "added a block", "that loads \"iris\".")
+                )
+              } else {
+                stop("Unknown request: ", message)
+              }
+            }
+          )
+        )$new(
+          ellmer::Provider("test", "test", "test")
+        )
+      }
+    )
   )
 
   Sys.sleep(4)
