@@ -97,7 +97,7 @@ testServer(
 
     session$flushReact()
 
-    while(append_stream_task$status() == "running") {
+    while (append_stream_task$status() == "running") {
       session$elapse(250)
     }
 
@@ -120,7 +120,7 @@ testServer(
     )
     session$flushReact()
 
-    while(append_stream_task$status() == "running") {
+    while (append_stream_task$status() == "running") {
       session$elapse(250)
     }
 
@@ -134,7 +134,7 @@ testServer(
     )
     session$flushReact()
 
-    while(append_stream_task$status() == "running") {
+    while (append_stream_task$status() == "running") {
       session$elapse(250)
     }
 
