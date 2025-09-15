@@ -45,37 +45,33 @@ testServer(
     expect_null(parent$ai_chat)
     expect_length(stackable_blocks(), 0)
 
-    MockChat <- R6::R6Class(
-      "MockChat",
-      inherit = asNamespace("ellmer")[["Chat"]],
-      public = list(
-        stream_async = function(message, ...) {
-          if (identical(message, "Import iris data")) {
-            self$get_tools()[["create_block_tool_factory"]](
-              ctor = "new_dataset_block"
-            )
-            self$get_tools()[["add_new_dataset_block"]](
-              name = "dataset_block",
-              append = FALSE,
-              parms = list(dataset = "iris", package = "datasets")
-            )
-          } else if (identical(message, "Remove block aaaa")) {
-            self$get_tools()[["remove_block"]](
-              id = "aaaa"
-            )
-          } else {
-            stop("Unknown request: ", message)
-          }
-        }
-      )
-    )
-
     llm_opt <- withr::with_options(
       list(
-        blockr.chat_function = function(system_prompt = NULL, params = NULL) {
-          #ellmer::chat_openai(system_prompt = system_prompt, params = params)
-          MockChat$new(ellmer::Provider("test", "test", "test"))
-        }
+        blockr.chat_function = mock_chat(
+          stream_async = function(msg, ...) {
+            if (identical(msg, "Import iris data")) {
+              call_tool(self, "create_block_tool_factory",
+                ctor = "new_dataset_block"
+              )
+              call_tool(self, "add_new_dataset_block",
+                name = "dataset_block",
+                append = FALSE,
+                parms = list(dataset = "iris", package = "datasets")
+              )
+              seq_gen("Successfully", "added a block", "that loads \"iris\".")
+            } else if (grepl("^Remove block", msg)) {
+              blk <- sub("^Remove block ", "", msg)
+              res <- call_tool(self, "remove_block", id = blk)
+              if ("error" %in% names(res)) {
+                seq_gen("Could not", "remove block", blk)
+              } else {
+                seq_gen("Successfully", "removed block", blk)
+              }
+            } else {
+              stop("Unknown request: ", msg)
+            }
+          }
+        )
       ),
       new_llm_model_option()
     )
@@ -96,24 +92,52 @@ testServer(
     expect_true(length(provider()$get_tools()) > 0)
     # Simulate a chat input
     session$setInputs(
-      `prompt_user_input` = "Import iris data"
+      prompt_user_input = "Import iris data"
     )
-    expect_true(parent$ai_chat)
 
-    expect_true("add_new_dataset_block" %in% names(provider()$get_tools()))
     session$flushReact()
-    expect_identical(parent$scoutbar$action, "add_block")
-    expect_identical(block_name(parent$scoutbar$value[[1]]), "Dataset block")
+
+    while(append_stream_task$status() == "running") {
+      session$elapse(250)
+    }
+
+    expect_identical(append_stream_task$status(), "success")
     expect_snapshot(app_request())
 
-    # TBD: add block to board manually
+    expect_identical(parent$scoutbar$action, "add_block")
+    expect_s3_class(parent$scoutbar$value, "blocks")
+    expect_length(parent$scoutbar$value, 1L)
+
+    names(parent$scoutbar$value) <- "iris_data"
+
     board_blocks(board$board) <- c(
       board_blocks(board$board),
       parent$scoutbar$value
     )
+
     session$setInputs(
-      `prompt_user_input` = "Remove block aaaa"
+      prompt_user_input = "Remove block iris_data"
     )
+    session$flushReact()
+
+    while(append_stream_task$status() == "running") {
+      session$elapse(250)
+    }
+
+    expect_snapshot(app_request())
+
+    to_rm <- which(names(board_blocks(board$board)) == "iris_data")
+    board_blocks(board$board) <- board_blocks(board$board)[-to_rm]
+
+    session$setInputs(
+      prompt_user_input = "Remove block iris_data"
+    )
+    session$flushReact()
+
+    while(append_stream_task$status() == "running") {
+      session$elapse(250)
+    }
+
     expect_snapshot(app_request())
 
     session$setInputs(
@@ -132,35 +156,23 @@ test_that("Chat app works", {
     name = "simple-ai-chat",
     seed = 4323,
     options = list(
-      blockr.chat_function = function(system_prompt = NULL, params = NULL) {
-        R6::R6Class(
-          "MockChat",
-          inherit = asNamespace("ellmer")[["Chat"]],
-          public = list(
-            stream_async = function(message, ...) {
-              if (identical(message, "Import iris data")) {
-                self$get_tools()[["create_block_tool_factory"]](
-                  ctor = "new_dataset_block"
-                )
-                self$get_tools()[["add_new_dataset_block"]](
-                  name = "dataset_block",
-                  append = FALSE,
-                  parms = list(dataset = "iris", package = "datasets")
-                )
-                coro::async_generator(
-                  function(x) for (elt in x) coro::yield(elt)
-                )(
-                  c("Successfully", "added a block", "that loads \"iris\".")
-                )
-              } else {
-                stop("Unknown request: ", message)
-              }
-            }
-          )
-        )$new(
-          ellmer::Provider("test", "test", "test")
-        )
-      }
+      blockr.chat_function = mock_chat(
+        stream_async = function(msg, ...) {
+          if (identical(msg, "Import iris data")) {
+            call_tool(self, "create_block_tool_factory",
+              ctor = "new_dataset_block"
+            )
+            call_tool(self, "add_new_dataset_block",
+              name = "dataset_block",
+              append = FALSE,
+              parms = list(dataset = "iris", package = "datasets")
+            )
+            seq_gen("Successfully", "added a block", "that loads \"iris\".")
+          } else {
+            stop("Unknown request: ", msg)
+          }
+        }
+      )
     )
   )
 

@@ -24,6 +24,14 @@ chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
     id,
     function(input, output, session) {
       ns <- session$ns
+
+      # Necessary to handle AI mode
+      isolate({
+        parent$ai_chat <- NULL
+      })
+
+      append_stream_task <- setup_chat_task(session)
+
       # Dynamic provider support through board options
       provider <- reactiveVal(NULL)
       # Request to store tool results
@@ -103,7 +111,45 @@ chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
         }
       )
 
-      res <- manage_chat(provider, parent, session)
+      observeEvent(input$prompt_user_input, {
+        # Switch to AI mode. This is used to avoid certain behavior
+        # that normally happen in the app when it is manually driven
+        # by a human. With AI this is slightly different and some of
+        # these action should not happen.
+        parent$ai_chat <- TRUE
+        append_stream_task$invoke(provider(), "prompt", input$prompt_user_input)
+      })
+
+      res <- reactive({
+        if (append_stream_task$status() == "success") {
+          provider()$last_turn()
+        }
+      })
+
+      observeEvent(req(append_stream_task$status() == "error"), {
+        tryCatch(append_stream_task$result(), error = function(e) {
+          showNotification(
+            sprintf("Error from AI provider: %s", e$body),
+            type = "error"
+          )
+        })
+        parent$ai_chat <- NULL
+      })
+
+      observeEvent(input$prompt_clean, {
+        chat_clear("prompt", session)
+        # This also erase the chat memory and not just the UI
+        #openai$set_turns(list())
+      })
+
+      observeEvent(res(), {
+        # Once the response is received, we signal the app
+        # that the AI chat is done.
+        parent$ai_chat <- NULL
+        # Need to reset scoutbar
+        parent$scoutbar$action <- parent$scoutbar$value <- NULL
+      })
+
       # We probably can comment this below
       #chat_restore("prompt", provider())
 

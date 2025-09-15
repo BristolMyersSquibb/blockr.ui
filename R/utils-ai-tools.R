@@ -23,6 +23,7 @@ system_prompt <- function() {
 }
 
 #' Create a task to append chat messages
+#' @param session Shiny session object.
 #' @keywords internal
 setup_chat_task <- function(session) {
   ExtendedTask$new(
@@ -39,62 +40,6 @@ setup_chat_task <- function(session) {
       )
     }
   )
-}
-
-#' Create a chat server callbacks
-#' @param provider AI provider object. See \url{system_prompt}.
-#' @param parent Parent global reactive values object.
-#' @param session Shiny session object.
-manage_chat <- function(provider, parent, session) {
-  input <- session$input
-
-  # Necessary to handle AI mode
-  isolate({
-    parent$ai_chat <- NULL
-  })
-
-  append_stream_task <- setup_chat_task(session)
-
-  observeEvent(input$prompt_user_input, {
-    # Switch to AI mode. This is used to avoid certain behavior
-    # that normally happen in the app when it is manually driven
-    # by a human. With AI this is slightly different and some of
-    # these action should not happen.
-    parent$ai_chat <- TRUE
-    append_stream_task$invoke(provider(), "prompt", input$prompt_user_input)
-  })
-
-  res <- reactive({
-    if (append_stream_task$status() == "success") {
-      provider()$last_turn()
-    }
-  })
-
-  observeEvent(req(append_stream_task$status() == "error"), {
-    tryCatch(append_stream_task$result(), error = function(e) {
-      showNotification(
-        sprintf("Error from AI provider: %s", e$body),
-        type = "error"
-      )
-    })
-    parent$ai_chat <- NULL
-  })
-
-  observeEvent(input$prompt_clean, {
-    chat_clear("prompt", session)
-    # This also erase the chat memory and not just the UI
-    #openai$set_turns(list())
-  })
-
-  observeEvent(res(), {
-    # Once the response is received, we signal the app
-    # that the AI chat is done.
-    parent$ai_chat <- NULL
-    # Need to reset scoutbar
-    parent$scoutbar$action <- parent$scoutbar$value <- NULL
-  })
-
-  return(res)
 }
 
 #' Create a block tool factory
