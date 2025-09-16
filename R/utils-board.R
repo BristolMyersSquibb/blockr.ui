@@ -437,7 +437,10 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
               infos <- file.info(path)
               scout_action(
                 id = sprintf("%s@restore_board", path),
-                label = strsplit(path, path.expand(location))[[1]][2],
+                label = strsplit(
+                  path,
+                  path.expand(location)
+                )[[1]][2],
                 description = sprintf(
                   "Created by %s. Date: %s. Size: %s KB",
                   infos[["uname"]],

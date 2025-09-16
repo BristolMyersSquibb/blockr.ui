@@ -112,9 +112,9 @@ create_block_tool_factory <- function(
           app_request(res)
 
           # Check that the block can be built.
-          new_blk <- tryCatch(
+          tryCatch(
             {
-              as_blocks(
+              new_blk <- as_blocks(
                 do.call(
                   create_block,
                   c(
@@ -134,9 +134,7 @@ create_block_tool_factory <- function(
           # Needs a reactive context... will happen once
           observeEvent(TRUE, {
             parent$scoutbar$action <- "add_block"
-            if (is_block(new_blk)) {
-              parent$scoutbar$value <- new_blk
-            }
+            parent$scoutbar$value <- new_blk
             if (dat$append) {
               parent$append_block <- TRUE
             }
