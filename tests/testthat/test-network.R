@@ -1,6 +1,3 @@
-library(blockr.core)
-library(blockr.dplyr)
-
 test_blk <- new_dataset_block()
 attr(test_blk, "uid") <- "test"
 
@@ -199,10 +196,10 @@ testServer(
     expect_identical(parent$scoutbar$trigger, "links")
 
     # Mock add other block (+ append)
-    select_blk <- new_select_block()
-    attr(select_blk, "uid") <- "select_test"
+    subset_blk <- new_subset_block()
+    attr(subset_blk, "uid") <- "subset_test"
     mock_add_block(
-      select_blk,
+      subset_blk,
       board,
       parent,
       session
@@ -210,7 +207,7 @@ testServer(
     expect_s3_class(parent$added_edge, "links")
     link <- as.data.frame(parent$added_edge[[1]])
     expect_identical(link$from, "test")
-    expect_identical(link$to, "select_test")
+    expect_identical(link$to, "subset_test")
     expect_identical(link$input, "data")
     expect_identical(update()$links$add, parent$added_edge)
     expect_false(parent$append_block)
@@ -226,14 +223,14 @@ testServer(
     )
     session$setInputs(
       "added_edge" = list(
-        source = "select_test",
+        source = "subset_test",
         target = "head_test",
         id = "dummy_edge_id"
       )
     )
     expect_identical(update()$links$add, parent$added_edge)
     link <- as.data.frame(parent$added_edge[[1]])
-    expect_identical(link$from, "select_test")
+    expect_identical(link$from, "subset_test")
     expect_identical(link$to, "head_test")
     expect_identical(link$input, "data")
 
@@ -280,11 +277,11 @@ testServer(
     expect_identical(parent$removed_from_dashboard, parent$selected_block)
 
     # Removed node and block
-    session$setInputs("remove_node" = "select_test")
-    expect_identical(parent$removed_block, "select_test")
+    session$setInputs("remove_node" = "subset_test")
+    expect_identical(parent$removed_block, "subset_test")
     expect_identical(parent$removed_edge, board_links(board$board)$id)
     mock_remove_block(
-      "select_test",
+      "subset_test",
       board,
       parent,
       session

@@ -1,9 +1,3 @@
-library(shinytest2)
-library(blockr.dplyr)
-library(blockr.sdtm)
-library(blockr.ai)
-library(blockr.io)
-
 mock_add_block <- function(blk, board_update, parent, session) {
   new_blk <- as_blocks(blk)
   board_update(
@@ -172,7 +166,7 @@ test_that("Board dock app works", {
 
   # We test from an existing dock so that we can fix block, stack and link IDs
   # to avoid randomness failure
-  app <- AppDriver$new(
+  app <- shinytest2::AppDriver$new(
     system.file(package = "blockr.ui", "examples/dashboard/non-empty"),
     name = "dashboard-non-empty-app",
     seed = 4323

@@ -1,6 +1,3 @@
-library(blockr.core)
-library(blockr.dplyr)
-
 mock_add_block <- function(blk, rv, parent, session) {
   board_blocks(rv$board) <- c(board_blocks(rv$board), as_blocks(blk))
   attr(blk, "uid") <- tail(board_block_ids(rv$board), n = 1)
