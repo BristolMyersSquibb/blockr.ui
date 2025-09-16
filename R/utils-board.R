@@ -415,6 +415,10 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
       # TBD: this isn't optimal. scoutbaR should
       # be able to allow to append/remove/modify actions
       # instead of having to re-create the whole list.
+      location <- attr(
+        get_board_option_or_default("snapshot", dag_board_options(), session),
+        "location"
+      )
       new_actions <- list(
         scout_page(
           label = "Add a block",
@@ -430,17 +434,7 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
                 id = sprintf("%s@restore_board", path),
                 label = strsplit(
                   path,
-                  path.expand(
-                    attr(
-                      get_board_option_or_default(
-                        "snapshot",
-                        dag_board_options(),
-                        session
-                      ),
-                      "location"
-                    )
-                  ),
-                  ""
+                  path.expand(location)
                 )[[1]][2],
                 description = sprintf(
                   "Created by %s. Date: %s. Size: %s KB",
