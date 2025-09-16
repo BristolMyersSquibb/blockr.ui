@@ -90,18 +90,7 @@ testServer(
   args = list(
     board = reactiveValues(
       blocks = list(),
-      board = new_dag_board(
-        #blocks = c(
-        #  a = new_dataset_block("BOD"),
-        #  b = new_dataset_block("ChickWeight"),
-        #  c = new_merge_block("Time")
-        #),
-        #links = c(
-        #  ac = new_link("a", "c", "x"),
-        #  bc = new_link("b", "c", "y")
-        #),
-        #stacks = list(ac = c("a", "c"))
-      ),
+      board = empty_board,
       board_id = "board",
       inputs = list(),
       links = list(),
