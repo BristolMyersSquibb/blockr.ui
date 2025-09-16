@@ -144,7 +144,9 @@ context_menu_items <- function(x) {
       add_block_ctxm
     )
 
-    return(res)
+    return(
+      set_names(res, chr_ply(res, context_menu_entry_id))
+    )
   }
 
   UseMethod("context_menu_items")
@@ -162,7 +164,7 @@ context_menu_items.board_module <- function(x) {
 
   res <- validate_context_menu_entries(res)
 
-  res
+  set_names(res, chr_ply(res, context_menu_entry_id))
 }
 
 #' @rdname context-menu
@@ -179,7 +181,9 @@ context_menu_items.list <- function(x) {
     validate_context_menu_entries(i)
   }
 
-  do.call("c", res)
+  res <- validate_context_menu_entries(do.call("c", res))
+
+  set_names(res, chr_ply(res, context_menu_entry_id))
 }
 
 #' @rdname context-menu

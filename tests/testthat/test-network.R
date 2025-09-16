@@ -83,27 +83,10 @@ mocked_network_state <- list(
   combos = list()
 )
 
-modules <- board_modules(new_dag_board())
-
-ctx_menu_items <- unlst(
-  c(
-    list(
-      list(
-        create_edge_ctxm,
-        remove_node_ctxm,
-        remove_edge_ctxm,
-        append_node_ctxm,
-        create_stack_ctxm,
-        remove_stack_ctxm,
-        add_block_ctxm
-      )
-    ),
-    lapply(modules, board_module_context_menu)
-  )
-)
+empty_board <- new_dag_board()
 
 testServer(
-  gen_add_rm_link_server(ctx_menu_items),
+  gen_add_rm_link_server(context_menu_items(empty_board)),
   args = list(
     board = reactiveValues(
       blocks = list(),
