@@ -532,9 +532,10 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
 #' Remove node from g6 instance
 #'
 #' @param selected UID (character string) of node to remove.
+#' @param vals Global reactive values.
 #' @param session Shiny session object.
 #' @keywords internal
-remove_node <- function(selected, session) {
+remove_node <- function(selected, vals, session) {
   stopifnot(
     is.character(selected),
     nchar(selected) > 0
@@ -546,6 +547,8 @@ remove_node <- function(selected, session) {
   g6_proxy(ns("network")) |>
     g6_set_nodes(setNames(list(""), selected)) |>
     g6_remove_nodes(ids = selected)
+
+  vals
 }
 
 
@@ -554,10 +557,10 @@ remove_node <- function(selected, session) {
 #' Update dataframe for visNetwork graph
 #'
 #' @param selected UID (character string) of edge to remove.
-#' @param update Reactive values for board objects callback.
+#' @param vals Reactive values containing dataframe representing edges data.
 #' @param session Shiny session object.
 #' @keywords internal
-remove_edge <- function(selected, update, session) {
+remove_edge <- function(selected, vals, session) {
   stopifnot(
     is.character(selected),
     nchar(selected) > 0
@@ -565,14 +568,12 @@ remove_edge <- function(selected, update, session) {
 
   ns <- session$ns
 
-  g6_proxy(ns("network")) |>
-    g6_remove_edges(ids = selected)
+  vals$removed_edge <- selected
 
-  update(
-    list(
-      links = list(rm = selected)
-    )
-  )
+  g6_proxy(ns("network")) |>
+    g6_remove_edges(ids = vals$removed_edge)
+
+  vals
 }
 
 #' Remove a node and associated edges
@@ -580,16 +581,14 @@ remove_edge <- function(selected, update, session) {
 #' Combine \link{remove_node} with \link{remove_edge}.
 #'
 #' @param selected UID (character string) of node to remove.
-#' @param update Reactive values for board objects callback.
+#' @param vals Reactive values with dataframe representing nodes data.
 #' @param rv Board reactive values. Read-only.
 #' @param session Shiny session object.
 #' @keywords internal
-cleanup_node <- function(selected, update, rv, session) {
-  remove_node(selected, session)
+cleanup_node <- function(selected, vals, rv, session) {
+  remove_node(selected, vals, session)
   # Need to cleanup any edge associated with this node
   edges <- as.data.frame(board_links(rv$board))
-  # Don't consider edge already removed by a previous operation
-  edges <- edges[edges$id != update()$links$rm, ]
   if (nrow(edges) > 0) {
     # loop over all edges where the target node is part
     edges_to_remove <- c(
@@ -603,9 +602,10 @@ cleanup_node <- function(selected, update, rv, session) {
       ]
     )
     for (edge in edges_to_remove) {
-      remove_edge(edge, update, session)
+      remove_edge(edge, vals, session)
     }
   }
+  vals
 }
 
 
@@ -632,7 +632,7 @@ create_edge <- function(new, vals, rv, session) {
 
     # Cleanup node when it was created from Append block
     if (vals$append_block) {
-      remove_node(new$target, session)
+      remove_node(new$target, vals, session)
       # send callback to add/rm block plugin
       vals$cancelled_edge <- new$target
       # Re-select source node
