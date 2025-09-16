@@ -2,6 +2,10 @@
 % Please edit documentation in R/context-menu.R
 \name{new_context_menu_entry}
 \alias{new_context_menu_entry}
+\alias{context_menu_items}
+\alias{context_menu_items.board_module}
+\alias{context_menu_items.list}
+\alias{context_menu_items.dag_board}
 \title{Create a context menu entry}
 \usage{
 new_context_menu_entry(
@@ -11,6 +15,14 @@ new_context_menu_entry(
   condition = TRUE,
   id = tolower(gsub(" +", "_", name))
 )
+
+context_menu_items(x)
+
+\method{context_menu_items}{board_module}(x)
+
+\method{context_menu_items}{list}(x)
+
+\method{context_menu_items}{dag_board}(x)
 }
 \arguments{
 \item{name}{Name of the context menu entry.}
@@ -23,6 +35,8 @@ new_context_menu_entry(
 
 \item{id}{Unique identifier for the context menu entry.
 Infered from \code{name} if not provided.}
+
+\item{x}{Object}
 }
 \description{
 Adds a new entry to the context menu of a board.

@@ -3,6 +3,7 @@
 \name{run_demo_app}
 \alias{run_demo_app}
 \alias{new_dag_board}
+\alias{is_dag_board}
 \alias{dag_board_options}
 \title{Demo app}
 \usage{
@@ -15,6 +16,8 @@ new_dag_board(
   class = character()
 )
 
+is_dag_board(x)
+
 dag_board_options()
 }
 \arguments{
@@ -25,6 +28,8 @@ dag_board_options()
 \item{options}{Board options (see \code{\link[=dag_board_options]{dag_board_options()}}).}
 
 \item{class}{Additional class(es).}
+
+\item{x}{(Board) object}
 }
 \description{
 Run demo app

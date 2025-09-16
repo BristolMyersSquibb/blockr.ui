@@ -111,12 +111,11 @@ options_ui <- function(id, x, ...) {
 #'
 #' @param id Namespace ID.
 #' @param x Board.
-#' @param plugins UI for board plugins.
 #' @param ... Generic consistency.
 #' @rdname board_ui
 #' @export
-board_ui.dag_board <- function(id, x, plugins = list(), ...) {
-  plugins <- as_plugins(plugins)
+board_ui.dag_board <- function(id, x, ...) {
+  plugins <- board_plugins(x)
 
   toolbar_plugins <- c(
     "preserve_board",

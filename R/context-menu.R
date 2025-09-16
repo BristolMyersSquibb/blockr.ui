@@ -126,3 +126,67 @@ validate_context_menu_entries <- function(x) {
 
   invisible(x)
 }
+
+#' @param x Object
+#' @rdname context-menu
+#' @export
+context_menu_items <- function(x) {
+
+  if (missing(x)) {
+
+    res <- list(
+      create_edge_ctxm,
+      remove_node_ctxm,
+      remove_edge_ctxm,
+      append_node_ctxm,
+      create_stack_ctxm,
+      remove_stack_ctxm,
+      add_block_ctxm
+    )
+
+    return(res)
+  }
+
+  UseMethod("context_menu_items")
+}
+
+#' @rdname context-menu
+#' @export
+context_menu_items.board_module <- function(x) {
+
+  res <- board_module_context_menu(x)
+
+  if (is_context_menu_entry(res)) {
+    return(list(res))
+  }
+
+  res <- validate_context_menu_entries(res)
+
+  res
+}
+
+#' @rdname context-menu
+#' @export
+context_menu_items.list <- function(x) {
+
+  res <- lapply(x, context_menu_items)
+
+  is_ctxm <- lgl_ply(x, is_context_menu_entry)
+
+  res[is_ctxm] <- lapply(res[is_ctxm], list)
+
+  for (i in res) {
+    validate_context_menu_entries(i)
+  }
+
+  do.call("c", res)
+}
+
+#' @rdname context-menu
+#' @export
+context_menu_items.dag_board <- function(x) {
+  c(
+    context_menu_items(),
+    context_menu_items(board_modules(x))
+  )
+}

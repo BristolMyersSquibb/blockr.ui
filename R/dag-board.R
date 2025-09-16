@@ -28,6 +28,13 @@ new_dag_board <- function(
   )
 }
 
+#' @param x (Board) object
+#' @rdname run_demo_app
+#' @export
+is_dag_board <- function(x) {
+  inherits(x, "dag_board") && is_board(x)
+}
+
 #' @rdname run_demo_app
 #' @export
 dag_board_options <- function() {
@@ -50,37 +57,29 @@ dag_board_options <- function() {
 }
 
 #' @export
-serve.dag_board <- function(x, id = "main", ...) {
-  modules <- board_modules(x)
+board_plugins.dag_board <- function(x, which = NULL) {
 
-  ctx_menu_items <- unlst(
-    c(
-      list(
-        list(
-          create_edge_ctxm,
-          remove_node_ctxm,
-          remove_edge_ctxm,
-          append_node_ctxm,
-          create_stack_ctxm,
-          remove_stack_ctxm,
-          add_block_ctxm
-        )
-      ),
-      lapply(modules, board_module_context_menu)
-    )
-  )
-
-  plugins <- plugins(
+  res <- plugins(
     preserve_board(server = ser_deser_server, ui = ser_deser_ui),
     manage_blocks(server = add_rm_block_server, ui = add_rm_block_ui),
     manage_links(
-      server = gen_add_rm_link_server(ctx_menu_items),
+      server = gen_add_rm_link_server(context_menu_items(x)),
       ui = add_rm_link_ui
     ),
     manage_stacks(server = add_rm_stack_server, ui = add_rm_stack_ui),
     generate_code(server = generate_code_server, ui = generate_code_ui),
     notify_user()
   )
+
+  if (is.null(which)) {
+    return(res)
+  }
+
+  res[which]
+}
+
+#' @export
+serve.dag_board <- function(x, id = "main", ...) {
 
   ui <- do.call(
     page_fillable,
@@ -89,14 +88,14 @@ serve.dag_board <- function(x, id = "main", ...) {
         padding = 0,
         gap = 0,
         shinyjs::useShinyjs(),
-        add_prismjs_deps(add_busy_load_deps(main_ui(id, x, plugins)))
+        add_prismjs_deps(add_busy_load_deps(main_ui(id, x)))
       ),
       unname(list(...))
     )
   )
 
   server <- function(input, output, session) {
-    main_server(id, x, plugins, modules)
+    main_server(id, x)
   }
 
   shinyApp(add_blockr.ui_deps(ui), server)
