@@ -13,32 +13,19 @@ init_chat_message <- function(provider) {
   )
 }
 
-default_chat <- function(...) {
-  ellmer::chat_openai(..., model = "gpt-4o")
-}
-
 #' Utility functions to create AI tools for blockr.ui
 #'
-#' @param chat [ellmer::chat()]-like function.
-#' @param prompt System prompt to use for the AI provider. Best
-#' to create a markdown file with instructions.
-#' @param ... Additional arguments to pass to the provider.
 #' @keywords internal
-setup_chat_provider <- function(
-  chat = blockr_option("chat_function", default_chat),
-  prompt = readLines(system.file(
-    "examples/ai-chat/rules.md",
-    package = "blockr.ui"
-  )),
-  ...
-) {
-
-  chat(..., system_prompt = prompt)
+system_prompt <- function() {
+  readLines(
+    system.file("examples/ai-chat/rules.md", package = "blockr.ui")
+  )
 }
 
 #' Create a task to append chat messages
+#' @param session Shiny session object.
 #' @keywords internal
-setup_chat_task <- function() {
+setup_chat_task <- function(session) {
   ExtendedTask$new(
     function(client, ui_id, user_input) {
       promises::then(
@@ -48,67 +35,11 @@ setup_chat_task <- function() {
           stream = "content"
         )),
         function(stream) {
-          chat_append(ui_id, stream)
+          chat_append(ui_id, stream, session = session)
         }
       )
     }
   )
-}
-
-#' Create a chat server callbacks
-#' @param provider AI provider object. See \url{setup_chat_provider}.
-#' @param parent Parent global reactive values object.
-#' @param session Shiny session object.
-manage_chat <- function(provider, parent, session) {
-  input <- session$input
-
-  # Necessary to handle AI mode
-  isolate({
-    parent$ai_chat <- NULL
-  })
-
-  append_stream_task <- setup_chat_task()
-
-  observeEvent(input$prompt_user_input, {
-    # Switch to AI mode. This is used to avoid certain behavior
-    # that normally happen in the app when it is manually driven
-    # by a human. With AI this is slightly different and some of
-    # these action should not happen.
-    parent$ai_chat <- TRUE
-    append_stream_task$invoke(provider(), "prompt", input$prompt_user_input)
-  })
-
-  res <- reactive({
-    if (append_stream_task$status() == "success") {
-      provider()$last_turn()
-    }
-  })
-
-  observeEvent(req(append_stream_task$status() == "error"), {
-    tryCatch(append_stream_task$result(), error = function(e) {
-      showNotification(
-        sprintf("Error from AI provider: %s", e$body),
-        type = "error"
-      )
-    })
-    parent$ai_chat <- NULL
-  })
-
-  observeEvent(input$prompt_clean, {
-    chat_clear("prompt")
-    # This also erase the chat memory and not just the UI
-    #openai$set_turns(list())
-  })
-
-  observeEvent(res(), {
-    # Once the response is received, we signal the app
-    # that the AI chat is done.
-    parent$ai_chat <- NULL
-    # Need to reset scoutbar
-    parent$scoutbar$action <- parent$scoutbar$value <- NULL
-  })
-
-  return(res)
 }
 
 #' Create a block tool factory
