@@ -41,14 +41,18 @@ ser_deser_server <- function(id, board, parent, ...) {
         # many intermediate states as json. This also leaves
         # enough time for the network to stabilize properly
         # and have the correct node coordinates.
-        snapshot_trigger <- reactive({
-          list(
-            board_links(board$board),
-            lapply(parent$module_state, reval),
-            get_blocks_state(board) # Capture any block state change (input change, ...)
-          )
-        }) |>
-          debounce(2000)
+        snapshot_trigger <- debounce(
+          reactive(
+            {
+              list(
+                board_links(board$board),
+                lapply(parent$module_state, reval),
+                get_blocks_state(board) # Capture any block state change (input change, ...)
+              )
+            }
+          ),
+          2000
+        )
 
         # Auto save
         observeEvent(

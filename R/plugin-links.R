@@ -208,17 +208,19 @@ gen_add_rm_link_server <- function(context_menu) {
 
         # Unselect node when panel is closed
         observeEvent(parent$unselected_block, {
-          g6_proxy(ns("network")) |>
-            g6_set_nodes(setNames(
+          g6_set_nodes(
+            g6_proxy(ns("network")),
+            setNames(
               list(selected = ""),
               parent$unselected_block
-            ))
+            )
+          )
           parent$unselected_block <- NULL
         })
 
         observeEvent(parent$removed_block, {
           # Note: links are cleaned in the add_rm_blocks plugin
-          lapply(parent$removed_block, \(removed) {
+          lapply(parent$removed_block, function(removed) {
             cleanup_node(removed, parent, board, session)
           })
         })

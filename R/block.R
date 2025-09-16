@@ -99,7 +99,7 @@ remove_block_panels <- function(ids, panels) {
   }
   ids <- ids[in_dock]
 
-  lapply(ids, \(id) {
+  lapply(ids, function(id) {
     remove_panel("layout", paste0("block-", id))
   })
 }
@@ -132,7 +132,7 @@ insert_block_ui.dag_board <- function(
   # This can happen when we restore a board with multiple blocks.
   # Insert all the UI in the hidden offcanvas. Then we can show them
   # on demand ...
-  lapply(seq_along(blocks), \(i) {
+  lapply(seq_along(blocks), function(i) {
     blk <- blocks[i]
     blk_ui <- block_ui(id, x, blk)
 
@@ -171,7 +171,7 @@ remove_block_ui.dag_board <- function(
     blocks <- board_blocks(x)
   }
 
-  lapply(seq_along(blocks), \(i) {
+  lapply(seq_along(blocks), function(i) {
     blk <- blocks[i]
 
     # Cleanup any existing UI for this block if we are refreshing the UI
@@ -317,7 +317,7 @@ get_block_metadata <- function(x) {
 get_blocks_state <- function(rv) {
   stopifnot(is_board(rv$board))
   req(length(board_blocks(rv$board)) > 0)
-  lapply(rv$blocks, \(blk) {
+  lapply(rv$blocks, function(blk) {
     blk$server$result()
   })
 }

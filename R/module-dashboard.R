@@ -63,7 +63,7 @@ dashboard_server <- function(board, update, session, parent, ...) {
   # Removed block(s) must not be referenced in the grid and
   # the panel must be removed from the dock.
   observeEvent(parent$removed_block, {
-    lapply(parent$removed_block, \(removed) {
+    lapply(parent$removed_block, function(removed) {
       # Signal to remove panel from dock.
       # Panel will be removed by manage_dashboard.
       parent$in_grid[[removed]] <- NULL
@@ -79,7 +79,7 @@ dashboard_server <- function(board, update, session, parent, ...) {
   # below when we can do that.
   #lapply(
   #  isolate(parent$in_grid),
-  #  \(id) {
+  #  function(id) {
   #    generate_dashboard_blk_output(
   #      id,
   #      board,
