@@ -202,12 +202,14 @@ board_restore <- function(board, update, session, parent, ...) {
   NULL
 }
 
-get_block_panels <- function(panels) {
+get_block_panels <- function(panels, pattern = "block-") {
+  # TBD: pattern is hardcoded because we prefix our panels
+  # with block- elsewhere... We could centralise that.
   gsub(
-    "block-",
+    pattern,
     "",
     grep(
-      "block",
+      pattern,
       panels,
       value = TRUE
     )
@@ -267,7 +269,10 @@ build_layout <- function(modules, plugins) {
       {
         req(
           parent$refreshed == "restore-dock",
-          length(input$layout_state$panels) == length(parent$app_layout$panels)
+          setequal(
+            names(input$layout_state$panels),
+            names(parent$app_layout$panels)
+          )
         )
       },
       {
