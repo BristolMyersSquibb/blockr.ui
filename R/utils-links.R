@@ -704,7 +704,8 @@ register_node_validation <- function(id, rv, vals, session) {
       req(
         length(board_block_ids(rv$board)) > 0,
         # Don't trigger if node is removed
-        id %in% board_block_ids(rv$board)
+        id %in% board_block_ids(rv$board),
+        is.null(vals$refreshed)
       )
       reactiveValuesToList(rv$blocks[[id]]$server$cond)
     },
