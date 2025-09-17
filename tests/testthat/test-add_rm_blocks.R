@@ -12,28 +12,28 @@ testServer(
   ),
   {
     # Test adding new block
-    dot_args$parent$scoutbar <- list(
+    parent$scoutbar <- list(
       action = "add_block",
       value = "dataset_block"
     )
     session$flushReact()
-    expect_identical(dot_args$parent$scoutbar$value, "dataset_block")
-    expect_s3_class(dot_args$parent$added_block, "dataset_block")
-    expect_type(attr(dot_args$parent$added_block, "uid"), "character")
+    expect_identical(parent$scoutbar$value, "dataset_block")
+    expect_s3_class(parent$added_block, "dataset_block")
+    expect_type(attr(parent$added_block, "uid"), "character")
     expect_s3_class(update()$blocks$add, "blocks")
 
     # Test removing block
-    dot_args$parent$removed_block <- attr(dot_args$parent$added_block, "uid")
+    parent$removed_block <- attr(parent$added_block, "uid")
     session$flushReact()
-    expect_identical(update()$blocks$rm, dot_args$parent$removed_block)
+    expect_identical(update()$blocks$rm, parent$removed_block)
 
     # Test edge cancellation
-    dot_args$parent$cancelled_edge <- "test2"
+    parent$cancelled_edge <- "test2"
     session$flushReact()
     expect_identical(update()$blocks$rm, "test2")
 
     # Verify added_block is reset after removal
-    expect_null(dot_args$parent$added_block)
+    expect_null(parent$added_block)
   }
 )
 

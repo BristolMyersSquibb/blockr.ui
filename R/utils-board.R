@@ -38,15 +38,15 @@ blk_icon <- function(category, class = NULL) {
 #' @keywords internal
 blk_choices <- function() {
   blk_cats <- sort(
-    unique(chr_ply(available_blocks(), \(b) attr(b, "category")))
+    unique(chr_ply(available_blocks(), function(b) attr(b, "category")))
   )
 
-  lapply(blk_cats, \(cat) {
+  lapply(blk_cats, function(cat) {
     scout_section(
       label = cat,
       .list = dropNulls(
         unname(
-          lapply(available_blocks(), \(choice) {
+          lapply(available_blocks(), function(choice) {
             if (attr(choice, "category") == cat) {
               scout_action(
                 id = sprintf("%s@add_block", attr(choice, "classes")[1]),
@@ -111,12 +111,11 @@ options_ui <- function(id, x, ...) {
 #'
 #' @param id Namespace ID.
 #' @param x Board.
-#' @param plugins UI for board plugins.
 #' @param ... Generic consistency.
 #' @rdname board_ui
 #' @export
-board_ui.dag_board <- function(id, x, plugins = list(), ...) {
-  plugins <- as_plugins(plugins)
+board_ui.dag_board <- function(id, x, ...) {
+  plugins <- board_plugins(x)
 
   toolbar_plugins <- c(
     "preserve_board",
@@ -125,7 +124,7 @@ board_ui.dag_board <- function(id, x, plugins = list(), ...) {
   )
 
   toolbar_plugins <- plugins[intersect(toolbar_plugins, names(plugins))]
-  toolbar_ui <- setNames(
+  toolbar_ui <- set_names(
     board_ui(id, toolbar_plugins, x),
     names(toolbar_plugins)
   )
@@ -152,7 +151,7 @@ board_ui.dag_board <- function(id, x, plugins = list(), ...) {
   # be added later on.
   blocks <- lapply(
     board_block_ids(x),
-    \(blk_id) {
+    function(blk_id) {
       block_ui(
         id = id,
         x = x,
@@ -226,7 +225,7 @@ restore_layout <- function(parent, session) {
     "dag"
   )
 
-  lapply(block_panels, \(id) {
+  lapply(block_panels, function(id) {
     dockViewR::select_panel(
       "layout",
       sprintf("block-%s", id)
@@ -390,7 +389,7 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
     }
   )
 
-  # Reset dot_args$parent$append_block is user
+  # Reset parent$append_block is user
   # accidentally close the scoutbar without selecting
   # a block, so that the scoutbar can open again on the
   # next input$append_block or from the links plugin.
@@ -440,7 +439,7 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
           label = "Restore a snapshot",
           .list = lapply(
             list_snapshot_files(board$board_id),
-            \(path) {
+            function(path) {
               infos <- file.info(path)
               scout_action(
                 id = sprintf("%s@restore_board", path),
@@ -517,10 +516,10 @@ update_blk_state_ui <- function(blk) {
   conds <- names(blk$server$cond)
 
   # Listen to blk$server$cond[["state"]], ...
-  lapply(conds, \(nme) {
+  lapply(conds, function(nme) {
     observeEvent(blk$server$cond[[nme]], {
       cond <- blk$server$cond[[nme]]
-      statuses <- lapply(names(cond), \(status) {
+      statuses <- lapply(names(cond), function(status) {
         cl <- switch(
           status,
           "error" = "danger",
@@ -584,7 +583,7 @@ update_block_ui <- function(board, update, session, parent, ...) {
     {
       lapply(
         names(board$blocks),
-        \(id) {
+        function(id) {
           blk <- board$blocks[[id]]
           attr(blk, "uid") <- id
           update_blk_code_ui(blk)

@@ -45,15 +45,16 @@ is_pkg_avail <- function(pkg) {
 process_app_state <- function(state) {
   stopifnot(is.list(state))
 
-  setNames(
-    lapply(names(state), \(nme) {
+  lapply(
+    set_names(nm = names(state)),
+    function(nme) {
       if (nme == "network") {
         # drop the x and y coords as this may not be reproducible
         if (length(state[[nme]]$nodes) || length(state[[nme]]$combos)) {
           if (length(state[[nme]]$nodes)) {
             state[[nme]]$nodes <- lapply(
               state[[nme]]$nodes,
-              \(node) {
+              function(node) {
                 node$x <- NULL
                 node$y <- NULL
                 node$style$x <- NULL
@@ -66,7 +67,7 @@ process_app_state <- function(state) {
           if (length(state[[nme]]$combos)) {
             state[[nme]]$combos <- lapply(
               state[[nme]]$combos,
-              \(combo) {
+              function(combo) {
                 combo$x <- NULL
                 combo$y <- NULL
                 combo$style$x <- NULL
@@ -86,7 +87,7 @@ process_app_state <- function(state) {
         if (length(state[[nme]]$panels) > 0) {
           state[[nme]]$panels <- lapply(
             state[[nme]]$panels,
-            \(panel) {
+            function(panel) {
               panel$params <- NULL
               panel
             }
@@ -100,8 +101,7 @@ process_app_state <- function(state) {
       } else {
         state[[nme]]
       }
-    }),
-    names(state)
+    }
   )
 }
 

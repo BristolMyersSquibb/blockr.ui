@@ -24,7 +24,7 @@ blockr_ser.dag_board <- function(
     network = network,
     layout = layout,
     modules = modules,
-    version = as.character(utils::packageVersion(utils::packageName()))
+    version = as.character(pkg_version())
   )
 }
 
@@ -64,6 +64,31 @@ to_json <- function(x, ...) {
   jsonlite::toJSON(blockr_ser(x, ...), null = "null")
 }
 
+board_to_json <- function(rv, parent, session) {
+  blocks <- lapply(
+    lst_xtr(rv$blocks, "server", "state"),
+    lapply,
+    reval_if
+  )
+
+  opts <- lapply(
+    set_names(nm = names(as_board_options(rv$board))),
+    get_board_option_or_null,
+    session
+  )
+
+  jsonlite::prettify(
+    to_json(
+      rv$board,
+      blocks = blocks,
+      options = opts,
+      network = parent$network,
+      layout = parent$app_layout,
+      modules = lapply(parent$module_state, reval)
+    )
+  )
+}
+
 #' Save board to disk
 #'
 #' @param rv Internal reactiveValues for read-only usage.
@@ -73,30 +98,7 @@ to_json <- function(x, ...) {
 #' @rdname save-board
 write_board_to_disk <- function(rv, parent, session) {
   function(con) {
-    blocks <- lapply(
-      lst_xtr(rv$blocks, "server", "state"),
-      lapply,
-      reval_if
-    )
-
-    opts <- lapply(
-      set_names(nm = names(as_board_options(rv$board))),
-      get_board_option_or_null,
-      session
-    )
-
-    json <- jsonlite::prettify(
-      to_json(
-        rv$board,
-        blocks = blocks,
-        options = opts,
-        network = parent$network,
-        layout = parent$app_layout,
-        modules = lapply(parent$module_state, reval)
-      )
-    )
-
-    writeLines(json, con)
+    writeLines(board_to_json(rv, parent, session), con)
   }
 }
 
