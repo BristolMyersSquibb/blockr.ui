@@ -9,7 +9,7 @@ attr(test_blk, "uid") <- "test"
 
 mock_add_block <- function(blk, rv, parent, session) {
   board_blocks(rv$board) <- c(board_blocks(rv$board), as_blocks(blk))
-  blk_id <- tail(board_block_ids(rv$board), n = 1)
+  blk_id <- last(board_block_ids(rv$board))
   rv$blocks[[blk_id]] <- list(
     block = blk,
     # Needed for code generation

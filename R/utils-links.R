@@ -1089,7 +1089,7 @@ stack_nodes <- function(
   session
 ) {
   if (is.null(stack_id)) {
-    stack_id <- tail(board_stack_ids(rv$board), n = 1)
+    stack_id <- last(board_stack_ids(rv$board))
   }
   # avoid duplicated id with edges
   stack_id <- sprintf("combo-%s", stack_id)

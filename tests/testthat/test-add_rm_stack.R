@@ -1,6 +1,6 @@
 mock_add_block <- function(blk, rv, parent, session) {
   board_blocks(rv$board) <- c(board_blocks(rv$board), as_blocks(blk))
-  attr(blk, "uid") <- tail(board_block_ids(rv$board), n = 1)
+  attr(blk, "uid") <- last(board_block_ids(rv$board))
 
   rv$blocks[[attr(blk, "uid")]]$block <- blk
   rv$blocks[[attr(blk, "uid")]]$server <- list(cond = reactiveValues())
@@ -78,11 +78,11 @@ testServer(
     board_stacks(board$board) <- update()$stacks$mod # manually update stack
 
     # Remove stack
-    parent$removed_stack <- tail(board_stack_ids(board$board), n = 1)
+    parent$removed_stack <- last(board_stack_ids(board$board))
     session$flushReact()
     expect_identical(
       update()$stacks$rm,
-      tail(board_stack_ids(board$board), n = 1)
+      last(board_stack_ids(board$board))
     )
     expect_null(parent$removed_stack)
     board_stacks(board$board) <- stacks()

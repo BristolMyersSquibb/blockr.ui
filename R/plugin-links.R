@@ -247,7 +247,7 @@ gen_add_rm_link_server <- function(context_menu) {
           {
             last_stack_id <- paste(
               "combo",
-              tail(board_stack_ids(board$board), n = 1),
+              last(board_stack_ids(board$board)),
               sep = "-"
             )
             # As soon as one board stack isn't in parent$stacks
