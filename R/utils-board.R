@@ -6,7 +6,8 @@
 #' or in the contextual menu (scoutbar) ...
 #'
 #' @param category Block category. See \link[blockr.core]{available_blocks}.
-#' @param class Additional class to add to the icon, to change the size for example.
+#' @param class Additional class to add to the icon, to change the size for
+#' example.
 #'
 #' @keywords internal
 blk_icon <- function(category, class = NULL) {
@@ -111,11 +112,11 @@ options_ui <- function(id, x, ...) {
 #'
 #' @param id Namespace ID.
 #' @param x Board.
+#' @param plugins Board plugins.
 #' @param ... Generic consistency.
 #' @rdname board_ui
 #' @export
-board_ui.dag_board <- function(id, x, ...) {
-  plugins <- board_plugins(x)
+board_ui.dag_board <- function(id, x, plugins = board_plugins(x), ...) {
 
   toolbar_plugins <- c(
     "preserve_board",

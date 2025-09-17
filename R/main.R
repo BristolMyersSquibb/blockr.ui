@@ -5,10 +5,11 @@
 #'
 #' @param id Unique id.
 #' @param board Board object.
+#' @param plugins Board plugins.
 #' @rdname main
 #' @export
-main_ui <- function(id, board) {
-  board_ui(NS(id, "board"), board)
+main_ui <- function(id, board, plugins = board_plugins(board)) {
+  board_ui(NS(id, "board"), board, plugins)
 }
 
 create_app_state <- function(board) {
@@ -57,10 +58,9 @@ create_app_state <- function(board) {
 #'
 #' @rdname main
 #' @export
-main_server <- function(id, board) {
+main_server <- function(id, board, plugins = board_plugins(board)) {
 
   modules <- board_modules(board)
-  plugins <- board_plugins(board)
 
   moduleServer(
     id,
