@@ -218,6 +218,13 @@ get_block_panels <- function(panels, pattern = "block-") {
 restore_layout <- function(parent, session) {
   # Move any existing block UI from the offcanvas to their panel
   block_panels <- get_block_panels(names(parent$app_layout$panels))
+
+  # Activate the dag panel to render the graph
+  dockViewR::select_panel(
+    "layout",
+    "dag"
+  )
+
   lapply(block_panels, function(id) {
     dockViewR::select_panel(
       "layout",
