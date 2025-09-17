@@ -382,7 +382,7 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
     }
   )
 
-  # Reset dot_args$parent$append_block is user
+  # Reset parent$append_block is user
   # accidentally close the scoutbar without selecting
   # a block, so that the scoutbar can open again on the
   # next input$append_block or from the links plugin.

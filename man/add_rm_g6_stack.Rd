@@ -5,7 +5,7 @@
 \alias{add_rm_stack_ui}
 \title{Add/remove block stacks module}
 \usage{
-add_rm_stack_server(id, board, update, ...)
+add_rm_stack_server(id, board, update, parent, ...)
 
 add_rm_stack_ui(id, board)
 }
@@ -15,6 +15,8 @@ add_rm_stack_ui(id, board)
 \item{board}{The initial \code{board} object}
 
 \item{update}{Reactive value object to initiate board updates.}
+
+\item{parent}{App state}
 
 \item{...}{Extra arguments passed from parent scope.}
 }

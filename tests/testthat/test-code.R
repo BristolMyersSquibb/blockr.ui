@@ -39,11 +39,11 @@ testServer(
     )
   ),
   {
-    mock_add_block(test_blk, board, dot_args$parent, session)
+    mock_add_block(test_blk, board, parent, session)
     expect_true(nchar(board_code()) > 0)
     output$code_out
-    dot_args$parent$display_code <- TRUE
+    parent$display_code <- TRUE
     session$flushReact()
-    expect_false(dot_args$parent$display_code)
+    expect_false(parent$display_code)
   }
 )

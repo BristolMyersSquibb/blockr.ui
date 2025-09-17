@@ -13,15 +13,15 @@
 #' component (i.e. `generate_code_server()`) is expected to return `NULL`.
 #' @param id Namespace ID
 #' @param board Reactive values object
+#' @param parent App state
 #' @param ... Extra arguments passed from parent scope
 #'
 #' @rdname generate_code
 #' @export
-generate_code_server <- function(id, board, ...) {
+generate_code_server <- function(id, board, parent, ...) {
   moduleServer(
     id,
     function(input, output, session) {
-      dot_args <- list(...)
 
       board_code <- reactive(
         export_code(lst_xtr_reval(board$blocks, "server", "expr"), board$board)
@@ -30,7 +30,7 @@ generate_code_server <- function(id, board, ...) {
       output$code_out <- renderPrint(HTML(board_code()))
 
       observeEvent(
-        req(dot_args$parent$display_code),
+        req(parent$display_code),
         {
           id <- "code_out"
 
@@ -47,7 +47,7 @@ generate_code_server <- function(id, board, ...) {
               size = "l"
             )
           )
-          dot_args$parent$display_code <- FALSE
+          parent$display_code <- FALSE
         }
       )
 

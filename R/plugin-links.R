@@ -10,7 +10,7 @@
 #' @rdname add_rm_link
 #' @export
 gen_add_rm_link_server <- function(context_menu) {
-  function(id, board, update, parent) {
+  function(id, board, update, parent, ...) {
     moduleServer(
       id,
       function(input, output, session) {
