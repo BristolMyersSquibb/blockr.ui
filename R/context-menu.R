@@ -104,10 +104,8 @@ context_menu_entry_js <- function(x, ns = NULL) {
 build_context_menu <- function(x, ...) {
   if (!is_context_menu_entry(x)) {
     validate_context_menu_entries(x)
-
-    return(
-      Filter(not_null, lapply(x, build_context_menu, ...))
-    )
+    res <- Filter(not_null, lapply(x, build_context_menu, ...))
+    return(unname(res))
   }
 
   if (!context_menu_entry_condition(x, ...)) {
