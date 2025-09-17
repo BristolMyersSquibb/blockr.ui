@@ -58,10 +58,6 @@ If you are a developer and want to get a better undestanding of how `blockr.ui` 
 To start an app with `blockr.ui`, you can use:
 
 ```r
-library(blockr.dplyr)
-library(blockr.sdtm)
-library(blockr.ai)
-library(blockr.io)
 library(blockr.ui)
 
 # To customize
@@ -69,7 +65,7 @@ Sys.setenv(
   "SNAPSHOT_LOCATION" = "<PATH_TO_SNAPSHOT_LOCATION>",
   "AUTO_SNAPSHOT" = FALSE
 )
-run_demo_app()
+serve(new_dag_board())
 ```
 
 This code can be deployed on any server that supports R and Shiny, such as Shiny Server or RStudio Connect. You may notice
@@ -80,7 +76,7 @@ You can also spin up a custom app with existing blocks, links and stacks, like s
 ```r
 library(blockr.ui)
 
-run_demo_app(
+board <- new_dag_board(
   blocks = c(
     a = new_dataset_block("BOD"),
     b = new_dataset_block("ChickWeight"),
@@ -92,6 +88,8 @@ run_demo_app(
   ),
   stacks = list(ac = c("a", "c"))
 )
+
+serve(board)
 ```
 
 This feature is convenient to setup demonstrations apps quickly.
@@ -216,7 +214,7 @@ flowchart TD
 
 #### Pass custom modules
 
-Under the hoods, `run_demo_app()` serves a `dag_board` object which is created via `new_dag_board()`:
+A DAG board can be instantiated with additional modules, via the `new_dag_board()` constructor:
 
 ```{r}
 my_board <- new_dag_board(

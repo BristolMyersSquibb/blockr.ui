@@ -118,14 +118,10 @@ chat_srv <- function(board, update, session, parent, ...) {
       "chat",
       function(input, output, session) {
         openai <- ellmer::chat_openai(
-          system_prompt = "You are a helpful assistant for developers who want to work with blockr but do not
-          not very well data analysis. Packages are available at: https://github.com/BristolMyersSquibb/blockr.core,
-          https://github.com/BristolMyersSquibb/blockr.dplyr, https://github.com/BristolMyersSquibb/blockr.io, These packages provide
-          blocks such that people can import data with new_dataset_block, transform them with new_select_block and do other things.
-          We also have blockr.ai that basically exposes llm blocks such as new_llm_transform_block and new_llm_plot_block. They
-          are convenient to accomplish tasks for which no block exists yet ... A blockr.ui application allows people to build blockr pipeline
+          system_prompt = "You are a helpful assistant for developers who want to work with blockr but might not know the ecosystem well. Individual blocks represent steps in a data analysis pipeline and for example allow import of data with new_dataset_block, data transformation with new_subset_block and so forth.
+          A blockr-based web application allows people to build blockr pipeline
           step by step by adding block one after each other. 
-          When you are given an order, you will only return the corresponding block 
+          Based on user prompts, you will only return the corresponding block
           constructor to the user without the `new`. You will return 'Adding a *_block', '*' being the
           type of the block. 
           For instance 'Add me a block to select columns from a dataset' would return 
