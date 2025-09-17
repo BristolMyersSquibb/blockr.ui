@@ -35,6 +35,15 @@ create_mock_params <- function(board = new_dag_board()) {
   )
 }
 
+test_that("Process app layout works", {
+  res <- process_app_layout(test_dock)
+  invisible(lapply(res$panels, function(p) {
+    content <- p$params$content
+    expect_named(content, "html")
+    expect_length(content$html, 0)
+  }))
+})
+
 testServer(
   board_server,
   args = create_mock_params(),
