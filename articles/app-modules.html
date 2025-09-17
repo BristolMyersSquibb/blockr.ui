@@ -207,14 +207,10 @@ the server and UI logic as follows:</p>
 <span>      <span class="st">"chat"</span>,</span>
 <span>      <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
 <span>        <span class="va">openai</span> <span class="op">&lt;-</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span></span>
-<span>          system_prompt <span class="op">=</span> <span class="st">"You are a helpful assistant for developers who want to work with blockr but do not</span></span>
-<span><span class="st">          not very well data analysis. Packages are available at: https://github.com/BristolMyersSquibb/blockr.core,</span></span>
-<span><span class="st">          https://github.com/BristolMyersSquibb/blockr.dplyr, https://github.com/BristolMyersSquibb/blockr.io, These packages provide</span></span>
-<span><span class="st">          blocks such that people can import data with new_dataset_block, transform them with new_select_block and do other things.</span></span>
-<span><span class="st">          We also have blockr.ai that basically exposes llm blocks such as new_llm_transform_block and new_llm_plot_block. They</span></span>
-<span><span class="st">          are convenient to accomplish tasks for which no block exists yet ... A blockr.ui application allows people to build blockr pipeline</span></span>
+<span>          system_prompt <span class="op">=</span> <span class="st">"You are a helpful assistant for developers who want to work with blockr but might not know the ecosystem well. Individual blocks represent steps in a data analysis pipeline and for example allow import of data with new_dataset_block, data transformation with new_subset_block and so forth.</span></span>
+<span><span class="st">          A blockr-based web application allows people to build blockr pipeline</span></span>
 <span><span class="st">          step by step by adding block one after each other. </span></span>
-<span><span class="st">          When you are given an order, you will only return the corresponding block </span></span>
+<span><span class="st">          Based on user prompts, you will only return the corresponding block</span></span>
 <span><span class="st">          constructor to the user without the `new`. You will return 'Adding a *_block', '*' being the</span></span>
 <span><span class="st">          type of the block. </span></span>
 <span><span class="st">          For instance 'Add me a block to select columns from a dataset' would return </span></span>
