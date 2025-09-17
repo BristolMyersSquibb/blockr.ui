@@ -13,7 +13,7 @@ restore_dashboard <- function(board, rv, parent, session) {
   # When the dock was empty, we still need to initialise the block state
   # and all values are false
   if (!length(in_grid_ids)) {
-    lapply(ids, \(id) {
+    lapply(ids, function(id) {
       parent$in_grid[[id]] <- FALSE
     })
     return(NULL)
@@ -27,12 +27,12 @@ restore_dashboard <- function(board, rv, parent, session) {
   dockViewR::restore_dock("dock", parent$module_state$dashboard())
 
   # Regenerate the output for the block
-  lapply(in_grid_ids, \(id) {
+  lapply(in_grid_ids, function(id) {
     parent$in_grid[[id]] <- TRUE
     generate_dashboard_blk_output(id, rv, session)
   })
 
-  lapply(ids[not_in_grid], \(id) {
+  lapply(ids[not_in_grid], function(id) {
     parent$in_grid[[id]] <- FALSE
   })
 }

@@ -7,7 +7,7 @@
 \usage{
 options_ui(id, x, ...)
 
-\method{board_ui}{dag_board}(id, x, plugins = list(), ...)
+\method{board_ui}{dag_board}(id, x, ...)
 }
 \arguments{
 \item{id}{Namespace ID.}
@@ -15,8 +15,6 @@ options_ui(id, x, ...)
 \item{x}{Board.}
 
 \item{...}{Generic consistency.}
-
-\item{plugins}{UI for board plugins.}
 }
 \description{
 Custom board UI

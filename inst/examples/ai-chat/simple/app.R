@@ -1,11 +1,5 @@
 library(blockr.core)
-library(blockr.dplyr)
-library(blockr.io)
-library(blockr.sdtm)
-library(blockr.ai)
-library(blockr.gt)
 library(blockr.ui)
-library(blockr.ggplot)
 
 serve(
   new_dag_board(

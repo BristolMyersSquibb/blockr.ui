@@ -47,12 +47,6 @@ Imports:
     cli
 Remotes:
     BristolMyersSquibb/blockr.core,
-    BristolMyersSquibb/blockr.dplyr,
-    BristolMyersSquibb/blockr.io,
-    BristolMyersSquibb/blockr.ai,
-    BristolMyersSquibb/blockr.sdtm,
-    BristolMyersSquibb/blockr.gt,
-    BristolMyersSquibb/blockr.ggplot,
     cynkra/g6R,
     cynkra/scoutbaR,
     cynkra/dockViewR,
@@ -60,12 +54,6 @@ Remotes:
 Suggests: 
     shinytest2,
     testthat (>= 3.0.0),
-    blockr.dplyr,
-    blockr.io,
-    blockr.ai,
-    blockr.sdtm,
-    blockr.gt,
-    blockr.ggplot,
     cyclocomp,
     roxy.shinylive,
     chromote,
@@ -100,7 +88,6 @@ Collate:
     'plugin-serialize.R'
     'plugin-stacks.R'
     'prismjs-dependencies.R'
-    'registry.R'
     'stacks.R'
     'utils-ai-tools.R'
     'utils-board.R'
@@ -110,4 +97,3 @@ Collate:
     'utils-serialize.R'
     'utils-ui.R'
     'utils.R'
-    'zzz.R'

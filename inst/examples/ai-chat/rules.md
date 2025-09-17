@@ -16,16 +16,8 @@
 
 ## blockr knowledge base
 
-### General information about blockr
-
-- blockr packages are available at: <https://github.com/BristolMyersSquibb/blockr.core>, <https://github.com/BristolMyersSquibb/blockr.dplyr>, <https://github.com/BristolMyersSquibb/blockr.io>.
-- These packages provide __blocks__ such that people can import data with `new_dataset_block`, transform them with `new_select_block` and do other things. We also have `blockr.ai` package that basically exposes llm blocks such as `new_llm_transform_block` and `new_llm_plot_block`. They are convenient to accomplish tasks for which no blockr block exists yet ...
+- In blockr, a __block__ represents a step in a data analysis pipeline. For example, data import is available using `new_dataset_block`, data subsetting can be carried out using `new_subset_block` and do other things.
 - A blockr.ui application allows people to build blockr pipeline step by step by adding block one after each other. Documentation is available at  <https://github.com/BristolMyersSquibb/blockr.ui>.
-
-### More detailed information
-
-- Whenever you're asked to import data from a location, say `/path/*.csv` ('*' being the file name), you can use the `new_filebrowser_block` block to read the data by replace the `file_path` with the provided path, `volume` will be set to `c(home = "/path")` (that is one level above the csv folder). Then append it a `new_csv_block` to parse the CSV file. If it were anoter format, you would use the corresponding block, for instance `new_excel_block` for Excel files. Parser blocks are defined as `new_<file_type>_block`, where `<file_type>` is extension of file to parse, such as `new_csv_block`. Available names
-are get by calling `available_block_names` tool.
 
 ## Adding block rules
 

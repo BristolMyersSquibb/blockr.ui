@@ -1,20 +1,17 @@
-library(blockr.core)
-library(blockr.dplyr)
-
 test_blk <- new_dataset_block()
 attr(test_blk, "uid") <- "test"
 
 mock_add_block <- function(blk, rv, parent, session) {
   board_blocks(rv$board) <- c(
     board_blocks(rv$board),
-    setNames(as_blocks(blk), attr(blk, "uid"))
+    set_names(as_blocks(blk), attr(blk, "uid"))
   )
   rv$blocks[[attr(blk, "uid")]]$block <- blk
   rv$blocks[[attr(blk, "uid")]]$server <- list(cond = reactiveValues())
   rv$inputs[[attr(blk, "uid")]] <- if (!length(block_inputs(blk))) {
     list()
   } else {
-    setNames(
+    set_names(
       list(reactiveVal()),
       block_inputs(blk)
     )
@@ -61,7 +58,7 @@ mock_add_stack <- function(stack_id, nodes, rv, session) {
   # Add stack
   board_stacks(rv$board) <- board_stacks(rv$board) |>
     c(
-      setNames(
+      set_names(
         stacks(new_stack(blocks = nodes)),
         stack_id
       )
@@ -83,42 +80,14 @@ mocked_network_state <- list(
   combos = list()
 )
 
-modules <- board_modules(new_dag_board())
-
-ctx_menu_items <- unlst(
-  c(
-    list(
-      list(
-        create_edge_ctxm,
-        remove_node_ctxm,
-        remove_edge_ctxm,
-        append_node_ctxm,
-        create_stack_ctxm,
-        remove_stack_ctxm,
-        add_block_ctxm
-      )
-    ),
-    lapply(modules, board_module_context_menu)
-  )
-)
+empty_board <- new_dag_board()
 
 testServer(
-  gen_add_rm_link_server(ctx_menu_items),
+  gen_add_rm_link_server(context_menu_items(empty_board)),
   args = list(
     board = reactiveValues(
       blocks = list(),
-      board = new_dag_board(
-        #blocks = c(
-        #  a = new_dataset_block("BOD"),
-        #  b = new_dataset_block("ChickWeight"),
-        #  c = new_merge_block("Time")
-        #),
-        #links = c(
-        #  ac = new_link("a", "c", "x"),
-        #  bc = new_link("b", "c", "y")
-        #),
-        #stacks = list(ac = c("a", "c"))
-      ),
+      board = empty_board,
       board_id = "board",
       inputs = list(),
       links = list(),
@@ -227,10 +196,10 @@ testServer(
     expect_identical(parent$scoutbar$trigger, "links")
 
     # Mock add other block (+ append)
-    select_blk <- new_select_block()
-    attr(select_blk, "uid") <- "select_test"
+    subset_blk <- new_subset_block()
+    attr(subset_blk, "uid") <- "subset_test"
     mock_add_block(
-      select_blk,
+      subset_blk,
       board,
       parent,
       session
@@ -238,7 +207,7 @@ testServer(
     expect_s3_class(parent$added_edge, "links")
     link <- as.data.frame(parent$added_edge[[1]])
     expect_identical(link$from, "test")
-    expect_identical(link$to, "select_test")
+    expect_identical(link$to, "subset_test")
     expect_identical(link$input, "data")
     expect_identical(update()$links$add, parent$added_edge)
     expect_false(parent$append_block)
@@ -254,14 +223,14 @@ testServer(
     )
     session$setInputs(
       "added_edge" = list(
-        source = "select_test",
+        source = "subset_test",
         target = "head_test",
         id = "dummy_edge_id"
       )
     )
     expect_identical(update()$links$add, parent$added_edge)
     link <- as.data.frame(parent$added_edge[[1]])
-    expect_identical(link$from, "select_test")
+    expect_identical(link$from, "subset_test")
     expect_identical(link$to, "head_test")
     expect_identical(link$input, "data")
 
@@ -308,11 +277,11 @@ testServer(
     expect_identical(parent$removed_from_dashboard, parent$selected_block)
 
     # Removed node and block
-    session$setInputs("remove_node" = "select_test")
-    expect_identical(parent$removed_block, "select_test")
+    session$setInputs("remove_node" = "subset_test")
+    expect_identical(parent$removed_block, "subset_test")
     expect_identical(parent$removed_edge, board_links(board$board)$id)
     mock_remove_block(
-      "select_test",
+      "subset_test",
       board,
       parent,
       session

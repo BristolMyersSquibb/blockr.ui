@@ -39,33 +39,16 @@ test_that("board_modules works", {
 })
 
 test_that("build_context_menu works", {
-  modules <- board_modules(new_dag_board())
 
-  expect_identical(context_menu_entry_name(add_block_ctxm), "Add block")
-
-  ctx_menu_items <- unlst(
-    c(
-      list(
-        list(
-          create_edge_ctxm,
-          remove_node_ctxm,
-          remove_edge_ctxm,
-          append_node_ctxm,
-          create_stack_ctxm,
-          remove_stack_ctxm,
-          add_block_ctxm
-        )
-      ),
-      lapply(modules, board_module_context_menu)
-    )
-  )
+  empty_board <- new_dag_board()
 
   res <- build_context_menu(
-    ctx_menu_items,
+    context_menu_items(empty_board),
     board = list(),
     parent = list(),
     target = list(type = "node", id = "test-node")
   )
+
   expect_type(res, "list")
   expect_named(res[[1]], c("name", "value"))
 })

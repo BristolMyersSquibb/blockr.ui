@@ -10,7 +10,7 @@
 #' @rdname add_rm_link
 #' @export
 gen_add_rm_link_server <- function(context_menu) {
-  function(id, board, update, parent) {
+  function(id, board, update, parent, ...) {
     moduleServer(
       id,
       function(input, output, session) {
@@ -208,17 +208,19 @@ gen_add_rm_link_server <- function(context_menu) {
 
         # Unselect node when panel is closed
         observeEvent(parent$unselected_block, {
-          g6_proxy(ns("network")) |>
-            g6_set_nodes(setNames(
+          g6_set_nodes(
+            g6_proxy(ns("network")),
+            set_names(
               list(selected = ""),
               parent$unselected_block
-            ))
+            )
+          )
           parent$unselected_block <- NULL
         })
 
         observeEvent(parent$removed_block, {
           # Note: links are cleaned in the add_rm_blocks plugin
-          lapply(parent$removed_block, \(removed) {
+          lapply(parent$removed_block, function(removed) {
             cleanup_node(removed, parent, board, session)
           })
         })
@@ -245,7 +247,7 @@ gen_add_rm_link_server <- function(context_menu) {
           {
             last_stack_id <- paste(
               "combo",
-              tail(board_stack_ids(board$board), n = 1),
+              last(board_stack_ids(board$board)),
               sep = "-"
             )
             # As soon as one board stack isn't in parent$stacks

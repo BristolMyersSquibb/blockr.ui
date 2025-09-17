@@ -1,9 +1,3 @@
-library(shinytest2)
-library(blockr.dplyr)
-library(blockr.sdtm)
-library(blockr.ai)
-library(blockr.io)
-
 mock_add_block <- function(blk, board_update, parent, session) {
   new_blk <- as_blocks(blk)
   board_update(
@@ -20,36 +14,9 @@ mock_remove_block <- function(id, parent, session) {
 }
 
 create_mock_params <- function(board = new_dag_board()) {
+
   modules <- board_modules(board)
-
-  ctx_menu_items <- unlst(
-    c(
-      list(
-        list(
-          create_edge_ctxm,
-          remove_node_ctxm,
-          remove_edge_ctxm,
-          append_node_ctxm,
-          create_stack_ctxm,
-          remove_stack_ctxm,
-          add_block_ctxm
-        )
-      ),
-      lapply(modules, board_module_context_menu)
-    )
-  )
-
-  plugins <- plugins(
-    preserve_board(server = ser_deser_server, ui = ser_deser_ui),
-    manage_blocks(server = add_rm_block_server, ui = add_rm_block_ui),
-    manage_links(
-      server = gen_add_rm_link_server(ctx_menu_items),
-      ui = add_rm_link_ui
-    ),
-    manage_stacks(server = add_rm_stack_server, ui = add_rm_stack_ui),
-    generate_code(server = generate_code_server, ui = generate_code_ui),
-    notify_user()
-  )
+  plugins <- board_plugins(board)
 
   list(
     x = board,
@@ -76,7 +43,7 @@ testServer(
     expect_length(dot_args$parent$in_grid, 0)
     # Layout initial state
     test_dock <- list()
-    test_dock[["panels"]] <- setNames(
+    test_dock[["panels"]] <- set_names(
       list(id = "dashboard"),
       "dashboard"
     )
@@ -114,7 +81,7 @@ testServer(
 
     # To be able to remove panels later, we need to mock the dock state
     test_dock <- list()
-    test_dock[["panels"]] <- setNames(
+    test_dock[["panels"]] <- set_names(
       list(id = block_uid(dot_args$parent$added_block)),
       sprintf("block-%s", block_uid(dot_args$parent$added_block))
     )
@@ -180,7 +147,7 @@ testServer(
       session
     )
     test_dock <- list()
-    test_dock[["panels"]] <- setNames(
+    test_dock[["panels"]] <- set_names(
       list(id = block_uid(dot_args$parent$added_block)),
       sprintf("block-%s", block_uid(dot_args$parent$added_block))
     )
@@ -199,7 +166,7 @@ test_that("Board dock app works", {
 
   # We test from an existing dock so that we can fix block, stack and link IDs
   # to avoid randomness failure
-  app <- AppDriver$new(
+  app <- shinytest2::AppDriver$new(
     system.file(package = "blockr.ui", "examples/dashboard/non-empty"),
     name = "dashboard-non-empty-app",
     seed = 4323
