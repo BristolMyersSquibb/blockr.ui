@@ -44,8 +44,7 @@ Imports:
     rlang,
     promises,
     shinychat (>= 0.2.0.9000),
-    cli,
-    utils
+    cli
 Remotes:
     BristolMyersSquibb/blockr.core,
     cynkra/g6R,
@@ -89,7 +88,6 @@ Collate:
     'plugin-serialize.R'
     'plugin-stacks.R'
     'prismjs-dependencies.R'
-    'registry.R'
     'stacks.R'
     'utils-ai-tools.R'
     'utils-board.R'
@@ -99,4 +97,3 @@ Collate:
     'utils-serialize.R'
     'utils-ui.R'
     'utils.R'
-    'zzz.R'

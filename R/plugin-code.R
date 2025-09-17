@@ -71,7 +71,7 @@ generate_code_ui <- function(id, board) {
 copy_to_clipboard <- function(session, id) {
   deps <- htmltools::htmlDependency(
     "copy-to-clipboard",
-    utils::packageVersion("blockr.core"),
+    pkg_version("blockr.core"),
     src = pkg_file("assets", "js"),
     script = "copyToClipboard.js"
   )

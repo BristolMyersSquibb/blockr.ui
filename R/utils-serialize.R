@@ -24,7 +24,7 @@ blockr_ser.dag_board <- function(
     network = network,
     layout = layout,
     modules = modules,
-    version = as.character(utils::packageVersion(utils::packageName()))
+    version = as.character(pkg_version())
   )
 }
 
