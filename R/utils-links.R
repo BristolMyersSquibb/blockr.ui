@@ -492,9 +492,9 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
 
   # Select new, unselect old
   if (is.null(input[["network-selected_node"]])) {
-    to_select <- setNames(list("selected"), block_uid(new))
+    to_select <- set_names(list("selected"), block_uid(new))
   } else {
-    to_select <- setNames(
+    to_select <- set_names(
       list("selected", ""),
       c(block_uid(new), input[["network-selected_node"]])
     )
@@ -558,7 +558,7 @@ remove_node <- function(selected, vals, session) {
   g6_remove_nodes(
     g6_set_nodes(
       g6_proxy(ns("network")),
-      setNames(list(""), selected)
+      set_names(list(""), selected)
     ),
     ids = selected
   )
@@ -658,7 +658,7 @@ create_edge <- function(new, vals, rv, session) {
       # Re-select source node
       g6_set_nodes(
         g6_proxy(ns("network")),
-        setNames(list("selected"), new$source)
+        set_names(list("selected"), new$source)
       )
     }
     stop()
@@ -951,7 +951,7 @@ show_stack_actions <- function(rv, session) {
           selectInput(
             ns("new_stack_nodes"),
             "Select nodes (leaving NULL creates an empty stack)",
-            choices = setNames(
+            choices = set_names(
               blk_ids,
               chr_ply(blk_ids, function(id) {
                 paste(attr(board_blocks(rv$board)[[id]], "name"), id)

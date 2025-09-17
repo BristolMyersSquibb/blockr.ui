@@ -210,7 +210,7 @@ gen_add_rm_link_server <- function(context_menu) {
         observeEvent(parent$unselected_block, {
           g6_set_nodes(
             g6_proxy(ns("network")),
-            setNames(
+            set_names(
               list(selected = ""),
               parent$unselected_block
             )

@@ -4,14 +4,14 @@ attr(test_blk, "uid") <- "test"
 mock_add_block <- function(blk, rv, parent, session) {
   board_blocks(rv$board) <- c(
     board_blocks(rv$board),
-    setNames(as_blocks(blk), attr(blk, "uid"))
+    set_names(as_blocks(blk), attr(blk, "uid"))
   )
   rv$blocks[[attr(blk, "uid")]]$block <- blk
   rv$blocks[[attr(blk, "uid")]]$server <- list(cond = reactiveValues())
   rv$inputs[[attr(blk, "uid")]] <- if (!length(block_inputs(blk))) {
     list()
   } else {
-    setNames(
+    set_names(
       list(reactiveVal()),
       block_inputs(blk)
     )
@@ -58,7 +58,7 @@ mock_add_stack <- function(stack_id, nodes, rv, session) {
   # Add stack
   board_stacks(rv$board) <- board_stacks(rv$board) |>
     c(
-      setNames(
+      set_names(
         stacks(new_stack(blocks = nodes)),
         stack_id
       )

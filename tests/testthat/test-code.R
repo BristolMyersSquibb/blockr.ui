@@ -18,7 +18,7 @@ mock_add_block <- function(blk, rv, parent, session) {
   rv$inputs[[blk_id]] <- if (!length(block_inputs(blk))) {
     list()
   } else {
-    setNames(
+    set_names(
       list(reactiveVal()),
       block_inputs(blk)
     )

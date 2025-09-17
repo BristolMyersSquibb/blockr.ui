@@ -66,7 +66,7 @@ add_rm_stack_server <- function(id, board, update, parent, ...) {
         update(
           list(
             stacks = list(
-              mod = as_stacks(setNames(
+              mod = as_stacks(set_names(
                 list(tmp_stack),
                 stack_id
               ))
@@ -85,7 +85,7 @@ add_rm_stack_server <- function(id, board, update, parent, ...) {
         update(
           list(
             stacks = list(
-              mod = as_stacks(setNames(
+              mod = as_stacks(set_names(
                 list(tmp_stack),
                 stack_id
               ))

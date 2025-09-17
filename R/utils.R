@@ -45,8 +45,9 @@ is_pkg_avail <- function(pkg) {
 process_app_state <- function(state) {
   stopifnot(is.list(state))
 
-  setNames(
-    lapply(names(state), function(nme) {
+  lapply(
+    set_names(nm = names(state)),
+    function(nme) {
       if (nme == "network") {
         # drop the x and y coords as this may not be reproducible
         if (length(state[[nme]]$nodes) || length(state[[nme]]$combos)) {
@@ -100,8 +101,7 @@ process_app_state <- function(state) {
       } else {
         state[[nme]]
       }
-    }),
-    names(state)
+    }
   )
 }
 

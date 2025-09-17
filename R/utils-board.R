@@ -124,7 +124,7 @@ board_ui.dag_board <- function(id, x, ...) {
   )
 
   toolbar_plugins <- plugins[intersect(toolbar_plugins, names(plugins))]
-  toolbar_ui <- setNames(
+  toolbar_ui <- set_names(
     board_ui(id, toolbar_plugins, x),
     names(toolbar_plugins)
   )

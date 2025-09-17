@@ -44,7 +44,8 @@ Imports:
     rlang,
     promises,
     shinychat (>= 0.2.0.9000),
-    cli
+    cli,
+    utils
 Remotes:
     BristolMyersSquibb/blockr.core,
     cynkra/g6R,
