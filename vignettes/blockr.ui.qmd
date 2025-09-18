@@ -242,22 +242,13 @@ We use the `...` to pass blocks, links and stacks to the board. The `modules` ar
 
 As discussed in the `blockr.core` plugins [vignette](https://bristolmyerssquibb.github.io/blockr.core/articles/extend-blockr.html#blockr-plugins), __plugins__ are Shiny modules used to customize/enhance UX aspects of the board module.
 
-To control which plugin to use in the app, you can use the `blockr.core::plugins()`, like so:
+To inspect which plugin are by default used in the app, you can call the `blockr.core::board_plugins()` generic, like so:
 
 ```{r}
-my_plugins <- plugins(
-  preserve_board(server = ser_deser_server, ui = ser_deser_ui),
-  manage_blocks(server = add_rm_block_server, ui = add_rm_block_ui),
-  manage_links(
-    server = gen_add_rm_link_server(ctx_menu_items),
-    ui = add_rm_link_ui
-  ),
-  manage_stacks(server = add_rm_stack_server, ui = add_rm_stack_ui),
-  generate_code(server = generate_code_server, ui = generate_code_ui),
-  notify_user()
-)
-my_plugins
+board_plugins(my_board)
 ```
+
+The set of plugins can be overridden in calls to `serve()`.
 
 `blockr.ui` improves few of the core modules such as the `gen_add_rm_link_server()` and `add_rm_link_ui()` which is responsible for managing node and edges and connections with the `g6R` [package](https://cynkra.github.io/g6R/). Blocks management is done via the `add_rm_block_server()` and `add_rm_block_ui()` modules, which are powered by the `scoutbaR` [package](https://cynkra.github.io/scoutbaR/). The latter provides a significantly better user experience with a powerful search bar with autocompletion and history management.
 

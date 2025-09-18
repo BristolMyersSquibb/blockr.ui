@@ -50,7 +50,6 @@ dag_board_options <- function() {
       category = "Theme options"
     ),
     new_stack_colors_option(category = "Board options"),
-    new_snapshot_option(category = "Board options"),
     new_show_conditions_option(category = "Board options"),
     new_blocks_position_option(category = "Layout options")
   )
@@ -60,7 +59,7 @@ dag_board_options <- function() {
 board_plugins.dag_board <- function(x, which = NULL) {
 
   res <- plugins(
-    preserve_board(server = ser_deser_server, ui = ser_deser_ui),
+    preserve_board(ui = ser_deser_ui),
     manage_blocks(server = add_rm_block_server, ui = add_rm_block_ui),
     manage_links(
       server = gen_add_rm_link_server(context_menu_items(x)),
