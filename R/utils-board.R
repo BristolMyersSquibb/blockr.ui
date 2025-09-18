@@ -180,6 +180,10 @@ board_ui.dag_board <- function(id, x, plugins = board_plugins(x), ...) {
     scoutbar(
       sprintf("%s-scoutbar", id),
       placeholder = "What do you want to do?",
+      actions = scout_page(
+        label = "Add a block",
+        .list = blk_choices()
+      ),
       showRecentSearch = TRUE
     )
   )
@@ -431,21 +435,6 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
         revealScoutbar = TRUE
       )
     }
-  )
-
-  observeEvent(
-    TRUE,
-    {
-      update_scoutbar(
-        session,
-        "scoutbar",
-        actions = scout_page(
-          label = "Add a block",
-          .list = blk_choices()
-        )
-      )
-    },
-    once = TRUE
   )
 
   # Sync value for other modules
