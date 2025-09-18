@@ -20,7 +20,9 @@ test_that("ser/deser roundtrip", {
     args = list(board = board_initial),
     {
       session$flushReact()
-      json <<- board_to_json(res$board, res$parent, session)
+      board <- res$board
+      json <<- serialize_board(board$board, board$blocks, res$parent,
+                               session = session)
     }
   )
 
@@ -36,7 +38,6 @@ test_that("ser/deser roundtrip", {
       ser_srv <- board_srv$makeScope("preserve_board")
 
       ser_srv$setInputs(restore = list(datapath = json))
-
       expect_identical(
         names(res$board$blocks),
         board_block_ids(board_initial)
