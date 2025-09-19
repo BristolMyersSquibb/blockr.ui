@@ -132,39 +132,6 @@ new_snapshot_option <- function(
   )
 }
 
-#' @export
-validate_board_option.snapshot_option <- function(x) {
-  val <- board_option_value(NextMethod())
-
-  if (!is_bool(val)) {
-    abort(
-      "Expecting `snapshot` to be a boolean.",
-      class = "board_options_snapshot_invalid"
-    )
-  }
-
-  if (!is_string(attr(val, "location"))) {
-    abort(
-      "Expecting snapshot location to be a string.",
-      class = "board_options_snapshot_invalid"
-    )
-  }
-
-  invisible(x)
-}
-
-#' @export
-blockr_ser.snapshot_option <- function(x, option = NULL, ...) {
-  res <- NextMethod()
-
-  res[["payload"]] <- list(
-    auto_save = c(res[["payload"]]),
-    location = attr(res[["payload"]], "location")
-  )
-
-  res
-}
-
 new_blocks_position_option <- function(
   reference_panel = blockr_option("reference_panel", NULL),
   direction = blockr_option("direction", "within"),

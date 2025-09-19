@@ -1,139 +1,3 @@
-#' Serialization module
-#'
-#' Object (de)serialization in a board server context.
-#'
-#' @param id Namespace ID
-#' @param board Reactive values object
-#' @param parent App state
-#' @param ... Extra arguments passed from parent scope
-#'
-#' @return A \link[shiny]{reactiveVal} object that evaluates to `NULL` or a
-#' `board` obejct.
-#'
-#' @rdname ser_deser
-#' @export
-ser_deser_server <- function(id, board, parent, ...) {
-  moduleServer(
-    id,
-    function(input, output, session) {
-      res <- reactiveVal()
-      vals <- reactiveValues(
-        auto_snapshot = FALSE,
-        current_backup = NULL
-      )
-
-      # Manual state saving. Use this to share the
-      # app state with another group.
-      output$serialize <- downloadHandler(
-        board_filename(board),
-        write_board_to_disk(board, parent, session)
-      )
-
-      # Init backup list
-      observeEvent(TRUE, {
-        parent$backup_list <- list_snapshot_files(board$board_id)
-      })
-
-      # TBD -> add board option for auto_snapshot
-
-      if (isTRUE(isolate(get_board_option_or_null("snapshot")))) {
-        # Debounce so that we don't record too
-        # many intermediate states as json. This also leaves
-        # enough time for the network to stabilize properly
-        # and have the correct node coordinates.
-        snapshot_trigger <- debounce(
-          reactive(
-            {
-              list(
-                board_links(board$board),
-                lapply(parent$module_state, reval),
-                get_blocks_state(board) # Capture any block state change (input change, ...)
-              )
-            }
-          ),
-          2000
-        )
-
-        # Auto save
-        observeEvent(
-          {
-            snapshot_trigger()
-          },
-          {
-            snapshot_board(vals, board, parent, session)
-          }
-        )
-      }
-
-      observeEvent(
-        c(vals$current_backup, parent$backup_list),
-        {
-          toggle_undo_redo(vals, parent)
-        },
-        ignoreNULL = TRUE
-      )
-
-      observeEvent(input$undo, {
-        vals$current_backup <- vals$current_backup - 1L
-      })
-
-      observeEvent(input$redo, {
-        vals$current_backup <- vals$current_backup + 1L
-      })
-
-      # Move from one snapshot to another
-      observeEvent(
-        c(input$undo, input$redo),
-        {
-          restore_board(
-            parent$backup_list[[vals$current_backup]],
-            res,
-            parent
-          )
-        },
-        priority = -1,
-        ignoreInit = TRUE
-      )
-
-      # Manual save
-      observeEvent(req(parent$save_board), {
-        snapshot_board(vals, board, parent, session)
-      })
-
-      # Probably useful to save something if the user disconnects
-      # by accident or the app crashes ...
-      session$onSessionEnded(function() {
-        # we need isolate to avoid reactive context error.
-        isolate({
-          snapshot_board(vals, board, parent, session)
-        })
-      })
-
-      # Restore workspace from json file
-      observeEvent(input$restore, {
-        restore_board(input$restore$datapath, res, parent)
-      })
-
-      # Restore from scoutbar choice
-      observeEvent(
-        {
-          parent$scoutbar
-          req(parent$scoutbar$action == "restore_board")
-        },
-        {
-          restore_board(
-            parent$scoutbar$value,
-            res,
-            parent
-          )
-        }
-      )
-
-      res
-    }
-  )
-}
-
 #' Ser/deser module UI
 #'
 #' @param id module ID.
@@ -159,32 +23,14 @@ ser_deser_ui <- function(id, board) {
     import_btn$attribs$class
   )
 
-  list(
-    buttons = tagList(
-      if (isTRUE(as_board_options(board)[["snapshot"]])) {
-        tagList(
-          actionButton(
-            NS(id, "undo"),
-            label = "Undo",
-            icon = icon("rotate-left")
-          ),
-          actionButton(
-            NS(id, "redo"),
-            label = "Redo",
-            icon = icon("rotate-right")
-          )
-        )
-      }
-    ),
-    restore = div(
-      class = "d-flex justify-content-center align-items-center gap-1",
-      import_btn,
-      downloadButton(
-        NS(id, "serialize"),
-        "Export",
-        class = "btn-sm",
-        icon = icon("file-export"),
-      )
+  div(
+    class = "d-flex justify-content-center align-items-center gap-1",
+    import_btn,
+    downloadButton(
+      NS(id, "serialize"),
+      "Export",
+      class = "btn-sm",
+      icon = icon("file-export"),
     )
   )
 }

@@ -142,7 +142,7 @@ board_ui.dag_board <- function(id, x, plugins = board_plugins(x), ...) {
     board_options_ui = options_ui(
       id,
       as_board_options(x),
-      toolbar_ui$preserve_board$restore
+      toolbar_ui$preserve_board
     )
   )
 
@@ -179,6 +179,10 @@ board_ui.dag_board <- function(id, x, plugins = board_plugins(x), ...) {
     scoutbar(
       sprintf("%s-scoutbar", id),
       placeholder = "What do you want to do?",
+      actions = scout_page(
+        label = "Add a block",
+        .list = blk_choices()
+      ),
       showRecentSearch = TRUE
     )
   )
@@ -414,57 +418,6 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
         session,
         "scoutbar",
         revealScoutbar = TRUE
-      )
-    }
-  )
-
-  # Update scoutbar action with snapshots taken in the serialise module
-  observeEvent(
-    {
-      parent$backup_list
-    },
-    {
-      # TBD: this isn't optimal. scoutbaR should
-      # be able to allow to append/remove/modify actions
-      # instead of having to re-create the whole list.
-      location <- attr(
-        get_board_option_or_default("snapshot", dag_board_options(), session),
-        "location"
-      )
-      new_actions <- list(
-        scout_page(
-          label = "Add a block",
-          .list = blk_choices()
-        ),
-        scout_page(
-          label = "Restore a snapshot",
-          .list = lapply(
-            list_snapshot_files(board$board_id),
-            function(path) {
-              infos <- file.info(path)
-              scout_action(
-                id = sprintf("%s@restore_board", path),
-                label = strsplit(
-                  path,
-                  path.expand(location)
-                )[[1]][2],
-                description = sprintf(
-                  "Created by %s. Date: %s. Size: %s KB",
-                  infos[["uname"]],
-                  round(infos[["mtime"]], units = "secs"),
-                  round(infos[["size"]] / 1000, 1)
-                ),
-                icon = icon("file")
-              )
-            }
-          )
-        )
-      )
-      # We need to avoid to overwrite the existing actions ...
-      update_scoutbar(
-        session,
-        "scoutbar",
-        actions = new_actions
       )
     }
   )
