@@ -178,8 +178,12 @@ initialize_g6 <- function(nodes = NULL, edges = NULL, ns, path, context_menu) {
   )
 
   graph <- default_g6_behaviors(graph, ns = ns)
-  graph <- default_g6_plugins(graph, ns = ns, path = path,
-                              context_menu = context_menu)
+  graph <- default_g6_plugins(
+    graph,
+    ns = ns,
+    path = path,
+    context_menu = context_menu
+  )
 
   graph
 }
@@ -481,7 +485,7 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
   new_node <- list(
     id = block_uid(new),
     label = paste(
-      attr(new, "class")[1],
+      block_name(new),
       "\n id:",
       block_uid(new)
     ),
