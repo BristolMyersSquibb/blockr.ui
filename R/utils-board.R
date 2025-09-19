@@ -198,7 +198,7 @@ board_restore <- function(board, update, session, parent, ...) {
   observeEvent(
     board_refresh(),
     {
-      parent$refreshed <- "refresh-board"
+      parent$refreshed <- "restored-board"
     },
     ignoreInit = TRUE
   )
@@ -238,7 +238,7 @@ restore_layout <- function(parent, session) {
     # Move block from offcanvas to panel
     show_block_panel(id, session)
   })
-  parent$refreshed <- "restore-layout"
+  parent$refreshed <- "restored-layout"
 }
 
 # Clean up layout from uncessary elements ...
@@ -288,12 +288,12 @@ build_layout <- function(modules, plugins) {
     # Restore layout from snapshot
     observeEvent(
       {
-        req(parent$refreshed == "refresh-board")
+        req(parent$refreshed == "restored-board")
       },
       {
         # No need to cleanup before
         restore_dock("layout", parent$app_layout)
-        parent$refreshed <- "restore-dock"
+        parent$refreshed <- "restored-dock"
       }
     )
 
@@ -301,7 +301,7 @@ build_layout <- function(modules, plugins) {
     observeEvent(
       {
         req(
-          parent$refreshed == "restore-dock",
+          parent$refreshed == "restored-dock",
           setequal(
             names(input$layout_state$panels),
             names(parent$app_layout$panels)
