@@ -23,7 +23,7 @@ new_stack_colors_option <- function(
         )
       )
     },
-    server = function(board, session) {
+    server = function(..., session) {
       observeEvent(
         get_board_option_or_null("stack_colors", session),
         {
@@ -115,7 +115,7 @@ new_snapshot_option <- function(
         auto_save
       )
     },
-    server = function(board, session) {
+    server = function(..., session) {
       observeEvent(
         get_board_option_or_null("snapshot", session),
         {
@@ -156,7 +156,7 @@ new_blocks_position_option <- function(
         )
       )
     },
-    server = function(board, session) {
+    server = function(..., session) {
       observeEvent(
         {
           req(length(get_panels_ids("layout")) > 0)
@@ -165,7 +165,7 @@ new_blocks_position_option <- function(
         {
           # Get existing layout panels
           layout_panels <- grep(
-            get_panels_ids("layout"),
+            get_panels_ids("layout", session),
             pattern = "^(?!.*block-).*$",
             perl = TRUE,
             value = TRUE
