@@ -242,6 +242,20 @@ restore_layout <- function(parent, session) {
   parent$refreshed <- "restore-layout"
 }
 
+# Clean up layout from uncessary elements ...
+# We don't need panel content.
+process_app_layout <- function(layout) {
+  if (!length(layout[["panels"]])) return(layout)
+  layout[["panels"]] <- lapply(
+    layout[["panels"]],
+    function(p) {
+      p[["params"]][["content"]] <- list(html = character(0))
+      p
+    }
+  )
+  layout
+}
+
 #' App layout
 #'
 #' @keywords internal
@@ -260,7 +274,7 @@ build_layout <- function(modules, plugins) {
         input$layout_state
       },
       {
-        parent$app_layout <- input$layout_state
+        parent$app_layout <- process_app_layout(input$layout_state)
       }
     )
 
