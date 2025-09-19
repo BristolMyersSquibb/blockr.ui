@@ -343,13 +343,14 @@
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_plugin.html" class="external-link">board_plugins</a></span><span class="op">(</span><span class="va">my_board</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;plugins[6]&gt;</span></span>
+<span><span class="co">#&gt; &lt;plugins[7]&gt;</span></span>
 <span><span class="co">#&gt; preserve_board: &lt;preserve_board&lt;plugin&gt;&gt;</span></span>
 <span><span class="co">#&gt; manage_blocks: &lt;manage_blocks&lt;plugin&gt;&gt;</span></span>
 <span><span class="co">#&gt; manage_links: &lt;manage_links&lt;plugin&gt;&gt;</span></span>
 <span><span class="co">#&gt; manage_stacks: &lt;manage_stacks&lt;plugin&gt;&gt;</span></span>
 <span><span class="co">#&gt; generate_code: &lt;generate_code&lt;plugin&gt;&gt;</span></span>
-<span><span class="co">#&gt; notify_user: &lt;notify_user&lt;plugin&gt;&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; notify_user: &lt;notify_user&lt;plugin&gt;&gt;</span></span>
+<span><span class="co">#&gt; edit_block: &lt;edit_block&lt;plugin&gt;&gt;</span></span></code></pre></div>
 </div>
 <p>The set of plugins can be overridden in calls to <code><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/serve.html" class="external-link">serve()</a></code>.</p>
 <p><code>blockr.ui</code> improves few of the core modules such as the <code><a href="../reference/add_rm_link.html">gen_add_rm_link_server()</a></code> and <code><a href="../reference/add_rm_link.html">add_rm_link_ui()</a></code> which is responsible for managing node and edges and connections with the <code>g6R</code> <a href="https://cynkra.github.io/g6R/" class="external-link">package</a>. Blocks management is done via the <code><a href="../reference/add_rm_block.html">add_rm_block_server()</a></code> and <code><a href="../reference/add_rm_block.html">add_rm_block_ui()</a></code> modules, which are powered by the <code>scoutbaR</code> <a href="https://cynkra.github.io/scoutbaR/" class="external-link">package</a>. The latter provides a significantly better user experience with a powerful search bar with autocompletion and history management.</p>
