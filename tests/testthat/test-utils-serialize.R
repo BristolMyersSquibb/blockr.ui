@@ -20,6 +20,17 @@ test_that("ser/deser roundtrip", {
     args = list(board = board_initial),
     {
       session$flushReact()
+
+      # mock dag panel to as it is selected on restore in an oberver
+      # avoid a warning in the test below
+      test_dock <- list()
+      test_dock[["panels"]][["dag"]] <- list(
+        id = "dag",
+        params = list(
+          content = list(html = "blabla")
+        )
+      )
+      res$parent$app_layout <- test_dock
       board <- res$board
       json <<- serialize_board(board$board, board$blocks, res$parent,
                                session = session)
