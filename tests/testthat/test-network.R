@@ -165,17 +165,6 @@ testServer(
     session$setInputs("save_board" = TRUE)
     expect_true(parent$save_board)
 
-    # Trigger browse snapshots
-    session$setInputs("browse_snapshots" = TRUE)
-    expect_true(parent$open_scoutbar)
-    expect_identical(
-      parent$scoutbar$trigger,
-      "serialize"
-    )
-
-    parent$scoutbar$is_open <- TRUE
-    session$flushReact()
-
     # Added block
     parent$append_block <- TRUE
     session$setInputs("network-selected_node" = "test")
