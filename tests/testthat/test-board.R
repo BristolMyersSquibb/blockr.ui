@@ -52,9 +52,13 @@ testServer(
     expect_length(dot_args$parent$in_grid, 0)
     # Layout initial state
     test_dock <- list()
-    test_dock[["panels"]] <- set_names(
-      list(id = "dashboard"),
-      "dashboard"
+    test_dock[["panels"]] <- list(
+      "dashboard" = list(
+        id = "dashboard",
+        params = list(
+          content = list(html = "blabla")
+        )
+      )
     )
 
     session$userData$board_options[["blocks_position"]] <- reactiveVal(
@@ -89,10 +93,11 @@ testServer(
     expect_null(dot_args$parent$added_to_dashboard)
 
     # To be able to remove panels later, we need to mock the dock state
-    test_dock <- list()
-    test_dock[["panels"]] <- set_names(
-      list(id = block_uid(dot_args$parent$added_block)),
-      sprintf("block-%s", block_uid(dot_args$parent$added_block))
+    test_dock[["panels"]][[sprintf("block-%s", block_uid(dot_args$parent$added_block))]] <- list(
+      id = block_uid(dot_args$parent$added_block),
+      params = list(
+        content = list(html = "blabla")
+      )
     )
     session$setInputs(dock_state = test_dock, layout_state = test_dock)
 
@@ -156,9 +161,11 @@ testServer(
       session
     )
     test_dock <- list()
-    test_dock[["panels"]] <- set_names(
-      list(id = block_uid(dot_args$parent$added_block)),
-      sprintf("block-%s", block_uid(dot_args$parent$added_block))
+    test_dock[["panels"]][[sprintf("block-%s", block_uid(dot_args$parent$added_block))]] <- list(
+      id = block_uid(dot_args$parent$added_block),
+      params = list(
+        content = list(html = "blabla")
+      )
     )
     session$setInputs(layout_state = test_dock)
     session$setInputs(

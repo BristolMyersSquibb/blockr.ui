@@ -244,7 +244,7 @@ process_app_layout <- function(layout) {
   layout[["panels"]] <- lapply(
     layout[["panels"]],
     function(p) {
-      p[["params"]][["content"]] <- list(html = list())
+      p[["params"]][["content"]] <- list(html = character(0))
       p
     }
   )
