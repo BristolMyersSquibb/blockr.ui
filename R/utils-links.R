@@ -1167,7 +1167,8 @@ restore_network <- function(rv, vals, session) {
     session = session
   )
 
-  vals$refreshed <- "restore-network"
+  browser()
+  vals$refreshed <- "restored-dag"
 
   vals
 }
@@ -1322,6 +1323,7 @@ cold_start <- function(rv, parent, session) {
     session = session
   )
 
-  parent$refreshed <- "restore-network"
+  parent$refreshed <- "restored-dag"
+
   parent
 }

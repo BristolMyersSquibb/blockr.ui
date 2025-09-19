@@ -14,7 +14,6 @@ mock_remove_block <- function(id, parent, session) {
 }
 
 create_mock_params <- function(board = new_dag_board()) {
-
   modules <- board_modules(board)
   plugins <- board_plugins(board)
 
@@ -93,7 +92,10 @@ testServer(
     expect_null(dot_args$parent$added_to_dashboard)
 
     # To be able to remove panels later, we need to mock the dock state
-    test_dock[["panels"]][[sprintf("block-%s", block_uid(dot_args$parent$added_block))]] <- list(
+    test_dock[["panels"]][[sprintf(
+      "block-%s",
+      block_uid(dot_args$parent$added_block)
+    )]] <- list(
       id = block_uid(dot_args$parent$added_block),
       params = list(
         content = list(html = "blabla")
@@ -129,7 +131,7 @@ testServer(
     expect_null(dot_args$parent$in_grid[[dot_args$parent$removed_block]])
 
     # Refresh
-    dot_args$parent$refreshed <- "restore-network"
+    dot_args$parent$refreshed <- "restore-dag"
     # Manually setup the dashboard state as this is theoretically
     # injected by the dashboard module
     dot_args$parent$module_state$dashboard <- reactiveVal(NULL)
@@ -161,7 +163,10 @@ testServer(
       session
     )
     test_dock <- list()
-    test_dock[["panels"]][[sprintf("block-%s", block_uid(dot_args$parent$added_block))]] <- list(
+    test_dock[["panels"]][[sprintf(
+      "block-%s",
+      block_uid(dot_args$parent$added_block)
+    )]] <- list(
       id = block_uid(dot_args$parent$added_block),
       params = list(
         content = list(html = "blabla")
