@@ -14,7 +14,6 @@ mock_remove_block <- function(id, parent, session) {
 }
 
 create_mock_params <- function(board = new_dag_board()) {
-
   modules <- board_modules(board)
   plugins <- board_plugins(board)
 
@@ -35,13 +34,52 @@ create_mock_params <- function(board = new_dag_board()) {
   )
 }
 
-test_that("Process app layout works", {
-  res <- process_app_layout(test_dock)
-  invisible(lapply(res$panels, function(p) {
-    content <- p$params$content
-    expect_named(content, "html")
-    expect_length(content$html, 0)
-  }))
+test_that("process_app_layout returns layout unchanged when no block panels", {
+  layout <- list(
+    panels = list(
+      panel1 = list(
+        id = "panel1",
+        params = list(content = list(html = "content1"))
+      ),
+      panel2 = list(
+        id = "panel2",
+        params = list(content = list(html = "content2"))
+      )
+    )
+  )
+
+  result <- process_app_layout(layout)
+  expect_equal(result, layout)
+})
+
+test_that("process_app_layout clears content for block panels", {
+  layout <- list(
+    panels = list(
+      `block-panel` = list(
+        id = "block-panel",
+        params = list(content = list(html = "some content"))
+      ),
+      normal_panel = list(
+        id = "normal_panel",
+        params = list(content = list(html = "other content"))
+      )
+    )
+  )
+
+  result <- process_app_layout(layout)
+
+  # Block panel content should be cleared
+  expect_equal(result$panels[["block-panel"]]$params$content$html, character(0))
+
+  # Normal panel content should remain unchanged
+  expect_equal(result$panels$normal_panel$params$content$html, "other content")
+})
+
+test_that("process_app_layout handles empty panels list", {
+  layout <- list(panels = list())
+
+  result <- process_app_layout(layout)
+  expect_equal(result, layout)
 })
 
 testServer(
@@ -93,7 +131,10 @@ testServer(
     expect_null(dot_args$parent$added_to_dashboard)
 
     # To be able to remove panels later, we need to mock the dock state
-    test_dock[["panels"]][[sprintf("block-%s", block_uid(dot_args$parent$added_block))]] <- list(
+    test_dock[["panels"]][[sprintf(
+      "block-%s",
+      block_uid(dot_args$parent$added_block)
+    )]] <- list(
       id = block_uid(dot_args$parent$added_block),
       params = list(
         content = list(html = "blabla")
@@ -161,7 +202,10 @@ testServer(
       session
     )
     test_dock <- list()
-    test_dock[["panels"]][[sprintf("block-%s", block_uid(dot_args$parent$added_block))]] <- list(
+    test_dock[["panels"]][[sprintf(
+      "block-%s",
+      block_uid(dot_args$parent$added_block)
+    )]] <- list(
       id = block_uid(dot_args$parent$added_block),
       params = list(
         content = list(html = "blabla")

@@ -117,7 +117,6 @@ options_ui <- function(id, x, ...) {
 #' @rdname board_ui
 #' @export
 board_ui.dag_board <- function(id, x, plugins = board_plugins(x), ...) {
-
   toolbar_plugins <- c(
     "preserve_board",
     "manage_stacks",
@@ -243,13 +242,21 @@ restore_layout <- function(parent, session) {
 }
 
 # Clean up layout from uncessary elements ...
-# We don't need panel content.
+# We don't need panel content, except for non-block panels
 process_app_layout <- function(layout) {
-  if (!length(layout[["panels"]])) return(layout)
+  block_panels <- get_block_panels(names(layout[["panels"]]))
+  if (!length(block_panels)) {
+    return(layout)
+  }
   layout[["panels"]] <- lapply(
     layout[["panels"]],
     function(p) {
-      p[["params"]][["content"]] <- list(html = character(0))
+      # Make sure the we only drop the html content of block panels
+      # as we don't need it.
+      id <- gsub("block-", "", p[["id"]])
+      if (id %in% block_panels) {
+        p[["params"]][["content"]] <- list(html = character(0))
+      }
       p
     }
   )
