@@ -20,7 +20,6 @@
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/block-panel.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/block_ui.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/blockr.ui-package.html</loc></url>
-<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/blockr_ser.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/board-module.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/board_ui.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/can_connect.html</loc></url>
@@ -49,18 +48,14 @@
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/register_node_stack_link.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/remove_edge.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/remove_node.html</loc></url>
-<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/restore_board.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/restore_network.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/run_demo_app.html</loc></url>
-<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/save-board.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/ser_deser.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/setup_chat_task.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/setup_remove_elements_kbd.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/show_stack_actions.html</loc></url>
-<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/snapshot_board.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/stack-nodes.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/system_prompt.html</loc></url>
-<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/toggle_undo_redo.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/validate_edge_creation.html</loc></url>
 </urlset>
 

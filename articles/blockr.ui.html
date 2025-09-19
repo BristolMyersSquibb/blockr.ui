@@ -323,7 +323,7 @@
 <span><span class="co">#&gt; Blocks: "a" and "c"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Options:</span></span>
-<span><span class="co">#&gt; &lt;board_options[11]&gt;</span></span>
+<span><span class="co">#&gt; &lt;board_options[10]&gt;</span></span>
 <span><span class="co">#&gt;   board_name: Board</span></span>
 <span><span class="co">#&gt;   n_rows: 50</span></span>
 <span><span class="co">#&gt;   page_size: 5</span></span>
@@ -331,7 +331,6 @@
 <span><span class="co">#&gt;   thematic: NULL</span></span>
 <span><span class="co">#&gt;   dark_mode: light</span></span>
 <span><span class="co">#&gt;   stack_colors: #A71B4B, #B32A49, #BF3645, #CA433E, #D54E34, ...</span></span>
-<span><span class="co">#&gt;   snapshot: FALSE</span></span>
 <span><span class="co">#&gt;   show_conditions: warning, error</span></span>
 <span><span class="co">#&gt;   blocks_position: NULL, within</span></span>
 <span><span class="co">#&gt;   dashboard_zoom: 1</span></span></code></pre></div>
@@ -340,21 +339,10 @@
 </section><section class="level4"><h4 id="manage-plugins">Manage plugins<a class="anchor" aria-label="anchor" href="#manage-plugins"></a>
 </h4>
 <p>As discussed in the <code>blockr.core</code> plugins <a href="https://bristolmyerssquibb.github.io/blockr.core/articles/extend-blockr.html#blockr-plugins" class="external-link">vignette</a>, <strong>plugins</strong> are Shiny modules used to customize/enhance UX aspects of the board module.</p>
-<p>To control which plugin to use in the app, you can use the <code><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_plugin.html" class="external-link">blockr.core::plugins()</a></code>, like so:</p>
+<p>To inspect which plugin are by default used in the app, you can call the <code><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_plugin.html" class="external-link">blockr.core::board_plugins()</a></code> generic, like so:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">my_plugins</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_plugin.html" class="external-link">plugins</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/preserve_board.html" class="external-link">preserve_board</a></span><span class="op">(</span>server <span class="op">=</span> <span class="va">ser_deser_server</span>, ui <span class="op">=</span> <span class="va">ser_deser_ui</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/manage_blocks.html" class="external-link">manage_blocks</a></span><span class="op">(</span>server <span class="op">=</span> <span class="va">add_rm_block_server</span>, ui <span class="op">=</span> <span class="va">add_rm_block_ui</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/manage_links.html" class="external-link">manage_links</a></span><span class="op">(</span></span>
-<span>    server <span class="op">=</span> <span class="fu"><a href="../reference/add_rm_link.html">gen_add_rm_link_server</a></span><span class="op">(</span><span class="va">ctx_menu_items</span><span class="op">)</span>,</span>
-<span>    ui <span class="op">=</span> <span class="va">add_rm_link_ui</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/manage_stacks.html" class="external-link">manage_stacks</a></span><span class="op">(</span>server <span class="op">=</span> <span class="va">add_rm_stack_server</span>, ui <span class="op">=</span> <span class="va">add_rm_stack_ui</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/generate_code.html" class="external-link">generate_code</a></span><span class="op">(</span>server <span class="op">=</span> <span class="va">generate_code_server</span>, ui <span class="op">=</span> <span class="va">generate_code_ui</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/notify_user.html" class="external-link">notify_user</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">my_plugins</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_plugin.html" class="external-link">board_plugins</a></span><span class="op">(</span><span class="va">my_board</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;plugins[6]&gt;</span></span>
 <span><span class="co">#&gt; preserve_board: &lt;preserve_board&lt;plugin&gt;&gt;</span></span>
 <span><span class="co">#&gt; manage_blocks: &lt;manage_blocks&lt;plugin&gt;&gt;</span></span>
@@ -363,6 +351,7 @@
 <span><span class="co">#&gt; generate_code: &lt;generate_code&lt;plugin&gt;&gt;</span></span>
 <span><span class="co">#&gt; notify_user: &lt;notify_user&lt;plugin&gt;&gt;</span></span></code></pre></div>
 </div>
+<p>The set of plugins can be overridden in calls to <code><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/serve.html" class="external-link">serve()</a></code>.</p>
 <p><code>blockr.ui</code> improves few of the core modules such as the <code><a href="../reference/add_rm_link.html">gen_add_rm_link_server()</a></code> and <code><a href="../reference/add_rm_link.html">add_rm_link_ui()</a></code> which is responsible for managing node and edges and connections with the <code>g6R</code> <a href="https://cynkra.github.io/g6R/" class="external-link">package</a>. Blocks management is done via the <code><a href="../reference/add_rm_block.html">add_rm_block_server()</a></code> and <code><a href="../reference/add_rm_block.html">add_rm_block_ui()</a></code> modules, which are powered by the <code>scoutbaR</code> <a href="https://cynkra.github.io/scoutbaR/" class="external-link">package</a>. The latter provides a significantly better user experience with a powerful search bar with autocompletion and history management.</p>
 <p>Then you can pass any extra plugin you developed as long as they belong to the one handled by <code>block.core</code>. The full list of available plugins can be found by running <code><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_plugin.html" class="external-link">board_plugins()</a></code>. You’ll notice that <code>blockr.ui</code> does not yet use <code>edit_block</code> or <code>edit_block</code> plugins.</p>
 </section></section></section><script id="quarto-html-after-body" type="application/javascript">
