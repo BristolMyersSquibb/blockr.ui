@@ -4,7 +4,10 @@
 \alias{setup_chat_task}
 \title{Create a task to append chat messages}
 \usage{
-setup_chat_task()
+setup_chat_task(session)
+}
+\arguments{
+\item{session}{Shiny session object.}
 }
 \description{
 Create a task to append chat messages

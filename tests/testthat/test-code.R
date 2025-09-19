@@ -9,7 +9,7 @@ attr(test_blk, "uid") <- "test"
 
 mock_add_block <- function(blk, rv, parent, session) {
   board_blocks(rv$board) <- c(board_blocks(rv$board), as_blocks(blk))
-  blk_id <- tail(board_block_ids(rv$board), n = 1)
+  blk_id <- last(board_block_ids(rv$board))
   rv$blocks[[blk_id]] <- list(
     block = blk,
     # Needed for code generation
@@ -18,7 +18,7 @@ mock_add_block <- function(blk, rv, parent, session) {
   rv$inputs[[blk_id]] <- if (!length(block_inputs(blk))) {
     list()
   } else {
-    setNames(
+    set_names(
       list(reactiveVal()),
       block_inputs(blk)
     )
@@ -39,11 +39,11 @@ testServer(
     )
   ),
   {
-    mock_add_block(test_blk, board, dot_args$parent, session)
+    mock_add_block(test_blk, board, parent, session)
     expect_true(nchar(board_code()) > 0)
     output$code_out
-    dot_args$parent$display_code <- TRUE
+    parent$display_code <- TRUE
     session$flushReact()
-    expect_false(dot_args$parent$display_code)
+    expect_false(parent$display_code)
   }
 )

@@ -1,12 +1,3 @@
-test_that("setup_chat_provider", {
-  # Test basic functionality with chat_openai
-  result <- setup_chat_provider(
-    prompt = "You are a helpful assistant"
-  )
-  expect_s3_class(result, "Chat")
-  expect_identical(result$get_system_prompt(), "You are a helpful assistant")
-})
-
 test_that("setup_chat_task creates ExtendedTask", {
   result <- setup_chat_task()
   expect_s3_class(result, "ExtendedTask")
@@ -54,6 +45,46 @@ testServer(
     expect_null(parent$ai_chat)
     expect_length(stackable_blocks(), 0)
 
+    llm_opt <- withr::with_options(
+      list(
+        blockr.chat_function = mock_chat(
+          stream_async = function(msg, ...) {
+            if (identical(msg, "Import iris data")) {
+              call_tool(self, "create_block_tool_factory",
+                ctor = "new_dataset_block"
+              )
+              call_tool(self, "add_new_dataset_block",
+                name = "dataset_block",
+                append = FALSE,
+                parms = list(dataset = "iris", package = "datasets")
+              )
+              seq_gen("Successfully", "added a block", "that loads \"iris\".")
+            } else if (grepl("^Remove block", msg)) {
+              blk <- sub("^Remove block ", "", msg)
+              res <- call_tool(self, "remove_block", id = blk)
+              if ("error" %in% names(res)) {
+                seq_gen("Could not", "remove block", blk)
+              } else {
+                seq_gen("Successfully", "removed block", blk)
+              }
+            } else {
+              stop("Unknown request: ", msg)
+            }
+          }
+        )
+      ),
+      new_llm_model_option()
+    )
+
+    board_option_to_userdata <- get(
+      "board_option_to_userdata",
+      envir = asNamespace("blockr.core"),
+      inherits = FALSE,
+      mode = "function"
+    )
+
+    board_option_to_userdata(llm_opt, board$board, session)
+
     session$flushReact()
 
     output$chat_ui
@@ -61,24 +92,52 @@ testServer(
     expect_true(length(provider()$get_tools()) > 0)
     # Simulate a chat input
     session$setInputs(
-      `prompt_user_input` = "Import iris data"
+      prompt_user_input = "Import iris data"
     )
-    expect_true(parent$ai_chat)
 
-    # Call provider to invoke tools
-    provider()$chat("Import iris data")
-    expect_true("add_new_dataset_block" %in% names(provider()$get_tools()))
     session$flushReact()
-    expect_identical(parent$scoutbar$action, "add_block")
-    expect_identical(block_name(parent$scoutbar$value[[1]]), "Dataset block")
+
+    while (append_stream_task$status() == "running") {
+      session$elapse(250)
+    }
+
+    expect_identical(append_stream_task$status(), "success")
     expect_snapshot(app_request())
 
-    # TBD: add block to board manually
+    expect_identical(parent$scoutbar$action, "add_block")
+    expect_s3_class(parent$scoutbar$value, "blocks")
+    expect_length(parent$scoutbar$value, 1L)
+
+    names(parent$scoutbar$value) <- "iris_data"
+
     board_blocks(board$board) <- c(
       board_blocks(board$board),
       parent$scoutbar$value
     )
-    provider()$chat("Remove block aaaa.")
+
+    session$setInputs(
+      prompt_user_input = "Remove block iris_data"
+    )
+    session$flushReact()
+
+    while (append_stream_task$status() == "running") {
+      session$elapse(250)
+    }
+
+    expect_snapshot(app_request())
+
+    to_rm <- which(names(board_blocks(board$board)) == "iris_data")
+    board_blocks(board$board) <- board_blocks(board$board)[-to_rm]
+
+    session$setInputs(
+      prompt_user_input = "Remove block iris_data"
+    )
+    session$flushReact()
+
+    while (append_stream_task$status() == "running") {
+      session$elapse(250)
+    }
+
     expect_snapshot(app_request())
 
     session$setInputs(
@@ -95,7 +154,26 @@ test_that("Chat app works", {
   app <- shinytest2::AppDriver$new(
     system.file(package = "blockr.ui", "examples/ai-chat/simple"),
     name = "simple-ai-chat",
-    seed = 4323
+    seed = 4323,
+    options = list(
+      blockr.chat_function = mock_chat(
+        stream_async = function(msg, ...) {
+          if (identical(msg, "Import iris data")) {
+            call_tool(self, "create_block_tool_factory",
+              ctor = "new_dataset_block"
+            )
+            call_tool(self, "add_new_dataset_block",
+              name = "dataset_block",
+              append = FALSE,
+              parms = list(dataset = "iris", package = "datasets")
+            )
+            seq_gen("Successfully", "added a block", "that loads \"iris\".")
+          } else {
+            stop("Unknown request: ", msg)
+          }
+        }
+      )
+    )
   )
 
   Sys.sleep(4)

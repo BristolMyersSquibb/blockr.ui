@@ -104,10 +104,8 @@ context_menu_entry_js <- function(x, ns = NULL) {
 build_context_menu <- function(x, ...) {
   if (!is_context_menu_entry(x)) {
     validate_context_menu_entries(x)
-
-    return(
-      Filter(not_null, lapply(x, build_context_menu, ...))
-    )
+    res <- Filter(not_null, lapply(x, build_context_menu, ...))
+    return(unname(res))
   }
 
   if (!context_menu_entry_condition(x, ...)) {
@@ -125,4 +123,72 @@ validate_context_menu_entries <- function(x) {
   )
 
   invisible(x)
+}
+
+#' @param x Object
+#' @rdname context-menu
+#' @export
+context_menu_items <- function(x) {
+
+  if (missing(x)) {
+
+    res <- list(
+      create_edge_ctxm,
+      remove_node_ctxm,
+      remove_edge_ctxm,
+      append_node_ctxm,
+      create_stack_ctxm,
+      remove_stack_ctxm,
+      add_block_ctxm
+    )
+
+    return(
+      set_names(res, chr_ply(res, context_menu_entry_id))
+    )
+  }
+
+  UseMethod("context_menu_items")
+}
+
+#' @rdname context-menu
+#' @export
+context_menu_items.board_module <- function(x) {
+
+  res <- board_module_context_menu(x)
+
+  if (is_context_menu_entry(res)) {
+    return(list(res))
+  }
+
+  res <- validate_context_menu_entries(res)
+
+  set_names(res, chr_ply(res, context_menu_entry_id))
+}
+
+#' @rdname context-menu
+#' @export
+context_menu_items.list <- function(x) {
+
+  res <- lapply(x, context_menu_items)
+
+  is_ctxm <- lgl_ply(x, is_context_menu_entry)
+
+  res[is_ctxm] <- lapply(res[is_ctxm], list)
+
+  for (i in res) {
+    validate_context_menu_entries(i)
+  }
+
+  res <- validate_context_menu_entries(do.call("c", res))
+
+  set_names(res, chr_ply(res, context_menu_entry_id))
+}
+
+#' @rdname context-menu
+#' @export
+context_menu_items.dag_board <- function(x) {
+  c(
+    context_menu_items(),
+    context_menu_items(board_modules(x))
+  )
 }

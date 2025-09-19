@@ -4,12 +4,14 @@
 \alias{generate_code_server}
 \title{Code generation plugin module}
 \usage{
-generate_code_server(id, board, ...)
+generate_code_server(id, board, parent, ...)
 }
 \arguments{
 \item{id}{Namespace ID}
 
 \item{board}{Reactive values object}
+
+\item{parent}{App state}
 
 \item{...}{Extra arguments passed from parent scope}
 }

@@ -6,6 +6,7 @@
 #' @param id Namespace ID.
 #' @param board Reactive values object.
 #' @param update Reactive value object to initiate board updates.
+#' @param parent App state
 #' @param ... Extra arguments passed from parent scope.
 #'
 #' @return A reactive value that evaluates to `NULL` or a list with components
@@ -14,23 +15,21 @@
 #'
 #' @rdname add_rm_g6_stack
 #' @export
-add_rm_stack_server <- function(id, board, update, ...) {
+add_rm_stack_server <- function(id, board, update, parent, ...) {
   moduleServer(
     id,
     function(input, output, session) {
-      dot_args <- list(...)
-
       # Add new stack from node selection
       observeEvent(
-        dot_args$parent$added_stack,
+        parent$added_stack,
         {
           tmp_stack <- if (
-            length(dot_args$parent$added_stack) == 1 &&
-              nchar(dot_args$parent$added_stack) == 0
+            length(parent$added_stack) == 1 &&
+              nchar(parent$added_stack) == 0
           ) {
             new_stack()
           } else {
-            new_stack(blocks = dot_args$parent$added_stack)
+            new_stack(blocks = parent$added_stack)
           }
           update(
             list(
@@ -39,27 +38,27 @@ add_rm_stack_server <- function(id, board, update, ...) {
               )
             )
           )
-          dot_args$parent$added_stack <- NULL
+          parent$added_stack <- NULL
         }
       )
 
       # Remove stack from node selection
-      observeEvent(dot_args$parent$removed_stack, {
+      observeEvent(parent$removed_stack, {
         update(
           list(
             stacks = list(
-              rm = dot_args$parent$removed_stack
+              rm = parent$removed_stack
             )
           )
         )
-        dot_args$parent$removed_stack <- NULL
+        parent$removed_stack <- NULL
       })
 
       # Callback from links module
-      observeEvent(dot_args$parent$stack_removed_node, {
+      observeEvent(parent$stack_removed_node, {
         # Update stacks callback
-        stack_id <- dot_args$parent$stack_removed_node$stack_id
-        node_id <- dot_args$parent$stack_removed_node$node_id
+        stack_id <- parent$stack_removed_node$stack_id
+        node_id <- parent$stack_removed_node$node_id
         tmp_stack <- board_stacks(board$board)[[stack_id]]
         stack_blocks(tmp_stack) <- stack_blocks(tmp_stack)[
           stack_blocks(tmp_stack) != node_id
@@ -67,33 +66,33 @@ add_rm_stack_server <- function(id, board, update, ...) {
         update(
           list(
             stacks = list(
-              mod = as_stacks(setNames(
+              mod = as_stacks(set_names(
                 list(tmp_stack),
                 stack_id
               ))
             )
           )
         )
-        dot_args$parent$stack_removed_node <- NULL
+        parent$stack_removed_node <- NULL
       })
 
       # Callback from links module
-      observeEvent(dot_args$parent$stack_added_node, {
-        stack_id <- dot_args$parent$stack_added_node$stack_id
-        node_id <- dot_args$parent$stack_added_node$node_id
+      observeEvent(parent$stack_added_node, {
+        stack_id <- parent$stack_added_node$stack_id
+        node_id <- parent$stack_added_node$node_id
         tmp_stack <- board_stacks(board$board)[[stack_id]]
         stack_blocks(tmp_stack) <- c(stack_blocks(tmp_stack), node_id)
         update(
           list(
             stacks = list(
-              mod = as_stacks(setNames(
+              mod = as_stacks(set_names(
                 list(tmp_stack),
                 stack_id
               ))
             )
           )
         )
-        dot_args$parent$stack_added_node <- NULL
+        parent$stack_added_node <- NULL
       })
 
       NULL

@@ -32,9 +32,21 @@
       [1] "remove_block"
       
       $data
-      [1] "aaaa"
+      [1] "iris_data"
+      
+
+---
+
+    Code
+      app_request()
+    Output
+      $action
+      [1] "remove_block"
+      
+      $data
+      [1] "iris_data"
       
       $error
-      [1] "Block with id aaaa does not exist."
+      [1] "Block with id iris_data does not exist."
       
 

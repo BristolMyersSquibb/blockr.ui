@@ -28,11 +28,19 @@ new_dag_board <- function(
   )
 }
 
+#' @param x (Board) object
+#' @rdname run_demo_app
+#' @export
+is_dag_board <- function(x) {
+  inherits(x, "dag_board") && is_board(x)
+}
+
 #' @rdname run_demo_app
 #' @export
 dag_board_options <- function() {
   new_board_options(
     new_board_name_option(category = "Board options"),
+    if (need_llm_cfg_opts()) new_llm_model_option(category = "Board options"),
     new_n_rows_option(category = "Table options"),
     new_page_size_option(category = "Table options"),
     new_filter_rows_option(category = "Table options"),
@@ -42,38 +50,19 @@ dag_board_options <- function() {
       category = "Theme options"
     ),
     new_stack_colors_option(category = "Board options"),
-    new_snapshot_option(category = "Board options"),
     new_show_conditions_option(category = "Board options"),
     new_blocks_position_option(category = "Layout options")
   )
 }
 
 #' @export
-serve.dag_board <- function(x, id = "main", ...) {
-  modules <- board_modules(x)
+board_plugins.dag_board <- function(x, which = NULL) {
 
-  ctx_menu_items <- unlst(
-    c(
-      list(
-        list(
-          create_edge_ctxm,
-          remove_node_ctxm,
-          remove_edge_ctxm,
-          append_node_ctxm,
-          create_stack_ctxm,
-          remove_stack_ctxm,
-          add_block_ctxm
-        )
-      ),
-      lapply(modules, board_module_context_menu)
-    )
-  )
-
-  plugins <- plugins(
-    preserve_board(server = ser_deser_server, ui = ser_deser_ui),
+  res <- plugins(
+    preserve_board(ui = ser_deser_ui),
     manage_blocks(server = add_rm_block_server, ui = add_rm_block_ui),
     manage_links(
-      server = gen_add_rm_link_server(ctx_menu_items),
+      server = gen_add_rm_link_server(context_menu_items(x)),
       ui = add_rm_link_ui
     ),
     manage_stacks(server = add_rm_stack_server, ui = add_rm_stack_ui),
@@ -81,6 +70,16 @@ serve.dag_board <- function(x, id = "main", ...) {
     notify_user(),
     edit_block(server = edit_block_server, ui = edit_block_ui)
   )
+
+  if (is.null(which)) {
+    return(res)
+  }
+
+  res[which]
+}
+
+#' @export
+serve.dag_board <- function(x, id = "main", plugins = board_plugins(x), ...) {
 
   ui <- do.call(
     page_fillable,
@@ -96,7 +95,7 @@ serve.dag_board <- function(x, id = "main", ...) {
   )
 
   server <- function(input, output, session) {
-    main_server(id, x, plugins, modules)
+    main_server(id, x, plugins)
   }
 
   shinyApp(add_blockr.ui_deps(ui), server)

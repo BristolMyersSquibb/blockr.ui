@@ -113,8 +113,18 @@ call_board_module_ui <- function(x, ...) {
 }
 
 board_modules <- function(board) {
-  stopifnot(is_board(board))
+
+  stopifnot(is_dag_board(board))
+
   modules <- board[["modules"]]
-  stopifnot(is.list(modules), all(lgl_ply(modules, is_board_module)))
+
+  stopifnot(
+    is.list(modules),
+    all(lgl_ply(modules, is_board_module)),
+    length(unique(chr_ply(modules, board_module_id))) == length(modules)
+  )
+
+  names(modules) <- chr_ply(modules, board_module_id)
+
   modules
 }

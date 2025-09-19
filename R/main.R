@@ -5,25 +5,11 @@
 #'
 #' @param id Unique id.
 #' @param board Board object.
-#' @param plugins List of plugins to use. See \link[blockr.core]{plugins}.
+#' @param plugins Board plugins.
 #' @rdname main
 #' @export
-main_ui <- function(id, board, plugins) {
-  ns <- NS(id)
-
-  ui_plugins <- c(
-    "preserve_board",
-    "manage_stacks",
-    "generate_code",
-    "notify_user",
-    "edit_block"
-  )
-
-  board_ui(
-    ns("board"),
-    board,
-    plugins = plugins[ui_plugins]
-  )
+main_ui <- function(id, board, plugins = board_plugins(board)) {
+  board_ui(NS(id, "board"), board, plugins)
 }
 
 create_app_state <- function(board) {
@@ -70,18 +56,10 @@ create_app_state <- function(board) {
 #'
 #' Server module for board.
 #'
-#' @param modules Further modules to pass.
-#'
 #' @rdname main
 #' @export
-main_server <- function(id, board, plugins, modules) {
-  stopifnot(
-    is.list(modules),
-    all(lgl_ply(modules, is_board_module)),
-    length(unique(chr_ply(modules, board_module_id))) == length(modules)
-  )
-
-  names(modules) <- chr_ply(modules, board_module_id)
+main_server <- function(id, board, plugins = board_plugins(board)) {
+  modules <- board_modules(board)
 
   moduleServer(
     id,

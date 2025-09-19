@@ -5,7 +5,7 @@
 \alias{add_rm_block_ui}
 \title{Add/remove block module}
 \usage{
-add_rm_block_server(id, board, update, ...)
+add_rm_block_server(id, board, update, parent, ...)
 
 add_rm_block_ui(id, board)
 }
@@ -15,6 +15,8 @@ add_rm_block_ui(id, board)
 \item{board}{The initial \code{board} object}
 
 \item{update}{Reactive value object to initiate board updates.}
+
+\item{parent}{App state}
 
 \item{...}{Extra arguments passed from parent scope. Useful to communicate
 between plugins and surface information at the top level (for testing ...).}

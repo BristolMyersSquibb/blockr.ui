@@ -47,10 +47,6 @@ Imports:
     cli
 Remotes:
     BristolMyersSquibb/blockr.core,
-    BristolMyersSquibb/blockr.dplyr,
-    BristolMyersSquibb/blockr.io,
-    BristolMyersSquibb/blockr.ai,
-    BristolMyersSquibb/blockr.sdtm,
     cynkra/g6R,
     cynkra/scoutbaR,
     cynkra/dockViewR,
@@ -58,16 +54,14 @@ Remotes:
 Suggests: 
     shinytest2,
     testthat (>= 3.0.0),
-    blockr.dplyr,
-    blockr.io,
-    blockr.ai,
-    blockr.sdtm,
     cyclocomp,
     roxy.shinylive,
     chromote,
     quarto,
     knitr,
-    withr
+    withr,
+    R6,
+    coro
 Config/testthat/edition: 3
 URL: https://github.com/BristolMyersSquibb/blockr.ui/, https://bristolmyerssquibb.github.io/blockr.ui/
 BugReports: https://github.com/BristolMyersSquibb/blockr.ui/issues
@@ -95,7 +89,6 @@ Collate:
     'plugin-serialize.R'
     'plugin-stacks.R'
     'prismjs-dependencies.R'
-    'registry.R'
     'stacks.R'
     'utils-ai-tools.R'
     'utils-board.R'
@@ -105,4 +98,3 @@ Collate:
     'utils-serialize.R'
     'utils-ui.R'
     'utils.R'
-    'zzz.R'

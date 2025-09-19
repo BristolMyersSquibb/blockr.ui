@@ -38,11 +38,8 @@ To run the demo app:
 
 ``` r
 library(blockr.ui)
-library(blockr.dplyr)
-library(blockr.sdtm)
-library(blockr.io)
 
-run_demo_app()
+serve(new_dag_board())
 ```
 
 ## User interface

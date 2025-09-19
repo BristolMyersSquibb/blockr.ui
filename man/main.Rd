@@ -5,18 +5,16 @@
 \alias{main_server}
 \title{Main ui for blockr2}
 \usage{
-main_ui(id, board, plugins)
+main_ui(id, board, plugins = board_plugins(board))
 
-main_server(id, board, plugins, modules)
+main_server(id, board, plugins = board_plugins(board))
 }
 \arguments{
 \item{id}{Unique id.}
 
 \item{board}{Board object.}
 
-\item{plugins}{List of plugins to use. See \link[blockr.core]{plugins}.}
-
-\item{modules}{Further modules to pass.}
+\item{plugins}{Board plugins.}
 }
 \description{
 The board is composed of 2 views pointing to the network module
