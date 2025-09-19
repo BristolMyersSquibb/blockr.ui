@@ -23,7 +23,7 @@ new_stack_colors_option <- function(
         )
       )
     },
-    server = function(board, session) {
+    server = function(..., session) {
       observeEvent(
         get_board_option_or_null("stack_colors", session),
         {
@@ -115,7 +115,7 @@ new_snapshot_option <- function(
         auto_save
       )
     },
-    server = function(board, session) {
+    server = function(..., session) {
       observeEvent(
         get_board_option_or_null("snapshot", session),
         {
@@ -156,24 +156,25 @@ new_blocks_position_option <- function(
         )
       )
     },
-    server = function(board, session) {
+    server = function(..., session) {
       observeEvent(
         {
-          req(length(get_panels_ids("layout")) > 0)
+          req(length(get_panels_ids("layout", session)) > 0)
           get_board_option_or_null("blocks_position", session)
         },
         {
           # Get existing layout panels
           layout_panels <- grep(
-            get_panels_ids("layout"),
+            get_panels_ids("layout", session),
             pattern = "^(?!.*block-).*$",
             perl = TRUE,
             value = TRUE
           )
 
           opt <- get_board_option_value("blocks_position", session)
-          if (nchar(opt$reference_panel) == 0) {
-            opt$reference_panel <- layout_panels[2L]
+
+          if (!length(opt$reference_panel) || !nchar(opt$reference_panel)) {
+            opt$reference_panel <- last(layout_panels)
           }
 
           updateSelectInput(
