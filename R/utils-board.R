@@ -293,7 +293,7 @@ build_layout <- function(modules, plugins) {
       {
         # No need to cleanup before
         restore_dock("layout", parent$app_layout)
-        parent$refreshed <- "restored-layout"
+        parent$refreshed <- "restored-dock"
       }
     )
 
@@ -301,7 +301,7 @@ build_layout <- function(modules, plugins) {
     observeEvent(
       {
         req(
-          parent$refreshed == "restored-layout",
+          parent$refreshed == "restored-dock",
           setequal(
             names(input$layout_state$panels),
             names(parent$app_layout$panels)
