@@ -1173,8 +1173,9 @@ restore_network <- function(rv, vals, session) {
   if (length(vals$module_state)) {
     vals$refreshed <- "restored"
   } else {
-    vals$refresh <- NULL
+    vals$refreshed <- NULL
   }
+  browser()
 
   vals
 }
