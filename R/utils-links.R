@@ -403,7 +403,6 @@ default_g6_plugins <- function(graph, ..., ns, path, context_menu) {
           { id: 'delete', value: 'delete' },
           { id: 'icon-roundaddfill', value : 'add-block'},
           { id: 'icon-down_light', value : 'save-board'},
-          { id: 'icon-upload', value : 'browse-snapshots'},
           { id: 'icon-text', value : 'show-code'}
         ]"
       ),
@@ -441,8 +440,6 @@ default_g6_plugins <- function(graph, ..., ns, path, context_menu) {
               Shiny.setInputValue('%s', true, {priority: 'event'});
             } else if (value === 'save-board') {
               Shiny.setInputValue('%s', true, {priority: 'event'})
-            } else if (value === 'browse-snapshots') {
-              Shiny.setInputValue('%s', true, {priority: 'event'})
             } else if (value === 'show-code') {
               Shiny.setInputValue('%s', true, {priority: 'event'})
             }
@@ -451,7 +448,6 @@ default_g6_plugins <- function(graph, ..., ns, path, context_menu) {
           ns("remove_node"),
           ns("add_block"),
           ns("save_board"),
-          ns("browse_snapshots"),
           ns("show_code")
         )
       )
