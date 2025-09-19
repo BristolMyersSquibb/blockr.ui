@@ -1167,8 +1167,14 @@ restore_network <- function(rv, vals, session) {
     session = session
   )
 
-  browser()
-  vals$refreshed <- "restored-dag"
+  # If no modules, we indicate that the restore is done
+  # Otherwise, we pass it as "restored" so other modules
+  # know when to restore their state.
+  if (length(vals$module_state)) {
+    vals$refreshed <- "restored"
+  } else {
+    vals$refresh <- NULL
+  }
 
   vals
 }
@@ -1323,7 +1329,14 @@ cold_start <- function(rv, parent, session) {
     session = session
   )
 
-  parent$refreshed <- "restored-dag"
+  # If no modules, we indicate that the restore is done
+  # Otherwise, we pass it as "restored" so other modules
+  # know when to restore their state.
+  if (length(vals$module_state)) {
+    vals$refreshed <- "restored"
+  } else {
+    vals$refresh <- NULL
+  }
 
   parent
 }

@@ -48,7 +48,7 @@ dashboard_server <- function(board, update, session, parent, ...) {
   # Restore dock from serialisation only when network is restored
   observeEvent(
     {
-      req(parent$refreshed == "restored-dag")
+      req(parent$refreshed == "restored")
     },
     {
       restore_dashboard(board$board, board, parent, session)
