@@ -119,10 +119,22 @@ gen_add_rm_link_server <- function(context_menu) {
           )
         })
 
-        # Trigger browse snapshots/open scoutbar
-        observeEvent(input$browse_snapshots, {
-          parent$scoutbar$trigger <- "serialize"
-          parent$open_scoutbar <- TRUE
+        # When a block is modified we have to update
+        # the node data
+        observeEvent(update()$blocks$mod, {
+          blk <- update()$blocks$mod
+          new <- list(
+            id = names(blk),
+            label = paste(
+              block_name(blk[[1]]),
+              "\n id:",
+              names(blk)
+            )
+          )
+          g6_update_nodes(
+            g6_proxy(ns("network")),
+            list(new)
+          )
         })
 
         # Add node to network board$nodes so the graph is updated

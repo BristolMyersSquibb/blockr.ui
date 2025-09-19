@@ -3,14 +3,20 @@
 #' @param id Block module id.
 #' @param x Board object.
 #' @param block Block to generate the UI for.
+#' @param edit_ui Block edit plugin.
 #' @param ... Generic consistency.
 #'
 #' @export
 #' @rdname block_ui
-block_ui.dag_board <- function(id, x, block = NULL, ...) {
+block_ui.dag_board <- function(id, x, block = NULL, edit_ui = NULL, ...) {
   block_card <- function(x, id, ns) {
     blk_id <- ns(paste0("block_", id))
     blk_info <- get_block_metadata(x)
+
+    # Edit plugin
+    if (!is.null(edit_ui)) {
+      edit_ui <- edit_ui$ui(x, NS(blk_id, "edit_block"))
+    }
 
     card_tag <- tags$div(
       class = "card",
@@ -19,17 +25,16 @@ block_ui.dag_board <- function(id, x, block = NULL, ...) {
       tags$div(
         class = "row g-0 px-4",
         tags$div(
-          class = "col-md-2 d-flex align-items-center justify-content-start",
+          class = "col-sm-2 col-md-1 col-lg-1 d-flex align-items-center justify-content-start",
           blk_icon(blk_info$category, class = "fa-3x")
         ),
         tags$div(
-          class = "col-md-10",
+          class = "col-sm-10 col-md-11 col-lg-11",
           tags$div(
             class = "card-body",
             tags$div(
               class = "d-flex align-items-center justify-content-start card-title gap-2",
-              h4(firstup(blk_info$name)),
-              tags$small(sprintf("(id: %s)", gsub("block_", "", id))),
+              edit_ui$block_name,
               tooltip(
                 icon("info-circle"),
                 p(
@@ -48,6 +53,7 @@ block_ui.dag_board <- function(id, x, block = NULL, ...) {
           )
         )
       ),
+      #edit_ui$block_summary,
       accordion(
         id = ns(paste0("accordion-", id)),
         multiple = TRUE,
@@ -134,7 +140,7 @@ insert_block_ui.dag_board <- function(
   # on demand ...
   lapply(seq_along(blocks), function(i) {
     blk <- blocks[i]
-    blk_ui <- block_ui(id, x, blk)
+    blk_ui <- block_ui(id, x, blk, ...)
 
     insertUI(
       sprintf(

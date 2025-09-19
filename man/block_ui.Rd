@@ -6,7 +6,7 @@
 \alias{remove_block_ui.dag_board}
 \title{Block custom UI}
 \usage{
-\method{block_ui}{dag_board}(id, x, block = NULL, ...)
+\method{block_ui}{dag_board}(id, x, block = NULL, edit_ui = NULL, ...)
 
 \method{insert_block_ui}{dag_board}(id, x, blocks = NULL, ...)
 
@@ -18,6 +18,8 @@
 \item{x}{Board object.}
 
 \item{block}{Block to generate the UI for.}
+
+\item{edit_ui}{Block edit plugin.}
 
 \item{...}{Generic consistency.}
 

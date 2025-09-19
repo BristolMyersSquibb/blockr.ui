@@ -178,8 +178,12 @@ initialize_g6 <- function(nodes = NULL, edges = NULL, ns, path, context_menu) {
   )
 
   graph <- default_g6_behaviors(graph, ns = ns)
-  graph <- default_g6_plugins(graph, ns = ns, path = path,
-                              context_menu = context_menu)
+  graph <- default_g6_plugins(
+    graph,
+    ns = ns,
+    path = path,
+    context_menu = context_menu
+  )
 
   graph
 }
@@ -399,7 +403,6 @@ default_g6_plugins <- function(graph, ..., ns, path, context_menu) {
           { id: 'delete', value: 'delete' },
           { id: 'icon-roundaddfill', value : 'add-block'},
           { id: 'icon-down_light', value : 'save-board'},
-          { id: 'icon-upload', value : 'browse-snapshots'},
           { id: 'icon-text', value : 'show-code'}
         ]"
       ),
@@ -437,8 +440,6 @@ default_g6_plugins <- function(graph, ..., ns, path, context_menu) {
               Shiny.setInputValue('%s', true, {priority: 'event'});
             } else if (value === 'save-board') {
               Shiny.setInputValue('%s', true, {priority: 'event'})
-            } else if (value === 'browse-snapshots') {
-              Shiny.setInputValue('%s', true, {priority: 'event'})
             } else if (value === 'show-code') {
               Shiny.setInputValue('%s', true, {priority: 'event'})
             }
@@ -447,7 +448,6 @@ default_g6_plugins <- function(graph, ..., ns, path, context_menu) {
           ns("remove_node"),
           ns("add_block"),
           ns("save_board"),
-          ns("browse_snapshots"),
           ns("show_code")
         )
       )
@@ -481,7 +481,7 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
   new_node <- list(
     id = block_uid(new),
     label = paste(
-      attr(new, "class")[1],
+      block_name(new),
       "\n id:",
       block_uid(new)
     ),

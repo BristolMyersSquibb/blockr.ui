@@ -59,7 +59,6 @@ create_app_state <- function(board) {
 #' @rdname main
 #' @export
 main_server <- function(id, board, plugins = board_plugins(board)) {
-
   modules <- board_modules(board)
 
   moduleServer(
