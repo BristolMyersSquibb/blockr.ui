@@ -1175,7 +1175,6 @@ restore_network <- function(rv, vals, session) {
   } else {
     vals$refreshed <- NULL
   }
-  browser()
 
   vals
 }
