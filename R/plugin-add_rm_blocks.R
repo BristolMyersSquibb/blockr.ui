@@ -31,7 +31,12 @@ add_rm_block_server <- function(id, board, update, parent, ...) {
           if (is_blocks(parent$scoutbar$value)) {
             new_blk <- parent$scoutbar$value
           } else {
-            new_blk <- as_blocks(create_block(parent$scoutbar$value))
+            new_id <- rand_names(coal(names(board$blocks), character()))
+            new_blk <- create_block(
+              parent$scoutbar$value,
+              name = id_to_sentence_case(new_id)
+            )
+            new_blk <- as_blocks(set_names(list(new_blk), new_id))
           }
 
           update(

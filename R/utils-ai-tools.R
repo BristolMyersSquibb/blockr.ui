@@ -102,6 +102,13 @@ create_block_tool_factory <- function(
       # Create the specific block tool
       block_tool <- tool(
         function(name, append = FALSE, parms = list()) {
+
+          id <- rand_names(isolate(board_block_ids(board$board)))
+
+          if (!"name" %in% names(params)) {
+            params <- c(params, list(name = id_to_sentence_case(id)))
+          }
+
           dat <- list(
             name = name,
             append = append,
@@ -112,18 +119,8 @@ create_block_tool_factory <- function(
           app_request(res)
 
           # Check that the block can be built.
-          tryCatch(
-            {
-              new_blk <- as_blocks(
-                do.call(
-                  create_block,
-                  c(
-                    list(id = dat$name),
-                    dat$parms
-                  )
-                )
-              )
-            },
+          new_blk <- tryCatch(
+            do.call(create_block, c(list(id = dat$name), dat$parms)),
             error = function(e) {
               res$error <- paste("Error while adding block:", e$message)
               app_request(res)
@@ -131,15 +128,20 @@ create_block_tool_factory <- function(
             }
           )
 
-          # Needs a reactive context... will happen once
-          observeEvent(TRUE, {
-            parent$scoutbar$action <- "add_block"
-            parent$scoutbar$value <- new_blk
-            if (dat$append) {
-              parent$append_block <- TRUE
+          # Needs a reactive context
+          isolate(
+            {
+              parent$scoutbar$action <- "add_block"
+              if (is_block(new_blk)) {
+                parent$scoutbar$value <- as_blocks(set_names(list(new_blk), id))
+              }
+              if (dat$append) {
+                parent$append_block <- TRUE
+              }
             }
-          })
-          return(res)
+          )
+
+          res
         },
         name = paste0("add_", ctor),
         description = paste(

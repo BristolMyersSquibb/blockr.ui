@@ -13,5 +13,6 @@ serve(
       bc = new_link("b", "c", "y")
     ),
     stacks = list(ac = c("a", "c"))
-  )
+  ),
+  board_id = "board"
 )

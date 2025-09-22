@@ -17,7 +17,7 @@ test_that("ser/deser roundtrip", {
 
   testServer(
     main_server,
-    args = list(board = board_initial),
+    args = list(board = board_initial, board_id = "board"),
     {
       session$flushReact()
 
@@ -39,7 +39,7 @@ test_that("ser/deser roundtrip", {
 
   testServer(
     main_server,
-    args = list(board = new_dag_board()),
+    args = list(board = new_dag_board(), board_id = "board"),
     {
       session$flushReact()
 
