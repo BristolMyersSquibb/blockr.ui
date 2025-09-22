@@ -188,6 +188,17 @@ board_ui.dag_board <- function(id, x, plugins = board_plugins(x), ...) {
   )
 }
 
+validate_refreshed <- function(parent) {
+  observeEvent(
+    parent$refreshed,
+    {
+      if (!parent$refreshed %in% restore_steps) {
+        stop("not ok")
+      }
+    }
+  )
+}
+
 restore_steps <- c(
   "restored-board",
   "restored-dock",
@@ -233,6 +244,31 @@ board_restore <- function(board, update, session, parent, ...) {
     },
     ignoreInit = TRUE
   )
+
+  NULL
+}
+
+#' Board module restore callback
+#'
+#' @keywords internal
+#' @rdname handlers-utils
+module_restore <- function(board, update, session, parent, ...) {
+  for (mod in isolate(board_modules(board$board))) {
+    observeEvent(
+      parent$refreshed,
+      {
+        if (parent$refreshed == "restore-network") {
+          # Module callbacks need to happen in their own
+          # namespace ...
+          mod_session <- session$makeScope(board_module_id(mod))
+          withReactiveDomain(mod_session, {
+            mod[["on_restore"]](board, parent, mod_session, ...)
+          })
+        }
+      },
+      ignoreInit = TRUE
+    )
+  }
 
   NULL
 }
@@ -401,9 +437,13 @@ build_layout <- function(modules, plugins) {
               title = chr_ply(modules, board_module_title),
               content = lapply(
                 modules,
-                call_board_module_ui,
-                ns(NULL),
-                board$board
+                function(mod) {
+                  call_board_module_ui(
+                    mod,
+                    ns(board_module_id(mod)),
+                    board$board
+                  )
+                }
               ),
               renderer = "always",
               position = board_module_positions(modules)

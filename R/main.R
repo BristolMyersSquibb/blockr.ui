@@ -82,6 +82,7 @@ main_server <- function(id, board, plugins = board_plugins(board)) {
             # Callback to signal other modules that the restore is done.
             # This allows to restore each part in the correct order.
             on_board_restore = board_restore,
+            on_module_restore = module_restore,
             manage_scoutbar = manage_scoutbar,
             layout = build_layout(modules, plugins),
             update_block_ui = update_block_ui
