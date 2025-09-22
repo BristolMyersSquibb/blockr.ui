@@ -262,7 +262,7 @@ module_restore <- function(board, update, session, parent, ...) {
           # namespace ...
           mod_session <- session$makeScope(board_module_id(mod))
           withReactiveDomain(mod_session, {
-            mod[["on_restore"]](board, parent, mod_session, ...)
+            board_module_on_restore(mod)(board, parent, mod_session, ...)
           })
         }
       },

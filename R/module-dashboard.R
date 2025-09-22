@@ -262,8 +262,6 @@ new_dashboard_module <- function(id = "dashboard", title = "Dashboard") {
     dashboard_ui,
     dashboard_server,
     on_restore = function(board, parent, session, ...) {
-      showNotification("Hello from dashboard restore")
-      browser()
       restore_dashboard(board$board, board, parent, session)
     },
     id = id,
