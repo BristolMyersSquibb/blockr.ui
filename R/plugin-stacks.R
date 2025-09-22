@@ -23,21 +23,23 @@ add_rm_stack_server <- function(id, board, update, parent, ...) {
       observeEvent(
         parent$added_stack,
         {
-          tmp_stack <- if (
-            length(parent$added_stack) == 1 &&
-              nchar(parent$added_stack) == 0
-          ) {
-            new_stack()
+          id <- rand_names(board_stack_ids(board$board))
+          nm <- id_to_sentence_case(id)
+
+          if (is_scalar(parent$added_stack) && parent$added_stack == "") {
+            tmp_stack <- new_stack(name = nm)
           } else {
-            new_stack(blocks = parent$added_stack)
+            tmp_stack <- new_stack(blocks = parent$added_stack, name = nm)
           }
+
           update(
             list(
               stacks = list(
-                add = stacks(tmp_stack)
+                add = as_stacks(set_names(list(tmp_stack), id))
               )
             )
           )
+
           parent$added_stack <- NULL
         }
       )

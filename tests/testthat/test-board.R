@@ -19,6 +19,7 @@ create_mock_params <- function(board = new_dag_board()) {
   plugins <- board_plugins(board)
 
   list(
+    id = "board",
     x = board,
     plugins = plugins,
     callbacks = c(
