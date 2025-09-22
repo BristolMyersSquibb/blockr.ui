@@ -188,6 +188,37 @@ board_ui.dag_board <- function(id, x, plugins = board_plugins(x), ...) {
   )
 }
 
+restore_steps <- c(
+  "restored-board",
+  "restored-dock",
+  "restored-layout",
+  "restored-dag"
+)
+
+set_restore <- function(parent, step) {
+  parent$refreshed <- structure(
+    if (step == "restored-dag") TRUE else FALSE,
+    # Useful for app internal
+    step = step,
+    # Indicates where refreshed happened
+    module = if (step %in% restore_steps) FALSE else TRUE
+  )
+}
+
+finalise_restore <- function(parent) {
+  parent$refreshed <- NULL
+}
+
+refresh_module <- function(parent, expr) {
+  observeEvent(
+    req(parent$refreshed),
+    {
+      expr
+      parent$refreshed <- structure()
+    },
+  )
+}
+
 #' Board restoration callback
 #'
 #' @keywords internal
