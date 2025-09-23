@@ -50,9 +50,9 @@ or the grid/dashboard module.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">main_ui</span><span class="op">(</span><span class="va">id</span>, <span class="va">board</span>, plugins <span class="op">=</span> <span class="fu">board_plugins</span><span class="op">(</span><span class="va">board</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">main_ui</span><span class="op">(</span><span class="va">id</span>, <span class="va">board</span>, <span class="va">board_id</span>, plugins <span class="op">=</span> <span class="fu">board_plugins</span><span class="op">(</span><span class="va">board</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">main_server</span><span class="op">(</span><span class="va">id</span>, <span class="va">board</span>, plugins <span class="op">=</span> <span class="fu">board_plugins</span><span class="op">(</span><span class="va">board</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">main_server</span><span class="op">(</span><span class="va">id</span>, <span class="va">board</span>, <span class="va">board_id</span>, plugins <span class="op">=</span> <span class="fu">board_plugins</span><span class="op">(</span><span class="va">board</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,6 +65,10 @@ or the grid/dashboard module.</p>
 
 <dt id="arg-board">board<a class="anchor" aria-label="anchor" href="#arg-board"></a></dt>
 <dd><p>Board object.</p></dd>
+
+
+<dt id="arg-board-id">board_id<a class="anchor" aria-label="anchor" href="#arg-board-id"></a></dt>
+<dd><p>Board ID.</p></dd>
 
 
 <dt id="arg-plugins">plugins<a class="anchor" aria-label="anchor" href="#arg-plugins"></a></dt>
