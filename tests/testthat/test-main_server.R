@@ -20,7 +20,7 @@ test_that("main_server works", {
 
   testServer(
     main_server,
-    args = list(board = ex_board),
+    args = list(board = ex_board, board_id = "board"),
     {
       expect_false(app_state$cold_start)
       expect_null(app_state$refreshed)

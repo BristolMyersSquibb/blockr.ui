@@ -157,7 +157,7 @@ new_dashboard_zoom_option <- function(
         step = 0.1
       )
     },
-    server = function(board, session) {
+    server = function(..., session) {
       observeEvent(
         get_board_option_or_null("dashboard_zoom", session),
         {

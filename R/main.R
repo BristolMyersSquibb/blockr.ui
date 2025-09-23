@@ -8,8 +8,8 @@
 #' @param plugins Board plugins.
 #' @rdname main
 #' @export
-main_ui <- function(id, board, plugins = board_plugins(board)) {
-  board_ui(NS(id, "board"), board, plugins)
+main_ui <- function(id, board, board_id, plugins = board_plugins(board)) {
+  board_ui(NS(id, board_id), board, plugins)
 }
 
 create_app_state <- function(board) {
@@ -56,9 +56,11 @@ create_app_state <- function(board) {
 #'
 #' Server module for board.
 #'
+#' @param board_id Board ID.
+#'
 #' @rdname main
 #' @export
-main_server <- function(id, board, plugins = board_plugins(board)) {
+main_server <- function(id, board, board_id, plugins = board_plugins(board)) {
   modules <- board_modules(board)
 
   moduleServer(
@@ -73,7 +75,7 @@ main_server <- function(id, board, plugins = board_plugins(board)) {
 
       # Board module
       res <- board_server(
-        "board",
+        board_id,
         board,
         plugins = plugins,
         callbacks = c(

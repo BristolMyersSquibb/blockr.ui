@@ -606,7 +606,7 @@ cleanup_node <- function(selected, vals, rv, session) {
   remove_node(selected, vals, session)
   # Need to cleanup any edge associated with this node
   edges <- as.data.frame(board_links(rv$board))
-  edges <- edges[edges$id != vals$removed_edge, ]
+  edges <- edges[!edges$id %in% vals$removed_edge, ]
   if (nrow(edges) > 0) {
     # loop over all edges where the target node is part
     edges_to_remove <- c(
