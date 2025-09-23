@@ -192,8 +192,12 @@ validate_refreshed <- function(parent) {
   observeEvent(
     parent$refreshed,
     {
-      if (!parent$refreshed %in% restore_steps) {
-        stop("not ok")
+      if (!(all(parent$refreshed %in% get_restore_steps(parent)))) {
+        stop(sprintf(
+          "Unknown restore step: %s. Valid steps are: %s",
+          parent$refreshed,
+          paste(get_restore_steps(parent), collapse = ", ")
+        ))
       }
     }
   )
@@ -206,28 +210,33 @@ restore_steps <- c(
   "restored-dag"
 )
 
+get_module_restore_step <- function(parent) {
+  mods <- names(parent$module_state)
+  sprintf("restored-%s", mods)
+}
+
+get_restore_steps <- function(parent) {
+  c(
+    restore_steps,
+    get_module_restore_step(parent)
+  )
+}
+
+is_restore_step_done <- function(parent, step) {
+  req(last(parent$refreshed) == step)
+}
+
+is_restore_complete <- function(parent) {
+  req(!is.null(parent$refreshed))
+  steps <- get_restore_steps(parent)
+  req(all(steps %in% parent$refreshed))
+}
+
 set_restore <- function(parent, step) {
-  parent$refreshed <- structure(
-    if (step == "restored-dag") TRUE else FALSE,
-    # Useful for app internal
-    step = step,
-    # Indicates where refreshed happened
-    module = if (step %in% restore_steps) FALSE else TRUE
-  )
-}
-
-finalise_restore <- function(parent) {
-  parent$refreshed <- NULL
-}
-
-refresh_module <- function(parent, expr) {
-  observeEvent(
-    req(parent$refreshed),
-    {
-      expr
-      parent$refreshed <- structure()
-    },
-  )
+  if (step %in% parent$refreshed) {
+    return(NULL)
+  }
+  parent$refreshed <- c(parent$refreshed, step)
 }
 
 #' Board restoration callback
@@ -240,7 +249,7 @@ board_restore <- function(board, update, session, parent, ...) {
   observeEvent(
     board_refresh(),
     {
-      parent$refreshed <- "refresh-board"
+      set_restore(parent, "restored-board")
     },
     ignoreInit = TRUE
   )
@@ -257,18 +266,35 @@ module_restore <- function(board, update, session, parent, ...) {
     observeEvent(
       parent$refreshed,
       {
-        if (parent$refreshed == "restore-network") {
+        if (is_restore_step_done(parent, "restored-dag")) {
           # Module callbacks need to happen in their own
           # namespace ...
           mod_session <- session$makeScope(board_module_id(mod))
           withReactiveDomain(mod_session, {
             board_module_on_restore(mod)(board, parent, mod_session, ...)
           })
+          mod_step <- sprintf("restored-%s", board_module_id(mod))
+          set_restore(parent, mod_step)
         }
-      },
-      ignoreInit = TRUE
+      }
     )
   }
+
+  NULL
+}
+
+#' Board module reset restore callback
+#'
+#' @keywords internal
+#' @rdname handlers-utils
+reset_restore <- function(board, update, session, parent, ...) {
+  # Once all steps are done including modules, we can reset the parent$refreshed
+  observeEvent(
+    is_restore_complete(parent),
+    {
+      parent$refreshed <- NULL
+    }
+  )
 
   NULL
 }
@@ -305,7 +331,7 @@ restore_layout <- function(parent, session) {
     # Move block from offcanvas to panel
     show_block_panel(id, session)
   })
-  parent$refreshed <- "restore-layout"
+  set_restore(parent, "restored-layout")
 }
 
 # Clean up layout from uncessary elements ...
@@ -355,20 +381,20 @@ build_layout <- function(modules, plugins) {
     # Restore layout from snapshot
     observeEvent(
       {
-        req(parent$refreshed == "refresh-board")
+        is_restore_step_done(parent, "restored-board")
       },
       {
         # No need to cleanup before
         restore_dock("layout", parent$app_layout)
-        parent$refreshed <- "restore-dock"
+        set_restore(parent, "restored-dock")
       }
     )
 
     # Wait for state to be synchronised
     observeEvent(
       {
+        is_restore_step_done(parent, "restored-dock")
         req(
-          parent$refreshed == "restore-dock",
           setequal(
             names(input$layout_state$panels),
             names(parent$app_layout$panels)
