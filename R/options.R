@@ -157,39 +157,40 @@ new_blocks_position_option <- function(
       )
     },
     server = function(..., session) {
-      observeEvent(
-        {
-          req(length(get_panels_ids("layout", session)) > 0)
-          get_board_option_or_null("blocks_position", session)
-        },
-        {
-          # Get existing layout panels
-          layout_panels <- grep(
-            get_panels_ids("layout", session),
-            pattern = "^(?!.*block-).*$",
-            perl = TRUE,
-            value = TRUE
-          )
+      list(
+        observeEvent(
+          req(length(get_panels_ids("layout", session)) > 0),
+          {
+            layout_panels <- reference_panel_candidates(session)
 
-          opt <- get_board_option_value("blocks_position", session)
+            updateSelectInput(
+              session,
+              "reference_panel",
+              choices = layout_panels,
+              selected = coal(reference_panel, last(layout_panels))
+            )
+          },
+          once = TRUE
+        ),
+        observeEvent(
+          get_board_option_or_null("blocks_position", session),
+          {
+            opt <- get_board_option_value("blocks_position", session)
 
-          if (!length(opt$reference_panel) || !nchar(opt$reference_panel)) {
-            opt$reference_panel <- last(layout_panels)
+            updateSelectInput(
+              session,
+              "reference_panel",
+              choices = reference_panel_candidates(session),
+              selected = opt$reference_panel
+            )
+
+            updateSelectInput(
+              session,
+              "direction",
+              selected = opt$direction
+            )
           }
-
-          updateSelectInput(
-            session,
-            "reference_panel",
-            choices = layout_panels,
-            selected = opt$reference_panel
-          )
-
-          updateSelectInput(
-            session,
-            "direction",
-            selected = opt$direction
-          )
-        }
+        )
       )
     },
     update_trigger = c("reference_panel", "direction"),
@@ -197,13 +198,53 @@ new_blocks_position_option <- function(
   )
 }
 
+reference_panel_candidates <- function(session) {
+  grep(
+    get_panels_ids("layout", session),
+    pattern = "^(?!.*block-).*$",
+    perl = TRUE,
+    value = TRUE
+  )
+}
+
 #' @export
 validate_board_option.blocks_position_option <- function(x) {
+
   val <- board_option_value(NextMethod())
 
-  if (!(val$direction %in% c("within", "above", "below", "left", "right"))) {
+  if (!is.list(val)) {
+    blockr_abort(
+      "Expecting `blocks_position_option` to be list.",
+      class = "board_options_blocks_position_invalid"
+    )
+  }
+
+  comps <- c("reference_panel", "direction")
+
+  if (!setequal(names(val), comps)) {
+    blockr_abort(
+      "Expecting `blocks_position_option` to contain component{?s} {comps}.",
+      class = "board_options_blocks_position_invalid"
+    )
+  }
+
+  ref <- val$reference_panel
+
+  if (!(is.null(ref) || is_string(ref))) {
+    blockr_abort(
+      "Expecting the `reference_panel` entry of `blocks_position_option` to ",
+      "either be `NULL` or string-valued.",
+      class = "board_options_blocks_position_invalid"
+    )
+  }
+
+  opts <- c("within", "above", "below", "left", "right")
+  dir <- val$direction
+
+  if (!(is_string(dir) && dir %in% opts)) {
     abort(
-      "Expecting `direction` to be a one of 'within', 'above', 'below', 'left', 'right'.",
+      "Expecting the `direction` entry of `blocks_position_option` to be one ",
+      "of {opts}.",
       class = "board_options_blocks_position_invalid"
     )
   }
