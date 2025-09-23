@@ -27,9 +27,9 @@ edit_block_server <- function(id, block_id, board, update, ...) {
       )
 
       output$block_name_out <- renderUI({
-        list(
+        h3(
           input$block_name_in,
-          icon("pencil-square")
+          tags$sup(icon("pencil-square"))
         )
       })
 

@@ -23,64 +23,100 @@ block_ui.dag_board <- function(id, x, block = NULL, edit_ui = NULL, ...) {
       width = "100%",
       id = ns(id),
       tags$div(
-        class = "row g-0 px-4",
+        class = "card-body",
         tags$div(
-          class = "col-sm-2 col-md-1 col-lg-1 d-flex align-items-center justify-content-start",
-          blk_icon(blk_info$category, class = "fa-3x")
-        ),
-        tags$div(
-          class = "col-sm-10 col-md-11 col-lg-11",
-          tags$div(
-            class = "card-body",
-            tags$div(
-              class = "d-flex align-items-center justify-content-start card-title gap-2",
-              edit_ui$block_name,
-              tooltip(
-                icon("info-circle"),
-                p(
-                  icon("lightbulb"),
-                  "How to use this block?",
+          class = sprintf(
+            "card-title d-flex align-items-center justify-content-between gap-2 border-start border-5 border-%s ps-2",
+            blk_border_color(blk_info$category)
+          ),
+          edit_ui$block_name,
+          shinyWidgets::checkboxGroupButtons(
+            inputId = ns(sprintf("blk_collapse-%s", id)),
+            status = "light",
+            size = "sm",
+            choices = setNames(
+              c("input", "output", "code"),
+              c(
+                sprintf(
+                  "<i class='fa fa-sliders' data-bs-toggle='collapse' data-bs-target='#%s' aria-expanded='false' aria-controls='%s'></i>",
+                  ns(paste0("input-", id)),
+                  ns(paste0("input-", id))
                 ),
-                p(blk_info$description, ".")
+                sprintf(
+                  "<i class='fa fa-line-chart' data-bs-toggle='collapse' data-bs-target='#%s' aria-expanded='false' aria-controls='%s'></i>",
+                  ns(paste0("output-", id)),
+                  ns(paste0("output-", id))
+                ),
+                sprintf(
+                  "<i class='fa fa-code' data-bs-toggle='collapse' data-bs-target='#%s' aria-expanded='false' aria-controls='%s'></i>",
+                  ns(paste0("code-", id)),
+                  ns(paste0("code-", id))
+                )
               )
+            )
+          ),
+          dropdown_button(
+            class = "float-end",
+            icon = icon("ellipsis-vertical"),
+            size = "sm",
+            dropdown_header("... Block actions"),
+            dropdown_action_button(
+              ns(sprintf("append-%s", blk_id)),
+              "Append block",
+              icon = icon("plus")
             ),
-            # subtitle
+            dropdown_action_button(
+              ns(sprintf("delete-%s", blk_id)),
+              "Delete block",
+              icon = icon("trash"),
+              class = "text-danger"
+            ),
+            dropdown_divider(),
             div(
-              class = "card-subtitle mb-2 text-body-secondary",
-              span(class = "badge bg-secondary", "Type:", blk_info$category),
-              span(class = "badge bg-secondary", "Package:", blk_info$package)
+              class = "text-muted d-flex justify-content-between",
+              p("Package: "),
+              p(blk_info$package)
+            ),
+            div(
+              class = "text-muted d-flex justify-content-between",
+              p("Type: "),
+              p(blk_info$category)
+            ),
+            div(
+              class = "text-muted d-flex justify-content-between",
+              p("ID: "),
+              p(id)
             )
           )
-        )
-      ),
-      #edit_ui$block_summary,
-      accordion(
-        id = ns(paste0("accordion-", id)),
-        multiple = TRUE,
-        class = "accordion-flush",
-        open = c("inputs", "outputs", "state"),
-        accordion_panel(
-          icon = icon("sliders"),
-          title = "Block inputs",
-          value = "inputs",
+        ),
+        # subtitle
+        div(
+          class = "card-subtitle text-body-secondary",
+          span(class(x)[1]),
+          " || ",
+          span("id:", id),
+          tooltip(
+            icon("info-circle"),
+            p(
+              icon("lightbulb"),
+              "How to use this block?",
+            ),
+            p(blk_info$description, ".")
+          )
+        ),
+        hr(),
+        #edit_ui$block_summary,
+        div(id = ns(paste0("errors-", id))),
+        collapse_container(
+          id = ns(paste0("input-", id)),
           expr_ui(blk_id, x)
         ),
-        accordion_panel(
-          icon = icon("chart-simple"),
-          title = "Block output(s)",
-          value = "outputs",
-          style = "max-width: 100%; overflow-x: auto;",
+        collapse_container(
+          id = ns(paste0("output-", id)),
           block_ui(blk_id, x)
         ),
-        accordion_panel(
-          title = "Block code",
-          value = "code",
-          icon = icon("code"),
-        ),
-        accordion_panel(
-          title = "Block state",
-          value = "state",
-          icon = icon("bug")
+        collapse_container(
+          id = ns(paste0("code-", id))
         )
       )
     )

@@ -86,18 +86,68 @@ off_canvas <- function(
 #'
 #' @return A HTML tag object representing the dropdown element.
 #' @export
-dropdown_button <- function(..., icon) {
+dropdown_button <- function(..., icon, class = NULL) {
   tagList(
     tags$button(
-      class = "btn",
+      class = if (!is.null(class)) paste("btn", class) else "btn",
       type = "button",
       `data-bs-toggle` = "dropdown",
       `aria-expanded` = "false",
       icon
     ),
     tags$ul(
-      class = "dropdown-menu px-4 py-3",
+      class = "dropdown-menu text-body-secondary p-4",
       ...
     )
+  )
+}
+
+#' @keywords internal
+dropdown_divider <- function() {
+  tags$li(tags$hr(class = "dropdown-divider"))
+}
+
+#' @keywords internal
+dropdown_action_button <- function(id, label, icon = NULL, ...) {
+  tags$li(
+    actionLink(
+      inputId = id,
+      label = label,
+      icon = icon,
+      class = "dropdown-item",
+      ...
+    )
+  )
+}
+
+#' @keywords internal
+dropdown_header <- function(label) {
+  tags$li(tags$h6(class = "dropdown-header", label))
+}
+
+#' Create a Bootstrap collapse container.
+#'
+#' Creates a collapsible element.
+#'
+#' @param id Unique id.
+#' @param ... Content.
+#'
+#' @return A HTML tag object representing the dropdown element.
+#' @keywords internal
+collapse_container <- function(id, ...) {
+  tags$div(class = "collapse", id = id, ...)
+}
+
+#' @keywords internal
+blk_border_color <- function(category) {
+  switch(
+    category,
+    data = "primary",
+    transform = "primary-subtle",
+    plot = "warning",
+    parse = "success",
+    file = "danger",
+    table = "warning-subtle",
+    "secondary"
   )
 }
