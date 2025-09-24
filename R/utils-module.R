@@ -32,6 +32,7 @@ new_board_module <- function(
   stopifnot(
     is.function(ui),
     is.function(server),
+    is.function(on_restore),
     is_string(id),
     is_string(title),
     is.list(context_menu),

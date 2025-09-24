@@ -55,16 +55,6 @@ dashboard_server <- function(
         }
       )
 
-      # Restore dock from serialisation only when network is restored
-      #observeEvent(
-      #  {
-      #    req(parent$refreshed == "restore-network")
-      #  },
-      #  {
-      #    restore_dashboard(board$board, board, parent, session)
-      #  }
-      #)
-
       # Whenever a new block is created, we initialise its grid state
       observeEvent(parent$added_block, {
         parent$in_grid[[block_uid(parent$added_block)]] <- FALSE
