@@ -120,13 +120,15 @@ block_card_subtitle <- function(board, block, id, info) {
     class = "card-subtitle text-body-secondary",
     span(class(block)[1]),
     block_subtitle_id(board, id),
-    tooltip(
-      icon("info-circle"),
-      p(
-        icon("lightbulb"),
-        "How to use this block?",
-      ),
-      p(info$description, ".")
+    tags$sup(
+      tooltip(
+        icon("info-circle"),
+        p(
+          icon("lightbulb"),
+          "How to use this block?",
+        ),
+        p(info$description, ".")
+      )
     )
   )
 }
