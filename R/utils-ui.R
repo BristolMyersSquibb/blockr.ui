@@ -89,14 +89,18 @@ off_canvas <- function(
 dropdown_button <- function(..., icon, class = NULL) {
   tagList(
     tags$button(
-      class = if (!is.null(class)) paste("btn", class) else "btn",
+      class = if (!is.null(class)) {
+        paste("btn btn-link", class)
+      } else {
+        "btn btn-link btn-dark"
+      },
       type = "button",
       `data-bs-toggle` = "dropdown",
       `aria-expanded` = "false",
       icon
     ),
     tags$ul(
-      class = "dropdown-menu text-body-secondary p-4",
+      class = "dropdown-menu text-body-secondary p-2",
       ...
     )
   )

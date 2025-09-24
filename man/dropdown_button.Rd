@@ -4,7 +4,7 @@
 \alias{dropdown_button}
 \title{Create a Bootstrap dropdown}
 \usage{
-dropdown_button(..., icon)
+dropdown_button(..., icon, class = NULL)
 }
 \arguments{
 \item{...}{Content.}

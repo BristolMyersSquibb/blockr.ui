@@ -456,6 +456,26 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
   NULL
 }
 
+toggle_blk_section <- function(blk, session) {
+  observeEvent(
+    {
+      session$input[[sprintf("collapse-blk-section-%s", attr(blk, "uid"))]]
+    },
+    {
+      vals <- session$input[[sprintf(
+        "collapse-blk-section-%s",
+        attr(blk, "uid")
+      )]]
+      bslib::accordion_panel_set(
+        id = paste0("accordion-", attr(blk, "uid")),
+        values = if (is.null(vals)) "" else vals
+      )
+    },
+    ignoreInit = TRUE,
+    ignoreNULL = FALSE
+  )
+}
+
 #' @keywords internal
 update_blk_code_ui <- function(blk) {
   observeEvent(
@@ -578,6 +598,7 @@ update_block_ui <- function(board, update, session, parent, ...) {
       attr(blk, "uid") <- block_uid(parent$added_block)
       update_blk_code_ui(blk)
       update_blk_state_ui(blk)
+      toggle_blk_section(blk, session)
     },
     ignoreInit = TRUE
   )

@@ -9,126 +9,190 @@
 #' @export
 #' @rdname block_ui
 block_ui.dag_board <- function(id, x, block = NULL, edit_ui = NULL, ...) {
-  block_card <- function(x, id, ns) {
-    blk_id <- ns(paste0("block_", id))
-    blk_info <- get_block_metadata(x)
-
-    # Edit plugin
-    if (!is.null(edit_ui)) {
-      edit_ui <- edit_ui$ui(x, NS(blk_id, "edit_block"))
-    }
-
-    card_tag <- tags$div(
-      class = "card",
-      width = "100%",
-      id = ns(id),
-      tags$div(
-        class = "card-body",
-        tags$div(
-          class = sprintf(
-            "card-title d-flex align-items-center justify-content-between gap-2 border-start border-5 border-%s ps-2",
-            blk_border_color(blk_info$category)
-          ),
-          edit_ui$block_name,
-          shinyWidgets::checkboxGroupButtons(
-            inputId = ns(sprintf("blk_collapse-%s", id)),
-            status = "light",
-            size = "sm",
-            choices = setNames(
-              c("input", "output", "code"),
-              c(
-                sprintf(
-                  "<i class='fa fa-sliders' data-bs-toggle='collapse' data-bs-target='#%s' aria-expanded='false' aria-controls='%s'></i>",
-                  ns(paste0("input-", id)),
-                  ns(paste0("input-", id))
-                ),
-                sprintf(
-                  "<i class='fa fa-line-chart' data-bs-toggle='collapse' data-bs-target='#%s' aria-expanded='false' aria-controls='%s'></i>",
-                  ns(paste0("output-", id)),
-                  ns(paste0("output-", id))
-                ),
-                sprintf(
-                  "<i class='fa fa-code' data-bs-toggle='collapse' data-bs-target='#%s' aria-expanded='false' aria-controls='%s'></i>",
-                  ns(paste0("code-", id)),
-                  ns(paste0("code-", id))
-                )
-              )
-            )
-          ),
-          dropdown_button(
-            class = "float-end",
-            icon = icon("ellipsis-vertical"),
-            size = "sm",
-            dropdown_header("... Block actions"),
-            dropdown_action_button(
-              ns(sprintf("append-%s", blk_id)),
-              "Append block",
-              icon = icon("plus")
-            ),
-            dropdown_action_button(
-              ns(sprintf("delete-%s", blk_id)),
-              "Delete block",
-              icon = icon("trash"),
-              class = "text-danger"
-            ),
-            dropdown_divider(),
-            div(
-              class = "text-muted d-flex justify-content-between",
-              p("Package: "),
-              p(blk_info$package)
-            ),
-            div(
-              class = "text-muted d-flex justify-content-between",
-              p("Type: "),
-              p(blk_info$category)
-            ),
-            div(
-              class = "text-muted d-flex justify-content-between",
-              p("ID: "),
-              p(id)
-            )
-          )
-        ),
-        # subtitle
-        div(
-          class = "card-subtitle text-body-secondary",
-          span(class(x)[1]),
-          " || ",
-          span("id:", id),
-          tooltip(
-            icon("info-circle"),
-            p(
-              icon("lightbulb"),
-              "How to use this block?",
-            ),
-            p(blk_info$description, ".")
-          )
-        ),
-        hr(),
-        #edit_ui$block_summary,
-        div(id = ns(paste0("errors-", id))),
-        collapse_container(
-          id = ns(paste0("input-", id)),
-          expr_ui(blk_id, x)
-        ),
-        collapse_container(
-          id = ns(paste0("output-", id)),
-          block_ui(blk_id, x)
-        ),
-        collapse_container(
-          id = ns(paste0("code-", id))
-        )
-      )
-    )
-    tagAppendAttributes(card_tag, class = "border border-0 shadow-none")
-  }
-
   ns <- NS(id)
   id <- names(block)
   stopifnot(is.character(id) && length(id) == 1L)
   block <- block[[1]]
   stopifnot(is_block(block))
-  block_card(block, id, ns = ns)
+  block_card(x, block, id, edit_ui, ns = ns)
+}
+
+#' @keywords internal
+block_card <- function(board, x, id, edit_ui, ns) {
+  blk_id <- ns(paste0("block_", id))
+  blk_info <- get_block_metadata(x)
+
+  # Edit plugin
+  if (!is.null(edit_ui)) {
+    edit_ui <- edit_ui$ui(x, NS(blk_id, "edit_block"))
+  }
+
+  # Hide headers of accordion panels
+  accordions <- accordion(
+    id = ns(paste0("accordion-", id)),
+    multiple = TRUE,
+    class = "accordion-flush",
+    open = "outputs",
+    accordion_panel(
+      icon = icon("sliders"),
+      title = "Block inputs",
+      value = "inputs",
+      expr_ui(blk_id, x)
+    ),
+    accordion_panel(
+      icon = icon("chart-simple"),
+      title = "Block output(s)",
+      value = "outputs",
+      style = "max-width: 100%; overflow-x: auto;",
+      block_ui(blk_id, x)
+    ),
+    accordion_panel(
+      title = "Block code",
+      value = "code",
+      icon = icon("code"),
+    ),
+    accordion_panel(
+      title = "Block state",
+      value = "state",
+      icon = icon("bug")
+    )
+  )
+  accordions <- htmltools::tagQuery(accordions)$find(
+    ".accordion-header"
+  )$addAttrs(style = "display: none;")$reset()$find(".accordion-item")$addAttrs(
+    style = "border: none;"
+  )$allTags()
+
+  card_tag <- tags$div(
+    class = "card",
+    width = "100%",
+    id = ns(id),
+    tags$div(
+      class = "card-body",
+      block_card_title(id, blk_info, edit_ui, ns),
+      # subtitle
+      block_card_subtitle(board, x, id, blk_info),
+      #edit_ui$block_summary,
+      accordions
+    )
+  )
+  tagAppendAttributes(card_tag, class = "border border-0 shadow-none")
+}
+
+block_card_title <- function(id, info, edit_ui, ns) {
+  tags$div(
+    class = sprintf(
+      "card-title d-flex align-items-center justify-content-between gap-2 border-start border-5 border-%s ps-2",
+      blk_border_color(info$category)
+    ),
+    edit_ui$block_name,
+    block_card_toggles(id, ns),
+    block_card_dropdown(id, info, ns)
+  )
+}
+
+#' Block subtitle id method
+#'
+#' @param x Board.
+#' @param id Block id.
+#'
+#' @export
+block_subtitle_id <- function(x, id) {
+  UseMethod("block_subtitle_id", x)
+}
+
+#' @export
+block_subtitle_id.dag_board <- function(x, id) {
+  NULL
+}
+
+#' @export
+block_subtitle_id.md_board <- function(x, id) {
+  tagList(
+    " || ",
+    span("id:", id)
+  )
+}
+
+#' @keywords internal
+block_card_subtitle <- function(board, block, id, info) {
+  div(
+    class = "card-subtitle text-body-secondary",
+    span(class(block)[1]),
+    block_subtitle_id(board, id),
+    tooltip(
+      icon("info-circle"),
+      p(
+        icon("lightbulb"),
+        "How to use this block?",
+      ),
+      p(info$description, ".")
+    )
+  )
+}
+
+block_card_content <- function(id, ns) {}
+
+#' @keywords internal
+block_card_toggles <- function(id, ns) {
+  section_toggles <- shinyWidgets::checkboxGroupButtons(
+    inputId = ns(sprintf("collapse-blk-section-%s", id)),
+    status = "light",
+    size = "sm",
+    choices = setNames(
+      c("inputs", "outputs", "code"),
+      c(
+        "<i class='fa fa-sliders'></i>",
+        "<i class='fa fa-line-chart'></i>",
+        "<i class='fa fa-code'></i>"
+      )
+    ),
+    selected = "outputs"
+  )
+
+  section_toggles$attribs$class <- trimws(gsub(
+    "form-group",
+    "ms-auto",
+    section_toggles$attribs$class
+  ))
+
+  section_toggles
+}
+
+block_card_dropdown <- function(id, info, ns) {
+  dropdown_button(
+    class = "float-end",
+    icon = icon("ellipsis-vertical", class = "text-dark"),
+    size = "sm",
+    dropdown_header("BLOCK ACTIONS"),
+    dropdown_action_button(
+      ns(sprintf("append-%s", id)),
+      "Append block",
+      icon = icon("plus")
+    ),
+    dropdown_action_button(
+      ns(sprintf("delete-%s", id)),
+      "Delete block",
+      icon = icon("trash"),
+      class = "text-danger"
+    ),
+    dropdown_divider(),
+    div(
+      class = "text-muted d-flex justify-content-between",
+      p("Package: "),
+      p(info$package)
+    ),
+    div(
+      class = "text-muted d-flex justify-content-between",
+      p("Type: "),
+      p(info$category)
+    ),
+    div(
+      class = "text-muted d-flex justify-content-between",
+      p("ID: "),
+      p(id)
+    )
+  )
 }
 
 #' @keywords internal
