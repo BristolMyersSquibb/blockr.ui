@@ -79,8 +79,8 @@ board_plugins.dag_board <- function(x, which = NULL) {
 }
 
 #' @export
-serve.dag_board <- function(x, id = "main", plugins = board_plugins(x), ...) {
-
+serve.dag_board <- function(x, id = "main", board_id = rand_names(),
+                            plugins = board_plugins(x), ...) {
   ui <- do.call(
     page_fillable,
     c(
@@ -88,14 +88,14 @@ serve.dag_board <- function(x, id = "main", plugins = board_plugins(x), ...) {
         padding = 0,
         gap = 0,
         shinyjs::useShinyjs(),
-        add_prismjs_deps(add_busy_load_deps(main_ui(id, x, plugins)))
+        add_prismjs_deps(add_busy_load_deps(main_ui(id, x, board_id, plugins)))
       ),
       unname(list(...))
     )
   )
 
   server <- function(input, output, session) {
-    main_server(id, x, plugins)
+    main_server(id, x, board_id, plugins)
   }
 
   shinyApp(add_blockr.ui_deps(ui), server)
