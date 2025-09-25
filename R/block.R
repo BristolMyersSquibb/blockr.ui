@@ -34,6 +34,11 @@ block_card <- function(board, x, id, edit_ui, ns) {
     class = "accordion-flush",
     open = "outputs",
     accordion_panel(
+      icon = icon("circle-exclamation"),
+      title = "Errors",
+      value = "errors"
+    ),
+    accordion_panel(
       icon = icon("sliders"),
       title = "Block inputs",
       value = "inputs",

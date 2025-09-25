@@ -515,10 +515,10 @@ update_blk_state_ui <- function(blk) {
   lapply(conds, function(nme) {
     observeEvent(blk$server$cond[[nme]], {
       cond <- blk$server$cond[[nme]]
-      statuses <- lapply(names(cond), function(status) {
+      weak_conds <- c("warning", "message")
+      statuses <- lapply(weak_conds, function(status) {
         cl <- switch(
           status,
-          "error" = "danger",
           "warning" = "warning",
           "message" = "info"
         )
@@ -557,6 +557,22 @@ update_blk_state_ui <- function(blk) {
         target = "state",
         bslib::navset_pill(!!!statuses)
       )
+
+      msgs <- NULL
+      if (length(cond[["error"]])) {
+        msgs <- tags$div(
+          class = sprintf("alert alert-%s", cl),
+          HTML(cli::ansi_html(paste(
+            unlist(cond[["error"]]),
+            collapse = "\n"
+          )))
+        )
+      }
+      bslib::accordion_panel_update(
+        id = paste0("accordion-", attr(blk, "uid")),
+        target = "errors",
+        bslib::navset_pill(msgs)
+      )
     })
   })
 }
@@ -584,6 +600,7 @@ update_block_ui <- function(board, update, session, parent, ...) {
           attr(blk, "uid") <- id
           update_blk_code_ui(blk)
           update_blk_state_ui(blk)
+          toggle_blk_section(blk, session)
         }
       )
     },
