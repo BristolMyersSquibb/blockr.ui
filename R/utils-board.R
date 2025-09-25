@@ -508,7 +508,7 @@ update_blk_code_ui <- function(blk) {
 }
 
 #' @keywords internal
-update_blk_state_ui <- function(blk) {
+update_blk_state_ui <- function(blk, session) {
   conds <- names(blk$server$cond)
 
   # Listen to blk$server$cond[["state"]], ...
@@ -516,7 +516,7 @@ update_blk_state_ui <- function(blk) {
     observeEvent(blk$server$cond[[nme]], {
       cond <- blk$server$cond[[nme]]
       weak_conds <- c("warning", "message")
-      statuses <- lapply(weak_conds, function(status) {
+      statuses <- dropNulls(lapply(weak_conds, function(status) {
         cl <- switch(
           status,
           "warning" = "warning",
@@ -550,16 +550,24 @@ update_blk_state_ui <- function(blk) {
             msgs,
           )
         }
-      })
+      }))
 
-      bslib::accordion_panel_update(
-        id = paste0("accordion-", attr(blk, "uid")),
-        target = "state",
-        bslib::navset_pill(!!!statuses)
-      )
+      if (length(statuses)) {
+        bslib::accordion_panel_update(
+          id = paste0("output-accordion-", attr(blk, "uid")),
+          target = "state",
+          bslib::navset_pill(!!!statuses)
+        )
+      }
 
       msgs <- NULL
+      removeUI(paste0(
+        "#",
+        session$ns(sprintf("errors-block-%s .alert", attr(blk, "uid")))
+      ))
       if (length(cond[["error"]])) {
+        # Stack error messages in the same alert container
+        # to save space ...
         msgs <- tags$div(
           class = sprintf("alert alert-danger"),
           HTML(cli::ansi_html(paste(
@@ -567,21 +575,11 @@ update_blk_state_ui <- function(blk) {
             collapse = "\n"
           )))
         )
-      } else {
-        bslib::accordion_panel_close(
-          id = paste0("accordion-", attr(blk, "uid")),
-          "errors"
+        insertUI(
+          paste0("#", session$ns(sprintf("errors-block-%s", attr(blk, "uid")))),
+          ui = msgs
         )
       }
-      bslib::accordion_panel_update(
-        id = paste0("accordion-", attr(blk, "uid")),
-        target = "errors",
-        msgs
-      )
-      bslib::accordion_panel_open(
-        id = paste0("accordion-", attr(blk, "uid")),
-        "errors"
-      )
     })
   })
 }
@@ -608,7 +606,7 @@ update_block_ui <- function(board, update, session, parent, ...) {
           blk <- board$blocks[[id]]
           attr(blk, "uid") <- id
           update_blk_code_ui(blk)
-          update_blk_state_ui(blk)
+          update_blk_state_ui(blk, session)
           toggle_blk_section(blk, session)
         }
       )
@@ -623,7 +621,7 @@ update_block_ui <- function(board, update, session, parent, ...) {
       blk <- board$blocks[[block_uid(parent$added_block)]]
       attr(blk, "uid") <- block_uid(parent$added_block)
       update_blk_code_ui(blk)
-      update_blk_state_ui(blk)
+      update_blk_state_ui(blk, session)
       toggle_blk_section(blk, session)
     },
     ignoreInit = TRUE

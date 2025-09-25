@@ -34,11 +34,6 @@ block_card <- function(board, x, id, edit_ui, ns) {
     class = "accordion-flush",
     open = "outputs",
     accordion_panel(
-      icon = icon("circle-exclamation"),
-      title = "Errors",
-      value = "errors"
-    ),
-    accordion_panel(
       icon = icon("sliders"),
       title = "Block inputs",
       value = "inputs",
@@ -49,17 +44,23 @@ block_card <- function(board, x, id, edit_ui, ns) {
       title = "Block output(s)",
       value = "outputs",
       style = "max-width: 100%; overflow-x: auto;",
-      block_ui(blk_id, x)
+      block_ui(blk_id, x),
+      accordion(
+        id = ns(paste0("output-accordion-", id)),
+        multiple = TRUE,
+        open = NULL,
+        class = "accordion-flush",
+        accordion_panel(
+          title = "Block state",
+          value = "state",
+          icon = icon("bug")
+        )
+      )
     ),
     accordion_panel(
       title = "Block code",
       value = "code",
       icon = icon("code"),
-    ),
-    accordion_panel(
-      title = "Block state",
-      value = "state",
-      icon = icon("bug")
     )
   )
   accordions <- htmltools::tagQuery(accordions)$find(
@@ -78,6 +79,7 @@ block_card <- function(board, x, id, edit_ui, ns) {
       # subtitle
       block_card_subtitle(board, x, id, blk_info),
       #edit_ui$block_summary,
+      div(id = ns(sprintf("errors-block-%s", id))),
       accordions
     )
   )
@@ -122,7 +124,7 @@ block_subtitle_id.md_board <- function(x, id) {
 #' @keywords internal
 block_card_subtitle <- function(board, block, id, info) {
   div(
-    class = "card-subtitle text-body-secondary",
+    class = "card-subtitle text-body-secondary mb-1",
     span(class(block)[1]),
     block_subtitle_id(board, id),
     tags$sup(
