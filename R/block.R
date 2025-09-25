@@ -45,17 +45,7 @@ block_card <- function(board, x, id, edit_ui, ns) {
       value = "outputs",
       style = "max-width: 100%; overflow-x: auto;",
       block_ui(blk_id, x),
-      accordion(
-        id = ns(paste0("output-accordion-", id)),
-        multiple = TRUE,
-        open = NULL,
-        class = "accordion-flush",
-        accordion_panel(
-          title = "Block state",
-          value = "state",
-          icon = icon("bug")
-        )
-      )
+      div(id = ns(paste0("outputs-issues-wrapper-", id)))
     ),
     accordion_panel(
       title = "Block code",

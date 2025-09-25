@@ -510,6 +510,7 @@ update_blk_code_ui <- function(blk) {
 #' @keywords internal
 update_blk_state_ui <- function(blk, session) {
   conds <- names(blk$server$cond)
+  ns <- session$ns
 
   # Listen to blk$server$cond[["state"]], ...
   lapply(conds, function(nme) {
@@ -520,7 +521,7 @@ update_blk_state_ui <- function(blk, session) {
         cl <- switch(
           status,
           "warning" = "warning",
-          "message" = "info"
+          "message" = "light"
         )
 
         msgs <- NULL
@@ -533,37 +534,51 @@ update_blk_state_ui <- function(blk, session) {
             )))
           )
         }
-
-        if (!is.null(msgs)) {
-          nav_panel(
-            class = "p-3",
-            title = tagList(
-              paste0(firstup(status), "(s)"),
-              tags$span(
-                class = sprintf(
-                  "badge text-bg-%s",
-                  cl
-                ),
-                length(unlist(cond[[status]]))
-              )
-            ),
-            msgs,
-          )
-        }
+        msgs
       }))
 
+      removeUI(paste0(
+        "#",
+        ns(sprintf("outputs-issues-%s", attr(blk, "uid")))
+      ))
       if (length(statuses)) {
-        bslib::accordion_panel_update(
-          id = paste0("output-accordion-", attr(blk, "uid")),
-          target = "state",
-          bslib::navset_pill(!!!statuses)
+        collapse_id <- ns(paste0(
+          "outputs-issues-collapse-%s",
+          attr(blk, "uid")
+        ))
+        issues_ui <- div(
+          id = ns(sprintf("outputs-issues-%s", attr(blk, "uid"))),
+          tags$button(
+            class = "btn btn-sm btn-outline-secondary mt-2 mb-2 position-relative",
+            type = "button",
+            `data-bs-toggle` = "collapse",
+            `data-bs-target` = sprintf("#%s", collapse_id),
+            `aria-expanded` = "false",
+            `aria-controls` = collapse_id,
+            "View issues",
+            span(
+              class = "position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger",
+              length(statuses)
+            )
+          ),
+          collapse_container(
+            id = collapse_id,
+            statuses
+          )
+        )
+        insertUI(
+          selector = sprintf(
+            "#%s",
+            ns(sprintf("outputs-issues-wrapper-%s", attr(blk, "uid")))
+          ),
+          ui = issues_ui
         )
       }
 
       msgs <- NULL
       removeUI(paste0(
         "#",
-        session$ns(sprintf("errors-block-%s .alert", attr(blk, "uid")))
+        ns(sprintf("errors-block-%s .alert", attr(blk, "uid")))
       ))
       if (length(cond[["error"]])) {
         # Stack error messages in the same alert container
@@ -576,7 +591,7 @@ update_blk_state_ui <- function(blk, session) {
           )))
         )
         insertUI(
-          paste0("#", session$ns(sprintf("errors-block-%s", attr(blk, "uid")))),
+          paste0("#", ns(sprintf("errors-block-%s", attr(blk, "uid")))),
           ui = msgs
         )
       }
