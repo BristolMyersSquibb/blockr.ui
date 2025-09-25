@@ -50,7 +50,7 @@ serialize_board.dag_board <- function(
     session
   )
 
-  ser <- blockr_ser(
+  blockr_ser(
     x,
     blocks = blocks,
     options = opts,
@@ -58,16 +58,12 @@ serialize_board.dag_board <- function(
     layout = parent$app_layout,
     modules = lapply(parent$module_state, reval)
   )
-
-  jsonlite::prettify(
-    jsonlite::toJSON(ser, null = "null")
-  )
 }
 
 #' @export
 restore_board.dag_board <- function(
   x,
-  json,
+  new,
   result,
   parent,
   ...,
@@ -75,11 +71,7 @@ restore_board.dag_board <- function(
 ) {
   tryCatch(
     {
-      tmp_res <- blockr_deser(jsonlite::fromJSON(
-        json,
-        simplifyDataFrame = FALSE,
-        simplifyMatrix = FALSE
-      ))
+      tmp_res <- blockr_deser(new)
       result(tmp_res$board)
       # Update parent node, grid, selected, mode
       # that were stored in the JSON but not part of the board object.
