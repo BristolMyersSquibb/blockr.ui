@@ -456,6 +456,26 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
   NULL
 }
 
+toggle_blk_section <- function(blk, session) {
+  observeEvent(
+    {
+      session$input[[sprintf("collapse-blk-section-%s", attr(blk, "uid"))]]
+    },
+    {
+      vals <- session$input[[sprintf(
+        "collapse-blk-section-%s",
+        attr(blk, "uid")
+      )]]
+      bslib::accordion_panel_set(
+        id = paste0("accordion-", attr(blk, "uid")),
+        values = if (is.null(vals)) "" else vals
+      )
+    },
+    ignoreInit = TRUE,
+    ignoreNULL = FALSE
+  )
+}
+
 #' @keywords internal
 update_blk_code_ui <- function(blk) {
   observeEvent(
@@ -488,19 +508,20 @@ update_blk_code_ui <- function(blk) {
 }
 
 #' @keywords internal
-update_blk_state_ui <- function(blk) {
+update_blk_state_ui <- function(blk, session) {
   conds <- names(blk$server$cond)
+  ns <- session$ns
 
   # Listen to blk$server$cond[["state"]], ...
   lapply(conds, function(nme) {
     observeEvent(blk$server$cond[[nme]], {
       cond <- blk$server$cond[[nme]]
-      statuses <- lapply(names(cond), function(status) {
+      weak_conds <- c("warning", "message")
+      statuses <- dropNulls(lapply(weak_conds, function(status) {
         cl <- switch(
           status,
-          "error" = "danger",
           "warning" = "warning",
-          "message" = "info"
+          "message" = "light"
         )
 
         msgs <- NULL
@@ -513,30 +534,67 @@ update_blk_state_ui <- function(blk) {
             )))
           )
         }
+        msgs
+      }))
 
-        if (!is.null(msgs)) {
-          nav_panel(
-            class = "p-3",
-            title = tagList(
-              paste0(firstup(status), "(s)"),
-              tags$span(
-                class = sprintf(
-                  "badge text-bg-%s",
-                  cl
-                ),
-                length(unlist(cond[[status]]))
-              )
-            ),
-            msgs,
+      removeUI(paste0(
+        "#",
+        ns(sprintf("outputs-issues-%s", attr(blk, "uid")))
+      ))
+      if (length(statuses)) {
+        collapse_id <- ns(paste0(
+          "outputs-issues-collapse-%s",
+          attr(blk, "uid")
+        ))
+        issues_ui <- div(
+          id = ns(sprintf("outputs-issues-%s", attr(blk, "uid"))),
+          tags$button(
+            class = "btn btn-sm btn-outline-secondary mt-2 mb-2 position-relative",
+            type = "button",
+            `data-bs-toggle` = "collapse",
+            `data-bs-target` = sprintf("#%s", collapse_id),
+            `aria-expanded` = "false",
+            `aria-controls` = collapse_id,
+            "View issues",
+            span(
+              class = "position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger",
+              length(statuses)
+            )
+          ),
+          collapse_container(
+            id = collapse_id,
+            statuses
           )
-        }
-      })
+        )
+        insertUI(
+          selector = sprintf(
+            "#%s",
+            ns(sprintf("outputs-issues-wrapper-%s", attr(blk, "uid")))
+          ),
+          ui = issues_ui
+        )
+      }
 
-      bslib::accordion_panel_update(
-        id = paste0("accordion-", attr(blk, "uid")),
-        target = "state",
-        bslib::navset_pill(!!!statuses)
-      )
+      msgs <- NULL
+      removeUI(paste0(
+        "#",
+        ns(sprintf("errors-block-%s .alert", attr(blk, "uid")))
+      ))
+      if (length(cond[["error"]])) {
+        # Stack error messages in the same alert container
+        # to save space ...
+        msgs <- tags$div(
+          class = sprintf("alert alert-danger"),
+          HTML(cli::ansi_html(paste(
+            unlist(cond[["error"]]),
+            collapse = "\n"
+          )))
+        )
+        insertUI(
+          paste0("#", ns(sprintf("errors-block-%s", attr(blk, "uid")))),
+          ui = msgs
+        )
+      }
     })
   })
 }
@@ -563,7 +621,8 @@ update_block_ui <- function(board, update, session, parent, ...) {
           blk <- board$blocks[[id]]
           attr(blk, "uid") <- id
           update_blk_code_ui(blk)
-          update_blk_state_ui(blk)
+          update_blk_state_ui(blk, session)
+          toggle_blk_section(blk, session)
         }
       )
     },
@@ -577,7 +636,8 @@ update_block_ui <- function(board, update, session, parent, ...) {
       blk <- board$blocks[[block_uid(parent$added_block)]]
       attr(blk, "uid") <- block_uid(parent$added_block)
       update_blk_code_ui(blk)
-      update_blk_state_ui(blk)
+      update_blk_state_ui(blk, session)
+      toggle_blk_section(blk, session)
     },
     ignoreInit = TRUE
   )
