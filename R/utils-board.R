@@ -220,15 +220,21 @@ get_block_panels <- function(panels, pattern = "block-") {
   )
 }
 
-restore_layout <- function(parent, session) {
+restore_layout <- function(board, parent, session) {
   # Move any existing block UI from the offcanvas to their panel
   block_panels <- get_block_panels(names(parent$app_layout$panels))
 
-  # Activate the dag panel to render the graph
-  dockViewR::select_panel(
-    "layout",
-    "dag"
+  # Recreate dag panel
+  insertUI(
+    selector = sprintf("#%s", session$ns("layout-dag")),
+    ui = board_ui(
+      session$ns(NULL),
+      board_plugins(board)["manage_links"]
+    ),
+    immediate = TRUE
   )
+
+  # Recreate module panels
 
   lapply(block_panels, function(id) {
     dockViewR::select_panel(
@@ -244,19 +250,10 @@ restore_layout <- function(parent, session) {
 # Clean up layout from uncessary elements ...
 # We don't need panel content, except for non-block panels
 process_app_layout <- function(layout) {
-  block_panels <- get_block_panels(names(layout[["panels"]]))
-  if (!length(block_panels)) {
-    return(layout)
-  }
   layout[["panels"]] <- lapply(
     layout[["panels"]],
     function(p) {
-      # Make sure the we only drop the html content of block panels
-      # as we don't need it.
-      id <- gsub("block-", "", p[["id"]])
-      if (id %in% block_panels) {
-        p[["params"]][["content"]] <- list(html = character(0))
-      }
+      p[["params"]][["content"]] <- list(html = character(0))
       p
     }
   )
@@ -316,7 +313,7 @@ build_layout <- function(modules, plugins) {
           "layout",
           list(defaultRenderer = "always")
         )
-        restore_layout(parent, session)
+        restore_layout(board$board, parent, session)
       }
     )
 

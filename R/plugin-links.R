@@ -282,10 +282,9 @@ gen_add_rm_link_server <- function(context_menu) {
 }
 
 #' @param id Module ID.
-#' @param board The initial `board` object
 #' @rdname add_rm_link
 #' @export
-add_rm_link_ui <- function(id, board) {
+add_rm_link_ui <- function(id) {
   tagList(
     g6_output(NS(id, "network"), height = "100%")
   )

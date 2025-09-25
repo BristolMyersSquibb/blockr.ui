@@ -35,33 +35,15 @@ create_mock_params <- function(board = new_dag_board()) {
   )
 }
 
-test_that("process_app_layout returns layout unchanged when no block panels", {
+test_that("process_app_layout clears content for block panels", {
   layout <- list(
     panels = list(
       panel1 = list(
         id = "panel1",
-        params = list(content = list(html = "content1"))
+        params = list(content = list(html = "some content"))
       ),
       panel2 = list(
         id = "panel2",
-        params = list(content = list(html = "content2"))
-      )
-    )
-  )
-
-  result <- process_app_layout(layout)
-  expect_equal(result, layout)
-})
-
-test_that("process_app_layout clears content for block panels", {
-  layout <- list(
-    panels = list(
-      `block-panel` = list(
-        id = "block-panel",
-        params = list(content = list(html = "some content"))
-      ),
-      normal_panel = list(
-        id = "normal_panel",
         params = list(content = list(html = "other content"))
       )
     )
@@ -70,10 +52,10 @@ test_that("process_app_layout clears content for block panels", {
   result <- process_app_layout(layout)
 
   # Block panel content should be cleared
-  expect_equal(result$panels[["block-panel"]]$params$content$html, character(0))
+  expect_equal(result$panels$panel1$params$content$html, character(0))
 
   # Normal panel content should remain unchanged
-  expect_equal(result$panels$normal_panel$params$content$html, "other content")
+  expect_equal(result$panels$panel2$params$content$html, character(0))
 })
 
 test_that("process_app_layout handles empty panels list", {
