@@ -44,7 +44,9 @@ new_board_module <- function(
     id = id,
     title = title,
     position = position,
-    class = c(class, "board_module")
+    class = c(class, "board_module") #,
+    #ctor = as.character(match.call()[[1]]),
+    #ctor_pkg = pkg_name()
   )
 }
 
@@ -113,7 +115,6 @@ call_board_module_ui <- function(x, ...) {
 }
 
 board_modules <- function(board) {
-
   stopifnot(is_dag_board(board))
 
   modules <- board[["modules"]]

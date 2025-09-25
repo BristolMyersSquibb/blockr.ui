@@ -225,6 +225,10 @@ restore_layout <- function(board, parent, session) {
   block_panels <- get_block_panels(names(parent$app_layout$panels))
 
   # Recreate dag panel
+  dockViewR::select_panel(
+    "layout",
+    "dag"
+  )
   insertUI(
     selector = sprintf("#%s", session$ns("layout-dag")),
     ui = board_ui(
@@ -235,6 +239,22 @@ restore_layout <- function(board, parent, session) {
   )
 
   # Recreate module panels
+  modules <- names(board_modules(board))
+  lapply(modules, function(mod) {
+    dockViewR::select_panel(
+      "layout",
+      mod
+    )
+    insertUI(
+      selector = sprintf("#%s", session$ns(paste0("layout-", mod))),
+      ui = call_board_module_ui(
+        board_modules(board)[[mod]],
+        session$ns(NULL),
+        board
+      ),
+      immediate = TRUE
+    )
+  })
 
   lapply(block_panels, function(id) {
     dockViewR::select_panel(
