@@ -561,17 +561,26 @@ update_blk_state_ui <- function(blk) {
       msgs <- NULL
       if (length(cond[["error"]])) {
         msgs <- tags$div(
-          class = sprintf("alert alert-%s", cl),
+          class = sprintf("alert alert-danger"),
           HTML(cli::ansi_html(paste(
             unlist(cond[["error"]]),
             collapse = "\n"
           )))
         )
+      } else {
+        bslib::accordion_panel_close(
+          id = paste0("accordion-", attr(blk, "uid")),
+          "errors"
+        )
       }
       bslib::accordion_panel_update(
         id = paste0("accordion-", attr(blk, "uid")),
         target = "errors",
-        bslib::navset_pill(msgs)
+        msgs
+      )
+      bslib::accordion_panel_open(
+        id = paste0("accordion-", attr(blk, "uid")),
+        "errors"
       )
     })
   })
