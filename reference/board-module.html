@@ -51,6 +51,9 @@
 <span><span class="fu">new_board_module</span><span class="op">(</span></span>
 <span>  <span class="va">ui</span>,</span>
 <span>  <span class="va">server</span>,</span>
+<span>  on_restore <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>     <span class="cn">TRUE</span></span>
+<span> <span class="op">}</span>,</span>
 <span>  <span class="va">id</span>,</span>
 <span>  <span class="va">title</span>,</span>
 <span>  context_menu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -70,6 +73,10 @@
 
 <dt id="arg-ui-server">ui, server<a class="anchor" aria-label="anchor" href="#arg-ui-server"></a></dt>
 <dd><p>UI and server functions</p></dd>
+
+
+<dt id="arg-on-restore">on_restore<a class="anchor" aria-label="anchor" href="#arg-on-restore"></a></dt>
+<dd><p>Function called when restoring the board state.</p></dd>
 
 
 <dt id="arg-context-menu">context_menu<a class="anchor" aria-label="anchor" href="#arg-context-menu"></a></dt>

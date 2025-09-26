@@ -47,26 +47,43 @@ layout, behaviors, and plugins.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">initialize_g6</span><span class="op">(</span>nodes <span class="op">=</span> <span class="cn">NULL</span>, edges <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">ns</span>, <span class="va">path</span>, <span class="va">context_menu</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">initialize_g6</span><span class="op">(</span></span>
+<span>  <span class="va">board</span>,</span>
+<span>  <span class="va">parent</span>,</span>
+<span>  <span class="va">ns</span>,</span>
+<span>  <span class="va">path</span>,</span>
+<span>  <span class="va">context_menu</span>,</span>
+<span>  session <span class="op">=</span> <span class="fu">getDefaultReactiveDomain</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-nodes">nodes<a class="anchor" aria-label="anchor" href="#arg-nodes"></a></dt>
-<dd><p>A data frame or list containing node information. Each node should
-typically have at least an <code>id</code> field, and optionally other attributes like <code>label</code>.
-Default is <code>NULL</code>.</p></dd>
+<dl><dt id="arg-board">board<a class="anchor" aria-label="anchor" href="#arg-board"></a></dt>
+<dd><p>The board object containing the network data and configuration if any.</p></dd>
 
 
-<dt id="arg-edges">edges<a class="anchor" aria-label="anchor" href="#arg-edges"></a></dt>
-<dd><p>A data frame or list containing edge information. Each edge typically
-needs <code>source</code> and <code>target</code> fields to define connections. Default is <code>NULL</code>.</p></dd>
+<dt id="arg-parent">parent<a class="anchor" aria-label="anchor" href="#arg-parent"></a></dt>
+<dd><p>App state reactive values.</p></dd>
 
 
 <dt id="arg-ns">ns<a class="anchor" aria-label="anchor" href="#arg-ns"></a></dt>
 <dd><p>Session namespace.</p></dd>
+
+
+<dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
+<dd><p>Location for the context menu. Generated
+with session$registerDataObj.</p></dd>
+
+
+<dt id="arg-context-menu">context_menu<a class="anchor" aria-label="anchor" href="#arg-context-menu"></a></dt>
+<dd><p>Named list of context menu entries and associated JS actions.</p></dd>
+
+
+<dt id="arg-session">session<a class="anchor" aria-label="anchor" href="#arg-session"></a></dt>
+<dd><p>Shiny session object.</p></dd>
 
 </dl></div>
     <div class="section level2">
