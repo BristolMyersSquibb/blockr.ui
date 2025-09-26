@@ -3,6 +3,7 @@
 S3method(add_block_to_stack,dag_board)
 S3method(block_ui,dag_board)
 S3method(blockr_deser,dag_board)
+S3method(blockr_ser,board_module)
 S3method(blockr_ser,dag_board)
 S3method(blockr_ser,stack_colors_option)
 S3method(board_plugins,dag_board)

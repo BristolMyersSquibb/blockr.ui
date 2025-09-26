@@ -19,6 +19,19 @@ blockr_ser.dag_board <- function(
 }
 
 #' @export
+blockr_ser.board_module <- function(x, state, ...) {
+  list(
+    object = class(x),
+    payload = list(
+      state = state[[attr(x, "id")]]
+    ),
+    constructor = attr(x, "ctor"),
+    package = attr(x, "ctor_pkg"),
+    version = as.character(pkg_version())
+  )
+}
+
+#' @export
 blockr_deser.dag_board <- function(x, data, ...) {
   list(
     board = NextMethod(data = data[["board"]]),
@@ -31,8 +44,13 @@ blockr_deser.dag_board <- function(x, data, ...) {
 }
 
 #' @export
-serialize_board.dag_board <- function(x, blocks, parent, ...,
-                                      session = get_session()) {
+serialize_board.dag_board <- function(
+  x,
+  blocks,
+  parent,
+  ...,
+  session = get_session()
+) {
   blocks <- lapply(
     lst_xtr(blocks, "server", "state"),
     lapply,
@@ -45,27 +63,36 @@ serialize_board.dag_board <- function(x, blocks, parent, ...,
     session
   )
 
-  ser <- blockr_ser(
+  blockr_ser(
     x,
     blocks = blocks,
     options = opts,
     network = parent$network,
     layout = parent$app_layout,
-    modules = lapply(parent$module_state, reval)
-  )
-
-
-  jsonlite::prettify(
-    jsonlite::toJSON(ser, null = "null")
+    modules = lapply(
+      board_modules(x),
+      blockr_ser,
+      state = lapply(parent$module_state, reval)
+    )
   )
 }
 
 #' @export
-restore_board.dag_board <- function(x, json, result, parent, ...,
-                                    session = get_session()) {
+restore_board.dag_board <- function(
+  x,
+  new,
+  result,
+  parent,
+  ...,
+  session = get_session()
+) {
   tryCatch(
     {
-      tmp_res <- from_json(json)
+      tmp_res <- blockr_deser(new)
+      tmp_res$board[["modules"]] <- lapply(tmp_res$modules, function(mod) {
+        fun <- get(mod$constructor, envir = asNamespace(mod$package))
+        fun()
+      })
       result(tmp_res$board)
       # Update parent node, grid, selected, mode
       # that were stored in the JSON but not part of the board object.
@@ -104,7 +131,7 @@ restore_board.dag_board <- function(x, json, result, parent, ...,
       }
 
       for (mod in mods) {
-        parent$module_state[[mod]](tmp_res$modules[[mod]])
+        parent$module_state[[mod]](tmp_res$modules[[mod]]$payload$state)
       }
     },
     error = function(e) {

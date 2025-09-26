@@ -7,14 +7,12 @@
 \usage{
 gen_add_rm_link_server(context_menu)
 
-add_rm_link_ui(id, board)
+add_rm_link_ui(id)
 }
 \arguments{
 \item{context_menu}{Context menu.}
 
 \item{id}{Module ID.}
-
-\item{board}{The initial \code{board} object}
 }
 \value{
 NULL.
