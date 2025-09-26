@@ -669,7 +669,7 @@ update_block_ui <- function(board, update, session, parent, ...) {
 
   # Register update block UI callbacks for existing blocks
   observeEvent(
-    req(!parent$cold_start),
+    req(length(board$blocks) > 0),
     {
       lapply(
         names(board$blocks),

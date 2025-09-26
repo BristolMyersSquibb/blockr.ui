@@ -3,6 +3,7 @@
 \name{board_restore}
 \alias{board_restore}
 \alias{module_restore}
+\alias{reset_restore}
 \alias{build_layout}
 \alias{manage_scoutbar}
 \alias{update_block_ui}
@@ -11,6 +12,8 @@
 board_restore(board, update, session, parent, ...)
 
 module_restore(board, update, session, parent, ...)
+
+reset_restore(board, update, session, parent, ...)
 
 build_layout(modules, plugins)
 

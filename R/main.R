@@ -14,7 +14,6 @@ main_ui <- function(id, board, board_id, plugins = board_plugins(board)) {
 
 create_app_state <- function(board) {
   res <- reactiveValues(
-    cold_start = length(board_blocks(board)) == 0L,
     refreshed = NULL,
     network = list(),
     app_layout = list(),

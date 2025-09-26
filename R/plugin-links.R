@@ -24,14 +24,33 @@ gen_add_rm_link_server <- function(context_menu) {
           session$sendCustomMessage("app-ready", list())
         })
 
-        # When starting from non empty board (happens once)
+        # When starting from non empty board or restoring (happens once)
+        # Apply node validation and stack behavior
         observeEvent(
           req(
-            isFALSE(parent$cold_start),
-            input[["network-initialized"]]
+            length(input[["network-state"]]$nodes) > 0,
+            is.null(parent$added_block),
+            length(board$blocks) > 0
           ),
           {
-            cold_start(board, parent, session)
+            blocks <- board_blocks(board$board)
+            # Apply node validation
+            lapply(
+              names(blocks),
+              register_node_validation,
+              rv = board,
+              vals = parent,
+              session = session
+            )
+
+            # Register add to stack/remove from stack behavior
+            lapply(
+              names(blocks),
+              register_node_stack_link,
+              rv = board,
+              vals = parent,
+              session = session
+            )
           },
           once = TRUE
         )
@@ -69,9 +88,12 @@ gen_add_rm_link_server <- function(context_menu) {
         output$network <- render_g6({
           isolate({
             initialize_g6(
+              board = board$board,
+              parent = parent,
               ns = session$ns,
               path = ctx_path,
-              context_menu = context_menu
+              context_menu = context_menu,
+              session
             )
           })
         })

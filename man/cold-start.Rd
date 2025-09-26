@@ -4,7 +4,7 @@
 \alias{create_edges_data_from_links}
 \alias{create_nodes_data_from_blocks}
 \alias{create_combos_data_from_stacks}
-\alias{cold_start}
+\alias{initialise_g6_data}
 \title{Create network data from board}
 \usage{
 create_edges_data_from_links(links)
@@ -13,7 +13,7 @@ create_nodes_data_from_blocks(blocks, stacks)
 
 create_combos_data_from_stacks(stacks, parent, colors)
 
-cold_start(rv, parent, session)
+initialise_g6_data(board, parent, session)
 }
 \arguments{
 \item{links}{Board links.}
@@ -26,7 +26,7 @@ cold_start(rv, parent, session)
 
 \item{colors}{Stacks colors. Internal.}
 
-\item{rv}{Board reactive values. Read-only}
+\item{board}{Board object.}
 
 \item{session}{Shiny session}
 }
