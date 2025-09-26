@@ -19,125 +19,127 @@ dashboard_ui <- function(id, board, ...) {
 #' @param ... Extra parameters.
 #' @rdname dashboard
 #' @export
-dashboard_server <- function(board, update, session, parent, ...) {
-  isolate(
-    {
-      parent$in_grid <- list()
-      parent$added_to_dashboard <- NULL
-      parent$removed_from_dashboard <- NULL
-    }
-  )
-
-  input <- session$input
-  ns <- session$ns
-  output <- session$output
-
-  res <- reactiveVal()
-
-  observeEvent(
-    {
-      # Should not trigger on restore, only when the dashboard changes
-      req(is.null(parent$refreshed))
-      input$dock_state
-    },
-    {
-      res(input$dock_state)
-    }
-  )
-
-  # Restore dock from serialisation only when network is restored
-  observeEvent(
-    {
-      req(parent$refreshed == "restore-network")
-    },
-    {
-      restore_dashboard(board$board, board, parent, session)
-    }
-  )
-
-  # Whenever a new block is created, we initialise its grid state
-  observeEvent(parent$added_block, {
-    parent$in_grid[[block_uid(parent$added_block)]] <- FALSE
-  })
-
-  # Removed block(s) must not be referenced in the grid and
-  # the panel must be removed from the dock.
-  observeEvent(parent$removed_block, {
-    lapply(parent$removed_block, function(removed) {
-      # Signal to remove panel from dock.
-      # Panel will be removed by manage_dashboard.
-      parent$in_grid[[removed]] <- NULL
-      if (paste0("block-", removed) %in% get_panels_ids("dock", session)) {
-        remove_panel("dock", paste0("block-", removed))
-      }
-    })
-  })
-
-  # Initialise outputs for any existing block in the grid
-  # TBD: this is not needed yet as we can't initialise a board
-  # with existing blocks in the grid. Uncomment the code
-  # below when we can do that.
-  #lapply(
-  #  isolate(parent$in_grid),
-  #  function(id) {
-  #    generate_dashboard_blk_output(
-  #      id,
-  #      board,
-  #      session
-  #    )
-  #  }
-  #)
-
-  # Add panel to dashboard + handle secondary output
-  observeEvent(
-    {
-      req(
-        parent$added_to_dashboard,
-        parent$in_grid[[parent$added_to_dashboard]]
+dashboard_server <- function(
+  id,
+  board,
+  update,
+  session,
+  parent,
+  ...
+) {
+  moduleServer(
+    id,
+    function(input, output, session) {
+      isolate(
+        {
+          parent$in_grid <- list()
+          parent$added_to_dashboard <- NULL
+          parent$removed_from_dashboard <- NULL
+        }
       )
-    },
-    {
-      add_blk_panel_to_dashboard(
-        parent$added_to_dashboard,
-        board,
-        session
+
+      input <- session$input
+      ns <- session$ns
+      output <- session$output
+
+      res <- reactiveVal()
+
+      observeEvent(
+        {
+          # Should not trigger on restore, only when the dashboard changes
+          req(is.null(parent$refreshed))
+          input$dock_state
+        },
+        {
+          res(input$dock_state)
+        }
       )
-      generate_dashboard_blk_output(
-        parent$added_to_dashboard,
-        board,
-        session
+
+      # Whenever a new block is created, we initialise its grid state
+      observeEvent(parent$added_block, {
+        parent$in_grid[[block_uid(parent$added_block)]] <- FALSE
+      })
+
+      # Removed block(s) must not be referenced in the grid and
+      # the panel must be removed from the dock.
+      observeEvent(parent$removed_block, {
+        lapply(parent$removed_block, function(removed) {
+          # Signal to remove panel from dock.
+          # Panel will be removed by manage_dashboard.
+          parent$in_grid[[removed]] <- NULL
+          if (paste0("block-", removed) %in% get_panels_ids("dock", session)) {
+            remove_panel("dock", paste0("block-", removed))
+          }
+        })
+      })
+
+      # Initialise outputs for any existing block in the grid
+      # TBD: this is not needed yet as we can't initialise a board
+      # with existing blocks in the grid. Uncomment the code
+      # below when we can do that.
+      #lapply(
+      #  isolate(parent$in_grid),
+      #  function(id) {
+      #    generate_dashboard_blk_output(
+      #      id,
+      #      board,
+      #      session
+      #    )
+      #  }
+      #)
+
+      # Add panel to dashboard + handle secondary output
+      observeEvent(
+        {
+          req(
+            parent$added_to_dashboard,
+            parent$in_grid[[parent$added_to_dashboard]]
+          )
+        },
+        {
+          add_blk_panel_to_dashboard(
+            parent$added_to_dashboard,
+            board,
+            session
+          )
+          generate_dashboard_blk_output(
+            parent$added_to_dashboard,
+            board,
+            session
+          )
+          parent$added_to_dashboard <- NULL
+        }
       )
-      parent$added_to_dashboard <- NULL
+
+      # Toggle state for each selected block and update the state
+      observeEvent(
+        {
+          req(parent$removed_from_dashboard)
+          parent$in_grid[[parent$removed_from_dashboard]]
+        },
+        {
+          # Remove output from dock
+          remove_blk_from_dashboard(parent$removed_from_dashboard, session)
+          parent$removed_from_dashboard <- NULL
+        }
+      )
+
+      output$dock <- renderDockView({
+        dock_view(
+          panels = list(), # TBD handle when we initalise from a non empty dock
+          # TBD: handle theme from global app options
+          theme = "replit"
+        )
+      })
+
+      # Handle zoom on grid element
+      observeEvent(get_board_option_value("dashboard_zoom"), {
+        handle_dashboard_zoom(session)
+      })
+
+      res
     }
   )
-
-  # Toggle state for each selected block and update the state
-  observeEvent(
-    {
-      req(parent$removed_from_dashboard)
-      parent$in_grid[[parent$removed_from_dashboard]]
-    },
-    {
-      # Remove output from dock
-      remove_blk_from_dashboard(parent$removed_from_dashboard, session)
-      parent$removed_from_dashboard <- NULL
-    }
-  )
-
-  output$dock <- renderDockView({
-    dock_view(
-      panels = list(), # TBD handle when we initalise from a non empty dock
-      # TBD: handle theme from global app options
-      theme = "replit"
-    )
-  })
-
-  # Handle zoom on grid element
-  observeEvent(get_board_option_value("dashboard_zoom"), {
-    handle_dashboard_zoom(session)
-  })
-
-  res
 }
 
 new_dashboard_zoom_option <- function(
@@ -249,6 +251,9 @@ new_dashboard_module <- function(id = "dashboard", title = "Dashboard") {
   new_board_module(
     dashboard_ui,
     dashboard_server,
+    on_restore = function(board, parent, session, ...) {
+      restore_dashboard(board$board, board, parent, session)
+    },
     id = id,
     title = title,
     context_menu = list(

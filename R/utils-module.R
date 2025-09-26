@@ -3,6 +3,7 @@
 #' Extend a DAG board by adding modules.
 #'
 #' @param ui,server UI and server functions
+#' @param on_restore Function called when restoring the board state.
 #' @param id,title Module ID and title
 #' @param context_menu List of context menu entries
 #' @param position Panel position
@@ -14,6 +15,9 @@
 new_board_module <- function(
   ui,
   server,
+  on_restore = function(...) {
+    TRUE
+  },
   id,
   title,
   context_menu = list(),
@@ -28,6 +32,7 @@ new_board_module <- function(
   stopifnot(
     is.function(ui),
     is.function(server),
+    is.function(on_restore),
     is_string(id),
     is_string(title),
     is.list(context_menu),
@@ -38,6 +43,7 @@ new_board_module <- function(
     list(
       server = server,
       ui = ui,
+      on_restore = on_restore,
       context_menu = context_menu,
       options = as_board_options(options)
     ),
@@ -56,7 +62,9 @@ is_board_module <- function(x) {
 
 board_module_server <- function(x) {
   stopifnot(is_board_module(x))
-  x[["server"]]
+  srv_func <- x[["server"]]
+  formals(srv_func)[["id"]] <- board_module_id(x)
+  srv_func
 }
 
 board_module_ui <- function(x) {
@@ -87,6 +95,11 @@ board_module_context_menu <- function(x) {
 board_module_position <- function(x) {
   stopifnot(is_board_module(x))
   attr(x, "position")
+}
+
+board_module_on_restore <- function(x) {
+  stopifnot(is_board_module(x))
+  x[["on_restore"]]
 }
 
 board_module_positions <- function(x) {

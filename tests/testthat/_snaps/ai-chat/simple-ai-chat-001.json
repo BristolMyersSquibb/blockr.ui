@@ -4,11 +4,18 @@
   },
   "export": {
     "main-res": {
-      "cold_start": true,
       "refreshed": null,
-      "network": [
+      "network": {
+        "nodes": [
 
-      ],
+        ],
+        "edges": [
+
+        ],
+        "combos": [
+
+        ]
+      },
       "app_layout": {
         "grid": {
           "root": {

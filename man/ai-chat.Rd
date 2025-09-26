@@ -7,7 +7,7 @@
 \usage{
 chat_mod_ui(id, board, ...)
 
-chat_mod_srv(id = "chat", board, update, session, parent, ...)
+chat_mod_srv(id, board, update, session, parent, ...)
 }
 \arguments{
 \item{id}{Module id.}

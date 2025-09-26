@@ -1,5 +1,4 @@
 test_that("main_server works", {
-
   empty_board <- new_dag_board()
 
   expect_error(main_server("id", NULL, NULL, NULL))
@@ -22,7 +21,6 @@ test_that("main_server works", {
     main_server,
     args = list(board = ex_board, board_id = "board"),
     {
-      expect_false(app_state$cold_start)
       expect_null(app_state$refreshed)
       expect_length(app_state$network, 0)
       expect_false(app_state$append_block)

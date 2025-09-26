@@ -4,7 +4,6 @@
   },
   "export": {
     "main-res": {
-      "cold_start": false,
       "refreshed": null,
       "network": {
         "nodes": [
@@ -13,7 +12,7 @@
             "label": "dataset_block \n id: a",
             "style": {
               "labelBackgroundFill": "#a0cafa",
-              "zIndex": 3,
+              "zIndex": 1,
               "z": 0,
               "fill": "#1783FF",
               "badges": [
@@ -46,7 +45,7 @@
             "label": "merge_block \n id: c",
             "style": {
               "labelBackgroundFill": "#a0cafa",
-              "zIndex": 3,
+              "zIndex": 1,
               "z": 0,
               "fill": "#1783FF",
               "badges": [
@@ -67,7 +66,7 @@
             "target": "c",
             "label": "x",
             "style": {
-              "zIndex": 2,
+              "zIndex": 0,
               "controlPoints": [
                 [
                   48.5,
@@ -76,7 +75,9 @@
                 ]
               ],
               "stroke": "#000",
-              "badgeText": null
+              "badgeText": null,
+              "sourceNode": "a",
+              "targetNode": "c"
             },
             "data": {
 
@@ -92,7 +93,7 @@
             "target": "c",
             "label": "y",
             "style": {
-              "zIndex": 2,
+              "zIndex": 0,
               "controlPoints": [
                 [
                   77,
@@ -101,7 +102,7 @@
                 ]
               ],
               "sourceNode": "b",
-              "targetNode": "combo-ac",
+              "targetNode": "c",
               "stroke": "#000",
               "badgeText": null
             },
@@ -126,9 +127,8 @@
               "collapsedStroke": "#A71B4B",
               "iconFill": "#A71B4B",
               "labelPlacement": "top",
-              "zIndex": 2,
-              "z": 0,
-              "collapsed": true
+              "zIndex": 0,
+              "z": 0
             },
             "data": {
 
@@ -209,11 +209,9 @@
       "backup_list": null,
       "display_code": false,
       "module_state": null,
-      "in_grid": {
-        "a": false,
-        "b": false,
-        "c": false
-      },
+      "in_grid": [
+
+      ],
       "added_to_dashboard": null,
       "removed_from_dashboard": null
     }

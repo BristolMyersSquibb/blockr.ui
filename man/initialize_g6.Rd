@@ -4,17 +4,28 @@
 \alias{initialize_g6}
 \title{Initialize a G6 ANTV Network Visualization}
 \usage{
-initialize_g6(nodes = NULL, edges = NULL, ns, path, context_menu)
+initialize_g6(
+  board,
+  parent,
+  ns,
+  path,
+  context_menu,
+  session = getDefaultReactiveDomain()
+)
 }
 \arguments{
-\item{nodes}{A data frame or list containing node information. Each node should
-typically have at least an \code{id} field, and optionally other attributes like \code{label}.
-Default is \code{NULL}.}
+\item{board}{The board object containing the network data and configuration if any.}
 
-\item{edges}{A data frame or list containing edge information. Each edge typically
-needs \code{source} and \code{target} fields to define connections. Default is \code{NULL}.}
+\item{parent}{App state reactive values.}
 
 \item{ns}{Session namespace.}
+
+\item{path}{Location for the context menu. Generated
+with session$registerDataObj.}
+
+\item{context_menu}{Named list of context menu entries and associated JS actions.}
+
+\item{session}{Shiny session object.}
 }
 \value{
 A G6 network visualization object that can be further customized or directly

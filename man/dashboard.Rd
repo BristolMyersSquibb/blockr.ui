@@ -7,7 +7,7 @@
 \usage{
 dashboard_ui(id, board, ...)
 
-dashboard_server(board, update, session, parent, ...)
+dashboard_server(id, board, update, session, parent, ...)
 }
 \arguments{
 \item{id}{Module id.}

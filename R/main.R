@@ -13,8 +13,7 @@ main_ui <- function(id, board, board_id, plugins = board_plugins(board)) {
 }
 
 create_app_state <- function(board) {
-  reactiveValues(
-    cold_start = length(board_blocks(board)) == 0L,
+  res <- reactiveValues(
     refreshed = NULL,
     network = list(),
     app_layout = list(),
@@ -50,6 +49,10 @@ create_app_state <- function(board) {
     # Dashboard
     module_state = list()
   )
+
+  validate_refreshed(res)
+
+  res
 }
 
 #' Main server function
@@ -84,6 +87,8 @@ main_server <- function(id, board, board_id, plugins = board_plugins(board)) {
             # Callback to signal other modules that the restore is done.
             # This allows to restore each part in the correct order.
             on_board_restore = board_restore,
+            on_module_restore = module_restore,
+            reset_restore = reset_restore,
             manage_scoutbar = manage_scoutbar,
             layout = build_layout(modules, plugins),
             update_block_ui = update_block_ui

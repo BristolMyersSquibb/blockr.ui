@@ -2,12 +2,18 @@
 % Please edit documentation in R/utils-board.R
 \name{board_restore}
 \alias{board_restore}
+\alias{module_restore}
+\alias{reset_restore}
 \alias{build_layout}
 \alias{manage_scoutbar}
 \alias{update_block_ui}
 \title{Board restoration callback}
 \usage{
 board_restore(board, update, session, parent, ...)
+
+module_restore(board, update, session, parent, ...)
+
+reset_restore(board, update, session, parent, ...)
 
 build_layout(modules, plugins)
 

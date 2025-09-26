@@ -56,8 +56,7 @@ dag_board_options <- function() {
 }
 
 #' @export
-board_plugins.dag_board <- function(x, which = NULL) {
-
+board_plugins.dag_board <- function(x, which = NULL, ...) {
   res <- plugins(
     preserve_board(ui = ser_deser_ui),
     manage_blocks(server = add_rm_block_server, ui = add_rm_block_ui),
@@ -79,8 +78,13 @@ board_plugins.dag_board <- function(x, which = NULL) {
 }
 
 #' @export
-serve.dag_board <- function(x, id = "main", board_id = rand_names(),
-                            plugins = board_plugins(x), ...) {
+serve.dag_board <- function(
+  x,
+  id = "main",
+  board_id = rand_names(),
+  plugins = board_plugins(x),
+  ...
+) {
   ui <- do.call(
     page_fillable,
     c(
