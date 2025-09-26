@@ -90,8 +90,15 @@ restore_board.dag_board <- function(
     {
       tmp_res <- blockr_deser(new)
       tmp_res$board[["modules"]] <- lapply(tmp_res$modules, function(mod) {
-        fun <- get(mod$constructor, envir = asNamespace(mod$package))
-        fun()
+        fun <- get0(
+          mod$constructor,
+          envir = asNamespace(mod$package),
+          mode = "function",
+          inherits = FALSE
+        )
+        res <- fun()
+        attr(res, "ctor") <- mod$constructor
+        res
       })
       result(tmp_res$board)
       # Update parent node, grid, selected, mode
