@@ -286,7 +286,7 @@ testServer(
 )
 
 test_that("network ui works", {
-  ui <- add_rm_link_ui("mod", new_board())
+  ui <- add_rm_link_ui("mod")
   expect_s3_class(ui, "shiny.tag.list")
 })
 

@@ -50,7 +50,9 @@ new_board_module <- function(
     id = id,
     title = title,
     position = position,
-    class = c(class, "board_module")
+    class = c(class, "board_module"),
+    ctor = deparse(sys.call(sys.parent())[[1]]),
+    ctor_pkg = pkg_name()
   )
 }
 

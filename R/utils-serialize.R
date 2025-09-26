@@ -19,6 +19,19 @@ blockr_ser.dag_board <- function(
 }
 
 #' @export
+blockr_ser.board_module <- function(x, state, ...) {
+  list(
+    object = class(x),
+    payload = list(
+      state = state[[attr(x, "id")]]
+    ),
+    constructor = attr(x, "ctor"),
+    package = attr(x, "ctor_pkg"),
+    version = as.character(pkg_version())
+  )
+}
+
+#' @export
 blockr_deser.dag_board <- function(x, data, ...) {
   list(
     board = NextMethod(data = data[["board"]]),
@@ -56,7 +69,11 @@ serialize_board.dag_board <- function(
     options = opts,
     network = parent$network,
     layout = parent$app_layout,
-    modules = lapply(parent$module_state, reval)
+    modules = lapply(
+      board_modules(x),
+      blockr_ser,
+      state = lapply(parent$module_state, reval)
+    )
   )
 }
 
@@ -72,6 +89,10 @@ restore_board.dag_board <- function(
   tryCatch(
     {
       tmp_res <- blockr_deser(new)
+      tmp_res$board[["modules"]] <- lapply(tmp_res$modules, function(mod) {
+        fun <- get(mod$constructor, envir = asNamespace(mod$package))
+        fun()
+      })
       result(tmp_res$board)
       # Update parent node, grid, selected, mode
       # that were stored in the JSON but not part of the board object.
@@ -110,7 +131,7 @@ restore_board.dag_board <- function(
       }
 
       for (mod in mods) {
-        parent$module_state[[mod]](tmp_res$modules[[mod]])
+        parent$module_state[[mod]](tmp_res$modules[[mod]]$payload$state)
       }
     },
     error = function(e) {

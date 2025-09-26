@@ -39,6 +39,6 @@ testServer(
 )
 
 test_that("add_rm_bloc_ui works", {
-  ui <- add_rm_block_ui("mod", new_board())
+  ui <- add_rm_block_ui("mod")
   expect_null(ui)
 })
