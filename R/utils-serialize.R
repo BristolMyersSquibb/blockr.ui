@@ -90,11 +90,10 @@ restore_board.dag_board <- function(
     {
       tmp_res <- blockr_deser(new)
       tmp_res$board[["modules"]] <- lapply(tmp_res$modules, function(mod) {
-        fun <- get0(
+        fun <- get(
           mod$constructor,
           envir = asNamespace(mod$package),
-          mode = "function",
-          inherits = FALSE
+          mode = "function"
         )
         res <- fun()
         attr(res, "ctor") <- mod$constructor
