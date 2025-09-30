@@ -175,15 +175,13 @@
             "id": "dag",
             "contentComponent": "default",
             "tabComponent": "custom",
-            "title": "Pipeline overview",
-            "renderer": "always"
+            "title": "Pipeline overview"
           },
           "dashboard": {
             "id": "dashboard",
             "contentComponent": "default",
             "tabComponent": "custom",
-            "title": "Dashboard",
-            "renderer": "always"
+            "title": "Dashboard"
           }
         },
         "activeGroup": "2"
