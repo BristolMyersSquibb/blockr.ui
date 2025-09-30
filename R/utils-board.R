@@ -342,7 +342,7 @@ restore_layout <- function(board, parent, session) {
       selector = sprintf("#%s", session$ns(paste0("layout-", mod))),
       ui = call_board_module_ui(
         board_modules(board)[[mod]],
-        session$ns(NULL),
+        session$ns(mod),
         board
       ),
       immediate = TRUE
@@ -419,13 +419,6 @@ build_layout <- function(modules, plugins) {
         )
       },
       {
-        # Ensure the default renderer is always on
-        # since restoring layout does not manage to preserve
-        # the individual panel renderer state.
-        dockViewR::update_dock_view(
-          "layout",
-          list(defaultRenderer = "always")
-        )
         restore_layout(board$board, parent, session)
       }
     )
@@ -462,12 +455,12 @@ build_layout <- function(modules, plugins) {
       # so we don't re-render the whole layout each time ...
       isolate({
         dock_view(
+          defaultRenderer = "always",
           panels = c(
             list(
               panel(
                 id = "dag",
                 title = "Pipeline overview",
-                renderer = "always",
                 content = board_ui(
                   ns(NULL),
                   plugins["manage_links"]
@@ -488,7 +481,6 @@ build_layout <- function(modules, plugins) {
                   )
                 }
               ),
-              renderer = "always",
               position = board_module_positions(modules)
             )
           ),

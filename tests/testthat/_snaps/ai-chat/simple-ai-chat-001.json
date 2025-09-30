@@ -56,22 +56,19 @@
             "id": "dag",
             "contentComponent": "default",
             "tabComponent": "custom",
-            "title": "Pipeline overview",
-            "renderer": "always"
+            "title": "Pipeline overview"
           },
           "dashboard": {
             "id": "dashboard",
             "contentComponent": "default",
             "tabComponent": "custom",
-            "title": "Dashboard",
-            "renderer": "always"
+            "title": "Dashboard"
           },
           "blockr_assistant": {
             "id": "blockr_assistant",
             "contentComponent": "default",
             "tabComponent": "custom",
-            "title": "AI chat",
-            "renderer": "always"
+            "title": "AI chat"
           }
         },
         "activeGroup": "2"
