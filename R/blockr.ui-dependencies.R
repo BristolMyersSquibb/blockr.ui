@@ -4,6 +4,7 @@
 #'
 #' @param tag Element to attach the dependencies.
 #'
+#' @importFrom utils packageVersion
 #' @importFrom htmltools tagList htmlDependency
 #' @export
 add_blockr.ui_deps <- function(tag) {
