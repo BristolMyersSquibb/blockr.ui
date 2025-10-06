@@ -150,12 +150,13 @@ new_dashboard_zoom_option <- function(
     id = "dashboard_zoom",
     default = value,
     ui = function(id) {
-      numericInput(
+      sliderInput(
         NS(id, "dashboard_zoom"),
         "Dashboard zoom factor",
-        value,
         min = 0.5,
         max = 2,
+        value = value,
+        ticks = FALSE,
         step = 0.1
       )
     },
