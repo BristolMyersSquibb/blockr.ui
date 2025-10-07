@@ -16,6 +16,10 @@ firstup <- function(x) {
   x
 }
 
+block_name_to_id <- function(x) {
+  gsub(" ", "_", tolower(block_name(x)))
+}
+
 v_rule <- function() {
   shiny::tags$div(class = "vr")
 }

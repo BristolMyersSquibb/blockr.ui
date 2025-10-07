@@ -10,54 +10,21 @@
 #' @rdname block_ui
 block_ui.dag_board <- function(id, x, block = NULL, edit_ui = NULL, ...) {
   ns <- NS(id)
-  id <- names(block)
-  stopifnot(is.character(id) && length(id) == 1L)
   block <- block[[1]]
   stopifnot(is_block(block))
-  block_card(x, block, id, edit_ui, ns = ns)
+  block_card(x, block, edit_ui, ns = ns)
 }
 
 #' @keywords internal
-block_card <- function(board, x, id, edit_ui, ns) {
+block_card <- function(board, block, edit_ui, ns) {
+  id <- block_name_to_id(block)
   blk_id <- ns(paste0("block_", id))
-  blk_info <- get_block_metadata(x)
+  blk_info <- get_block_metadata(block)
 
   # Edit plugin
   if (!is.null(edit_ui)) {
     edit_ui <- edit_ui$ui(x, NS(blk_id, "edit_block"))
   }
-
-  # Hide headers of accordion panels
-  accordions <- accordion(
-    id = ns(paste0("accordion-", id)),
-    multiple = TRUE,
-    class = "accordion-flush",
-    open = "outputs",
-    accordion_panel(
-      icon = icon("sliders"),
-      title = "Block inputs",
-      value = "inputs",
-      expr_ui(blk_id, x)
-    ),
-    accordion_panel(
-      icon = icon("chart-simple"),
-      title = "Block output(s)",
-      value = "outputs",
-      style = "max-width: 100%; overflow-x: auto;",
-      block_ui(blk_id, x),
-      div(id = ns(paste0("outputs-issues-wrapper-", id)))
-    ),
-    accordion_panel(
-      title = "Block code",
-      value = "code",
-      icon = icon("code"),
-    )
-  )
-  accordions <- htmltools::tagQuery(accordions)$find(
-    ".accordion-header"
-  )$addAttrs(style = "display: none;")$reset()$find(".accordion-item")$addAttrs(
-    style = "border: none;"
-  )$allTags()
 
   card_tag <- tags$div(
     class = "card",
@@ -65,23 +32,26 @@ block_card <- function(board, x, id, edit_ui, ns) {
     id = ns(id),
     tags$div(
       class = "card-body",
-      block_card_title(id, blk_info, edit_ui, ns),
-      # subtitle
-      block_card_subtitle(board, x, id, blk_info),
+      div(
+        class = sprintf(
+          "border-start border-5 border-%s ps-2",
+          blk_border_color(blk_info$category)
+        ),
+        block_card_title(id, blk_info, edit_ui, ns),
+        # subtitle
+        block_card_subtitle(board, block, id, blk_info),
+      ),
       #edit_ui$block_summary,
-      div(id = ns(sprintf("errors-block-%s", id))),
-      accordions
+      block_card_content(block, id, blk_id, ns)
     )
   )
   tagAppendAttributes(card_tag, class = "border border-0 shadow-none")
 }
 
+#' @keywords internal
 block_card_title <- function(id, info, edit_ui, ns) {
   tags$div(
-    class = sprintf(
-      "card-title d-flex align-items-center justify-content-between gap-2 border-start border-5 border-%s ps-2",
-      blk_border_color(info$category)
-    ),
+    class = "card-title d-flex align-items-center justify-content-between gap-2",
     edit_ui$block_name,
     block_card_toggles(id, ns),
     block_card_dropdown(id, info, ns)
@@ -130,7 +100,45 @@ block_card_subtitle <- function(board, block, id, info) {
   )
 }
 
-block_card_content <- function(id, ns) {}
+#' @keywords internal
+block_card_content <- function(block, id, blk_id, ns) {
+  # Hide headers of accordion panels
+  accordions <- accordion(
+    id = ns(paste0("accordion-", id)),
+    multiple = TRUE,
+    class = "accordion-flush",
+    open = "outputs",
+    accordion_panel(
+      icon = icon("sliders"),
+      title = "Block inputs",
+      value = "inputs",
+      expr_ui(blk_id, block)
+    ),
+    accordion_panel(
+      icon = icon("chart-simple"),
+      title = "Block output(s)",
+      value = "outputs",
+      style = "max-width: 100%; overflow-x: auto;",
+      block_ui(blk_id, block),
+      div(id = ns(paste0("outputs-issues-wrapper-", id)))
+    ),
+    accordion_panel(
+      title = "Block code",
+      value = "code",
+      icon = icon("code"),
+    )
+  )
+  accordions <- htmltools::tagQuery(accordions)$find(
+    ".accordion-header"
+  )$addAttrs(style = "display: none;")$reset()$find(".accordion-item")$addAttrs(
+    style = "border: none;"
+  )$allTags()
+
+  tagList(
+    div(id = ns(sprintf("errors-block-%s", id))),
+    accordions
+  )
+}
 
 #' @keywords internal
 block_card_toggles <- function(id, ns) {
