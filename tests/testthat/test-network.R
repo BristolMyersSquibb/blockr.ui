@@ -133,12 +133,6 @@ testServer(
     session$setInputs("network-initialized" = TRUE)
     session$flushReact()
 
-    # Cold start
-    parent$cold_start <- FALSE
-    session$flushReact()
-    expect_identical(parent$refreshed, "restore-network")
-    # TBD does this even do something?
-
     # TBD mock: g6_state to get input[["network-state"]]
     session$setInputs("network-state" = list())
 
@@ -286,7 +280,7 @@ testServer(
 )
 
 test_that("network ui works", {
-  ui <- add_rm_link_ui("mod", new_board())
+  ui <- add_rm_link_ui("mod")
   expect_s3_class(ui, "shiny.tag.list")
 })
 

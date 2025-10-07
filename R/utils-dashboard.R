@@ -1,6 +1,5 @@
 restore_dashboard <- function(board, rv, parent, session) {
   parent$in_grid <- list()
-  parent$refreshed <- NULL
   ids <- names(rv$blocks)
   # Find blocks that should be in the dock
   in_grid_ids <- find_blocks_ids(rv$board, parent, session)

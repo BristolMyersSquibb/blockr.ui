@@ -1,13 +1,14 @@
 testServer(
   add_rm_block_server,
-  args = list(
-    board = reactiveValues(),
-    update = reactiveVal(),
-    parent = reactiveValues(
-      scoutbar = NULL,
-      added_block = NULL,
-      removed_block = NULL,
-      cancelled_edge = NULL
+  args = c(
+    generate_plugin_args(new_dag_board()),
+    list(
+      parent = reactiveValues(
+        scoutbar = NULL,
+        added_block = NULL,
+        removed_block = NULL,
+        cancelled_edge = NULL
+      )
     )
   ),
   {
@@ -38,6 +39,6 @@ testServer(
 )
 
 test_that("add_rm_bloc_ui works", {
-  ui <- add_rm_block_ui("mod", new_board())
+  ui <- add_rm_block_ui("mod")
   expect_null(ui)
 })

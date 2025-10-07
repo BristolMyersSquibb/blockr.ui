@@ -297,11 +297,6 @@ add_block_panel <- function(id, panels) {
       id = sprintf("block-%s", id),
       title = sprintf("Block: %s", id),
       content = tagList(),
-      # Don't remove if position is "within": by default,
-      # only the visible tab is mounted in the DOM,
-      # which means updating one block does not update
-      # the linked block UIs and causes many issues.
-      renderer = "always",
       # Remove padding and margin to use full space of the panel
       style = list(
         overflow = "auto",

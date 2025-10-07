@@ -138,12 +138,13 @@ define_conlabel.llm_block <- function(x, target, rv) {
 #' Creates a G6 ANTV network visualization with pre-configured options for nodes, edges,
 #' layout, behaviors, and plugins.
 #'
-#' @param nodes A data frame or list containing node information. Each node should
-#'   typically have at least an `id` field, and optionally other attributes like `label`.
-#'   Default is `NULL`.
-#' @param edges A data frame or list containing edge information. Each edge typically
-#'   needs `source` and `target` fields to define connections. Default is `NULL`.
+#' @param board The board object containing the network data and configuration if any.
+#' @param parent App state reactive values.
 #' @param ns Session namespace.
+#' @param path Location for the context menu. Generated
+#' with session$registerDataObj.
+#' @param context_menu Named list of context menu entries and associated JS actions.
+#' @param session Shiny session object.
 #' @details
 #' This function initializes a G6 network visualization with several pre-configured features:
 #'
@@ -159,11 +160,24 @@ define_conlabel.llm_block <- function(x, target, rv) {
 #' @return A G6 network visualization object that can be further customized or directly
 #'   rendered in R Markdown, Shiny, or other R environments.
 #' @keywords internal
-initialize_g6 <- function(nodes = NULL, edges = NULL, ns, path, context_menu) {
-  graph <- g6(
-    nodes = nodes,
-    edges = edges
-  )
+initialize_g6 <- function(
+  board,
+  parent,
+  ns,
+  path,
+  context_menu,
+  session = getDefaultReactiveDomain()
+) {
+  g6_data <- if (length(board_blocks(board)) > 0) {
+    initialise_g6_data(board, parent, session)
+  } else {
+    list(
+      nodes = NULL,
+      edges = NULL
+    )
+  }
+
+  graph <- do.call(g6, g6_data)
 
   graph <- default_g6_options(graph)
 
@@ -1149,25 +1163,7 @@ restore_network <- function(rv, vals, session) {
 
   # TBD maybe restore the state of vals$stacks?
 
-  # Re apply node validation
-  lapply(
-    chr_ply(vals$network$nodes, `[[`, "id"),
-    register_node_validation,
-    rv = rv,
-    vals = vals,
-    session = session
-  )
-
-  # Register add to stack/remove from stack behavior
-  lapply(
-    chr_ply(vals$network$nodes, `[[`, "id"),
-    register_node_stack_link,
-    rv = rv,
-    vals = vals,
-    session = session
-  )
-
-  vals$refreshed <- "restore-network"
+  set_restore(vals, "restored-dag")
 
   vals
 }
@@ -1263,16 +1259,16 @@ create_combos_data_from_stacks <- function(
 #' links and stacks.
 #'
 #' @keywords internal
-#' @param rv Board reactive values. Read-only
+#' @param board Board object.
 #' @param parent Global app reactive values.
 #' @param session Shiny session
 #' @rdname cold-start
-cold_start <- function(rv, parent, session) {
+initialise_g6_data <- function(board, parent, session) {
   ns <- session$ns
   # Cold start
-  links <- board_links(rv$board)
-  blocks <- board_blocks(rv$board)
-  stacks <- board_stacks(rv$board)
+  links <- board_links(board)
+  blocks <- board_blocks(board)
+  stacks <- board_stacks(board)
 
   edges_data <- create_edges_data_from_links(links)
   combos_data <- create_combos_data_from_stacks(
@@ -1286,42 +1282,9 @@ cold_start <- function(rv, parent, session) {
   )
   nodes_data <- create_nodes_data_from_blocks(blocks, stacks)
 
-  graph_data <- list(
+  list(
     nodes = nodes_data,
     edges = edges_data,
     combos = combos_data
   )
-
-  #graph_data <- jsonlite::toJSON(graph_data, pretty = TRUE)
-  # Render all data all at once for better performances
-  g6_set_data(
-    g6_proxy(ns("network")),
-    graph_data
-  )
-
-  # Collapse stacks
-  lapply(combos_data, function(combo) {
-    g6_collapse_combo(g6_proxy(ns("network")), combo$id)
-  })
-
-  # Re apply node validation
-  lapply(
-    names(blocks),
-    register_node_validation,
-    rv = rv,
-    vals = parent,
-    session = session
-  )
-
-  # Register add to stack/remove from stack behavior
-  lapply(
-    names(blocks),
-    register_node_stack_link,
-    rv = rv,
-    vals = parent,
-    session = session
-  )
-
-  parent$refreshed <- "restore-network"
-  parent
 }

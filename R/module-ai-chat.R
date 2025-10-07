@@ -1,7 +1,7 @@
 #' Chat module UI
 #' @rdname ai-chat
 chat_mod_ui <- function(id, board, ...) {
-  ns <- NS(NS(id, "chat"))
+  ns <- NS(id)
   card(
     card_header(
       class = "d-flex justify-content-between",
@@ -19,7 +19,7 @@ chat_mod_ui <- function(id, board, ...) {
 #'
 #' @inheritParams dashboard_server
 #' @rdname ai-chat
-chat_mod_srv <- function(id = "chat", board, update, session, parent, ...) {
+chat_mod_srv <- function(id, board, update, session, parent, ...) {
   moduleServer(
     id,
     function(input, output, session) {

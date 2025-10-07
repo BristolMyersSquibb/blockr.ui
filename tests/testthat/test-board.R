@@ -27,41 +27,26 @@ create_mock_params <- function(board = new_dag_board()) {
         # Callback to signal other modules that the restore is done.
         # This allows to restore each part in the correct order.
         on_board_restore = board_restore,
+        on_module_restore = module_restore,
+        reset_restore = reset_restore,
         manage_scoutbar = manage_scoutbar,
-        layout = build_layout(modules, plugins)
+        layout = build_layout(modules, plugins),
+        update_block_ui = update_block_ui
       )
     ),
     parent = create_app_state(board)
   )
 }
 
-test_that("process_app_layout returns layout unchanged when no block panels", {
+test_that("process_app_layout clears content for block panels", {
   layout <- list(
     panels = list(
       panel1 = list(
         id = "panel1",
-        params = list(content = list(html = "content1"))
+        params = list(content = list(html = "some content"))
       ),
       panel2 = list(
         id = "panel2",
-        params = list(content = list(html = "content2"))
-      )
-    )
-  )
-
-  result <- process_app_layout(layout)
-  expect_equal(result, layout)
-})
-
-test_that("process_app_layout clears content for block panels", {
-  layout <- list(
-    panels = list(
-      `block-panel` = list(
-        id = "block-panel",
-        params = list(content = list(html = "some content"))
-      ),
-      normal_panel = list(
-        id = "normal_panel",
         params = list(content = list(html = "other content"))
       )
     )
@@ -70,10 +55,10 @@ test_that("process_app_layout clears content for block panels", {
   result <- process_app_layout(layout)
 
   # Block panel content should be cleared
-  expect_equal(result$panels[["block-panel"]]$params$content$html, character(0))
+  expect_equal(result$panels$panel1$params$content$html, character(0))
 
   # Normal panel content should remain unchanged
-  expect_equal(result$panels$normal_panel$params$content$html, "other content")
+  expect_equal(result$panels$panel2$params$content$html, character(0))
 })
 
 test_that("process_app_layout handles empty panels list", {
@@ -87,6 +72,9 @@ testServer(
   board_server,
   args = create_mock_params(),
   {
+    # Needed to setup the dashboard module and query its outputs
+    dashboard_srv <- session$makeScope("dashboard")
+
     # Init
     expect_length(dot_args$parent$in_grid, 0)
     # Layout initial state
@@ -128,7 +116,10 @@ testServer(
     dot_args$parent$added_to_dashboard <- block_uid(dot_args$parent$added_block)
     dot_args$parent$in_grid[[dot_args$parent$added_to_dashboard]] <- TRUE
     session$flushReact()
-    output[[sprintf("dock-%s-result", block_uid(dot_args$parent$added_block))]]
+    dashboard_srv$output[[sprintf(
+      "dock-%s-result",
+      block_uid(dot_args$parent$added_block)
+    )]]
     expect_null(dot_args$parent$added_to_dashboard)
 
     # To be able to remove panels later, we need to mock the dock state
@@ -141,9 +132,10 @@ testServer(
         content = list(html = "blabla")
       )
     )
-    session$setInputs(dock_state = test_dock, layout_state = test_dock)
+    dashboard_srv$setInputs(dock_state = test_dock)
+    session$setInputs(layout_state = test_dock)
 
-    output$dock
+    dashboard_srv$dock
 
     # Change dashboard zoom
     session$userData$board_options[["dashboard_zoom"]] <- 0.5
@@ -156,7 +148,7 @@ testServer(
     dot_args$parent$in_grid[[dot_args$parent$removed_from_dashboard]] <- FALSE
     session$flushReact()
     # This does not work, but it should ...
-    #expect_null(output[[sprintf(
+    #expect_null(dashboard_srv$output[[sprintf(
     #  "dock-%s-result",
     #  block_uid(dot_args$parent$added_block)
     #)]])
@@ -171,13 +163,19 @@ testServer(
     expect_null(dot_args$parent$in_grid[[dot_args$parent$removed_block]])
 
     # Refresh
-    dot_args$parent$refreshed <- "restore-network"
+    dot_args$parent$refreshed <- "restored-dag"
     # Manually setup the dashboard state as this is theoretically
     # injected by the dashboard module
     dot_args$parent$module_state$dashboard <- reactiveVal(NULL)
     # Manually simulate remove panel as the JS callback does not work
     # in the testServer context
-    session$setInputs(dock_state = list(panels = list()))
+    dashboard_srv$setInputs(dock_state = list(panels = list()))
+    # Dashboard is refreshed
+    expect_true("restored-dag" %in% dot_args$parent$refreshed)
+    # Assuming everything is refreshed
+    dot_args$parent$refreshed <- get_restore_steps(dot_args$parent)
+    session$flushReact()
+    # Reset refresh
     expect_null(dot_args$parent$refreshed)
 
     # Scoutbar

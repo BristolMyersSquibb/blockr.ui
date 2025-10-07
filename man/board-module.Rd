@@ -14,6 +14,9 @@ new_dashboard_module(id = "dashboard", title = "Dashboard")
 new_board_module(
   ui,
   server,
+  on_restore = function(...) {
+     TRUE
+ },
   id,
   title,
   context_menu = list(),
@@ -26,6 +29,8 @@ new_board_module(
 \item{id, title}{Module ID and title}
 
 \item{ui, server}{UI and server functions}
+
+\item{on_restore}{Function called when restoring the board state.}
 
 \item{context_menu}{List of context menu entries}
 
