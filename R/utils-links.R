@@ -492,6 +492,9 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
   input <- session$input
   ns <- session$ns
 
+  info <- get_block_metadata(new)
+  blk_color <- blk_border_color(info$category)
+
   new_node <- list(
     id = block_uid(new),
     label = paste(
@@ -500,7 +503,7 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
       block_uid(new)
     ),
     style = list(
-      labelBackgroundFill = "#a0cafa"
+      fill = blk_color
     )
   )
 
@@ -860,8 +863,6 @@ apply_validation <- function(id, vals, rv, session) {
     list(
       id = id,
       style = list(
-        fill = "#1783FF",
-        labelBackgroundFill = "#a0cafa",
         badges = list()
       )
     )
@@ -892,15 +893,13 @@ apply_validation <- function(id, vals, rv, session) {
     badge <- list(
       text = format(n_err),
       placement = "right-top",
-      backgroundFill = "#edb528"
+      backgroundFill = "#000"
     )
 
     node_config <- list(
       list(
         id = id,
         style = list(
-          fill = "#ee705c",
-          labelBackgroundFill = "#FFB6C1",
           badges = list(badge)
         )
       )

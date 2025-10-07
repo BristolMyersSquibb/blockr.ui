@@ -33,8 +33,9 @@ block_card <- function(board, block, edit_ui, ns) {
     tags$div(
       class = "card-body",
       div(
-        class = sprintf(
-          "border-start border-5 border-%s ps-2",
+        class = "border-start border-5 ps-2",
+        style = sprintf(
+          "--bs-border-opacity: 1; border-color: %s !important;",
           blk_border_color(blk_info$category)
         ),
         block_card_title(id, blk_info, edit_ui, ns),

@@ -144,14 +144,18 @@ collapse_container <- function(id, ...) {
 
 #' @keywords internal
 blk_border_color <- function(category) {
+  # Palette is taken from:
+  # https://siegal.bio.nyu.edu/color-palette/
+  # very nice palette that is color-blind friendly.
   switch(
     category,
-    data = "primary",
-    transform = "primary-subtle",
-    plot = "warning",
-    parse = "success",
-    file = "danger",
-    table = "warning-subtle",
-    "secondary"
+    data = "#0072B2",
+    transform = "#56B4E9",
+    plot = "#E69F00",
+    file = "#CC79A7",
+    parse = "#009E73",
+    table = "#F0E442",
+    text = "#D55E00",
+    "#6c757d"
   )
 }
