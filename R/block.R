@@ -141,7 +141,7 @@ block_card_toggles <- function(id, ns) {
     inputId = ns(sprintf("collapse-blk-section-%s", id)),
     status = "light",
     size = "sm",
-    choices = setNames(
+    choices = set_names(
       c("inputs", "outputs"),
       c(
         "<small>inputs</small>",

@@ -770,6 +770,32 @@ update_blk_state_ui <- function(blk, session) {
   )
 }
 
+#' @keyowrds internal
+handle_block_actions <- function(blk, parent, session) {
+  id <- attr(blk, "uid")
+  ns <- session$ns
+
+  observeEvent(
+    session$input[[sprintf("append-%s", id)]],
+    {
+      if (is.null(parent$selected_block)) {
+        return(NULL)
+      }
+      parent$scoutbar$trigger <- "links"
+      if (isFALSE(parent$append_block)) {
+        parent$append_block <- TRUE
+      }
+    }
+  )
+
+  observeEvent(
+    session$input[[sprintf("delete-%s", id)]],
+    {
+      parent$removed_block <- id
+    }
+  )
+}
+
 #' Update some pieces of the block UI
 #'
 #' Some elements of the block UI require server
@@ -793,6 +819,7 @@ update_block_ui <- function(board, update, session, parent, ...) {
           attr(blk, "uid") <- id
           update_blk_state_ui(blk, session)
           toggle_blk_section(blk, session)
+          handle_block_actions(blk, parent, session)
         }
       )
     },
@@ -807,6 +834,9 @@ update_block_ui <- function(board, update, session, parent, ...) {
       attr(blk, "uid") <- block_uid(parent$added_block)
       update_blk_state_ui(blk, session)
       toggle_blk_section(blk, session)
+      handle_block_actions(blk, parent, session)
     }
   )
+
+  NULL
 }

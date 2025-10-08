@@ -83,6 +83,7 @@ off_canvas <- function(
 #'
 #' @param ... Content.
 #' @param icon Icon.
+#' @param class Additional CSS classes for the button.
 #'
 #' @return A HTML tag object representing the dropdown element.
 #' @export
