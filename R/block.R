@@ -108,7 +108,6 @@ block_card_content <- function(block, id, blk_id, ns) {
     id = ns(paste0("accordion-", id)),
     multiple = TRUE,
     class = "accordion-flush",
-    open = "outputs",
     accordion_panel(
       icon = icon("sliders"),
       title = "Block inputs",
@@ -150,12 +149,12 @@ block_card_toggles <- function(id, ns) {
     choices = setNames(
       c("inputs", "outputs", "code"),
       c(
-        "<i class='fa fa-sliders'></i>",
-        "<i class='fa fa-line-chart'></i>",
-        "<i class='fa fa-code'></i>"
+        "<small>inputs</small>",
+        "<small>outputs</small>",
+        "<small>code</small>"
       )
     ),
-    selected = "outputs"
+    selected = "inputs"
   )
 
   section_toggles$attribs$class <- trimws(gsub(

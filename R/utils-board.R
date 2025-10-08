@@ -563,23 +563,80 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
   NULL
 }
 
+#' @keywords internal
 toggle_blk_section <- function(blk, session) {
+  id <- attr(blk, "uid")
+  accordion_id <- paste0("accordion-", id)
+
   observeEvent(
+    session$input[[sprintf("collapse-blk-section-%s", id)]],
     {
-      session$input[[sprintf("collapse-blk-section-%s", attr(blk, "uid"))]]
-    },
-    {
-      vals <- session$input[[sprintf(
+      selected_sections <- session$input[[sprintf(
         "collapse-blk-section-%s",
-        attr(blk, "uid")
+        id
       )]]
-      bslib::accordion_panel_set(
-        id = paste0("accordion-", attr(blk, "uid")),
-        values = if (is.null(vals)) "" else vals
-      )
+
+      # Get current open panels
+      current_open <- session$input[[sprintf("accordion-%s", id)]] %||%
+        character(0)
+
+      # Handle empty selections - close all panels
+      if (length(selected_sections) == 0) {
+        if (length(current_open) > 0) {
+          bslib::accordion_panel_close(
+            id = accordion_id,
+            values = current_open
+          )
+        }
+      } else {
+        # Close panels that should no longer be open
+        to_close <- setdiff(current_open, selected_sections)
+        if (length(to_close) > 0) {
+          bslib::accordion_panel_close(
+            id = accordion_id,
+            values = to_close
+          )
+        }
+
+        # Open panels that should be open
+        to_open <- setdiff(selected_sections, current_open)
+        if (length(to_open) > 0) {
+          bslib::accordion_panel_open(
+            id = accordion_id,
+            values = to_open
+          )
+        }
+      }
     },
-    ignoreInit = TRUE,
     ignoreNULL = FALSE
+  )
+
+  # Sync accordion state back to toggle buttons when accordion changes
+  observeEvent(
+    session$input[[sprintf("accordion-%s", id)]],
+    {
+      current_accordion_state <- session$input[[sprintf(
+        "accordion-%s",
+        id
+      )]] %||%
+        character(0)
+      current_toggle_state <- session$input[[sprintf(
+        "collapse-blk-section-%s",
+        id
+      )]] %||%
+        character(0)
+
+      # Only update if they're different to avoid infinite loops
+      if (
+        !identical(sort(current_accordion_state), sort(current_toggle_state))
+      ) {
+        shinyWidgets::updateCheckboxGroupButtons(
+          session,
+          sprintf("collapse-blk-section-%s", id),
+          selected = current_accordion_state
+        )
+      }
+    }
   )
 }
 
@@ -618,8 +675,10 @@ update_blk_code_ui <- function(blk) {
 update_blk_state_ui <- function(blk, session) {
   conds <- names(blk$server$cond)
   ns <- session$ns
+  id <- attr(blk, "uid")
 
-  # Listen to blk$server$cond[["state"]], ...
+  any_error <- reactiveVal(NULL)
+
   lapply(conds, function(nme) {
     observeEvent(blk$server$cond[[nme]], {
       cond <- blk$server$cond[[nme]]
@@ -646,15 +705,15 @@ update_blk_state_ui <- function(blk, session) {
 
       removeUI(paste0(
         "#",
-        ns(sprintf("outputs-issues-%s", attr(blk, "uid")))
+        ns(sprintf("outputs-issues-%s", id))
       ))
       if (length(statuses)) {
         collapse_id <- ns(paste0(
           "outputs-issues-collapse-%s",
-          attr(blk, "uid")
+          id
         ))
         issues_ui <- div(
-          id = ns(sprintf("outputs-issues-%s", attr(blk, "uid"))),
+          id = ns(sprintf("outputs-issues-%s", id)),
           tags$button(
             class = "btn btn-sm btn-outline-secondary mt-2 mb-2 position-relative",
             type = "button",
@@ -676,7 +735,7 @@ update_blk_state_ui <- function(blk, session) {
         insertUI(
           selector = sprintf(
             "#%s",
-            ns(sprintf("outputs-issues-wrapper-%s", attr(blk, "uid")))
+            ns(sprintf("outputs-issues-wrapper-%s", id))
           ),
           ui = issues_ui
         )
@@ -685,11 +744,11 @@ update_blk_state_ui <- function(blk, session) {
       msgs <- NULL
       removeUI(paste0(
         "#",
-        ns(sprintf("errors-block-%s .alert", attr(blk, "uid")))
+        ns(sprintf("errors-block-%s .alert", id))
       ))
+
       if (length(cond[["error"]])) {
-        # Stack error messages in the same alert container
-        # to save space ...
+        # Stack error messages
         msgs <- tags$div(
           class = sprintf("alert alert-danger"),
           HTML(cli::ansi_html(paste(
@@ -698,12 +757,37 @@ update_blk_state_ui <- function(blk, session) {
           )))
         )
         insertUI(
-          paste0("#", ns(sprintf("errors-block-%s", attr(blk, "uid")))),
+          paste0("#", ns(sprintf("errors-block-%s", id))),
           ui = msgs
         )
+
+        any_error(cond)
+      } else {
+        any_error(NULL)
       }
     })
   })
+
+  # Handle accordion collapse updates based on errors
+  observeEvent(
+    any_error(),
+    {
+      if (!is.null(any_error())) {
+        shinyWidgets::updateCheckboxGroupButtons(
+          session,
+          sprintf("collapse-blk-section-%s", id),
+          selected = "inputs"
+        )
+      } else {
+        shinyWidgets::updateCheckboxGroupButtons(
+          session,
+          sprintf("collapse-blk-section-%s", id),
+          selected = "outputs"
+        )
+      }
+    },
+    ignoreNULL = FALSE
+  )
 }
 
 #' Update some pieces of the block UI
@@ -745,7 +829,7 @@ update_block_ui <- function(board, update, session, parent, ...) {
       update_blk_code_ui(blk)
       update_blk_state_ui(blk, session)
       toggle_blk_section(blk, session)
-    },
-    ignoreInit = TRUE
+    } #,
+    #ignoreInit = TRUE
   )
 }
