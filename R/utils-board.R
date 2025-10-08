@@ -672,6 +672,40 @@ update_blk_code_ui <- function(blk) {
 }
 
 #' @keywords internal
+create_issues_ui <- function(id, statuses, ns) {
+  # Generate unique collapse ID
+  collapse_id <- ns(paste0("outputs-issues-collapse-", id))
+
+  # Create the issues UI component
+  div(
+    id = ns(sprintf("outputs-issues-%s", id)),
+    tags$button(
+      class = paste(
+        "btn btn-sm btn-outline-secondary",
+        "mt-2 mb-2 position-relative"
+      ),
+      type = "button",
+      `data-bs-toggle` = "collapse",
+      `data-bs-target` = sprintf("#%s", collapse_id),
+      `aria-expanded` = "false",
+      `aria-controls` = collapse_id,
+      "View issues",
+      span(
+        class = paste(
+          "position-absolute top-0 start-100",
+          "translate-middle badge rounded-pill bg-danger"
+        ),
+        length(statuses)
+      )
+    ),
+    collapse_container(
+      id = collapse_id,
+      statuses
+    )
+  )
+}
+
+#' @keywords internal
 update_blk_state_ui <- function(blk, session) {
   conds <- names(blk$server$cond)
   ns <- session$ns
@@ -708,30 +742,7 @@ update_blk_state_ui <- function(blk, session) {
         ns(sprintf("outputs-issues-%s", id))
       ))
       if (length(statuses)) {
-        collapse_id <- ns(paste0(
-          "outputs-issues-collapse-%s",
-          id
-        ))
-        issues_ui <- div(
-          id = ns(sprintf("outputs-issues-%s", id)),
-          tags$button(
-            class = "btn btn-sm btn-outline-secondary mt-2 mb-2 position-relative",
-            type = "button",
-            `data-bs-toggle` = "collapse",
-            `data-bs-target` = sprintf("#%s", collapse_id),
-            `aria-expanded` = "false",
-            `aria-controls` = collapse_id,
-            "View issues",
-            span(
-              class = "position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger",
-              length(statuses)
-            )
-          ),
-          collapse_container(
-            id = collapse_id,
-            statuses
-          )
-        )
+        issues_ui <- create_issues_ui(id, statuses, ns)
         insertUI(
           selector = sprintf(
             "#%s",
@@ -829,7 +840,6 @@ update_block_ui <- function(board, update, session, parent, ...) {
       update_blk_code_ui(blk)
       update_blk_state_ui(blk, session)
       toggle_blk_section(blk, session)
-    } #,
-    #ignoreInit = TRUE
+    }
   )
 }
