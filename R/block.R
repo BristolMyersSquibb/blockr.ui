@@ -10,6 +10,7 @@
 #' @rdname block_ui
 block_ui.dag_board <- function(id, x, block = NULL, edit_ui = NULL, ...) {
   ns <- NS(id)
+  attr(block[[1]], "uid") <- names(block)
   block <- block[[1]]
   stopifnot(is_block(block))
   block_card(x, block, edit_ui, ns = ns)
@@ -17,7 +18,7 @@ block_ui.dag_board <- function(id, x, block = NULL, edit_ui = NULL, ...) {
 
 #' @keywords internal
 block_card <- function(board, block, edit_ui, ns) {
-  id <- block_name_to_id(block)
+  id <- block_uid(block)
   blk_id <- ns(paste0("block_", id))
   blk_info <- get_block_metadata(block)
 
