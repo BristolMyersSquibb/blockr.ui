@@ -641,37 +641,6 @@ toggle_blk_section <- function(blk, session) {
 }
 
 #' @keywords internal
-update_blk_code_ui <- function(blk) {
-  observeEvent(
-    {
-      blk_expr <- try(blk$server$expr(), silent = TRUE)
-      req(!inherits(blk_expr, "try-error"))
-    },
-    {
-      blk_code <- paste(
-        deparse(blk$server$expr()),
-        collapse = "\n"
-      )
-
-      bslib::accordion_panel_update(
-        id = paste0("accordion-", attr(blk, "uid")),
-        target = "code",
-        tagList(
-          pre(code(class = "language-r", blk_code)),
-          tags$script(HTML(
-            "setTimeout(function() {
-              if (typeof Prism !== 'undefined') {
-                Prism.highlightAll();
-              }
-            }, 100);"
-          ))
-        )
-      )
-    }
-  )
-}
-
-#' @keywords internal
 create_issues_ui <- function(id, statuses, ns) {
   # Generate unique collapse ID
   collapse_id <- ns(paste0("outputs-issues-collapse-", id))
@@ -822,7 +791,6 @@ update_block_ui <- function(board, update, session, parent, ...) {
         function(id) {
           blk <- board$blocks[[id]]
           attr(blk, "uid") <- id
-          update_blk_code_ui(blk)
           update_blk_state_ui(blk, session)
           toggle_blk_section(blk, session)
         }
@@ -837,7 +805,6 @@ update_block_ui <- function(board, update, session, parent, ...) {
     {
       blk <- board$blocks[[block_uid(parent$added_block)]]
       attr(blk, "uid") <- block_uid(parent$added_block)
-      update_blk_code_ui(blk)
       update_blk_state_ui(blk, session)
       toggle_blk_section(blk, session)
     }

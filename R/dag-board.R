@@ -92,7 +92,7 @@ serve.dag_board <- function(
         padding = 0,
         gap = 0,
         shinyjs::useShinyjs(),
-        add_prismjs_deps(add_busy_load_deps(main_ui(id, x, board_id, plugins)))
+        add_busy_load_deps(main_ui(id, x, board_id, plugins))
       ),
       unname(list(...))
     )

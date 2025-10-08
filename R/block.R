@@ -121,11 +121,6 @@ block_card_content <- function(block, id, blk_id, ns) {
       style = "max-width: 100%; overflow-x: auto;",
       block_ui(blk_id, block),
       div(id = ns(paste0("outputs-issues-wrapper-", id)))
-    ),
-    accordion_panel(
-      title = "Block code",
-      value = "code",
-      icon = icon("code"),
     )
   )
   accordions <- htmltools::tagQuery(accordions)$find(
@@ -147,11 +142,10 @@ block_card_toggles <- function(id, ns) {
     status = "light",
     size = "sm",
     choices = setNames(
-      c("inputs", "outputs", "code"),
+      c("inputs", "outputs"),
       c(
         "<small>inputs</small>",
-        "<small>outputs</small>",
-        "<small>code</small>"
+        "<small>outputs</small>"
       )
     ),
     selected = "inputs"
