@@ -1,14 +1,12 @@
 testServer(
   add_rm_block_server,
-  args = c(
-    generate_plugin_args(new_dag_board()),
-    list(
-      parent = reactiveValues(
-        scoutbar = NULL,
-        added_block = NULL,
-        removed_block = NULL,
-        cancelled_edge = NULL
-      )
+  args = generate_plugin_args(
+    new_dag_board(),
+    parent = reactiveValues(
+      scoutbar = NULL,
+      added_block = NULL,
+      removed_block = NULL,
+      cancelled_edge = NULL
     )
   ),
   {
