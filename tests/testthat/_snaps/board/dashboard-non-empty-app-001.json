@@ -11,7 +11,7 @@
             "id": "a",
             "label": "dataset_block \n id: a",
             "style": {
-              "labelBackgroundFill": "#a0cafa",
+              "fill": "#0072B2",
               "zIndex": 1,
               "z": 0,
               "badges": [
@@ -27,7 +27,7 @@
             "id": "b",
             "label": "dataset_block \n id: b",
             "style": {
-              "labelBackgroundFill": "#a0cafa",
+              "fill": "#0072B2",
               "zIndex": 0,
               "z": 0,
               "badges": [
@@ -42,7 +42,7 @@
             "id": "c",
             "label": "merge_block \n id: c",
             "style": {
-              "labelBackgroundFill": "#a0cafa",
+              "fill": "#56B4E9",
               "zIndex": 1,
               "z": 0,
               "badges": [

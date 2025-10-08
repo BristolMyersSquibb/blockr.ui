@@ -1191,6 +1191,10 @@ create_nodes_data_from_blocks <- function(blocks, stacks) {
 
   lapply(seq_along(blocks), function(i) {
     current <- blocks[[i]]
+
+    info <- get_block_metadata(current)
+    blk_color <- blk_border_color(info$category)
+
     tmp <- list(
       id = names(blocks)[[i]],
       label = paste(
@@ -1199,7 +1203,7 @@ create_nodes_data_from_blocks <- function(blocks, stacks) {
         names(blocks)[[i]]
       ),
       style = list(
-        labelBackgroundFill = "#a0cafa"
+        fill = blk_color
       )
     )
 
