@@ -90,14 +90,15 @@ validate_board_option.stack_colors_option <- function(x) {
 
 #' @export
 blockr_ser.stack_colors_option <- function(x, option = NULL, ...) {
-  res <- NextMethod()
 
-  res[["payload"]] <- list(
-    n_stacks = attr(res[["payload"]], "n_stacks"),
-    color_palette = attr(res[["payload"]], "palette")
+  val <- coal(option, board_option_value(x))
+
+  NextMethod(
+    option = list(
+      n_stacks = attr(val, "n_stacks"),
+      color_palette = attr(val, "palette")
+    )
   )
-
-  res
 }
 
 new_snapshot_option <- function(
