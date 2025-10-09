@@ -9,7 +9,6 @@
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/news/index.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/add_blockr.ui_deps.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/add_busy_load_deps.html</loc></url>
-<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/add_prismjs_deps.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/add_rm_block.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/add_rm_g6_stack.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/add_rm_link.html</loc></url>
@@ -18,6 +17,7 @@
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/blk_choices.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/blk_icon.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/block-panel.html</loc></url>
+<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/block_subtitle_id.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/block_ui.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/blockr.ui-package.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/board-module.html</loc></url>
@@ -26,6 +26,7 @@
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/check_connections.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/cleanup_node.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/cold-start.html</loc></url>
+<url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/collapse_container.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/context-menu.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/create_edge.html</loc></url>
 <url><loc>https://bristolmyerssquibb.github.io/blockr.ui/reference/create_node.html</loc></url>
