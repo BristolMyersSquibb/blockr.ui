@@ -15,7 +15,7 @@
 new_board_module <- function(
   ui,
   server,
-  on_restore = function(...) {
+  on_restore = function(board, parent, session, ...) {
     TRUE
   },
   id,

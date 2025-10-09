@@ -11,10 +11,9 @@
             "id": "a",
             "label": "dataset_block \n id: a",
             "style": {
-              "labelBackgroundFill": "#a0cafa",
+              "fill": "#0072B2",
               "zIndex": 1,
               "z": 0,
-              "fill": "#1783FF",
               "badges": [
 
               ]
@@ -28,10 +27,9 @@
             "id": "b",
             "label": "dataset_block \n id: b",
             "style": {
-              "labelBackgroundFill": "#a0cafa",
+              "fill": "#0072B2",
               "zIndex": 0,
               "z": 0,
-              "fill": "#1783FF",
               "badges": [
 
               ]
@@ -44,10 +42,9 @@
             "id": "c",
             "label": "merge_block \n id: c",
             "style": {
-              "labelBackgroundFill": "#a0cafa",
+              "fill": "#56B4E9",
               "zIndex": 1,
               "z": 0,
-              "fill": "#1783FF",
               "badges": [
 
               ]
@@ -156,9 +153,10 @@
                 "type": "leaf",
                 "data": {
                   "views": [
-                    "dashboard"
+                    "dashboard",
+                    "blockr_assistant"
                   ],
-                  "activeView": "dashboard",
+                  "activeView": "blockr_assistant",
                   "id": "2"
                 },
                 "size": 100
@@ -182,6 +180,12 @@
             "contentComponent": "default",
             "tabComponent": "custom",
             "title": "Dashboard"
+          },
+          "blockr_assistant": {
+            "id": "blockr_assistant",
+            "contentComponent": "default",
+            "tabComponent": "custom",
+            "title": "AI chat"
           }
         },
         "activeGroup": "2"
@@ -211,7 +215,8 @@
 
       ],
       "added_to_dashboard": null,
-      "removed_from_dashboard": null
+      "removed_from_dashboard": null,
+      "ai_chat": null
     }
   }
 }

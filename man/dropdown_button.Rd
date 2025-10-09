@@ -4,12 +4,14 @@
 \alias{dropdown_button}
 \title{Create a Bootstrap dropdown}
 \usage{
-dropdown_button(..., icon)
+dropdown_button(..., icon, class = NULL)
 }
 \arguments{
 \item{...}{Content.}
 
 \item{icon}{Icon.}
+
+\item{class}{Additional CSS classes for the button.}
 }
 \value{
 A HTML tag object representing the dropdown element.

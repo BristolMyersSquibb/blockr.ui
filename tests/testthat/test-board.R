@@ -74,6 +74,7 @@ testServer(
   {
     # Needed to setup the dashboard module and query its outputs
     dashboard_srv <- session$makeScope("dashboard")
+    chat_srv <- session$makeScope("blockr_assistant")
 
     # Init
     expect_length(dot_args$parent$in_grid, 0)
@@ -167,6 +168,7 @@ testServer(
     # Manually setup the dashboard state as this is theoretically
     # injected by the dashboard module
     dot_args$parent$module_state$dashboard <- reactiveVal(NULL)
+    dot_args$parent$module_state$blockr_assistant <- reactiveVal(NULL)
     # Manually simulate remove panel as the JS callback does not work
     # in the testServer context
     dashboard_srv$setInputs(dock_state = list(panels = list()))

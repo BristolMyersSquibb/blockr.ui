@@ -154,6 +154,7 @@ restore_board.dag_board <- function(
       }
     },
     error = function(e) {
+      session$sendCustomMessage("hide-busy-load", TRUE)
       showNotification(
         paste0(
           "Error restoring snapshot. It is possible that you are trying to ",

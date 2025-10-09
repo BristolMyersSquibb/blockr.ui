@@ -14,7 +14,7 @@ new_dashboard_module(id = "dashboard", title = "Dashboard")
 new_board_module(
   ui,
   server,
-  on_restore = function(...) {
+  on_restore = function(board, parent, session, ...) {
      TRUE
  },
   id,

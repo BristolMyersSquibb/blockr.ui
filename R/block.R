@@ -9,90 +9,192 @@
 #' @export
 #' @rdname block_ui
 block_ui.dag_board <- function(id, x, block = NULL, edit_ui = NULL, ...) {
-  block_card <- function(x, id, ns) {
-    blk_id <- ns(paste0("block_", id))
-    blk_info <- get_block_metadata(x)
-
-    # Edit plugin
-    if (!is.null(edit_ui)) {
-      edit_ui <- edit_ui$ui(x, NS(blk_id, "edit_block"))
-    }
-
-    card_tag <- tags$div(
-      class = "card",
-      width = "100%",
-      id = ns(id),
-      tags$div(
-        class = "row g-0 px-4",
-        tags$div(
-          class = "col-sm-2 col-md-1 col-lg-1 d-flex align-items-center justify-content-start",
-          blk_icon(blk_info$category, class = "fa-3x")
-        ),
-        tags$div(
-          class = "col-sm-10 col-md-11 col-lg-11",
-          tags$div(
-            class = "card-body",
-            tags$div(
-              class = "d-flex align-items-center justify-content-start card-title gap-2",
-              edit_ui$block_name,
-              tooltip(
-                icon("info-circle"),
-                p(
-                  icon("lightbulb"),
-                  "How to use this block?",
-                ),
-                p(blk_info$description, ".")
-              )
-            ),
-            # subtitle
-            div(
-              class = "card-subtitle mb-2 text-body-secondary",
-              span(class = "badge bg-secondary", "Type:", blk_info$category),
-              span(class = "badge bg-secondary", "Package:", blk_info$package)
-            )
-          )
-        )
-      ),
-      #edit_ui$block_summary,
-      accordion(
-        id = ns(paste0("accordion-", id)),
-        multiple = TRUE,
-        class = "accordion-flush",
-        open = c("inputs", "outputs", "state"),
-        accordion_panel(
-          icon = icon("sliders"),
-          title = "Block inputs",
-          value = "inputs",
-          expr_ui(blk_id, x)
-        ),
-        accordion_panel(
-          icon = icon("chart-simple"),
-          title = "Block output(s)",
-          value = "outputs",
-          style = "max-width: 100%; overflow-x: auto;",
-          block_ui(blk_id, x)
-        ),
-        accordion_panel(
-          title = "Block code",
-          value = "code",
-          icon = icon("code"),
-        ),
-        accordion_panel(
-          title = "Block state",
-          value = "state",
-          icon = icon("bug")
-        )
-      )
-    )
-    tagAppendAttributes(card_tag, class = "border border-0 shadow-none")
-  }
-
   ns <- NS(id)
-  id <- names(block)
-  stopifnot(is.character(id) && length(id) == 1L)
+  attr(block[[1]], "uid") <- names(block)
   block <- block[[1]]
   stopifnot(is_block(block))
-  block_card(block, id, ns = ns)
+  block_card(x, block, edit_ui, ns = ns)
+}
+
+#' @keywords internal
+block_card <- function(board, block, edit_ui, ns) {
+  id <- block_uid(block)
+  blk_id <- ns(paste0("block_", id))
+  blk_info <- get_block_metadata(block)
+
+  # Edit plugin
+  if (!is.null(edit_ui)) {
+    edit_ui <- edit_ui$ui(x, NS(blk_id, "edit_block"))
+  }
+
+  card_tag <- tags$div(
+    class = "card",
+    width = "100%",
+    id = ns(id),
+    tags$div(
+      class = "card-body",
+      div(
+        class = "border-start border-5 ps-2",
+        style = sprintf(
+          "--bs-border-opacity: 1; border-color: %s !important;",
+          blk_border_color(blk_info$category)
+        ),
+        block_card_title(id, blk_info, edit_ui, ns),
+        # subtitle
+        block_card_subtitle(board, block, id, blk_info),
+      ),
+      #edit_ui$block_summary,
+      block_card_content(block, id, blk_id, ns)
+    )
+  )
+  tagAppendAttributes(card_tag, class = "border border-0 shadow-none")
+}
+
+#' @keywords internal
+block_card_title <- function(id, info, edit_ui, ns) {
+  tags$div(
+    class = "card-title d-flex align-items-center justify-content-between gap-2",
+    edit_ui$block_name,
+    block_card_toggles(id, ns),
+    block_card_dropdown(id, info, ns)
+  )
+}
+
+#' Block subtitle id method
+#'
+#' @param x Board.
+#' @param id Block id.
+#'
+#' @export
+block_subtitle_id <- function(x, id) {
+  UseMethod("block_subtitle_id", x)
+}
+
+#' @export
+block_subtitle_id.dag_board <- function(x, id) {
+  NULL
+}
+
+#' @export
+block_subtitle_id.md_board <- function(x, id) {
+  tagList(
+    " || ",
+    span("id:", id)
+  )
+}
+
+#' @keywords internal
+block_card_subtitle <- function(board, block, id, info) {
+  div(
+    class = "card-subtitle text-body-secondary mb-1",
+    span(class(block)[1]),
+    block_subtitle_id(board, id),
+    tags$sup(
+      tooltip(
+        icon("info-circle"),
+        p(
+          icon("lightbulb"),
+          "How to use this block?",
+        ),
+        p(info$description, ".")
+      )
+    )
+  )
+}
+
+#' @keywords internal
+block_card_content <- function(block, id, blk_id, ns) {
+  # Hide headers of accordion panels
+  accordions <- accordion(
+    id = ns(paste0("accordion-", id)),
+    multiple = TRUE,
+    class = "accordion-flush",
+    accordion_panel(
+      icon = icon("sliders"),
+      title = "Block inputs",
+      value = "inputs",
+      expr_ui(blk_id, block)
+    ),
+    accordion_panel(
+      icon = icon("chart-simple"),
+      title = "Block output(s)",
+      value = "outputs",
+      style = "max-width: 100%; overflow-x: auto;",
+      block_ui(blk_id, block),
+      div(id = ns(paste0("outputs-issues-wrapper-", id)))
+    )
+  )
+  accordions <- htmltools::tagQuery(accordions)$find(
+    ".accordion-header"
+  )$addAttrs(style = "display: none;")$reset()$find(".accordion-item")$addAttrs(
+    style = "border: none;"
+  )$allTags()
+
+  tagList(
+    div(id = ns(sprintf("errors-block-%s", id))),
+    accordions
+  )
+}
+
+#' @keywords internal
+block_card_toggles <- function(id, ns) {
+  section_toggles <- shinyWidgets::checkboxGroupButtons(
+    inputId = ns(sprintf("collapse-blk-section-%s", id)),
+    status = "light",
+    size = "sm",
+    choices = set_names(
+      c("inputs", "outputs"),
+      c(
+        "<small>inputs</small>",
+        "<small>outputs</small>"
+      )
+    ),
+    selected = "inputs"
+  )
+
+  section_toggles$attribs$class <- trimws(gsub(
+    "form-group",
+    "ms-auto",
+    section_toggles$attribs$class
+  ))
+
+  section_toggles
+}
+
+block_card_dropdown <- function(id, info, ns) {
+  dropdown_button(
+    class = "float-end",
+    icon = icon("ellipsis-vertical", class = "text-dark"),
+    size = "sm",
+    dropdown_header("BLOCK ACTIONS"),
+    dropdown_action_button(
+      ns(sprintf("append-%s", id)),
+      "Append block",
+      icon = icon("plus")
+    ),
+    dropdown_action_button(
+      ns(sprintf("delete-%s", id)),
+      "Delete block",
+      icon = icon("trash"),
+      class = "text-danger"
+    ),
+    dropdown_divider(),
+    div(
+      class = "text-muted d-flex justify-content-between",
+      p("Package: "),
+      p(info$package)
+    ),
+    div(
+      class = "text-muted d-flex justify-content-between",
+      p("Type: "),
+      p(info$category)
+    ),
+    div(
+      class = "text-muted d-flex justify-content-between",
+      p("ID: "),
+      p(id)
+    )
+  )
 }
 
 #' @keywords internal

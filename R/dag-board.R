@@ -5,7 +5,7 @@
 #' @export
 new_dag_board <- function(
   ...,
-  modules = new_dashboard_module(),
+  modules = list(new_dashboard_module(), new_chat_module()),
   options = dag_board_options(),
   class = character()
 ) {
@@ -92,7 +92,7 @@ serve.dag_board <- function(
         padding = 0,
         gap = 0,
         shinyjs::useShinyjs(),
-        add_prismjs_deps(add_busy_load_deps(main_ui(id, x, board_id, plugins)))
+        add_busy_load_deps(main_ui(id, x, board_id, plugins))
       ),
       unname(list(...))
     )

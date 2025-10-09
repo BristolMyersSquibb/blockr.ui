@@ -83,21 +83,80 @@ off_canvas <- function(
 #'
 #' @param ... Content.
 #' @param icon Icon.
+#' @param class Additional CSS classes for the button.
 #'
 #' @return A HTML tag object representing the dropdown element.
 #' @export
-dropdown_button <- function(..., icon) {
+dropdown_button <- function(..., icon, class = NULL) {
   tagList(
     tags$button(
-      class = "btn",
+      class = if (!is.null(class)) {
+        paste("btn btn-link", class)
+      } else {
+        "btn btn-link btn-dark"
+      },
       type = "button",
       `data-bs-toggle` = "dropdown",
       `aria-expanded` = "false",
       icon
     ),
     tags$ul(
-      class = "dropdown-menu px-4 py-3",
+      class = "dropdown-menu text-body-secondary p-2",
       ...
     )
+  )
+}
+
+#' @keywords internal
+dropdown_divider <- function() {
+  tags$li(tags$hr(class = "dropdown-divider"))
+}
+
+#' @keywords internal
+dropdown_action_button <- function(id, label, icon = NULL, ...) {
+  tags$li(
+    actionLink(
+      inputId = id,
+      label = label,
+      icon = icon,
+      class = "dropdown-item",
+      ...
+    )
+  )
+}
+
+#' @keywords internal
+dropdown_header <- function(label) {
+  tags$li(tags$h6(class = "dropdown-header", label))
+}
+
+#' Create a Bootstrap collapse container.
+#'
+#' Creates a collapsible element.
+#'
+#' @param id Unique id.
+#' @param ... Content.
+#'
+#' @return A HTML tag object representing the dropdown element.
+#' @keywords internal
+collapse_container <- function(id, ...) {
+  tags$div(class = "collapse", id = id, ...)
+}
+
+#' @keywords internal
+blk_border_color <- function(category) {
+  # Palette is taken from:
+  # https://siegal.bio.nyu.edu/color-palette/
+  # very nice palette that is color-blind friendly.
+  switch(
+    category,
+    data = "#0072B2",
+    transform = "#56B4E9",
+    plot = "#E69F00",
+    file = "#CC79A7",
+    parse = "#009E73",
+    table = "#F0E442",
+    text = "#D55E00",
+    "#6c757d"
   )
 }

@@ -11,7 +11,7 @@ run_demo_app(...)
 
 new_dag_board(
   ...,
-  modules = new_dashboard_module(),
+  modules = list(new_dashboard_module(), new_chat_module()),
   options = dag_board_options(),
   class = character()
 )
