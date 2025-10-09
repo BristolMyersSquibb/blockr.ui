@@ -153,9 +153,10 @@
                 "type": "leaf",
                 "data": {
                   "views": [
-                    "dashboard"
+                    "dashboard",
+                    "blockr_assistant"
                   ],
-                  "activeView": "dashboard",
+                  "activeView": "blockr_assistant",
                   "id": "2"
                 },
                 "size": 100
@@ -179,6 +180,12 @@
             "contentComponent": "default",
             "tabComponent": "custom",
             "title": "Dashboard"
+          },
+          "blockr_assistant": {
+            "id": "blockr_assistant",
+            "contentComponent": "default",
+            "tabComponent": "custom",
+            "title": "AI chat"
           }
         },
         "activeGroup": "2"
@@ -208,7 +215,8 @@
 
       ],
       "added_to_dashboard": null,
-      "removed_from_dashboard": null
+      "removed_from_dashboard": null,
+      "ai_chat": null
     }
   }
 }

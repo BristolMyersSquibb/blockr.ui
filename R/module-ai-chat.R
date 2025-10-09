@@ -37,6 +37,8 @@ chat_mod_srv <- function(id, board, update, session, parent, ...) {
       # Request to store tool results
       app_request <- reactiveVal(NULL)
 
+      res <- reactiveVal(NULL)
+
       # Dynamic UI: this also somehow fixes an issue with shinychat
       # if the provider choosen does not have enough credits
       # then the chat isn't stuck and can be reset by changing the provider
@@ -120,19 +122,21 @@ chat_mod_srv <- function(id, board, update, session, parent, ...) {
         append_stream_task$invoke(provider(), "prompt", input$prompt_user_input)
       })
 
-      res <- reactive({
-        if (append_stream_task$status() == "success") {
-          provider()$last_turn()
+      observeEvent(append_stream_task$status(), {
+        if (append_stream_task$status() == "error") {
+          tryCatch(append_stream_task$result(), error = function(e) {
+            showNotification(
+              sprintf("Error from AI provider: %s", e$body),
+              type = "error"
+            )
+          })
+        } else if (append_stream_task$status() == "success") {
+          # Need to reset scoutbar
+          parent$scoutbar$action <- parent$scoutbar$value <- NULL
+          res(provider()$last_turn())
         }
-      })
-
-      observeEvent(req(append_stream_task$status() == "error"), {
-        tryCatch(append_stream_task$result(), error = function(e) {
-          showNotification(
-            sprintf("Error from AI provider: %s", e$body),
-            type = "error"
-          )
-        })
+        # Once the response is received, we signal the app
+        # that the AI chat is done.
         parent$ai_chat <- NULL
       })
 
@@ -140,14 +144,6 @@ chat_mod_srv <- function(id, board, update, session, parent, ...) {
         chat_clear("prompt", session)
         # This also erase the chat memory and not just the UI
         #openai$set_turns(list())
-      })
-
-      observeEvent(res(), {
-        # Once the response is received, we signal the app
-        # that the AI chat is done.
-        parent$ai_chat <- NULL
-        # Need to reset scoutbar
-        parent$scoutbar$action <- parent$scoutbar$value <- NULL
       })
 
       # We probably can comment this below

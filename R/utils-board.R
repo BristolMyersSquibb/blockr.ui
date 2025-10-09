@@ -203,7 +203,7 @@ validate_refreshed <- function(parent) {
   )
 }
 
-restore_steps <- c(
+internal_restore_steps <- c(
   "restored-board",
   "restored-dock",
   "restored-layout",
@@ -217,7 +217,7 @@ get_module_restore_step <- function(parent) {
 
 get_restore_steps <- function(parent) {
   c(
-    restore_steps,
+    internal_restore_steps,
     get_module_restore_step(parent)
   )
 }
@@ -262,25 +262,63 @@ board_restore <- function(board, update, session, parent, ...) {
 #' @keywords internal
 #' @rdname handlers-utils
 module_restore <- function(board, update, session, parent, ...) {
-  for (mod in isolate(board_modules(board$board))) {
-    observeEvent(
-      parent$refreshed,
-      {
-        if (is_restore_step_done(parent, "restored-dag")) {
-          # Module callbacks need to happen in their own
-          # namespace ...
-          mod_session <- session$makeScope(board_module_id(mod))
-          withReactiveDomain(mod_session, {
-            board_module_on_restore(mod)(board, parent, mod_session, ...)
-          })
-          mod_step <- sprintf("restored-%s", board_module_id(mod))
-          set_restore(parent, mod_step)
-        }
-      }
-    )
-  }
+  modules <- isolate(board_modules(board$board))
+
+  observeEvent(
+    parent$refreshed,
+    {
+      current_step <- last(parent$refreshed)
+      process_module_restoration(
+        modules,
+        current_step,
+        board,
+        parent,
+        session,
+        ...
+      )
+    }
+  )
 
   NULL
+}
+
+#' @keywords internal
+process_module_restoration <- function(
+  modules,
+  current_step,
+  board,
+  parent,
+  session,
+  ...
+) {
+  for (i in seq_along(modules)) {
+    mod <- modules[[i]]
+    mod_id <- board_module_id(mod)
+    mod_step <- sprintf("restored-%s", mod_id)
+
+    # Skip if this module is already completed
+    if (current_step == mod_step) {
+      next
+    }
+
+    # Determine prerequisite
+    if (i == 1) {
+      prerequisite <- "restored-dag"
+    } else {
+      prev_mod <- modules[[i - 1]]
+      prerequisite <- sprintf("restored-%s", board_module_id(prev_mod))
+    }
+
+    # Execute if prerequisite is met
+    if (current_step == prerequisite) {
+      mod_session <- session$makeScope(mod_id)
+      withReactiveDomain(mod_session, {
+        board_module_on_restore(mod)(board, parent, mod_session, ...)
+      })
+      set_restore(parent, mod_step)
+      break
+    }
+  }
 }
 
 #' Board module reset restore callback
