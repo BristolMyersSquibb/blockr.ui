@@ -149,7 +149,7 @@ block_card_toggles <- function(id, ns) {
         "<small>outputs</small>"
       )
     ),
-    selected = "inputs"
+    selected = c("inputs", "outputs")
   )
 
   section_toggles$attribs$class <- trimws(gsub(
