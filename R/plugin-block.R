@@ -6,7 +6,8 @@ edit_block_ui <- function(x, id, ...) {
       title = "Provide a new title",
       textInput(
         NS(id, "block_name_in"),
-        "Block name"
+        "Block name",
+        updateOn = "blur"
       )
     ),
     block_summary = uiOutput(NS(id, "block_summary"))
