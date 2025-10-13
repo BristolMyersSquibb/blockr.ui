@@ -684,7 +684,7 @@ create_edge <- function(new, vals, rv, session) {
   to_blk <- rv$blocks[[new$target]]$block
 
   new_edge <- list(
-    type = "fly-marker-cubic",
+    type = "line",
     source = new$source,
     target = new$target,
     label = define_conlabel(to_blk, new$target, rv)
@@ -872,7 +872,7 @@ apply_validation <- function(id, vals, rv, session) {
     edge_config <- lapply(connected_edges, function(id) {
       list(
         id = id,
-        type = "fly-marker-cubic",
+        type = "line",
         style = list(
           stroke = "#000",
           badgeText = NULL
@@ -1174,7 +1174,7 @@ create_edges_data_from_links <- function(links) {
     link <- links[[i]]
     list(
       id = names(links)[[i]],
-      type = "fly-marker-cubic",
+      type = "line",
       source = link$from,
       target = link$to,
       label = link$input
