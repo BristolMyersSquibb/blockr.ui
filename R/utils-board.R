@@ -529,7 +529,7 @@ build_layout <- function(modules, plugins) {
             )
           ),
           # TBD (make theme function of board options)
-          theme = "light"
+          theme = "light-spaced"
         )
       })
     })
@@ -538,7 +538,7 @@ build_layout <- function(modules, plugins) {
     observeEvent(get_board_option_value("dark_mode"), {
       update_dock_view(
         "layout",
-        list(theme = get_board_option_value("dark_mode"))
+        list(theme = sprintf("%s-spaced", get_board_option_value("dark_mode")))
       )
     })
 

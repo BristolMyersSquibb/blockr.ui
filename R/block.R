@@ -109,6 +109,7 @@ block_card_content <- function(block, id, blk_id, ns) {
     id = ns(paste0("accordion-", id)),
     multiple = TRUE,
     class = "accordion-flush",
+    open = c("inputs", "outputs"),
     accordion_panel(
       icon = icon("sliders"),
       title = "Block inputs",
