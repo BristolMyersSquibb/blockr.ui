@@ -536,9 +536,14 @@ build_layout <- function(modules, plugins) {
 
     # Update theme in real time
     observeEvent(get_board_option_value("dark_mode"), {
+      theme <- get_board_option_value("dark_mode")
+      # dockview does not have dark ...
+      if (theme == "dark") {
+        theme <- "abyss"
+      }
       update_dock_view(
         "layout",
-        list(theme = sprintf("%s-spaced", get_board_option_value("dark_mode")))
+        list(theme = sprintf("%s-spaced", theme))
       )
     })
 
@@ -561,6 +566,7 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
       update_scoutbar(
         session,
         "scoutbar",
+        theme = get_board_option_value("dark_mode"),
         revealScoutbar = TRUE
       )
     }

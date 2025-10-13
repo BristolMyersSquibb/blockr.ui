@@ -130,7 +130,7 @@ create_edge_ctxm <- new_context_menu_entry(
 
 #' @include context-menu.R
 remove_node_ctxm <- new_context_menu_entry(
-  name = "Remove node",
+  name = "Remove block",
   js = function(ns) {
     sprintf(
       "(value, target, current) => {
@@ -188,7 +188,7 @@ remove_edge_ctxm <- new_context_menu_entry(
 
 #' @include context-menu.R
 append_node_ctxm <- new_context_menu_entry(
-  name = "Append node",
+  name = "Append block",
   js = function(ns) {
     sprintf(
       "(value, target, current) => {

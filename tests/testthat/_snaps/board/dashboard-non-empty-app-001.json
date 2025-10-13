@@ -147,7 +147,7 @@
                   "activeView": "dag",
                   "id": "1"
                 },
-                "size": 100
+                "size": 95
               },
               {
                 "type": "leaf",
@@ -159,7 +159,7 @@
                   "activeView": "blockr_assistant",
                   "id": "2"
                 },
-                "size": 100
+                "size": 95
               }
             ],
             "size": 0
