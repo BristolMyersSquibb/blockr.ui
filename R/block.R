@@ -149,6 +149,7 @@ block_card_toggles <- function(id, ns) {
         "<small>outputs</small>"
       )
     ),
+    individual = TRUE,
     selected = c("inputs", "outputs")
   )
 
