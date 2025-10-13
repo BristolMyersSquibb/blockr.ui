@@ -464,7 +464,12 @@ build_layout <- function(modules, plugins) {
 
     # Add or re-insert block panel ui
     observeEvent(
-      req(parent$selected_block, length(parent$selected_block) == 1),
+      req(
+        parent$selected_block,
+        length(parent$selected_block) == 1,
+        # Ensure we insert panel for something that exists
+        parent$selected_block %in% board_block_ids(board$board)
+      ),
       {
         create_or_show_block_panel(parent$selected_block, parent, session)
       }
@@ -738,8 +743,9 @@ handle_block_actions <- function(blk, parent, session) {
   observeEvent(
     session$input[[sprintf("append-%s", id)]],
     {
+      # Reselect node if node is not selected in the graph
       if (is.null(parent$selected_block)) {
-        return(NULL)
+        parent$selected_block <- id
       }
       parent$scoutbar$trigger <- "links"
       if (isFALSE(parent$append_block)) {

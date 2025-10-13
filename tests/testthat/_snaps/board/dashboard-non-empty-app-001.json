@@ -9,7 +9,7 @@
         "nodes": [
           {
             "id": "a",
-            "label": "dataset_block \n id: a",
+            "label": "Dataset  \n id: a",
             "style": {
               "fill": "#0072B2",
               "zIndex": 1,
@@ -25,7 +25,7 @@
           },
           {
             "id": "b",
-            "label": "dataset_block \n id: b",
+            "label": "Dataset  \n id: b",
             "style": {
               "fill": "#0072B2",
               "zIndex": 0,
@@ -40,7 +40,7 @@
           },
           {
             "id": "c",
-            "label": "merge_block \n id: c",
+            "label": "Merge  \n id: c",
             "style": {
               "fill": "#56B4E9",
               "zIndex": 1,
@@ -58,7 +58,7 @@
         "edges": [
           {
             "id": "ac",
-            "type": "fly-marker-cubic",
+            "type": "line",
             "source": "a",
             "target": "c",
             "label": "x",
@@ -66,7 +66,7 @@
               "zIndex": 0,
               "controlPoints": [
                 [
-                  48.5,
+                  101,
                   182,
                   0
                 ]
@@ -85,7 +85,7 @@
           },
           {
             "id": "bc",
-            "type": "fly-marker-cubic",
+            "type": "line",
             "source": "b",
             "target": "c",
             "label": "y",
@@ -93,7 +93,7 @@
               "zIndex": 0,
               "controlPoints": [
                 [
-                  77,
+                  182,
                   182,
                   0
                 ]

@@ -571,7 +571,7 @@ remove_node <- function(selected, vals, session) {
 
   ns <- session$ns
 
-  # clear node selection + remove
+  # clear node selection + remove connected edges)
   g6_remove_nodes(
     g6_set_nodes(
       g6_proxy(ns("network")),
@@ -661,11 +661,14 @@ create_edge <- function(new, vals, rv, session) {
   stopifnot(is.list(new))
 
   if (!validate_edge_creation(new$target, rv)) {
-    # remove edge when it was created from DND
-    g6_remove_edges(
-      g6_proxy(ns("network")),
-      ids = new$id
-    )
+    # remove edge when it was created from DND.
+    # With append, new$id does not exist
+    if (length(new$id)) {
+      g6_remove_edges(
+        g6_proxy(ns("network")),
+        ids = new$id
+      )
+    }
 
     # Cleanup node when it was created from Append block
     if (vals$append_block) {
@@ -1198,7 +1201,7 @@ create_nodes_data_from_blocks <- function(blocks, stacks) {
     tmp <- list(
       id = names(blocks)[[i]],
       label = paste(
-        attr(current, "class")[1],
+        blk_name(current),
         "\n id:",
         names(blocks)[[i]]
       ),
