@@ -185,7 +185,7 @@ initialize_g6 <- function(
     graph,
     layout = antv_dagre_layout(
       begin = c(150, 150),
-      nodesep = 15,
+      nodesep = 50,
       ranksep = 75,
       sortByCombo = TRUE
     )
