@@ -78,7 +78,7 @@ block_subtitle_id.dag_board <- function(x, id) {
 #' @export
 block_subtitle_id.md_board <- function(x, id) {
   tagList(
-    " || ",
+    " | ",
     span("id:", id)
   )
 }
@@ -86,12 +86,13 @@ block_subtitle_id.md_board <- function(x, id) {
 #' @keywords internal
 block_card_subtitle <- function(board, block, id, info) {
   div(
-    class = "card-subtitle text-body-secondary mb-1",
+    class = "card-subtitle text-body-secondary mb-1 small text-muted",
+    style = "margin-top: -15px;",
     span(class(block)[1]),
     block_subtitle_id(board, id),
     tags$sup(
       tooltip(
-        icon("info-circle"),
+        icon("info-circle", style = "color: #BBBBBB;"),
         p(
           icon("lightbulb"),
           "How to use this block?",
