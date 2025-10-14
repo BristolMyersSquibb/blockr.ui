@@ -86,8 +86,7 @@ block_subtitle_id.md_board <- function(x, id) {
 #' @keywords internal
 block_card_subtitle <- function(board, block, id, info) {
   div(
-    class = "card-subtitle text-body-secondary mb-1 small text-muted",
-    style = "margin-top: -15px;",
+    class = "card-subtitle text-body-secondary mb-1 small text-muted mt-n3",
     span(class(block)[1]),
     block_subtitle_id(board, id),
     tags$sup(
