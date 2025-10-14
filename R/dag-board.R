@@ -91,6 +91,10 @@ serve.dag_board <- function(
       list(
         padding = 0,
         gap = 0,
+        theme = bslib::bs_theme(
+          version = 5,
+          "enable-negative-margins" = "true"
+        ),
         shinyjs::useShinyjs(),
         add_busy_load_deps(main_ui(id, x, board_id, plugins))
       ),
