@@ -34,7 +34,7 @@ block_card <- function(board, block, edit_ui, ns) {
     tags$div(
       class = "card-body",
       div(
-        class = "border-start border-5 ps-2",
+        class = "border-start border-5 ps-3",
         style = sprintf(
           "--bs-border-opacity: 1; border-color: %s !important;",
           blk_border_color(blk_info$category)
@@ -78,7 +78,7 @@ block_subtitle_id.dag_board <- function(x, id) {
 #' @export
 block_subtitle_id.md_board <- function(x, id) {
   tagList(
-    " || ",
+    " | ",
     span("id:", id)
   )
 }
@@ -86,12 +86,12 @@ block_subtitle_id.md_board <- function(x, id) {
 #' @keywords internal
 block_card_subtitle <- function(board, block, id, info) {
   div(
-    class = "card-subtitle text-body-secondary mb-1",
+    class = "card-subtitle text-body-secondary mb-1 small text-muted mt-n3",
     span(class(block)[1]),
     block_subtitle_id(board, id),
     tags$sup(
       tooltip(
-        icon("info-circle"),
+        icon("info-circle", style = "color: #BBBBBB;"),
         p(
           icon("lightbulb"),
           "How to use this block?",
@@ -109,6 +109,7 @@ block_card_content <- function(block, id, blk_id, ns) {
     id = ns(paste0("accordion-", id)),
     multiple = TRUE,
     class = "accordion-flush",
+    open = c("inputs", "outputs"),
     accordion_panel(
       icon = icon("sliders"),
       title = "Block inputs",
@@ -149,7 +150,8 @@ block_card_toggles <- function(id, ns) {
         "<small>outputs</small>"
       )
     ),
-    selected = "inputs"
+    individual = TRUE,
+    selected = c("inputs", "outputs")
   )
 
   section_toggles$attribs$class <- trimws(gsub(

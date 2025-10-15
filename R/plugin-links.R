@@ -240,6 +240,27 @@ gen_add_rm_link_server <- function(context_menu) {
           ignoreNULL = FALSE
         )
 
+        # Ensure that selected node in the graph
+        # is in sync with parent$selected_block
+        observeEvent(parent$selected_block, {
+          if (
+            !is.null(input[["network-selected_node"]]) &&
+              !length(setdiff(
+                input[["network-selected_node"]],
+                parent$selected_block
+              ))
+          ) {
+            return(NULL)
+          }
+          g6_set_nodes(
+            g6_proxy(ns("network")),
+            set_names(
+              list("selected"),
+              parent$selected_block
+            )
+          )
+        })
+
         # Unselect node when panel is closed
         observeEvent(parent$unselected_block, {
           g6_set_nodes(
@@ -255,7 +276,11 @@ gen_add_rm_link_server <- function(context_menu) {
         observeEvent(parent$removed_block, {
           # Note: links are cleaned in the add_rm_blocks plugin
           lapply(parent$removed_block, function(removed) {
-            cleanup_node(removed, parent, board, session)
+            remove_node(removed, parent, session)
+            # Question: what's the point of cleanup_node?
+            # It was useful but now it seems that removing a node
+            # also removes the connected edges in g6 ...
+            #cleanup_node(removed, parent, board, session)
           })
         })
 

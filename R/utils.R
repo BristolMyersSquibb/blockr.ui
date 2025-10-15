@@ -16,6 +16,11 @@ firstup <- function(x) {
   x
 }
 
+blk_name <- function(x) {
+  stopifnot(inherits(x, "block"))
+  gsub("block", "", block_name(x))
+}
+
 v_rule <- function() {
   shiny::tags$div(class = "vr")
 }

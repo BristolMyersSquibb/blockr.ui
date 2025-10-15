@@ -32,10 +32,8 @@ add_rm_block_server <- function(id, board, update, parent, ...) {
             new_blk <- parent$scoutbar$value
           } else {
             new_id <- rand_names(board_block_ids(board$board))
-            new_blk <- create_block(
-              parent$scoutbar$value,
-              name = id_to_sentence_case(new_id)
-            )
+            new_blk <- create_block(parent$scoutbar$value)
+            block_name(new_blk) <- blk_name(new_blk)
             new_blk <- as_blocks(set_names(list(new_blk), new_id))
           }
 

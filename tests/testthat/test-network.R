@@ -262,7 +262,6 @@ testServer(
     # Removed node and block
     session$setInputs("remove_node" = "subset_test")
     expect_identical(parent$removed_block, "subset_test")
-    expect_identical(parent$removed_edge, board_links(board$board)$id)
     mock_remove_block(
       "subset_test",
       board,
