@@ -330,7 +330,6 @@ reset_restore <- function(board, update, session, parent, ...) {
   observeEvent(
     is_restore_complete(parent),
     {
-      session$sendCustomMessage("hide-busy-load", TRUE)
       parent$refreshed <- NULL
     }
   )
