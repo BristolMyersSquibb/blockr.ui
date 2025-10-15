@@ -95,6 +95,12 @@ serve.dag_board <- function(
           version = 5,
           "enable-negative-margins" = "true"
         ),
+        # Use shiny's busy indicator
+        useBusyIndicators(spinners = FALSE, pulse = TRUE),
+        busyIndicatorOptions(
+          pulse_background = "#5e626b",
+          pulse_height = "5px"
+        ),
         shinyjs::useShinyjs(),
         add_busy_load_deps(main_ui(id, x, board_id, plugins))
       ),
