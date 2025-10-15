@@ -88,19 +88,6 @@ restore_board.dag_board <- function(
 ) {
   tryCatch(
     {
-      session$sendCustomMessage(
-        "show-busy-load",
-        list(
-          options = list(
-            background = "#5e626b",
-            spinner = "circles",
-            animation = "slide",
-            text = "Restoring state ...",
-            textPosition = "bottom"
-          )
-        )
-      )
-
       tmp_res <- blockr_deser(new)
       tmp_res$board[["modules"]] <- lapply(tmp_res$modules, function(mod) {
         fun <- get(
@@ -154,7 +141,6 @@ restore_board.dag_board <- function(
       }
     },
     error = function(e) {
-      session$sendCustomMessage("hide-busy-load", TRUE)
       showNotification(
         paste0(
           "Error restoring snapshot. It is possible that you are trying to ",

@@ -11,14 +11,6 @@ export const setupApp = () => {
     }, 1000);
   });
 
-  Shiny.addCustomMessageHandler('show-busy-load', (m) => {
-    $.busyLoadFull('show', m.options);
-  });
-
-  Shiny.addCustomMessageHandler('hide-busy-load', (m) => {
-    $.busyLoadFull('hide');
-  });
-
   // Handle dashboard zoom
   Shiny.addCustomMessageHandler('update-dashboard-zoom', (m) => {
     $(m.id).css('zoom', m.zoom);
