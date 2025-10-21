@@ -90,7 +90,6 @@ validate_board_option.stack_colors_option <- function(x) {
 
 #' @export
 blockr_ser.stack_colors_option <- function(x, option = NULL, ...) {
-
   val <- coal(option, board_option_value(x))
 
   NextMethod(
@@ -158,11 +157,13 @@ new_blocks_position_option <- function(
       )
     },
     server = function(..., session) {
+      dock_proxy <- dock_view_proxy("layout", session)
+
       list(
         observeEvent(
-          req(length(get_panels_ids("layout", session)) > 0),
+          req(length(get_panels_ids(dock_proxy)) > 0),
           {
-            layout_panels <- reference_panel_candidates(session)
+            layout_panels <- reference_panel_candidates(dock_proxy)
 
             updateSelectInput(
               session,
@@ -181,7 +182,7 @@ new_blocks_position_option <- function(
             updateSelectInput(
               session,
               "reference_panel",
-              choices = reference_panel_candidates(session),
+              choices = reference_panel_candidates(dock_proxy),
               selected = opt$reference_panel
             )
 
@@ -199,9 +200,9 @@ new_blocks_position_option <- function(
   )
 }
 
-reference_panel_candidates <- function(session) {
+reference_panel_candidates <- function(proxy) {
   grep(
-    get_panels_ids("layout", session),
+    get_panels_ids(proxy),
     pattern = "^(?!.*block-).*$",
     perl = TRUE,
     value = TRUE
@@ -210,7 +211,6 @@ reference_panel_candidates <- function(session) {
 
 #' @export
 validate_board_option.blocks_position_option <- function(x) {
-
   val <- board_option_value(NextMethod())
 
   if (!is.list(val)) {

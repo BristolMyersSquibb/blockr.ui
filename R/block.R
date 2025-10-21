@@ -200,7 +200,7 @@ block_card_dropdown <- function(id, info, ns) {
 }
 
 #' @keywords internal
-remove_block_panels <- function(ids, panels) {
+remove_block_panels <- function(proxy, ids, panels) {
   stopifnot(is.character(ids))
   # Only remove panels that are in the dock
   in_dock <- which(ids %in% get_block_panels(names(panels)))
@@ -210,7 +210,7 @@ remove_block_panels <- function(ids, panels) {
   ids <- ids[in_dock]
 
   lapply(ids, function(id) {
-    remove_panel("layout", paste0("block-", id))
+    remove_panel(proxy, paste0("block-", id))
   })
 }
 
@@ -295,9 +295,9 @@ remove_block_ui.dag_board <- function(
   invisible(x)
 }
 
-add_block_panel <- function(id, panels) {
+add_block_panel <- function(proxy, id, panels) {
   add_panel(
-    "layout",
+    proxy,
     panel = dockViewR::panel(
       id = sprintf("block-%s", id),
       title = sprintf("Block: %s", id),
@@ -313,7 +313,7 @@ add_block_panel <- function(id, panels) {
         )$reference_panel,
         direction = get_board_option_value("blocks_position")$direction
       ),
-      remove = list(enable = TRUE, mode = "manual")
+      remove = new_remove_tab_plugin(enable = TRUE, mode = "manual")
     )
   )
 }
@@ -337,13 +337,14 @@ show_block_panel <- function(id, session) {
 #'
 #' @param id Block id to show
 #' @param parent Parent reactive values.
-#' @param session Shiny session object.
+#' @param proxy Dock proxy.
 #' @rdname block-panel
-create_or_show_block_panel <- function(id, parent, session) {
+create_or_show_block_panel <- function(proxy, id, parent) {
+  session <- proxy$session
   ns <- session$ns
 
   # Extract block panels
-  all_panels <- get_panels_ids("layout", session)
+  all_panels <- get_panels_ids(proxy)
   block_panels <- get_block_panels(all_panels)
 
   # If the block panel is already there,
@@ -351,12 +352,12 @@ create_or_show_block_panel <- function(id, parent, session) {
   if (parent$selected_block %in% block_panels) {
     # Only select panel
     dockViewR::select_panel(
-      "layout",
+      proxy,
       sprintf("block-%s", parent$selected_block)
     )
   } else {
     # Or add it and move the block UI from offcanvas to the panel container
-    add_block_panel(id, all_panels)
+    add_block_panel(proxy, id, all_panels)
     show_block_panel(id, session)
   }
 }
@@ -366,7 +367,8 @@ create_or_show_block_panel <- function(id, parent, session) {
 #' Move block from panel to offcanvas-body.
 #'
 #' @rdname block-panel
-hide_block_panel <- function(id, session) {
+hide_block_panel <- function(proxy, id) {
+  session <- proxy$session
   ns <- session$ns
   # Remove the block panel when the user clicks on the
   # close button of the panel.
@@ -377,7 +379,7 @@ hide_block_panel <- function(id, session) {
       block_id = sprintf("#%s", ns(paste0("layout-", id)))
     )
   )
-  remove_panel("layout", id)
+  remove_panel(proxy, id)
 }
 
 #' Get block info in registry
@@ -388,6 +390,7 @@ get_block_metadata <- function(x) {
   stopifnot(is_block(x))
 
   ctor <- attr(x, "ctor")
+  ctor <- attr(ctor, "fun")
 
   if (is_string(ctor)) {
     blk <- sub("^new_", "", ctor)

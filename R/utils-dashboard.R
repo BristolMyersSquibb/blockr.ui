@@ -1,4 +1,5 @@
-restore_dashboard <- function(board, rv, parent, session) {
+restore_dashboard <- function(proxy, board, rv, parent) {
+  session <- proxy$session
   parent$in_grid <- list()
   ids <- names(rv$blocks)
   # Find blocks that should be in the dock
@@ -23,7 +24,7 @@ restore_dashboard <- function(board, rv, parent, session) {
 
   # Restore dock layout (panels positions and sizes). No need
   # to cleanup before
-  dockViewR::restore_dock("dock", parent$module_state$dashboard())
+  dockViewR::restore_dock(proxy, parent$module_state$dashboard())
 
   # Regenerate the output for the block
   lapply(in_grid_ids, function(id) {
@@ -75,8 +76,10 @@ generate_dashboard_blk_output <- function(id, rv, session) {
   )
 }
 
-add_blk_panel_to_dashboard <- function(id, rv, session) {
+add_blk_panel_to_dashboard <- function(proxy, id, rv) {
+  session <- proxy$session
   ns <- session$ns
+
   dock_blk_ui <- block_ui(
     ns(
       sprintf(
@@ -88,7 +91,7 @@ add_blk_panel_to_dashboard <- function(id, rv, session) {
   )
 
   add_panel(
-    "dock",
+    proxy,
     sprintf("block_%s", id),
     panel = dockViewR::panel(
       id = sprintf("block-%s", id),
@@ -98,10 +101,11 @@ add_blk_panel_to_dashboard <- function(id, rv, session) {
   )
 }
 
-remove_blk_from_dashboard <- function(id, session) {
+remove_blk_from_dashboard <- function(proxy, id) {
+  session <- proxy$session
   output <- session$output
   out_name <- sprintf("dock-%s-result", id)
-  remove_panel("dock", sprintf("block-%s", id))
+  remove_panel(proxy, sprintf("block-%s", id))
   output[[out_name]] <- NULL
 }
 
