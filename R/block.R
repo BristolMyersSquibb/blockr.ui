@@ -143,32 +143,42 @@ block_card_subtitle <- function(board, block, id, info) {
 
 #' @keywords internal
 block_card_content <- function(block, id, blk_id, ns) {
-  # Hide headers of accordion panels
-  accordions <- accordion(
-    id = ns(paste0("accordion-", id)),
-    multiple = TRUE,
-    class = "accordion-flush",
-    open = c("inputs", "outputs"),
+  # Create accordion panels and hide their headers directly
+  inputs_panel <- htmltools::tagQuery(
     accordion_panel(
       icon = icon("sliders"),
       title = "Block inputs",
-      value = "inputs",
-      expr_ui(blk_id, block)
-    ),
+      value = "inputs"
+    )
+  )$find(".accordion-header")$addAttrs(style = "display: none;")$reset()$find(
+    ".accordion-body"
+  )$append(expr_ui(blk_id, block))$allTags()
+
+  inputs_panel$attribs$style <- "border: none; border-radius: 0;"
+
+  outputs_panel <- htmltools::tagQuery(
     accordion_panel(
       icon = icon("chart-simple"),
       title = "Block output(s)",
       value = "outputs",
-      style = "max-width: 100%; overflow-x: auto;",
-      block_ui(blk_id, block),
-      div(id = ns(paste0("outputs-issues-wrapper-", id)))
+      style = "max-width: 100%; overflow-x: auto;"
     )
+  )$find(".accordion-header")$addAttrs(style = "display: none;")$reset()$find(
+    ".accordion-body"
+  )$append(tagList(
+    block_ui(blk_id, block),
+    div(id = ns(paste0("outputs-issues-wrapper-", id)))
+  ))$allTags()
+
+  outputs_panel$attribs$style <- "border: none; border-radius: 0;"
+
+  accordions <- accordion(
+    id = ns(paste0("accordion-", id)),
+    multiple = TRUE,
+    open = c("inputs", "outputs"),
+    inputs_panel,
+    outputs_panel
   )
-  accordions <- htmltools::tagQuery(accordions)$find(
-    ".accordion-header"
-  )$addAttrs(style = "display: none;")$reset()$find(".accordion-item")$addAttrs(
-    style = "border: none;"
-  )$allTags()
 
   tagList(
     div(id = ns(sprintf("errors-block-%s", id)), class = "mt-4"),
