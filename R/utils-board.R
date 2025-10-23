@@ -351,7 +351,10 @@ get_block_panels <- function(panels, pattern = "block-") {
   )
 }
 
-restore_layout <- function(proxy, board, parent, session) {
+restore_layout <- function(proxy, board, parent) {
+  session <- proxy$session
+  ns <- session$ns
+
   # Move any existing block UI from the offcanvas to their panel
   block_panels <- get_block_panels(names(parent$app_layout$panels))
 
@@ -361,9 +364,9 @@ restore_layout <- function(proxy, board, parent, session) {
     "dag"
   )
   insertUI(
-    selector = sprintf("#%s", session$ns("layout-dag")),
+    selector = sprintf("#%s", ns("layout-dag")),
     ui = board_ui(
-      session$ns(NULL),
+      ns(NULL),
       board_plugins(board)["manage_links"]
     ),
     immediate = TRUE
@@ -377,10 +380,10 @@ restore_layout <- function(proxy, board, parent, session) {
       mod
     )
     insertUI(
-      selector = sprintf("#%s", session$ns(paste0("layout-", mod))),
+      selector = sprintf("#%s", ns(paste0("layout-", mod))),
       ui = call_board_module_ui(
         board_modules(board)[[mod]],
-        session$ns(mod),
+        ns(mod),
         board
       ),
       immediate = TRUE
@@ -459,7 +462,7 @@ build_layout <- function(modules, plugins) {
         )
       },
       {
-        restore_layout(board$board, parent, session)
+        restore_layout(dock_proxy, board$board, parent)
       }
     )
 

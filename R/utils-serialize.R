@@ -33,7 +33,6 @@ blockr_ser.board_module <- function(x, state, ...) {
 
 #' @export
 blockr_deser.dag_board <- function(x, data, ...) {
-
   mods <- lapply(data[["modules"]], blockr_deser)
   mods <- lapply(mods, function(mod) {
     mod[["options"]] <- new_board_options()
@@ -56,7 +55,6 @@ blockr_deser.dag_board <- function(x, data, ...) {
 
 #' @export
 blockr_deser.board_module <- function(x, data, ...) {
-
   ctor <- get(
     data[["constructor"]],
     envir = asNamespace(data[["package"]]),
@@ -128,6 +126,11 @@ restore_board.dag_board <- function(
       )
 
       result(tmp_res)
+
+      # Update parent node, grid, selected, mode
+      # that were stored in the JSON but not part of the board object.
+      parent$network <- tmp_res$network
+      parent$app_layout <- tmp_res$layout
 
       mods <- intersect(names(parent$module_state), names(mod_states))
 
