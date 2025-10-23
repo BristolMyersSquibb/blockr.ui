@@ -4,6 +4,9 @@
 \alias{run_demo_app}
 \alias{new_dag_board}
 \alias{is_dag_board}
+\alias{as_dag_board}
+\alias{as_dag_board.dag_board}
+\alias{as_dag_board.list}
 \alias{dag_board_options}
 \title{Demo app}
 \usage{
@@ -17,6 +20,12 @@ new_dag_board(
 )
 
 is_dag_board(x)
+
+as_dag_board(x, ...)
+
+\method{as_dag_board}{dag_board}(x, ...)
+
+\method{as_dag_board}{list}(x, ...)
 
 dag_board_options()
 }

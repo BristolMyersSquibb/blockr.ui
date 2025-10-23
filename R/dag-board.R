@@ -37,6 +37,24 @@ is_dag_board <- function(x) {
 
 #' @rdname run_demo_app
 #' @export
+as_dag_board <- function(x, ...) {
+  UseMethod("as_dag_board")
+}
+
+#' @rdname run_demo_app
+#' @export
+as_dag_board.dag_board <- function(x, ...) {
+  x
+}
+
+#' @rdname run_demo_app
+#' @export
+as_dag_board.list <- function(x, ...) {
+  do.call(new_dag_board, x)
+}
+
+#' @rdname run_demo_app
+#' @export
 dag_board_options <- function() {
   new_board_options(
     new_board_name_option(category = "Board options"),

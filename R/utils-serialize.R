@@ -33,14 +33,40 @@ blockr_ser.board_module <- function(x, state, ...) {
 
 #' @export
 blockr_deser.dag_board <- function(x, data, ...) {
-  list(
-    board = NextMethod(data = data[["board"]]),
-    # Other elements that are not part of the board
-    # and need to be restored at the top level
-    network = data[["network"]],
-    layout = data[["layout"]],
-    modules = data[["modules"]]
+  mods <- lapply(data[["modules"]], blockr_deser)
+  mods <- lapply(mods, function(mod) {
+    mod[["options"]] <- new_board_options()
+    mod
+  })
+
+  as_dag_board(
+    c(
+      NextMethod(data = data[["board"]]),
+      # Other elements that are not part of the board
+      # and need to be restored at the top level
+      list(
+        network = data[["network"]],
+        layout = data[["layout"]],
+        modules = mods
+      )
+    )
   )
+}
+
+#' @export
+blockr_deser.board_module <- function(x, data, ...) {
+  ctor <- get(
+    data[["constructor"]],
+    envir = asNamespace(data[["package"]]),
+    mode = "function",
+    inherits = FALSE
+  )
+
+  res <- do.call(ctor, list())
+
+  attr(res, "state") <- data[["payload"]][["state"]]
+
+  res
 }
 
 #' @export
@@ -89,26 +115,27 @@ restore_board.dag_board <- function(
   tryCatch(
     {
       tmp_res <- blockr_deser(new)
-      tmp_res$board[["modules"]] <- lapply(tmp_res$modules, function(mod) {
-        fun <- get(
-          mod$constructor,
-          envir = asNamespace(mod$package),
-          mode = "function"
-        )
-        res <- fun()
-        attr(res, "ctor") <- mod$constructor
-        res
-      })
-      result(tmp_res$board)
+
+      mod_states <- lapply(tmp_res[["modules"]], attr, "state")
+
+      tmp_res[["modules"]] <- lapply(
+        tmp_res[["modules"]],
+        `attr<-`,
+        "state",
+        NULL
+      )
+
+      result(tmp_res)
+
       # Update parent node, grid, selected, mode
       # that were stored in the JSON but not part of the board object.
       parent$network <- tmp_res$network
       parent$app_layout <- tmp_res$layout
 
-      mods <- intersect(names(parent$module_state), names(tmp_res$modules))
+      mods <- intersect(names(parent$module_state), names(mod_states))
 
-      miss <- setdiff(names(parent$module_state), names(tmp_res$modules))
-      xtra <- setdiff(names(tmp_res$modules), names(parent$module_state))
+      miss <- setdiff(names(parent$module_state), names(mod_states))
+      xtra <- setdiff(names(mod_states), names(parent$module_state))
 
       if (length(miss)) {
         showNotification(
@@ -137,7 +164,7 @@ restore_board.dag_board <- function(
       }
 
       for (mod in mods) {
-        parent$module_state[[mod]](tmp_res$modules[[mod]]$payload$state)
+        parent$module_state[[mod]](mod_states[[mod]])
       }
     },
     error = function(e) {
