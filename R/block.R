@@ -132,7 +132,7 @@ block_card_content <- function(block, id, blk_id, ns) {
   )$allTags()
 
   tagList(
-    div(id = ns(sprintf("errors-block-%s", id))),
+    div(id = ns(sprintf("errors-block-%s", id)), class = "mt-4"),
     accordions
   )
 }
