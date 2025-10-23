@@ -41,7 +41,10 @@ block_card <- function(board, block, edit_ui, ns) {
         class = "d-flex align-items-stretch gap-3",
         # Icon element
         div(
-          class = "d-flex align-items-center justify-content-center flex-shrink-0 rounded-3 shadow-sm",
+          class = paste(
+            "d-flex align-items-center justify-content-center",
+            "flex-shrink-0 rounded-3 shadow-sm"
+          ),
           style = sprintf(
             paste0(
               "background: %s;",
@@ -83,7 +86,6 @@ block_card_title <- function(board, block, id, info, edit_ui, ns) {
         style = "line-height: 1.3;",
         edit_ui$block_name
       ),
-      # Subtitle moved here, below the block name
       block_card_subtitle(board, block, id, info)
     ),
     # Right side: toggles and dropdown
@@ -203,7 +205,7 @@ block_card_toggles <- function(id, ns) {
 
 #' @keywords internal
 block_card_dropdown <- function(id, info, ns) {
-  # Create a custom dropdown without the default button styling
+  # Create a custom dropdown without the default button styling (no bg on hover, ...)
   tags$div(
     class = "dropdown",
     tags$button(
@@ -211,35 +213,32 @@ block_card_dropdown <- function(id, info, ns) {
       type = "button",
       `data-bs-toggle` = "dropdown",
       `aria-expanded` = "false",
-      # Minimal inline style for hover states that can't be achieved with Bootstrap classes
       onmouseover = "this.classList.add('text-dark');",
       onmouseout = "this.classList.remove('text-dark');",
       icon("ellipsis-vertical")
     ),
     tags$ul(
       class = "dropdown-menu dropdown-menu-end shadow-sm rounded-3 border-1",
-      style = "min-width: 250px;", # This specific width isn't available as a Bootstrap class
+      style = "min-width: 250px;",
       # Actions header
       tags$li(
         tags$h6(
           class = "dropdown-header text-uppercase fw-semibold small text-secondary",
-          style = "font-size: 0.75rem; letter-spacing: 0.5px;", # These specific values aren't Bootstrap classes
+          style = "font-size: 0.75rem; letter-spacing: 0.5px;",
           "Block Actions"
         )
       ),
-      # Action buttons with left-aligned icons and centered text
+      # Block actions
       tags$li(
         tags$button(
           class = "dropdown-item action-button py-2 position-relative text-center",
           type = "button",
           id = ns(sprintf("append-%s", id)),
-          style = "padding-left: 2.5rem;", # Specific padding value not available in Bootstrap
-          # Icon positioned absolutely to the left
+          style = "padding-left: 2.5rem;",
           tags$span(
             class = "position-absolute start-0 top-50 translate-middle-y ms-3",
             icon("plus", class = "text-success")
           ),
-          # Centered text
           "Append block"
         )
       ),
@@ -248,22 +247,20 @@ block_card_dropdown <- function(id, info, ns) {
           class = "dropdown-item action-button py-2 position-relative text-center text-danger",
           type = "button",
           id = ns(sprintf("delete-%s", id)),
-          style = "padding-left: 2.5rem;", # Specific padding value not available in Bootstrap
-          # Icon positioned absolutely to the left
+          style = "padding-left: 2.5rem;",
           tags$span(
             class = "position-absolute start-0 top-50 translate-middle-y ms-3",
             icon("trash")
           ),
-          # Centered text
           "Delete block"
         )
       ),
       tags$li(tags$hr(class = "dropdown-divider my-2")),
-      # Block details header - matching the actions header style
+      # Block details header
       tags$li(
         tags$h6(
           class = "dropdown-header text-uppercase fw-semibold small text-secondary",
-          style = "font-size: 0.75rem; letter-spacing: 0.5px;", # These specific values aren't Bootstrap classes
+          style = "font-size: 0.75rem; letter-spacing: 0.5px;",
           "Block Details"
         )
       ),
@@ -271,19 +268,19 @@ block_card_dropdown <- function(id, info, ns) {
       tags$li(
         tags$div(
           class = "px-3 py-1",
-          # Package - plain text
+          # Package
           tags$div(
             class = "d-flex justify-content-between align-items-center mb-2",
             tags$span("Package", class = "text-muted small"),
             tags$span(info$package, class = "small fw-medium")
           ),
-          # Type - plain text
+          # Type
           tags$div(
             class = "d-flex justify-content-between align-items-center mb-2",
             tags$span("Type", class = "text-muted small"),
             tags$span(info$category, class = "small fw-medium")
           ),
-          # ID - plain text
+          # ID
           tags$div(
             class = "d-flex justify-content-between align-items-center mb-0",
             tags$span("ID", class = "text-muted small"),
