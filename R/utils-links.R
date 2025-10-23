@@ -493,7 +493,7 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
   ns <- session$ns
 
   info <- get_block_metadata(new)
-  blk_color <- blk_border_color(info$category)
+  blk_color <- blk_color(info$category)
 
   new_node <- list(
     id = block_uid(new),
@@ -1196,7 +1196,7 @@ create_nodes_data_from_blocks <- function(blocks, stacks) {
     current <- blocks[[i]]
 
     info <- get_block_metadata(current)
-    blk_color <- blk_border_color(info$category)
+    blk_color <- blk_color(info$category)
 
     tmp <- list(
       id = names(blocks)[[i]],

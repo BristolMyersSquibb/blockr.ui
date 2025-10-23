@@ -95,7 +95,7 @@ add_blk_panel_to_dashboard <- function(proxy, id, rv) {
     sprintf("block_%s", id),
     panel = dockViewR::panel(
       id = sprintf("block-%s", id),
-      title = sprintf("Block: %s", id),
+      title = id,
       content = dock_blk_ui
     )
   )
