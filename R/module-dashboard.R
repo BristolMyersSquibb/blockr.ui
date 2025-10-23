@@ -42,6 +42,8 @@ dashboard_server <- function(
       ns <- session$ns
       output <- session$output
 
+      dock_proxy <- dock_view_proxy("dock", session)
+
       res <- reactiveVal()
 
       observeEvent(
@@ -67,8 +69,8 @@ dashboard_server <- function(
           # Signal to remove panel from dock.
           # Panel will be removed by manage_dashboard.
           parent$in_grid[[removed]] <- NULL
-          if (paste0("block-", removed) %in% get_panels_ids("dock", session)) {
-            remove_panel("dock", paste0("block-", removed))
+          if (paste0("block-", removed) %in% get_panels_ids(dock_proxy)) {
+            remove_panel(dock_proxy, paste0("block-", removed))
           }
         })
       })
@@ -98,9 +100,9 @@ dashboard_server <- function(
         },
         {
           add_blk_panel_to_dashboard(
+            dock_proxy,
             parent$added_to_dashboard,
-            board,
-            session
+            board
           )
           generate_dashboard_blk_output(
             parent$added_to_dashboard,
@@ -119,17 +121,13 @@ dashboard_server <- function(
         },
         {
           # Remove output from dock
-          remove_blk_from_dashboard(parent$removed_from_dashboard, session)
+          remove_blk_from_dashboard(dock_proxy, parent$removed_from_dashboard)
           parent$removed_from_dashboard <- NULL
         }
       )
 
       output$dock <- renderDockView({
-        dock_view(
-          panels = list(), # TBD handle when we initalise from a non empty dock
-          # TBD: handle theme from global app options
-          theme = "replit"
-        )
+        dock_view(theme = "replit")
       })
 
       # Handle zoom on grid element
@@ -253,7 +251,8 @@ new_dashboard_module <- function(id = "dashboard", title = "Dashboard") {
     dashboard_ui,
     dashboard_server,
     on_restore = function(board, parent, session, ...) {
-      restore_dashboard(board$board, board, parent, session)
+      dock_proxy <- dock_view_proxy("dock", session)
+      restore_dashboard(dock_proxy, board$board, board, parent)
     },
     id = id,
     title = title,

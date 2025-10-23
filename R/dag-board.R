@@ -37,6 +37,24 @@ is_dag_board <- function(x) {
 
 #' @rdname run_demo_app
 #' @export
+as_dag_board <- function(x, ...) {
+  UseMethod("as_dag_board")
+}
+
+#' @rdname run_demo_app
+#' @export
+as_dag_board.dag_board <- function(x, ...) {
+  x
+}
+
+#' @rdname run_demo_app
+#' @export
+as_dag_board.list <- function(x, ...) {
+  do.call(new_dag_board, x)
+}
+
+#' @rdname run_demo_app
+#' @export
 dag_board_options <- function() {
   new_board_options(
     new_board_name_option(category = "Board options"),
@@ -91,6 +109,13 @@ serve.dag_board <- function(
       list(
         padding = 0,
         gap = 0,
+        theme = bslib::bs_theme(
+          version = 5,
+          # button have the same color as dockView tabs
+          "btn-active-border-shade-amount" = "5%",
+          "btn-active-bg-shade-amount" = "5%",
+          "enable-negative-margins" = "true"
+        ),
         # Use shiny's busy indicator
         useBusyIndicators(spinners = FALSE, pulse = TRUE),
         busyIndicatorOptions(
@@ -136,7 +161,7 @@ create_edge_ctxm <- new_context_menu_entry(
 
 #' @include context-menu.R
 remove_node_ctxm <- new_context_menu_entry(
-  name = "Remove node",
+  name = "Remove block",
   js = function(ns) {
     sprintf(
       "(value, target, current) => {
@@ -194,7 +219,7 @@ remove_edge_ctxm <- new_context_menu_entry(
 
 #' @include context-menu.R
 append_node_ctxm <- new_context_menu_entry(
-  name = "Append node",
+  name = "Append block",
   js = function(ns) {
     sprintf(
       "(value, target, current) => {

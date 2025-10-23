@@ -27,6 +27,10 @@ block_card <- function(board, block, edit_ui, ns) {
     edit_ui <- edit_ui$ui(x, NS(blk_id, "edit_block"))
   }
 
+  # if yellow color, use black text, otherwise white for contrasts
+  bg_color <- blk_color(blk_info$category)
+  icon_color <- if (bg_color == "#F0E442") "text-dark" else "text-white"
+
   card_tag <- tags$div(
     class = "card",
     width = "100%",
@@ -34,14 +38,34 @@ block_card <- function(board, block, edit_ui, ns) {
     tags$div(
       class = "card-body",
       div(
-        class = "border-start border-5 ps-2",
-        style = sprintf(
-          "--bs-border-opacity: 1; border-color: %s !important;",
-          blk_border_color(blk_info$category)
+        class = "d-flex align-items-stretch gap-3",
+        # Icon element
+        div(
+          class = paste(
+            "d-flex align-items-center justify-content-center",
+            "flex-shrink-0 rounded-3 shadow-sm"
+          ),
+          style = sprintf(
+            paste0(
+              "background: %s;",
+              "border: 1px solid rgba(255, 255, 255, 0.2);",
+              "width: 60px;",
+              "min-height: 100%%;",
+              "position: relative;"
+            ),
+            bg_color
+          ),
+          div(
+            class = icon_color,
+            style = "filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));",
+            blk_icon(blk_info$category, class = "xl")
+          )
         ),
-        block_card_title(id, blk_info, edit_ui, ns),
-        # subtitle
-        block_card_subtitle(board, block, id, blk_info),
+        # Title section
+        div(
+          class = "d-flex flex-column justify-content-center flex-grow-1 min-height-0",
+          block_card_title(board, block, id, blk_info, edit_ui, ns)
+        )
       ),
       #edit_ui$block_summary,
       block_card_content(block, id, blk_id, ns)
@@ -51,12 +75,25 @@ block_card <- function(board, block, edit_ui, ns) {
 }
 
 #' @keywords internal
-block_card_title <- function(id, info, edit_ui, ns) {
+block_card_title <- function(board, block, id, info, edit_ui, ns) {
   tags$div(
-    class = "card-title d-flex align-items-center justify-content-between gap-2",
-    edit_ui$block_name,
-    block_card_toggles(id, ns),
-    block_card_dropdown(id, info, ns)
+    class = "d-flex align-items-center justify-content-between w-100",
+    # Left side: block name and subtitle
+    div(
+      class = "flex-grow-1 pe-3",
+      div(
+        class = "card-title mb-1",
+        style = "line-height: 1.3;",
+        edit_ui$block_name
+      ),
+      block_card_subtitle(board, block, id, info)
+    ),
+    # Right side: toggles and dropdown
+    div(
+      class = "d-flex align-items-center gap-2 flex-shrink-0",
+      block_card_toggles(id, ns),
+      block_card_dropdown(id, info, ns)
+    )
   )
 }
 
@@ -78,7 +115,7 @@ block_subtitle_id.dag_board <- function(x, id) {
 #' @export
 block_subtitle_id.md_board <- function(x, id) {
   tagList(
-    " || ",
+    " | ",
     span("id:", id)
   )
 }
@@ -86,12 +123,14 @@ block_subtitle_id.md_board <- function(x, id) {
 #' @keywords internal
 block_card_subtitle <- function(board, block, id, info) {
   div(
-    class = "card-subtitle text-body-secondary mb-1",
+    class = "text-body-secondary small text-muted",
+    style = "line-height: 1.2;",
     span(class(block)[1]),
     block_subtitle_id(board, id),
     tags$sup(
+      class = "ms-1",
       tooltip(
-        icon("info-circle"),
+        icon("info-circle", style = "color: #9ca3af; font-size: 0.75em;"),
         p(
           icon("lightbulb"),
           "How to use this block?",
@@ -104,34 +143,45 @@ block_card_subtitle <- function(board, block, id, info) {
 
 #' @keywords internal
 block_card_content <- function(block, id, blk_id, ns) {
-  # Hide headers of accordion panels
-  accordions <- accordion(
-    id = ns(paste0("accordion-", id)),
-    multiple = TRUE,
-    class = "accordion-flush",
+  # Create accordion panels and hide their headers directly
+  inputs_panel <- htmltools::tagQuery(
     accordion_panel(
       icon = icon("sliders"),
       title = "Block inputs",
-      value = "inputs",
-      expr_ui(blk_id, block)
-    ),
+      value = "inputs"
+    )
+  )$find(".accordion-header")$addAttrs(style = "display: none;")$reset()$find(
+    ".accordion-body"
+  )$append(expr_ui(blk_id, block))$allTags()
+
+  inputs_panel$attribs$style <- "border: none; border-radius: 0;"
+
+  outputs_panel <- htmltools::tagQuery(
     accordion_panel(
       icon = icon("chart-simple"),
       title = "Block output(s)",
       value = "outputs",
-      style = "max-width: 100%; overflow-x: auto;",
-      block_ui(blk_id, block),
-      div(id = ns(paste0("outputs-issues-wrapper-", id)))
+      style = "max-width: 100%; overflow-x: auto;"
     )
+  )$find(".accordion-header")$addAttrs(style = "display: none;")$reset()$find(
+    ".accordion-body"
+  )$append(tagList(
+    block_ui(blk_id, block),
+    div(id = ns(paste0("outputs-issues-wrapper-", id)))
+  ))$allTags()
+
+  outputs_panel$attribs$style <- "border: none; border-radius: 0;"
+
+  accordions <- accordion(
+    id = ns(paste0("accordion-", id)),
+    multiple = TRUE,
+    open = c("inputs", "outputs"),
+    inputs_panel,
+    outputs_panel
   )
-  accordions <- htmltools::tagQuery(accordions)$find(
-    ".accordion-header"
-  )$addAttrs(style = "display: none;")$reset()$find(".accordion-item")$addAttrs(
-    style = "border: none;"
-  )$allTags()
 
   tagList(
-    div(id = ns(sprintf("errors-block-%s", id))),
+    div(id = ns(sprintf("errors-block-%s", id)), class = "mt-4"),
     accordions
   )
 }
@@ -149,56 +199,111 @@ block_card_toggles <- function(id, ns) {
         "<small>outputs</small>"
       )
     ),
-    selected = "inputs"
+    individual = TRUE,
+    selected = c("inputs", "outputs")
   )
 
+  # Remove the ms-auto class
   section_toggles$attribs$class <- trimws(gsub(
-    "form-group",
-    "ms-auto",
+    "form-group|ms-auto",
+    "",
     section_toggles$attribs$class
   ))
 
   section_toggles
 }
 
+#' @keywords internal
 block_card_dropdown <- function(id, info, ns) {
-  dropdown_button(
-    class = "float-end",
-    icon = icon("ellipsis-vertical", class = "text-dark"),
-    size = "sm",
-    dropdown_header("BLOCK ACTIONS"),
-    dropdown_action_button(
-      ns(sprintf("append-%s", id)),
-      "Append block",
-      icon = icon("plus")
+  # Create a custom dropdown without the default button styling (no bg on hover, ...)
+  tags$div(
+    class = "dropdown",
+    tags$button(
+      class = "btn btn-link p-1 border-0 bg-transparent text-muted",
+      type = "button",
+      `data-bs-toggle` = "dropdown",
+      `aria-expanded` = "false",
+      onmouseover = "this.classList.add('text-dark');",
+      onmouseout = "this.classList.remove('text-dark');",
+      icon("ellipsis-vertical")
     ),
-    dropdown_action_button(
-      ns(sprintf("delete-%s", id)),
-      "Delete block",
-      icon = icon("trash"),
-      class = "text-danger"
-    ),
-    dropdown_divider(),
-    div(
-      class = "text-muted d-flex justify-content-between",
-      p("Package: "),
-      p(info$package)
-    ),
-    div(
-      class = "text-muted d-flex justify-content-between",
-      p("Type: "),
-      p(info$category)
-    ),
-    div(
-      class = "text-muted d-flex justify-content-between",
-      p("ID: "),
-      p(id)
+    tags$ul(
+      class = "dropdown-menu dropdown-menu-end shadow-sm rounded-3 border-1",
+      style = "min-width: 250px;",
+      # Actions header
+      tags$li(
+        tags$h6(
+          class = "dropdown-header text-uppercase fw-semibold small text-secondary",
+          style = "font-size: 0.75rem; letter-spacing: 0.5px;",
+          "Block Actions"
+        )
+      ),
+      # Block actions
+      tags$li(
+        tags$button(
+          class = "dropdown-item action-button py-2 position-relative text-center",
+          type = "button",
+          id = ns(sprintf("append-%s", id)),
+          style = "padding-left: 2.5rem;",
+          tags$span(
+            class = "position-absolute start-0 top-50 translate-middle-y ms-3",
+            icon("plus", class = "text-success")
+          ),
+          "Append block"
+        )
+      ),
+      tags$li(
+        tags$button(
+          class = "dropdown-item action-button py-2 position-relative text-center text-danger",
+          type = "button",
+          id = ns(sprintf("delete-%s", id)),
+          style = "padding-left: 2.5rem;",
+          tags$span(
+            class = "position-absolute start-0 top-50 translate-middle-y ms-3",
+            icon("trash")
+          ),
+          "Delete block"
+        )
+      ),
+      tags$li(tags$hr(class = "dropdown-divider my-2")),
+      # Block details header
+      tags$li(
+        tags$h6(
+          class = "dropdown-header text-uppercase fw-semibold small text-secondary",
+          style = "font-size: 0.75rem; letter-spacing: 0.5px;",
+          "Block Details"
+        )
+      ),
+      # Block details content
+      tags$li(
+        tags$div(
+          class = "px-3 py-1",
+          # Package
+          tags$div(
+            class = "d-flex justify-content-between align-items-center mb-2",
+            tags$span("Package", class = "text-muted small"),
+            tags$span(info$package, class = "small fw-medium")
+          ),
+          # Type
+          tags$div(
+            class = "d-flex justify-content-between align-items-center mb-2",
+            tags$span("Type", class = "text-muted small"),
+            tags$span(info$category, class = "small fw-medium")
+          ),
+          # ID
+          tags$div(
+            class = "d-flex justify-content-between align-items-center mb-0",
+            tags$span("ID", class = "text-muted small"),
+            tags$span(id, class = "small fw-medium font-monospace")
+          )
+        )
+      )
     )
   )
 }
 
 #' @keywords internal
-remove_block_panels <- function(ids, panels) {
+remove_block_panels <- function(proxy, ids, panels) {
   stopifnot(is.character(ids))
   # Only remove panels that are in the dock
   in_dock <- which(ids %in% get_block_panels(names(panels)))
@@ -208,7 +313,7 @@ remove_block_panels <- function(ids, panels) {
   ids <- ids[in_dock]
 
   lapply(ids, function(id) {
-    remove_panel("layout", paste0("block-", id))
+    remove_panel(proxy, paste0("block-", id))
   })
 }
 
@@ -293,12 +398,12 @@ remove_block_ui.dag_board <- function(
   invisible(x)
 }
 
-add_block_panel <- function(id, panels) {
+add_block_panel <- function(proxy, id, panels) {
   add_panel(
-    "layout",
+    proxy,
     panel = dockViewR::panel(
       id = sprintf("block-%s", id),
-      title = sprintf("Block: %s", id),
+      title = id,
       content = tagList(),
       # Remove padding and margin to use full space of the panel
       style = list(
@@ -311,7 +416,7 @@ add_block_panel <- function(id, panels) {
         )$reference_panel,
         direction = get_board_option_value("blocks_position")$direction
       ),
-      remove = list(enable = TRUE, mode = "manual")
+      remove = new_remove_tab_plugin(enable = TRUE, mode = "manual")
     )
   )
 }
@@ -335,13 +440,14 @@ show_block_panel <- function(id, session) {
 #'
 #' @param id Block id to show
 #' @param parent Parent reactive values.
-#' @param session Shiny session object.
+#' @param proxy Dock proxy.
 #' @rdname block-panel
-create_or_show_block_panel <- function(id, parent, session) {
+create_or_show_block_panel <- function(proxy, id, parent) {
+  session <- proxy$session
   ns <- session$ns
 
   # Extract block panels
-  all_panels <- get_panels_ids("layout", session)
+  all_panels <- get_panels_ids(proxy)
   block_panels <- get_block_panels(all_panels)
 
   # If the block panel is already there,
@@ -349,12 +455,12 @@ create_or_show_block_panel <- function(id, parent, session) {
   if (parent$selected_block %in% block_panels) {
     # Only select panel
     dockViewR::select_panel(
-      "layout",
+      proxy,
       sprintf("block-%s", parent$selected_block)
     )
   } else {
     # Or add it and move the block UI from offcanvas to the panel container
-    add_block_panel(id, all_panels)
+    add_block_panel(proxy, id, all_panels)
     show_block_panel(id, session)
   }
 }
@@ -364,7 +470,8 @@ create_or_show_block_panel <- function(id, parent, session) {
 #' Move block from panel to offcanvas-body.
 #'
 #' @rdname block-panel
-hide_block_panel <- function(id, session) {
+hide_block_panel <- function(proxy, id) {
+  session <- proxy$session
   ns <- session$ns
   # Remove the block panel when the user clicks on the
   # close button of the panel.
@@ -375,7 +482,7 @@ hide_block_panel <- function(id, session) {
       block_id = sprintf("#%s", ns(paste0("layout-", id)))
     )
   )
-  remove_panel("layout", id)
+  remove_panel(proxy, id)
 }
 
 #' Get block info in registry
@@ -386,6 +493,7 @@ get_block_metadata <- function(x) {
   stopifnot(is_block(x))
 
   ctor <- attr(x, "ctor")
+  ctor <- attr(ctor, "fun")
 
   if (is_string(ctor)) {
     blk <- sub("^new_", "", ctor)

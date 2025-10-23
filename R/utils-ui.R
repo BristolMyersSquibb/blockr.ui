@@ -144,7 +144,7 @@ collapse_container <- function(id, ...) {
 }
 
 #' @keywords internal
-blk_border_color <- function(category) {
+blk_color <- function(category) {
   # Palette is taken from:
   # https://siegal.bio.nyu.edu/color-palette/
   # very nice palette that is color-blind friendly.

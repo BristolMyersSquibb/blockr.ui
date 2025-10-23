@@ -37,7 +37,7 @@ Imports:
     shinyjs,
     jsonlite,
     htmltools,
-    dockViewR (>= 0.2.1),
+    dockViewR (>= 0.3.0),
     g6R (>= 0.2.0),
     ellmer (>= 0.3.0),
     grDevices,

@@ -351,19 +351,22 @@ get_block_panels <- function(panels, pattern = "block-") {
   )
 }
 
-restore_layout <- function(board, parent, session) {
+restore_layout <- function(proxy, board, parent) {
+  session <- proxy$session
+  ns <- session$ns
+
   # Move any existing block UI from the offcanvas to their panel
   block_panels <- get_block_panels(names(parent$app_layout$panels))
 
   # Recreate dag panel
   dockViewR::select_panel(
-    "layout",
+    proxy,
     "dag"
   )
   insertUI(
-    selector = sprintf("#%s", session$ns("layout-dag")),
+    selector = sprintf("#%s", ns("layout-dag")),
     ui = board_ui(
-      session$ns(NULL),
+      ns(NULL),
       board_plugins(board)["manage_links"]
     ),
     immediate = TRUE
@@ -373,14 +376,14 @@ restore_layout <- function(board, parent, session) {
   modules <- names(board_modules(board))
   lapply(modules, function(mod) {
     dockViewR::select_panel(
-      "layout",
+      proxy,
       mod
     )
     insertUI(
-      selector = sprintf("#%s", session$ns(paste0("layout-", mod))),
+      selector = sprintf("#%s", ns(paste0("layout-", mod))),
       ui = call_board_module_ui(
         board_modules(board)[[mod]],
-        session$ns(mod),
+        ns(mod),
         board
       ),
       immediate = TRUE
@@ -389,7 +392,7 @@ restore_layout <- function(board, parent, session) {
 
   lapply(block_panels, function(id) {
     dockViewR::select_panel(
-      "layout",
+      proxy,
       sprintf("block-%s", id)
     )
     # Move block from offcanvas to panel
@@ -421,6 +424,8 @@ build_layout <- function(modules, plugins) {
     output <- session$output
     ns <- session$ns
 
+    dock_proxy <- dock_view_proxy("layout", session)
+
     # Save layout on change
     observeEvent(
       {
@@ -440,7 +445,7 @@ build_layout <- function(modules, plugins) {
       },
       {
         # No need to cleanup before
-        restore_dock("layout", parent$app_layout)
+        restore_dock(dock_proxy, parent$app_layout)
         set_restore(parent, "restored-dock")
       }
     )
@@ -457,22 +462,31 @@ build_layout <- function(modules, plugins) {
         )
       },
       {
-        restore_layout(board$board, parent, session)
+        restore_layout(dock_proxy, board$board, parent)
       }
     )
 
     # Add or re-insert block panel ui
     observeEvent(
-      req(parent$selected_block, length(parent$selected_block) == 1),
+      req(
+        parent$selected_block,
+        length(parent$selected_block) == 1,
+        # Ensure we insert panel for something that exists
+        parent$selected_block %in% board_block_ids(board$board)
+      ),
       {
-        create_or_show_block_panel(parent$selected_block, parent, session)
+        create_or_show_block_panel(
+          dock_proxy,
+          parent$selected_block,
+          parent
+        )
       }
     )
 
     observeEvent(
       input[["layout_panel-to-remove"]],
       {
-        hide_block_panel(input[["layout_panel-to-remove"]], session)
+        hide_block_panel(dock_proxy, input[["layout_panel-to-remove"]])
         # Send callback to links plugin to unselect the node
         parent$unselected_block <- gsub(
           "block-",
@@ -485,7 +499,11 @@ build_layout <- function(modules, plugins) {
     # Remove block panel on block remove
     # We can remove multiple blocks at once
     observeEvent(parent$removed_block, {
-      remove_block_panels(parent$removed_block, parent$app_layout$panels)
+      remove_block_panels(
+        dock_proxy,
+        parent$removed_block,
+        parent$app_layout$panels
+      )
     })
 
     output$layout <- renderDockView({
@@ -523,16 +541,21 @@ build_layout <- function(modules, plugins) {
             )
           ),
           # TBD (make theme function of board options)
-          theme = "light"
+          theme = "light-spaced"
         )
       })
     })
 
     # Update theme in real time
     observeEvent(get_board_option_value("dark_mode"), {
+      theme <- get_board_option_value("dark_mode")
+      # dockview does not have dark ...
+      if (theme == "dark") {
+        theme <- "abyss"
+      }
       update_dock_view(
-        "layout",
-        list(theme = get_board_option_value("dark_mode"))
+        dock_proxy,
+        list(theme = sprintf("%s-spaced", theme))
       )
     })
 
@@ -555,6 +578,7 @@ manage_scoutbar <- function(board, update, session, parent, ...) {
       update_scoutbar(
         session,
         "scoutbar",
+        theme = get_board_option_value("dark_mode"),
         revealScoutbar = TRUE
       )
     }
@@ -612,68 +636,17 @@ toggle_blk_section <- function(blk, session) {
         "collapse-blk-section-%s",
         id
       )]]
-
-      # Get current open panels
-      current_open <- session$input[[sprintf("accordion-%s", id)]] %||%
-        character(0)
-
-      # Handle empty selections - close all panels
       if (length(selected_sections) == 0) {
-        if (length(current_open) > 0) {
-          bslib::accordion_panel_close(
-            id = accordion_id,
-            values = current_open
-          )
-        }
-      } else {
-        # Close panels that should no longer be open
-        to_close <- setdiff(current_open, selected_sections)
-        if (length(to_close) > 0) {
-          bslib::accordion_panel_close(
-            id = accordion_id,
-            values = to_close
-          )
-        }
-
-        # Open panels that should be open
-        to_open <- setdiff(selected_sections, current_open)
-        if (length(to_open) > 0) {
-          bslib::accordion_panel_open(
-            id = accordion_id,
-            values = to_open
-          )
-        }
+        selected_sections <- ""
       }
+
+      bslib::accordion_panel_set(
+        accordion_id,
+        selected_sections
+      )
     },
+    ignoreInit = TRUE,
     ignoreNULL = FALSE
-  )
-
-  # Sync accordion state back to toggle buttons when accordion changes
-  observeEvent(
-    session$input[[sprintf("accordion-%s", id)]],
-    {
-      current_accordion_state <- session$input[[sprintf(
-        "accordion-%s",
-        id
-      )]] %||%
-        character(0)
-      current_toggle_state <- session$input[[sprintf(
-        "collapse-blk-section-%s",
-        id
-      )]] %||%
-        character(0)
-
-      # Only update if they're different to avoid infinite loops
-      if (
-        !identical(sort(current_accordion_state), sort(current_toggle_state))
-      ) {
-        shinyWidgets::updateCheckboxGroupButtons(
-          session,
-          sprintf("collapse-blk-section-%s", id),
-          selected = current_accordion_state
-        )
-      }
-    }
   )
 }
 
@@ -716,8 +689,6 @@ update_blk_state_ui <- function(blk, session) {
   conds <- names(blk$server$cond)
   ns <- session$ns
   id <- attr(blk, "uid")
-
-  any_error <- reactiveVal(NULL)
 
   lapply(conds, function(nme) {
     observeEvent(blk$server$cond[[nme]], {
@@ -777,37 +748,12 @@ update_blk_state_ui <- function(blk, session) {
           paste0("#", ns(sprintf("errors-block-%s", id))),
           ui = msgs
         )
-
-        any_error(cond)
-      } else {
-        any_error(NULL)
       }
     })
   })
-
-  # Handle accordion collapse updates based on errors
-  observeEvent(
-    any_error(),
-    {
-      if (!is.null(any_error())) {
-        shinyWidgets::updateCheckboxGroupButtons(
-          session,
-          sprintf("collapse-blk-section-%s", id),
-          selected = "inputs"
-        )
-      } else {
-        shinyWidgets::updateCheckboxGroupButtons(
-          session,
-          sprintf("collapse-blk-section-%s", id),
-          selected = "outputs"
-        )
-      }
-    },
-    ignoreNULL = FALSE
-  )
 }
 
-#' @keyowrds internal
+#' @keywords internal
 handle_block_actions <- function(blk, parent, session) {
   id <- attr(blk, "uid")
   ns <- session$ns
@@ -815,8 +761,9 @@ handle_block_actions <- function(blk, parent, session) {
   observeEvent(
     session$input[[sprintf("append-%s", id)]],
     {
+      # Reselect node if node is not selected in the graph
       if (is.null(parent$selected_block)) {
-        return(NULL)
+        parent$selected_block <- id
       }
       parent$scoutbar$trigger <- "links"
       if (isFALSE(parent$append_block)) {

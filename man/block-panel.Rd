@@ -5,16 +5,16 @@
 \alias{hide_block_panel}
 \title{Create/Show a block panel}
 \usage{
-create_or_show_block_panel(id, parent, session)
+create_or_show_block_panel(proxy, id, parent)
 
-hide_block_panel(id, session)
+hide_block_panel(proxy, id)
 }
 \arguments{
+\item{proxy}{Dock proxy.}
+
 \item{id}{Block id to show}
 
 \item{parent}{Parent reactive values.}
-
-\item{session}{Shiny session object.}
 }
 \description{
 If panel does not exist, create it and move the block UI from

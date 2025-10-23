@@ -185,7 +185,7 @@ initialize_g6 <- function(
     graph,
     layout = antv_dagre_layout(
       begin = c(150, 150),
-      nodesep = 15,
+      nodesep = 50,
       ranksep = 75,
       sortByCombo = TRUE
     )
@@ -493,7 +493,7 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
   ns <- session$ns
 
   info <- get_block_metadata(new)
-  blk_color <- blk_border_color(info$category)
+  blk_color <- blk_color(info$category)
 
   new_node <- list(
     id = block_uid(new),
@@ -571,7 +571,7 @@ remove_node <- function(selected, vals, session) {
 
   ns <- session$ns
 
-  # clear node selection + remove
+  # clear node selection + remove connected edges)
   g6_remove_nodes(
     g6_set_nodes(
       g6_proxy(ns("network")),
@@ -661,11 +661,14 @@ create_edge <- function(new, vals, rv, session) {
   stopifnot(is.list(new))
 
   if (!validate_edge_creation(new$target, rv)) {
-    # remove edge when it was created from DND
-    g6_remove_edges(
-      g6_proxy(ns("network")),
-      ids = new$id
-    )
+    # remove edge when it was created from DND.
+    # With append, new$id does not exist
+    if (length(new$id)) {
+      g6_remove_edges(
+        g6_proxy(ns("network")),
+        ids = new$id
+      )
+    }
 
     # Cleanup node when it was created from Append block
     if (vals$append_block) {
@@ -684,7 +687,7 @@ create_edge <- function(new, vals, rv, session) {
   to_blk <- rv$blocks[[new$target]]$block
 
   new_edge <- list(
-    type = "fly-marker-cubic",
+    type = "line",
     source = new$source,
     target = new$target,
     label = define_conlabel(to_blk, new$target, rv)
@@ -872,7 +875,7 @@ apply_validation <- function(id, vals, rv, session) {
     edge_config <- lapply(connected_edges, function(id) {
       list(
         id = id,
-        type = "fly-marker-cubic",
+        type = "line",
         style = list(
           stroke = "#000",
           badgeText = NULL
@@ -1174,7 +1177,7 @@ create_edges_data_from_links <- function(links) {
     link <- links[[i]]
     list(
       id = names(links)[[i]],
-      type = "fly-marker-cubic",
+      type = "line",
       source = link$from,
       target = link$to,
       label = link$input
@@ -1193,12 +1196,12 @@ create_nodes_data_from_blocks <- function(blocks, stacks) {
     current <- blocks[[i]]
 
     info <- get_block_metadata(current)
-    blk_color <- blk_border_color(info$category)
+    blk_color <- blk_color(info$category)
 
     tmp <- list(
       id = names(blocks)[[i]],
       label = paste(
-        attr(current, "class")[1],
+        blk_name(current),
         "\n id:",
         names(blocks)[[i]]
       ),
