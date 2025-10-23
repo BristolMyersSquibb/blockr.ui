@@ -111,6 +111,9 @@ serve.dag_board <- function(
         gap = 0,
         theme = bslib::bs_theme(
           version = 5,
+          # button have the same color as dockView tabs
+          "btn-active-border-shade-amount" = "5%",
+          "btn-active-bg-shade-amount" = "5%",
           "enable-negative-margins" = "true"
         ),
         # Use shiny's busy indicator
