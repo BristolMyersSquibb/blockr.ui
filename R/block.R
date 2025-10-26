@@ -144,15 +144,34 @@ block_card_subtitle <- function(board, block, id, info) {
 #' @keywords internal
 block_card_content <- function(block, id, blk_id, ns) {
   # Create accordion panels and hide their headers directly
+  # Use children() instead of find() to avoid affecting nested accordions
   inputs_panel <- htmltools::tagQuery(
     accordion_panel(
       icon = icon("sliders"),
       title = "Block inputs",
       value = "inputs"
     )
-  )$find(".accordion-header")$addAttrs(style = "display: none;")$reset()$find(
-    ".accordion-body"
-  )$append(expr_ui(blk_id, block))$allTags()
+  )$children(".accordion-header")$addAttrs(style = "display: none;")$resetSelected()$
+    children(".accordion-collapse")$children(".accordion-body")$append(tagList(
+      # Fix for nested accordions: Bootstrap incorrectly adds 'show' class to all
+      # nested panels. This script removes extra 'show' classes after initialization.
+      tags$script(HTML("
+        setTimeout(function() {
+          var nested = document.querySelectorAll('.accordion-body .accordion');
+          nested.forEach(function(acc) {
+            var panels = acc.querySelectorAll('.accordion-collapse');
+            var first = false;
+            panels.forEach(function(p) {
+              if (p.classList.contains('show')) {
+                if (first) p.classList.remove('show');
+                first = true;
+              }
+            });
+          });
+        }, 50);
+      ")),
+      expr_ui(blk_id, block)
+    ))$allTags()
 
   inputs_panel$attribs$style <- "border: none; border-radius: 0;"
 
@@ -163,12 +182,11 @@ block_card_content <- function(block, id, blk_id, ns) {
       value = "outputs",
       style = "max-width: 100%; overflow-x: auto;"
     )
-  )$find(".accordion-header")$addAttrs(style = "display: none;")$reset()$find(
-    ".accordion-body"
-  )$append(tagList(
-    block_ui(blk_id, block),
-    div(id = ns(paste0("outputs-issues-wrapper-", id)))
-  ))$allTags()
+  )$children(".accordion-header")$addAttrs(style = "display: none;")$resetSelected()$
+    children(".accordion-collapse")$children(".accordion-body")$append(tagList(
+      block_ui(blk_id, block),
+      div(id = ns(paste0("outputs-issues-wrapper-", id)))
+    ))$allTags()
 
   outputs_panel$attribs$style <- "border: none; border-radius: 0;"
 
