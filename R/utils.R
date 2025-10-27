@@ -43,6 +43,8 @@ is_pkg_avail <- function(pkg) {
   requireNamespace(pkg, quietly = TRUE)
 }
 
+last <- function(x) x[[length(x)]]
+
 #' Useful for shinytest2
 #' Pre-process reactiveValues results
 #'
