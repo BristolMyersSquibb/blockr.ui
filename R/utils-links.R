@@ -432,7 +432,7 @@ default_g6_plugins <- function(graph, ..., ns, path, context_menu) {
             } else if ( value === 'zoom-out' ) {
               graph.zoomTo (graph.getZoom() - 0.1);
             } else if ( value === 'auto-fit' ) {
-              graph.fitView ( ) ;
+              graph.fitView() ;
             } else if (value === 'delete') {
               const selectedNodes = graph.getElementDataByState('node', 'selected').map(
                 (node) => {
@@ -752,6 +752,7 @@ register_node_validation <- function(id, rv, vals, session) {
         length(board_block_ids(rv$board)) > 0,
         # Don't trigger if node is removed
         id %in% board_block_ids(rv$board),
+        id != vals$removed_block,
         is.null(vals$refreshed)
       )
       reactiveValuesToList(rv$blocks[[id]]$server$cond)
@@ -784,7 +785,8 @@ register_node_stack_link <- function(id, rv, vals, session) {
       req(
         input[["network-initialized"]],
         # Don't trigger if node is removed
-        id %in% board_block_ids(rv$board)
+        id %in% board_block_ids(rv$board),
+        id != vals$removed_block
       )
       input[["network-state"]]
     },
@@ -858,8 +860,14 @@ apply_validation <- function(id, vals, rv, session) {
   message <- reactiveValuesToList(rv$blocks[[id]]$server$cond)
   ns <- session$ns
   # Restore blue color if valid
+  connected_edges <- character(0)
   edges <- as.data.frame(board_links(rv$board))
-  connected_edges <- edges[edges$from == id, "id"]
+  if (nrow(edges) > 0) {
+    connected_edges <- edges[
+      edges$from == id && edges$to != vals$removed_block,
+      "id"
+    ]
+  }
 
   # Reset node defaults
   node_config <- list(

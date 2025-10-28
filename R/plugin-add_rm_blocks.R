@@ -33,13 +33,13 @@ add_rm_block_server <- function(id, board, update, parent, ...) {
           } else {
             new_id <- rand_names(board_block_ids(board$board))
             new_blk <- create_block(parent$scoutbar$value)
-            block_name(new_blk) <- blk_name(new_blk)
             new_blk <- as_blocks(set_names(list(new_blk), new_id))
           }
 
           update(
             list(blocks = list(add = new_blk))
           )
+
           parent$added_block <- new_blk[[1]]
           attr(parent$added_block, "uid") <- names(new_blk)
         }

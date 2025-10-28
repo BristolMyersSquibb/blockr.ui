@@ -160,32 +160,41 @@ gen_add_rm_link_server <- function(context_menu) {
         })
 
         # Add node to network board$nodes so the graph is updated
-        observeEvent(parent$added_block, {
-          tryCatch(
-            {
-              create_node(
-                new = parent$added_block,
-                vals = parent,
-                rv = board,
-                validate = TRUE,
-                session
-              )
-
-              if (parent$append_block) {
-                # Send any created link back to the board
-                update(
-                  list(
-                    links = list(add = parent$added_edge)
-                  )
+        observeEvent(
+          {
+            req(parent$added_block)
+            # With latest core: without the below req, this event
+            # would trigger before board$blocks[[block_uid(parent$added_block)]] even exists,
+            # leading to errors.
+            req(board$blocks[[block_uid(parent$added_block)]])
+          },
+          {
+            tryCatch(
+              {
+                create_node(
+                  new = parent$added_block,
+                  vals = parent,
+                  rv = board,
+                  validate = TRUE,
+                  session
                 )
+
+                if (parent$append_block) {
+                  # Send any created link back to the board
+                  update(
+                    list(
+                      links = list(add = parent$added_edge)
+                    )
+                  )
+                }
+              },
+              error = function(e) {
+                e$message
               }
-            },
-            error = function(e) {
-              e$message
-            }
-          )
-          parent$append_block <- FALSE
-        })
+            )
+            parent$append_block <- FALSE
+          }
+        )
 
         # Implement Edge creation by DND
         # we can drag from one node

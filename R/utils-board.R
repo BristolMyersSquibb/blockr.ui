@@ -814,11 +814,9 @@ update_block_ui <- function(board, update, session, parent, ...) {
   observeEvent(
     parent$added_block,
     {
-      blk <- board$blocks[[block_uid(parent$added_block)]]
-      attr(blk, "uid") <- block_uid(parent$added_block)
-      update_blk_state_ui(blk, session)
-      toggle_blk_section(blk, session)
-      handle_block_actions(blk, parent, session)
+      update_blk_state_ui(parent$added_block, session)
+      toggle_blk_section(parent$added_block, session)
+      handle_block_actions(parent$added_block, parent, session)
     }
   )
 
