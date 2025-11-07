@@ -20,7 +20,7 @@ block_ui.dag_board <- function(id, x, block = NULL, edit_ui = NULL, ...) {
 block_card <- function(board, block, edit_ui, ns) {
   id <- block_uid(block)
   blk_id <- ns(paste0("block_", id))
-  blk_info <- get_block_metadata(block)
+  blk_info <- blks_metadata(block)
 
   # Edit plugin
   if (!is.null(edit_ui)) {
@@ -28,8 +28,7 @@ block_card <- function(board, block, edit_ui, ns) {
   }
 
   # if yellow color, use black text, otherwise white for contrasts
-  bg_color <- blk_color(blk_info$category)
-  icon_color <- if (bg_color == "#F0E442") "text-dark" else "text-white"
+  icon_color <- if (blk_info$color == "#F0E442") "text-dark" else "text-white"
 
   card_tag <- tags$div(
     class = "card",
@@ -53,12 +52,12 @@ block_card <- function(board, block, edit_ui, ns) {
               "min-height: 100%%;",
               "position: relative;"
             ),
-            bg_color
+            blk_info$color
           ),
           div(
             class = icon_color,
             style = "filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));",
-            blk_icon(blk_info$category, class = "xl")
+            HTML(blk_info$icon)
           )
         ),
         # Title section
@@ -483,42 +482,6 @@ hide_block_panel <- function(proxy, id) {
     )
   )
   remove_panel(proxy, id)
-}
-
-#' Get block info in registry
-#'
-#' @param x Block object
-#' @keywords internal
-get_block_metadata <- function(x) {
-  stopifnot(is_block(x))
-
-  ctor <- attr(x, "ctor")
-  ctor <- attr(ctor, "fun")
-
-  if (is_string(ctor)) {
-    blk <- sub("^new_", "", ctor)
-    blks <- available_blocks()
-
-    if (blk %in% names(blks)) {
-      info <- blks[[blk]]
-
-      res <- list(
-        category = attr(info, "category"),
-        name = attr(info, "name"),
-        description = attr(info, "description"),
-        package = attr(info, "package")
-      )
-
-      return(res)
-    }
-  }
-
-  list(
-    category = "Uncategorized",
-    name = block_name(x),
-    description = "No description available",
-    package = "local"
-  )
 }
 
 #' Get the state of a block

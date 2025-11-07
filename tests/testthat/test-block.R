@@ -1,8 +1,12 @@
 test_that("get_block_registry works", {
-  expect_error(get_block_metadata(character()))
-  res <- get_block_metadata(new_dataset_block())
+  expect_error(blks_metadata(character()))
+  res <- blks_metadata(new_dataset_block())
   expect_type(res, "list")
-  expect_named(res, c("category", "name", "description", "package"))
+  expect_named(
+    res,
+    c("id", "icon", "category", "name", "description", "package", "color"),
+    ignore.order = TRUE
+  )
 
   new_local_block <- function(...) {
     new_block(
@@ -14,7 +18,7 @@ test_that("get_block_registry works", {
       ...
     )
   }
-  res <- get_block_metadata(new_local_block())
+  res <- blks_metadata(new_local_block())
   expect_identical(res$category, "Uncategorized")
 })
 

@@ -143,20 +143,80 @@ collapse_container <- function(id, ...) {
   tags$div(class = "collapse", id = id, ...)
 }
 
-#' @keywords internal
+#' Get metadata for blocks
+#'
+#' @param blocks Blocks passed as `blocks` or `block` object
+#' @rdname meta
+#' @export
+blks_metadata <- function(blocks) {
+  default_name <- function(x) {
+    gsub("_", " ", class(x)[1L])
+  }
+
+  if (is_block(blocks)) {
+    id <- registry_id_from_block(blocks)
+  } else if (is_blocks(blocks)) {
+    id <- lapply(blocks, registry_id_from_block)
+  } else {
+    blockr_abort("Unsupported input type for `blocks`.")
+  }
+
+  if (any(lengths(id) == 0L)) {
+    cat <- default_category()
+
+    res <- data.frame(
+      id = id[lengths(id) == 0L],
+      name = chr_ply(blocks[lengths(id) == 0L], default_name),
+      description = "not available",
+      category = cat,
+      icon = default_icon(cat),
+      package = "local",
+      color = blk_color(cat)
+    )
+
+    if (is_blocks(blocks)) {
+      rownames(res) <- names(blocks)[lengths(id) == 0L]
+    }
+  } else {
+    res <- NULL
+  }
+
+  if (any(lengths(id) > 0L)) {
+    reg <- block_metadata(id[lengths(id) > 0L])
+    reg <- cbind(reg, color = blk_color(reg$category))
+
+    if (is_blocks(blocks)) {
+      rownames(reg) <- names(blocks)[lengths(id) > 0L]
+    }
+
+    res <- rbind(res, reg)
+
+    if (is_blocks(blocks)) {
+      res <- res[names(blocks), ]
+    }
+  }
+
+  res
+}
+
+#' Get block color based on category
+#'
+#' @param category Block category
+#' @rdname meta
+#' @export
 blk_color <- function(category) {
-  # Palette is taken from:
-  # https://siegal.bio.nyu.edu/color-palette/
-  # very nice palette that is color-blind friendly.
+  # Okabe-Ito colorblind-friendly palette
+  # See: https://jfly.uni-koeln.de/color/
   switch(
     category,
-    data = "#0072B2",
-    transform = "#56B4E9",
-    plot = "#E69F00",
-    file = "#CC79A7",
-    parse = "#009E73",
-    table = "#F0E442",
-    text = "#D55E00",
-    "#6c757d"
+    input = "#0072B2", # Blue
+    transform = "#009E73", # Bluish green
+    structured = "#56B4E9", # Sky blue
+    plot = "#E69F00", # Orange
+    table = "#CC79A7", # Reddish purple/pink
+    model = "#F0E442", # Yellow (includes AI/ML)
+    output = "#D55E00", # Vermilion
+    utility = "#CCCCCC", # Light gray
+    "#999999" # Medium gray (uncategorized)
   )
 }

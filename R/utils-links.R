@@ -492,8 +492,7 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
   input <- session$input
   ns <- session$ns
 
-  info <- get_block_metadata(new)
-  blk_color <- blk_color(info$category)
+  info <- blks_metadata(new)
 
   new_node <- list(
     id = block_uid(new),
@@ -503,7 +502,7 @@ create_node <- function(new, vals, rv, validate = TRUE, session) {
       block_uid(new)
     ),
     style = list(
-      fill = blk_color
+      fill = info$color
     )
   )
 
@@ -1203,8 +1202,7 @@ create_nodes_data_from_blocks <- function(blocks, stacks) {
   lapply(seq_along(blocks), function(i) {
     current <- blocks[[i]]
 
-    info <- get_block_metadata(current)
-    blk_color <- blk_color(info$category)
+    info <- blks_metadata(current)
 
     tmp <- list(
       id = names(blocks)[[i]],
@@ -1214,7 +1212,7 @@ create_nodes_data_from_blocks <- function(blocks, stacks) {
         names(blocks)[[i]]
       ),
       style = list(
-        fill = blk_color
+        fill = info$color
       )
     )
 
