@@ -6,6 +6,7 @@
 \alias{sidebar_dep}
 \alias{show_sidebar}
 \alias{hide_sidebar}
+\alias{sidebar_state}
 \title{Sidebar primitive}
 \usage{
 sidebar_ui(id, side = c("right", "left"), width = "360px")
@@ -15,6 +16,8 @@ sidebar_dep()
 show_sidebar(id, ui, title = NULL, session = shiny::getDefaultReactiveDomain())
 
 hide_sidebar(id, session = shiny::getDefaultReactiveDomain())
+
+sidebar_state(id, session = shiny::getDefaultReactiveDomain())
 }
 \arguments{
 \item{id}{A character scalar. The DOM id used for the panel element. The
@@ -42,6 +45,11 @@ attached.
 \item \code{sidebar_dep()} returns an \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
 \item \code{show_sidebar()} and \code{hide_sidebar()} are called for their side
 effect (a custom message to the client) and return \code{invisible(NULL)}.
+\item \code{sidebar_state()} returns a list \code{list(open, pinned)} of logicals,
+read from the root session's input. Useful when an action handler
+wants to decide whether to chain (re-render the form) or close the
+panel after a successful confirm: pinned panels should stay open
+per the user's opt-in, unpinned panels close.
 }
 }
 \description{

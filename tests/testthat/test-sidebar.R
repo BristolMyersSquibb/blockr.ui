@@ -140,3 +140,30 @@ test_that("show_sidebar / hide_sidebar error outside a Shiny session", {
     class = "blockr_ui_no_session"
   )
 })
+
+test_that("sidebar_state defaults to FALSE / FALSE before the binding has set", {
+  sess <- shiny::MockShinySession$new()
+
+  state <- sidebar_state("main_sidebar", session = sess)
+  expect_identical(state, list(open = FALSE, pinned = FALSE))
+})
+
+test_that("sidebar_state reads from the root session, not the calling scope", {
+  sess <- shiny::MockShinySession$new()
+  # Simulate the binding having reported a state up to the root session.
+  sess$setInputs(main_sidebar = list(open = TRUE, pinned = TRUE))
+
+  # Calling from a deeply-namespaced session_proxy must still pick up
+  # the absolute-id state from the root.
+  nested <- sess$makeScope("mod_a")$makeScope("add_block_action")
+  state <- sidebar_state("main_sidebar", session = nested)
+
+  expect_identical(state, list(open = TRUE, pinned = TRUE))
+})
+
+test_that("sidebar_state errors outside a Shiny session", {
+  expect_error(
+    sidebar_state("main_sidebar", session = NULL),
+    class = "blockr_ui_no_session"
+  )
+})

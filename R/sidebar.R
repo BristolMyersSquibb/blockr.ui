@@ -24,6 +24,11 @@
 #' - `sidebar_dep()` returns an [htmltools::htmlDependency].
 #' - `show_sidebar()` and `hide_sidebar()` are called for their side
 #'   effect (a custom message to the client) and return `invisible(NULL)`.
+#' - `sidebar_state()` returns a list `list(open, pinned)` of logicals,
+#'   read from the root session's input. Useful when an action handler
+#'   wants to decide whether to chain (re-render the form) or close the
+#'   panel after a successful confirm: pinned panels should stay open
+#'   per the user's opt-in, unpinned panels close.
 #'
 #' @examples
 #' if (interactive()) {
@@ -144,6 +149,22 @@ hide_sidebar <- function(id, session = shiny::getDefaultReactiveDomain()) {
 
   root$sendInputMessage(id, list(action = "hide"))
   invisible(NULL)
+}
+
+#' @rdname sidebar
+#' @export
+sidebar_state <- function(id, session = shiny::getDefaultReactiveDomain()) {
+  stopifnot(is.character(id), length(id) == 1L, nzchar(id))
+  root <- root_session(session)
+
+  # Snapshot read: callers (typically `observeEvent` confirm handlers)
+  # want the current value without creating a reactive dependency on it.
+  state <- shiny::isolate(root$input[[id]])
+  if (is.null(state)) {
+    list(open = FALSE, pinned = FALSE)
+  } else {
+    state
+  }
 }
 
 # Walk to the root session so `sendInputMessage(id, ...)` targets the

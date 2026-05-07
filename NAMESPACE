@@ -3,6 +3,7 @@
 export(hide_sidebar)
 export(show_sidebar)
 export(sidebar_dep)
+export(sidebar_state)
 export(sidebar_ui)
 importFrom(blockr.core,pkg_name)
 importFrom(htmltools,tagList)

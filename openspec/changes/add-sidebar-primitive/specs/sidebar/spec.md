@@ -159,6 +159,36 @@ The binding's input value SHALL be reachable as `input[[id]]` server-side, where
 - **WHEN** the panel is open (regardless of how it was opened) and the user presses `Escape` (with the panel not pinned) OR clicks the X button
 - **THEN** `input[["main_sidebar"]]$open` becomes `FALSE` on the next reactive flush, allowing R-side observers to react to user-initiated dismissal
 
+### Requirement: Snapshot helper `sidebar_state(id, session)`
+
+`blockr.ui` SHALL export `sidebar_state(id, session = shiny::getDefaultReactiveDomain())` returning a `list(open, pinned)` snapshot of the binding's current value. The helper MUST walk to `session$rootScope()` so callers from a deeply-nested module can read the absolute-id state without computing the namespacing themselves, and MUST `shiny::isolate()` the read so the calling consumer does not pick up a reactive dependency. When the binding has not yet reported a value (e.g. the panel was never opened), the helper SHALL return `list(open = FALSE, pinned = FALSE)`.
+
+This is the recommended primitive for action handlers that want to "chain on pinned, close otherwise":
+
+```r
+update(list(blocks = list(add = bk)))
+if (isTRUE(blockr.ui::sidebar_state(sidebar_id)$pinned)) {
+  blockr.ui::show_sidebar(sidebar_id, ui = fresh_body, title = ...)
+} else {
+  blockr.ui::hide_sidebar(sidebar_id)
+}
+```
+
+#### Scenario: sidebar_state reads from the root session
+
+- **WHEN** `sidebar_state("main_sidebar", session)` is called from a deeply-nested module's session-proxy
+- **THEN** the helper walks to `session$rootScope()` and reads the absolute-id input value, returning the same `{open, pinned}` list that the root session sees
+
+#### Scenario: sidebar_state defaults before the binding has reported
+
+- **WHEN** `sidebar_state("main_sidebar")` is called before the panel has ever rendered (binding has never set a value)
+- **THEN** the helper returns `list(open = FALSE, pinned = FALSE)` rather than erroring
+
+#### Scenario: sidebar_state does not create a reactive dependency
+
+- **WHEN** `sidebar_state("main_sidebar")` is called from within an `observeEvent` handler
+- **THEN** subsequent changes to `input[["main_sidebar"]]` do NOT re-run the observer (the read is isolated)
+
 ### Requirement: Auto-open on empty board
 
 R-side code SHALL be able to drive an "auto-open at session start when there's nothing on the board" pattern using only `show_sidebar()` and the `input[[id]]$open` value. No special opt-in argument on `sidebar_ui()` is required: callers compose the recipe themselves with the existing helpers.
