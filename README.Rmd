@@ -23,12 +23,8 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 User-interface primitives shared across the [blockr](https://blockr.site/)
-ecosystem. This release ships a Bootstrap-free slide-in sidebar panel
-that mirrors `shiny::showModal()` / `shiny::removeModal()` in spirit
-and is intended to replace the modal dialogs used by `blockr.dock` for
-board mutations. Designed to sit between `blockr.core` and renderers
-such as `blockr.dock`, so extensions and embedded apps can adopt the
-same panel without pulling in `dockViewR`.
+ecosystem. Designed to sit between `blockr.core` and renderers
+such as `blockr.dock`.
 
 ## Installation
 

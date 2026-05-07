@@ -142,6 +142,10 @@
     if (body) Shiny.unbindAll(body);
 
     panel.classList.remove("blockr-sidebar-open");
+    // Closing is an explicit user/server action; pin opts in to "stay open
+    // while I work elsewhere", so clearing pin on close prevents a stale pin
+    // bleeding into the next show.
+    panel.classList.remove("blockr-sidebar-pinned");
     panel.setAttribute("aria-hidden", "true");
 
     detachOutsideClick(panel);
