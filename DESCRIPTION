@@ -1,18 +1,14 @@
 Package: blockr.ui
-Title: Cross-Cutting User Interface for the 'blockr' Ecosystem
+Title: User Interface Components for the 'blockr' Ecosystem
 Version: 0.0.0.9000
 Authors@R:
     person(given = "David",
            family = "Granjon",
            role = c("aut", "cre"),
            email = "david@cynkra.com")
-Description: Provides the cross-cutting user-interface surface used by
-    'blockr'-flavoured Shiny apps: design tokens, base CSS, the block
-    card, page chrome (app shell, navbar, options renderer), and a
-    reusable sidebar primitive with a content registry. Designed to
-    sit between 'blockr.core' and renderers such as 'blockr.dock', so
-    extensions and embedded apps can adopt the look and feel without
-    pulling in 'dockViewR'.
+Description: User-interface primitives shared across the 'blockr'
+    ecosystem. Designed to sit between 'blockr.core' 
+    and renderers such as 'blockr.dock'.
 URL: https://bristolmyerssquibb.github.io/blockr.ui/
 BugReports: https://github.com/BristolMyersSquibb/blockr.ui/issues
 License: GPL (>= 3)
@@ -33,3 +29,4 @@ Suggests:
 Remotes:
     BristolMyersSquibb/blockr.core
 Config/testthat/edition: 3
+VignetteBuilder: knitr

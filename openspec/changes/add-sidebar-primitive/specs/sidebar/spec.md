@@ -23,33 +23,35 @@
 
 ### Requirement: Server-side show / hide helpers
 
-`blockr.ui` SHALL export `sidebar_show(id, ui, title = NULL, session = shiny::getDefaultReactiveDomain())` and `sidebar_hide(id, session = shiny::getDefaultReactiveDomain())`. These mirror Shiny's `showModal()` / `removeModal()` in spirit.
+`blockr.ui` SHALL export `show_sidebar(id, ui, title = NULL, session = shiny::getDefaultReactiveDomain())` and `hide_sidebar(id, session = shiny::getDefaultReactiveDomain())`. These mirror Shiny's `showModal()` / `removeModal()` in spirit.
 
-`sidebar_show()` MUST pre-render `ui` via `htmltools::renderTags()` and send a single Shiny custom message of type `"blockr.ui:sidebar"` with payload `list(action = "show", id = id, html = rendered$html, dependencies = htmltools::resolveDependencies(rendered$dependencies), title = title)`. `sidebar_hide()` MUST send `list(action = "hide", id = id)` with the same custom-message type.
+Both helpers MUST dispatch through the calling session's root scope (`session$rootScope()$sendInputMessage(id, ...)`) so the panel id is treated as an absolute DOM id and is NOT prefixed by the calling module's namespace. The id passed at call time MUST match the id that was passed to `sidebar_ui()` at mount time.
 
-The custom-message type is intentionally fixed (`"blockr.ui:sidebar"`) so messages aren't namespaced by the calling session — the JS handler reads the absolute element id from `data.id` directly. Callers do not need to walk session proxies or compute parent namespaces.
+`show_sidebar()` MUST pre-render `ui` via `htmltools::renderTags()` and emit a single input message with `list(action = "show", html = rendered$html, dependencies = <resolved deps>, title = title)`. `hide_sidebar()` MUST emit `list(action = "hide")`. There is no custom-message handler: the input message is delivered to the panel's `Shiny.InputBinding` via its `receiveMessage(el, data)` method.
 
-#### Scenario: sidebar_show ships HTML and resolved dependencies
+#### Scenario: show_sidebar ships HTML and resolved dependencies
 
-- **WHEN** server code calls `sidebar_show("main_sidebar", ui = some_tag_tree, title = "Add block")`
-- **THEN** the session emits one custom message of type `"blockr.ui:sidebar"`
-- **AND** the message payload's `action` is `"show"`, `id` is `"main_sidebar"`, `html` is character (the rendered HTML), `dependencies` is a (possibly empty) list of `html_dependency` objects
+- **WHEN** server code calls `show_sidebar("main_sidebar", ui = some_tag_tree, title = "Add block")`
+- **THEN** the root session emits one `sendInputMessage` call with `inputId = "main_sidebar"`
+- **AND** the message payload's `action` is `"show"`, `html` is character (the rendered HTML), `dependencies` is a (possibly empty) list of resolved web dependencies
 - **AND** `title` in the payload is `"Add block"`
 
-#### Scenario: sidebar_hide is a single-purpose hide message
+#### Scenario: hide_sidebar is a single-purpose hide message
 
-- **WHEN** server code calls `sidebar_hide("main_sidebar")`
-- **THEN** the session emits one custom message of type `"blockr.ui:sidebar"` with payload `list(action = "hide", id = "main_sidebar")`
+- **WHEN** server code calls `hide_sidebar("main_sidebar")`
+- **THEN** the root session emits one `sendInputMessage` call with `inputId = "main_sidebar"` and payload `list(action = "hide")`
 
 #### Scenario: Calling session is the modal-equivalent default
 
-- **WHEN** `sidebar_show()` is called from inside a `moduleServer` body without an explicit `session` argument
+- **WHEN** `show_sidebar()` is called from inside a `moduleServer` body without an explicit `session` argument
 - **THEN** the message is dispatched via `getDefaultReactiveDomain()` (the calling module's session) — exactly as `shiny::showModal()` does
-- **AND** the panel id passed in `data.id` is the absolute DOM id chosen by the caller; no session-namespacing is applied to it
+- **AND** the call walks to `session$rootScope()` before invoking `sendInputMessage`, so the panel id is the absolute DOM id chosen at `sidebar_ui()` time and is NOT prepended with the calling module's namespace
 
-### Requirement: Client-side custom-message handler
+### Requirement: Client-side handling via the InputBinding
 
-`blockr.ui` SHALL register a single Shiny custom-message handler keyed `"blockr.ui:sidebar"` (in `inst/assets/js/blockr-sidebar.js`). On `data.action == "show"`, the handler MUST execute the following sequence in order on the panel's `.blockr-sidebar-body` element:
+The panel's `Shiny.InputBinding` (registered against `.blockr-sidebar`) MUST implement `receiveMessage(el, data)` that switches on `data.action`. There SHALL NOT be a separate `Shiny.addCustomMessageHandler(...)` registration: the same binding owns both directions of the R↔JS conversation.
+
+On `data.action == "show"`, `receiveMessage` MUST execute the following sequence in order on the panel's `.blockr-sidebar-body` element:
 
 1. `Shiny.unbindAll(body)` — tear down stale Shiny bindings.
 2. `Shiny.renderDependencies(data.dependencies)` if any — install new CSS / JS deps before rendering.
@@ -58,11 +60,11 @@ The custom-message type is intentionally fixed (`"blockr.ui:sidebar"`) so messag
 5. `Shiny.bindAll(body)` — wire up new bindings.
 6. Set the panel's title slot to `data.title` (or empty if `null`); add the `.blockr-sidebar-open` class; set `aria-hidden="false"`; move keyboard focus to the first focusable element inside the body, remembering the previously-focused element so close can restore it.
 
-On `data.action == "hide"`, the handler MUST `Shiny.unbindAll(body)`, remove the `.blockr-sidebar-open` class, set `aria-hidden="true"`, and restore focus to the remembered previously-focused element.
+On `data.action == "hide"`, `receiveMessage` MUST `Shiny.unbindAll(body)`, remove the `.blockr-sidebar-open` class, set `aria-hidden="true"`, and restore focus to the remembered previously-focused element.
 
 #### Scenario: set-content unbinds before replacing
 
-- **WHEN** the handler fires for `action == "show"` with new HTML
+- **WHEN** `receiveMessage` fires with `data.action == "show"` and new HTML
 - **THEN** `Shiny.unbindAll(body)` is invoked before `body.replaceChildren(...)`
 - **AND** `Shiny.initializeInputs(body)` and `Shiny.bindAll(body)` are invoked after `replaceChildren`
 
@@ -73,9 +75,14 @@ On `data.action == "hide"`, the handler MUST `Shiny.unbindAll(body)`, remove the
 
 #### Scenario: hide unbinds the body
 
-- **WHEN** the handler fires for `action == "hide"`
+- **WHEN** `receiveMessage` fires with `data.action == "hide"`
 - **THEN** `Shiny.unbindAll(body)` is invoked before the open class is removed
 - **AND** the panel's `aria-hidden` is set to `"true"`
+
+#### Scenario: No standalone custom-message handler is registered
+
+- **WHEN** the bundled JS loads in a Shiny page
+- **THEN** it does NOT register a `Shiny.addCustomMessageHandler` for sidebar control; all R-driven state changes flow through the InputBinding's `receiveMessage`
 
 ### Requirement: Pinned mode reflows the page via a CSS variable
 
@@ -96,11 +103,11 @@ The pin state lives entirely in the DOM (a class on the panel element). It is no
 - **WHEN** the panel is open but not pinned
 - **THEN** `--blockr-sidebar-width` is `"0px"` (the panel overlays the content rather than reflowing it)
 
-### Requirement: Keyboard support and focus management
+### Requirement: Dismissal, keyboard support, and focus management
 
 On open the panel SHALL move keyboard focus to the first focusable element inside the body and remember the previously-focused element. While the panel is open, Tab and Shift+Tab SHALL cycle focus among focusable descendants of the panel (focus trap). On close the panel SHALL restore focus to the previously-focused element.
 
-While the panel is open AND not pinned, pressing `Escape` SHALL close it. While pinned, `Escape` SHALL NOT close it.
+While the panel is open AND not pinned, pressing `Escape` SHALL close it AND clicking outside the panel SHALL close it. While pinned, neither `Escape` nor an outside click SHALL close it - only the X button closes a pinned panel. The pin button is therefore the user's opt-in to "stay open while I work elsewhere on the page".
 
 #### Scenario: Esc closes when not pinned
 
@@ -112,6 +119,17 @@ While the panel is open AND not pinned, pressing `Escape` SHALL close it. While 
 - **WHEN** the panel is open, pinned, and the user presses `Escape`
 - **THEN** the panel remains open
 
+#### Scenario: Outside click closes when not pinned
+
+- **WHEN** the panel is open, not pinned, and the user clicks anywhere outside the panel
+- **THEN** the panel transitions to closed (`.blockr-sidebar-open` removed, `aria-hidden="true"`)
+- **AND** the click that opened the panel does NOT itself close it (the outside-click handler activates after the open completes)
+
+#### Scenario: Outside click does not close when pinned
+
+- **WHEN** the panel is open, pinned, and the user clicks outside the panel
+- **THEN** the panel remains open
+
 #### Scenario: Focus returns to the trigger on close
 
 - **WHEN** focus is on a button, the user opens the panel, then closes it
@@ -119,7 +137,7 @@ While the panel is open AND not pinned, pressing `Escape` SHALL close it. While 
 
 ### Requirement: Shiny input binding exposes `{open, pinned}`
 
-`blockr.ui` SHALL ship a `Shiny.InputBinding` registered against `.blockr-sidebar` whose `getValue()` returns a list-shaped value with named entries `open` (logical) and `pinned` (logical). The binding MUST emit a state update through Shiny on every state change — server-driven (`sidebar_show()` / `sidebar_hide()`), Esc-to-close, X-button click, pin toggle. There SHALL NOT be a `content` entry: R-side already knows what content was last set (it called `sidebar_show()`), and tracking it client-side is duplicate state. There SHALL NOT be `setValue()` / `receiveMessage()` overrides on the binding: state changes from R go through the custom-message handler (`sidebar_show()` / `sidebar_hide()`), and the binding observes the resulting class flip just like any client-driven flip.
+`blockr.ui` SHALL ship a `Shiny.InputBinding` registered against `.blockr-sidebar` whose `getValue()` returns a list-shaped value with named entries `open` (logical) and `pinned` (logical). The binding MUST emit a state update through Shiny on every state change — server-driven (`show_sidebar()` / `hide_sidebar()` via `receiveMessage`), Esc-to-close, X-button click, outside-click-to-close, pin toggle. There SHALL NOT be a `content` entry: R-side already knows what content was last set (it called `show_sidebar()`), and tracking it client-side is duplicate state. The binding's `receiveMessage(el, data)` is the sole entry point for R-driven state changes (per the previous requirement); the binding does NOT define `setValue()`.
 
 The binding's input value SHALL be reachable as `input[[id]]` server-side, where `id` matches the DOM id passed to `sidebar_ui()`.
 
@@ -143,31 +161,31 @@ The binding's input value SHALL be reachable as `input[[id]]` server-side, where
 
 ### Requirement: Auto-open on empty board
 
-R-side code SHALL be able to drive an "auto-open at session start when there's nothing on the board" pattern using only `sidebar_show()` and the `input[[id]]$open` value. No special opt-in argument on `sidebar_ui()` is required: callers compose the recipe themselves with the existing helpers.
+R-side code SHALL be able to drive an "auto-open at session start when there's nothing on the board" pattern using only `show_sidebar()` and the `input[[id]]$open` value. No special opt-in argument on `sidebar_ui()` is required: callers compose the recipe themselves with the existing helpers.
 
 #### Scenario: Renderer auto-opens an empty-board hint
 
 - **WHEN** a renderer's session starts with `length(board_blocks(board)) == 0`
-- **AND** the renderer's server function calls `blockr.ui::sidebar_show(id, hint_ui, title = "Add your first block")` early in `moduleServer`
+- **AND** the renderer's server function calls `blockr.ui::show_sidebar(id, hint_ui, title = "Add your first block")` early in `moduleServer`
 - **THEN** the panel opens with the hint content
 - **AND** if the user dismisses it (Esc, X), `input[[id]]$open` becomes `FALSE` and the renderer's observer can read that to avoid re-opening on subsequent reactive flushes (e.g. by tracking a `auto_opened` `reactiveVal()` flag set after the first show)
 
 ### Requirement: Drop-in replacement for `showModal()` / `removeModal()`
 
-The API of `sidebar_show()` and `sidebar_hide()` SHALL be ergonomically equivalent to Shiny's `showModal()` / `removeModal()`: callers compose the panel body with arbitrary shiny tags (no S3 generic, no trigger types, no content registry), and the panel's session-handling matches a modal's so existing input observers attached to inputs inside the body keep working without change.
+The API of `show_sidebar()` and `hide_sidebar()` SHALL be ergonomically equivalent to Shiny's `showModal()` / `removeModal()`: callers compose the panel body with arbitrary shiny tags (no S3 generic, no trigger types, no content registry), and the panel's session-handling matches a modal's so existing input observers attached to inputs inside the body keep working without change.
 
 After this change ships, the migration in `blockr.dock` from each modal flow to the sidebar SHALL be a mechanical substitution of two function calls:
 
-- `showModal(modal_dialog_wrapping(body))` becomes `blockr.ui::sidebar_show(sidebar_id, ui = body, title = ...)`.
-- `removeModal()` becomes `blockr.ui::sidebar_hide(sidebar_id)`.
+- `showModal(modal_dialog_wrapping(body))` becomes `blockr.ui::show_sidebar(sidebar_id, ui = body, title = ...)`.
+- `removeModal()` becomes `blockr.ui::hide_sidebar(sidebar_id)`.
 
 #### Scenario: Inputs inside the panel body land in the calling session's input
 
-- **WHEN** an action handler in `blockr.dock` calls `sidebar_show(sidebar_id, ui = block_modal_body(session$ns, ...))` from inside its `moduleServer`
+- **WHEN** an action handler in `blockr.dock` calls `show_sidebar(sidebar_id, ui = block_modal_body(session$ns, ...))` from inside its `moduleServer`
 - **THEN** the panel body's inputs (e.g. `add_block_confirm`) are accessible as `input$add_block_confirm` from that same `moduleServer`'s body, exactly as they were when the body lived inside `modalDialog(...)` opened by `showModal()`
 
 #### Scenario: No session walking required
 
-- **WHEN** `sidebar_show()` / `sidebar_hide()` is called from a deeply-nested `moduleServer` (e.g. `blockr.dock`'s action handler, which is itself a `moduleServer` mounted inside `blockr.core::board_server()`'s `moduleServer`)
+- **WHEN** `show_sidebar()` / `hide_sidebar()` is called from a deeply-nested `moduleServer` (e.g. `blockr.dock`'s action handler, which is itself a `moduleServer` mounted inside `blockr.core::board_server()`'s `moduleServer`)
 - **THEN** the message is delivered to the panel element identified by `id`, without the caller having to compute or walk to a parent session
 - **AND** the migration code does NOT need to access `.subset2(session, "parent")`, `session$rootScope`, or any private shiny internals

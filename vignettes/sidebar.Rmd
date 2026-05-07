@@ -1,0 +1,112 @@
+---
+title: "Driving the sidebar primitive"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Driving the sidebar primitive}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE, comment = "#>")
+```
+
+`blockr.ui` ships a Bootstrap-free slide-in panel that mirrors
+`shiny::showModal()` / `shiny::removeModal()` in spirit. Mount the
+panel once per page with `sidebar_ui()`, then drive its content from
+any `moduleServer()` body using `show_sidebar()` and `hide_sidebar()`.
+
+## Minimal example
+
+```{r}
+library(shiny)
+library(blockr.ui)
+
+ui <- fluidPage(
+  actionButton("open", "Open sidebar"),
+  sidebar_ui("main_sidebar")
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$open, {
+    show_sidebar(
+      "main_sidebar",
+      title = "Add a new block",
+      ui = tagList(
+        textInput("block_name", "Name"),
+        selectInput("block_kind", "Type", c("data", "transform", "plot")),
+        actionButton("confirm", "Add", class = "btn-primary")
+      )
+    )
+  })
+
+  observeEvent(input$confirm, {
+    # validate, mutate state, ...
+    hide_sidebar("main_sidebar")
+  })
+}
+
+shinyApp(ui, server)
+```
+
+The inputs inside the body (`input$block_name`, `input$block_kind`,
+`input$confirm`) live in the calling session — exactly as they would
+inside a `modalDialog()`. No nested `moduleServer()` is required.
+
+## Observing user-driven dismissals
+
+Each `sidebar_ui()` call also registers a Shiny input under the same
+id, exposing two logical fields:
+
+- `input[[id]]$open` — `TRUE` while the panel is open, `FALSE` once
+  the user closes it (Esc, X button) or the server calls
+  `hide_sidebar()`.
+- `input[[id]]$pinned` — `TRUE` while the user has the panel pinned.
+
+```{r}
+observe({
+  state <- input$main_sidebar
+  req(state)
+  cat("open:", state$open, " pinned:", state$pinned, "\n")
+})
+```
+
+## Auto-open on an empty board
+
+A common renderer pattern is to open the sidebar with a "first block"
+hint when the session starts on an empty board, while still respecting
+a later user dismissal. The recipe is built on top of `show_sidebar()`
+and `input[[id]]$open` — no special opt-in is needed on `sidebar_ui()`.
+
+```{r}
+empty_board_renderer <- function(id, board) {
+  moduleServer(id, function(input, output, session) {
+    auto_opened <- reactiveVal(FALSE)
+
+    observe({
+      if (auto_opened()) return()
+      if (length(blockr.core::board_blocks(board)) > 0L) return()
+
+      show_sidebar(
+        session$ns("main_sidebar"),
+        title = "Add your first block",
+        ui = tagList(
+          p("Pick a block to get started."),
+          actionButton(session$ns("add_dataset"), "Dataset block"),
+          actionButton(session$ns("add_import"), "Import data")
+        )
+      )
+      auto_opened(TRUE)
+    })
+
+    # Once the user dismisses the hint, input[[id]]$open flips to FALSE
+    # and the auto_opened flag prevents this observer from re-opening.
+  })
+}
+```
+
+The pinned panel reflows the page content via the
+`--blockr-sidebar-width` CSS custom property on `<body>`. Apps that
+want the main canvas to slide alongside (rather than be overlaid by)
+a pinned panel can use `margin-right: var(--blockr-sidebar-width, 0px)`
+on their main container.
