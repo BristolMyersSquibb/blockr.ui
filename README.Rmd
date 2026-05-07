@@ -22,9 +22,9 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/blockr.ui)](https://CRAN.R-project.org/package=blockr.ui)
 <!-- badges: end -->
 
-User-interface primitives shared across the [blockr](https://blockr.site/)
-ecosystem. Designed to sit between `blockr.core` and renderers
-such as `blockr.dock`.
+User-interface primitives shared across the
+[blockr](https://blockr.site/) ecosystem. Designed to sit between
+`blockr.core` and renderers such as `blockr.dock`.
 
 ## Installation
 
@@ -38,40 +38,29 @@ pak::pak("BristolMyersSquibb/blockr.ui")
 
 ## Example
 
-The four-function API mirrors `shiny::showModal()` /
-`shiny::removeModal()`: mount the panel once with `sidebar_ui()`, then
-drive its content with `show_sidebar()` / `hide_sidebar()` from any
-`moduleServer()` body — exactly like a modal.
-
 ```{r minimal-example, eval=FALSE, code=readLines("inst/examples/minimal/app.R")}
 ```
 
-Inputs inside the panel body (`input$block_name`, `input$confirm`, ...)
-live in the calling session — no nested `moduleServer()` is required.
-The panel itself is also a Shiny input, so `input[["main_sidebar"]]`
-exposes `list(open, pinned)` for observing user-driven dismissals
-(Esc, X button, outside click).
+```{r minimal-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
+# Drive an "open sidebar" click via shinytest2 so the screenshot
+# captures the panel in its open state. Mirrors blockr.dock's README
+# convention (NOT_CRAN unblocks shinytest2's CRAN guard during build).
+withr::local_envvar(NOT_CRAN = "true")
+app <- shinytest2::AppDriver$new(
+  system.file("examples", "minimal", package = "blockr.ui"),
+  width = 1200,
+  height = 700
+)
+Sys.sleep(2)
+app$run_js("document.getElementById('open').click()")
+Sys.sleep(0.8)
+tmp <- tempfile(fileext = ".png")
+app$get_screenshot(tmp)
+file.copy(tmp, "man/figures/sidebar-minimal.png", overwrite = TRUE)
+app$stop()
+```
 
-## What's in the panel
-
-- **Pin toggle** — when pinned, the panel stays open while you click
-  elsewhere on the page. The pinned width is exposed as
-  `--blockr-sidebar-width` on `<body>` so apps can reflow the main
-  canvas (`margin-right: var(--blockr-sidebar-width, 0px)`).
-- **Esc / outside-click / X-button** close the panel when not pinned.
-- **Focus trap** — Tab and Shift+Tab cycle within the panel while it
-  is open; on close, focus returns to the element that opened it.
-- **Bootstrap-free** — no `.offcanvas` / `.modal` / `data-bs-*`. The
-  panel is a plain `<div>` + scoped CSS + a single
-  `Shiny.InputBinding`.
-
-## Roadmap
-
-`blockr.ui` is the home for cross-cutting UI extracted from
-`blockr.dock` over time. The current scope is intentionally tiny — one
-primitive, four exports — so each follow-up extraction (design tokens,
-block card, app shell, selectize widgets, block browser) can land as
-its own pull request without churning the API.
+![blockr.ui minimal sidebar example](man/figures/sidebar-minimal.png)
 
 ## Code of Conduct
 

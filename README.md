@@ -13,13 +13,8 @@ status](https://www.r-pkg.org/badges/version/blockr.ui)](https://CRAN.R-project.
 <!-- badges: end -->
 
 User-interface primitives shared across the
-[blockr](https://blockr.site/) ecosystem. This release ships a
-Bootstrap-free slide-in sidebar panel that mirrors `shiny::showModal()`
-/ `shiny::removeModal()` in spirit and is intended to replace the modal
-dialogs used by `blockr.dock` for board mutations. Designed to sit
-between `blockr.core` and renderers such as `blockr.dock`, so extensions
-and embedded apps can adopt the same panel without pulling in
-`dockViewR`.
+[blockr](https://blockr.site/) ecosystem. Designed to sit between
+`blockr.core` and renderers such as `blockr.dock`.
 
 ## Installation
 
@@ -32,11 +27,6 @@ pak::pak("BristolMyersSquibb/blockr.ui")
 ```
 
 ## Example
-
-The four-function API mirrors `shiny::showModal()` /
-`shiny::removeModal()`: mount the panel once with `sidebar_ui()`, then
-drive its content with `show_sidebar()` / `hide_sidebar()` from any
-`moduleServer()` body — exactly like a modal.
 
 ``` r
 library(shiny)
@@ -83,31 +73,12 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-Inputs inside the panel body (`input$block_name`, `input$confirm`, …)
-live in the calling session — no nested `moduleServer()` is required.
-The panel itself is also a Shiny input, so `input[["main_sidebar"]]`
-exposes `list(open, pinned)` for observing user-driven dismissals (Esc,
-X button, outside click).
-
-## What’s in the panel
-
-- **Pin toggle** — when pinned, the panel stays open while you click
-  elsewhere on the page. The pinned width is exposed as
-  `--blockr-sidebar-width` on `<body>` so apps can reflow the main
-  canvas (`margin-right: var(--blockr-sidebar-width, 0px)`).
-- **Esc / outside-click / X-button** close the panel when not pinned.
-- **Focus trap** — Tab and Shift+Tab cycle within the panel while it is
-  open; on close, focus returns to the element that opened it.
-- **Bootstrap-free** — no `.offcanvas` / `.modal` / `data-bs-*`. The
-  panel is a plain `<div>` + scoped CSS + a single `Shiny.InputBinding`.
-
-## Roadmap
-
-`blockr.ui` is the home for cross-cutting UI extracted from
-`blockr.dock` over time. The current scope is intentionally tiny — one
-primitive, four exports — so each follow-up extraction (design tokens,
-block card, app shell, selectize widgets, block browser) can land as its
-own pull request without churning the API.
+<figure>
+<img src="man/figures/sidebar-minimal.png"
+alt="blockr.ui minimal sidebar example" />
+<figcaption aria-hidden="true">blockr.ui minimal sidebar
+example</figcaption>
+</figure>
 
 ## Code of Conduct
 

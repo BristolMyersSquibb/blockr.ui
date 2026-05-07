@@ -45,6 +45,14 @@ press_esc <- function(app) {
   app$wait_for_idle(500)
 }
 
+# Click an element in the running app via JS — keeps the long
+# `document.querySelector(...).click()` calls inside a single helper so the
+# call sites stay under 80 columns.
+click_js <- function(app, selector) {
+  app$run_js(sprintf("document.querySelector(%s).click()", shQuote(selector)))
+  app$wait_for_idle(500)
+}
+
 test_that("mode = 'push' adds .blockr-body-pushed-* and a width on open", {
   push_app <- system.file("examples/push", package = "blockr.ui")
   if (!nzchar(push_app)) {
@@ -75,10 +83,7 @@ test_that("mode = 'push' adds .blockr-body-pushed-* and a width on open", {
   expect_match(width_open, "[0-9]+px")
   expect_false(width_open == "0px")
 
-  app$run_js(
-    "document.querySelector('#main_sidebar .blockr-sidebar-close').click()"
-  )
-  app$wait_for_idle(500)
+  click_js(app, "#main_sidebar .blockr-sidebar-close")
 
   body_class_closed <- app$get_js("document.body.className")
   expect_false(grepl("blockr-body-pushed", body_class_closed %||% ""))
@@ -108,14 +113,15 @@ test_that("minimal example: pin / unpin / Esc / outside-click / X-button", {
   expect_equal(panel_state(app), list(open = TRUE, pinned = FALSE))
   expect_match(panel_class(app), "blockr-sidebar-open")
 
+  pin_sel   <- "#main_sidebar .blockr-sidebar-pin"
+  close_sel <- "#main_sidebar .blockr-sidebar-close"
+
   # 3. Pin.
-  app$run_js("document.querySelector('#main_sidebar .blockr-sidebar-pin').click()")
-  app$wait_for_idle(500)
+  click_js(app, pin_sel)
   expect_equal(panel_state(app), list(open = TRUE, pinned = TRUE))
 
   # 4. Unpin.
-  app$run_js("document.querySelector('#main_sidebar .blockr-sidebar-pin').click()")
-  app$wait_for_idle(500)
+  click_js(app, pin_sel)
   expect_equal(panel_state(app), list(open = TRUE, pinned = FALSE))
 
   # 5. Esc closes when not pinned.
@@ -125,14 +131,12 @@ test_that("minimal example: pin / unpin / Esc / outside-click / X-button", {
   # 6. Esc with pin: still open.
   app$click("open")
   app$wait_for_idle(500)
-  app$run_js("document.querySelector('#main_sidebar .blockr-sidebar-pin').click()")
-  app$wait_for_idle(500)
+  click_js(app, pin_sel)
   press_esc(app)
   expect_equal(panel_state(app), list(open = TRUE, pinned = TRUE))
 
   # 7. X button closes (overrides pin).
-  app$run_js("document.querySelector('#main_sidebar .blockr-sidebar-close').click()")
-  app$wait_for_idle(500)
+  click_js(app, close_sel)
   expect_equal(panel_state(app)$open, FALSE)
 
   # 8. Re-open + outside click closes (not pinned).
@@ -144,8 +148,7 @@ test_that("minimal example: pin / unpin / Esc / outside-click / X-button", {
   # 9. Re-open + pin + outside click stays open.
   app$click("open")
   app$wait_for_idle(500)
-  app$run_js("document.querySelector('#main_sidebar .blockr-sidebar-pin').click()")
-  app$wait_for_idle(500)
+  click_js(app, pin_sel)
   dispatch_outside_click(app)
   expect_equal(panel_state(app), list(open = TRUE, pinned = TRUE))
 })
