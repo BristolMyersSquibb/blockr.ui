@@ -1,0 +1,7 @@
+Provides the cross-cutting user-interface surface used by
+'blockr'-flavoured Shiny apps: design tokens, base CSS, the block card,
+page chrome (app shell, navbar, options renderer), and a reusable
+sidebar primitive with a content registry. Designed to sit between
+'blockr.core' and renderers such as 'blockr.dock', so extensions and
+embedded apps can adopt the look and feel without pulling in
+'dockViewR'.
