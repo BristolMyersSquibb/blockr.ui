@@ -141,7 +141,7 @@ test_that("show_sidebar / hide_sidebar error outside a Shiny session", {
   )
 })
 
-test_that("sidebar_state defaults to FALSE / FALSE before the binding has set", {
+test_that("sidebar_state defaults to FALSE/FALSE before binding reports", {
   sess <- shiny::MockShinySession$new()
 
   state <- sidebar_state("main_sidebar", session = sess)
