@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rcheck
+.DS_Store
+docs/
+inst/doc/
+.claude/

@@ -1,0 +1,12 @@
+^LICENSE\.md$
+^README\.(Rmd|html)$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+^\.claude$
+^openspec$
+^\.DS_Store$
+^blockr\.ui\.Rproj$
+^\.Rproj\.user$
