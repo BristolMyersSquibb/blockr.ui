@@ -218,8 +218,12 @@
     },
     subscribe: function (el, callback) {
       initPanel(el);
-      el._blockrSidebarHandler = callback;
-      el.addEventListener(STATE_EVENT, callback);
+      // Shiny's input-binding callback expects to be invoked with no args.
+      // addEventListener passes the Event object, which silently breaks the
+      // value-update path inside Shiny — so wrap to drop it.
+      var handler = function () { callback(); };
+      el._blockrSidebarHandler = handler;
+      el.addEventListener(STATE_EVENT, handler);
     },
     unsubscribe: function (el) {
       if (el._blockrSidebarHandler) {
