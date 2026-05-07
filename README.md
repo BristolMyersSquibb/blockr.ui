@@ -28,6 +28,11 @@ pak::pak("BristolMyersSquibb/blockr.ui")
 
 ## Example
 
+### Minimal sidebar
+
+A slide-in panel that hosts arbitrary Shiny content. See
+`vignette("sidebar", package = "blockr.ui")` for the full API.
+
 ``` r
 library(shiny)
 library(blockr.ui)
