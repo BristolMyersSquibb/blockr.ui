@@ -117,3 +117,15 @@
 .blockr-sidebar.blockr-sidebar-open[aria-hidden="false"] {
   pointer-events: auto;
 }
+
+/* Push mode: shift body content aside when an open push-mode sidebar exists.
+   The class + variable are managed by the JS bundle. */
+body.blockr-body-pushed-right {
+  padding-right: var(--blockr-sidebar-width, 0px);
+  transition: padding-right 200ms ease;
+}
+
+body.blockr-body-pushed-left {
+  padding-left: var(--blockr-sidebar-width, 0px);
+  transition: padding-left 200ms ease;
+}

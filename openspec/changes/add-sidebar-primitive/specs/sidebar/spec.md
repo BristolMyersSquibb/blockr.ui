@@ -84,24 +84,34 @@ On `data.action == "hide"`, `receiveMessage` MUST `Shiny.unbindAll(body)`, remov
 - **WHEN** the bundled JS loads in a Shiny page
 - **THEN** it does NOT register a `Shiny.addCustomMessageHandler` for sidebar control; all R-driven state changes flow through the InputBinding's `receiveMessage`
 
-### Requirement: Pinned mode reflows the page via a CSS variable
+### Requirement: `mode = "overlay"` vs `mode = "push"`
 
-The panel header SHALL include a pin toggle. When the panel is open AND pinned, the JS handler SHALL set `--blockr-sidebar-width` on `document.body` to the panel's pixel width. When the panel is closed OR not pinned, the variable SHALL be `0px`. Apps that want the page canvas to reflow beside the panel can use `margin-right: var(--blockr-sidebar-width, 0px)` (or equivalent) on their main container.
+`sidebar_ui()` SHALL accept a `mode` argument with values `"overlay"` (default) or `"push"`. The mode is set on the panel as `data-mode="<mode>"` and is independent of pin state (pin only affects dismissal).
 
-The pin state lives entirely in the DOM (a class on the panel element). It is not exposed as a Shiny input value at v0.
+In `"overlay"` mode, the panel slides over page content; the body layout is untouched. In `"push"` mode, the bundled JS sets `--blockr-sidebar-width` on `<body>` to the panel's pixel width and adds a `.blockr-body-pushed-<side>` class while the panel is open; the bundled CSS uses these to apply `padding-<side>: var(--blockr-sidebar-width)` so page content shifts aside instead of being covered. When the panel closes the class and width are removed.
 
-#### Scenario: --blockr-sidebar-width tracks state
+The pin state lives entirely in the DOM (a class on the panel element). It is not exposed as a Shiny input value beyond what the binding's `getValue()` returns. Pin no longer drives body reflow — that is `mode`'s job.
 
-- **WHEN** the panel transitions from closed to open while pinned
-- **THEN** `document.body.style.getPropertyValue('--blockr-sidebar-width')` becomes the panel's pixel width (e.g. `"360px"`)
+#### Scenario: Push mode shifts body content aside while open
 
-- **WHEN** the panel transitions from open-pinned to closed
-- **THEN** `document.body.style.getPropertyValue('--blockr-sidebar-width')` becomes `"0px"`
+- **WHEN** a panel with `mode = "push"` and `side = "right"` opens
+- **THEN** `document.body` has the class `blockr-body-pushed-right`
+- **AND** `document.body.style.getPropertyValue('--blockr-sidebar-width')` is the panel's pixel width
 
-#### Scenario: Open-but-not-pinned does not reflow
+- **WHEN** that same panel closes
+- **THEN** `document.body` no longer has `blockr-body-pushed-right`
+- **AND** `--blockr-sidebar-width` is `"0px"`
 
-- **WHEN** the panel is open but not pinned
-- **THEN** `--blockr-sidebar-width` is `"0px"` (the panel overlays the content rather than reflowing it)
+#### Scenario: Overlay mode never reflows
+
+- **WHEN** a panel with `mode = "overlay"` (the default) is open
+- **THEN** `document.body` has neither `blockr-body-pushed-left` nor `blockr-body-pushed-right`
+- **AND** `--blockr-sidebar-width` is `"0px"` (the panel overlays the content)
+
+#### Scenario: Pin state does not affect body reflow
+
+- **WHEN** an open panel's pin button is toggled
+- **THEN** `document.body.classList` and `--blockr-sidebar-width` are unchanged (reflow is governed by `data-mode`, not by pin)
 
 ### Requirement: Dismissal, keyboard support, and focus management
 

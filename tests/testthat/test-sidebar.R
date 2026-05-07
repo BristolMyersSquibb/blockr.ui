@@ -32,6 +32,19 @@ test_that("sidebar_ui rejects malformed inputs", {
   expect_error(sidebar_ui(c("a", "b")))
   expect_error(sidebar_ui("ok", side = "top"))
   expect_error(sidebar_ui("ok", width = ""))
+  expect_error(sidebar_ui("ok", mode = "stretch"))
+})
+
+test_that("sidebar_ui defaults to overlay mode", {
+  panel <- sidebar_ui("main_sidebar")
+  html <- as.character(panel)
+  expect_match(html, "data-mode=\"overlay\"", fixed = TRUE)
+})
+
+test_that("sidebar_ui carries data-mode='push' when requested", {
+  panel <- sidebar_ui("main_sidebar", mode = "push")
+  html <- as.character(panel)
+  expect_match(html, "data-mode=\"push\"", fixed = TRUE)
 })
 
 test_that("sidebar_dep references the bundled CSS and JS files", {

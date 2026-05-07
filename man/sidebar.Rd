@@ -10,7 +10,12 @@
 \alias{keep_or_hide_sidebar}
 \title{Sidebar primitive}
 \usage{
-sidebar_ui(id, side = c("right", "left"), width = "360px")
+sidebar_ui(
+  id,
+  side = c("right", "left"),
+  width = "360px",
+  mode = c("overlay", "push")
+)
 
 sidebar_dep()
 
@@ -37,6 +42,13 @@ reads as \code{input[[id]]} to observe \verb{\{open, pinned\}} state.}
 \item{width}{A CSS length applied to the panel as
 \code{--blockr-sidebar-panel-width}. The CSS bundle uses that variable for
 the panel's \code{width}.}
+
+\item{mode}{One of \code{"overlay"} (default) or \code{"push"}. In \code{"overlay"}
+mode the panel hovers above the page and the rest of the layout is
+untouched. In \code{"push"} mode the bundled CSS adds
+\verb{padding-<side>: var(--blockr-sidebar-width)} on \verb{<body>} whenever
+the panel is open, so the page content shifts aside instead of being
+covered. The choice is independent of pin state.}
 
 \item{ui}{A Shiny tag tree to render inside the panel body. Pre-rendered
 via \code{\link[htmltools:renderTags]{htmltools::renderTags()}} so dependencies travel with the content.}

@@ -41,18 +41,25 @@
     return panel.classList.contains("blockr-sidebar-pinned");
   }
 
-  function refreshPinnedReflow() {
-    var pinnedOpen = document.querySelector(
-      ".blockr-sidebar.blockr-sidebar-open.blockr-sidebar-pinned"
+  function refreshBodyReflow() {
+    // Push-mode panels shift body content aside via a body class + a CSS
+    // variable whenever they are open. Overlay-mode panels never reflow
+    // the body. The choice is independent of pin state.
+    var body = document.body;
+    body.classList.remove(
+      "blockr-body-pushed-left",
+      "blockr-body-pushed-right"
     );
-    if (pinnedOpen) {
-      var width = pinnedOpen.getBoundingClientRect().width;
-      document.body.style.setProperty(
-        "--blockr-sidebar-width",
-        width + "px"
-      );
+    var pushedOpen = document.querySelector(
+      ".blockr-sidebar.blockr-sidebar-open[data-mode=\"push\"]"
+    );
+    if (pushedOpen) {
+      var side = pushedOpen.dataset.side || "right";
+      body.classList.add("blockr-body-pushed-" + side);
+      var width = pushedOpen.getBoundingClientRect().width;
+      body.style.setProperty("--blockr-sidebar-width", width + "px");
     } else {
-      document.body.style.setProperty("--blockr-sidebar-width", "0px");
+      body.style.setProperty("--blockr-sidebar-width", "0px");
     }
   }
 
@@ -124,7 +131,7 @@
     panel.classList.add("blockr-sidebar-open");
     panel.setAttribute("aria-hidden", "false");
 
-    refreshPinnedReflow();
+    refreshBodyReflow();
     attachOutsideClick(panel);
     dispatchState(panel);
 
@@ -149,7 +156,7 @@
     panel.setAttribute("aria-hidden", "true");
 
     detachOutsideClick(panel);
-    refreshPinnedReflow();
+    refreshBodyReflow();
     dispatchState(panel);
 
     // Restore focus to previously-focused element.
@@ -161,8 +168,10 @@
   }
 
   function togglePinned(panel) {
+    // Pin only affects dismissal (Esc / outside click). Body reflow is
+    // governed by the panel's `data-mode`, not by pin state, so no
+    // refreshBodyReflow() call here.
     panel.classList.toggle("blockr-sidebar-pinned");
-    refreshPinnedReflow();
     dispatchState(panel);
   }
 

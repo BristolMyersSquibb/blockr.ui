@@ -12,6 +12,12 @@
 #' @param width A CSS length applied to the panel as
 #'   `--blockr-sidebar-panel-width`. The CSS bundle uses that variable for
 #'   the panel's `width`.
+#' @param mode One of `"overlay"` (default) or `"push"`. In `"overlay"`
+#'   mode the panel hovers above the page and the rest of the layout is
+#'   untouched. In `"push"` mode the bundled CSS adds
+#'   `padding-<side>: var(--blockr-sidebar-width)` on `<body>` whenever
+#'   the panel is open, so the page content shifts aside instead of being
+#'   covered. The choice is independent of pin state.
 #' @param ui A Shiny tag tree to render inside the panel body. Pre-rendered
 #'   via [htmltools::renderTags()] so dependencies travel with the content.
 #' @param title Optional title shown in the panel header. `NULL` clears it.
@@ -62,17 +68,20 @@ NULL
 
 #' @rdname sidebar
 #' @export
-sidebar_ui <- function(id, side = c("right", "left"), width = "360px") {
+sidebar_ui <- function(id, side = c("right", "left"), width = "360px",
+                       mode = c("overlay", "push")) {
   stopifnot(
     is.character(id), length(id) == 1L, nzchar(id),
     is.character(width), length(width) == 1L, nzchar(width)
   )
   side <- match.arg(side)
+  mode <- match.arg(mode)
 
   panel <- shiny::tags$div(
     id = id,
     class = "blockr-sidebar",
     `data-side` = side,
+    `data-mode` = mode,
     `aria-hidden` = "true",
     tabindex = "-1",
     style = paste0("--blockr-sidebar-panel-width: ", width, ";"),
