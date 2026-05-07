@@ -163,15 +163,16 @@ The binding's input value SHALL be reachable as `input[[id]]` server-side, where
 
 `blockr.ui` SHALL export `sidebar_state(id, session = shiny::getDefaultReactiveDomain())` returning a `list(open, pinned)` snapshot of the binding's current value. The helper MUST walk to `session$rootScope()` so callers from a deeply-nested module can read the absolute-id state without computing the namespacing themselves, and MUST `shiny::isolate()` the read so the calling consumer does not pick up a reactive dependency. When the binding has not yet reported a value (e.g. the panel was never opened), the helper SHALL return `list(open = FALSE, pinned = FALSE)`.
 
-This is the recommended primitive for action handlers that want to "chain on pinned, close otherwise":
+`blockr.ui` SHALL also export `confirm_sidebar(id, ui, title = NULL, session = ...)` as the convenience primitive for the chain-on-pinned action-handler flow: when `sidebar_state(id, session)$pinned` is `TRUE`, it dispatches via `show_sidebar(id, ui, title, session)` (re-render the form fresh); otherwise it dispatches via `hide_sidebar(id, session)`. The chaining decision SHALL live in `blockr.ui` rather than be duplicated in every consumer (e.g. `blockr.dock`).
 
 ```r
+# Caller's confirm flow becomes a single call:
 update(list(blocks = list(add = bk)))
-if (isTRUE(blockr.ui::sidebar_state(sidebar_id)$pinned)) {
-  blockr.ui::show_sidebar(sidebar_id, ui = fresh_body, title = ...)
-} else {
-  blockr.ui::hide_sidebar(sidebar_id)
-}
+blockr.ui::confirm_sidebar(
+  sidebar_id,
+  ui = block_sidebar_body(ns, board$board, mode = "add"),
+  title = "Add new block"
+)
 ```
 
 #### Scenario: sidebar_state reads from the root session
@@ -188,6 +189,14 @@ if (isTRUE(blockr.ui::sidebar_state(sidebar_id)$pinned)) {
 
 - **WHEN** `sidebar_state("main_sidebar")` is called from within an `observeEvent` handler
 - **THEN** subsequent changes to `input[["main_sidebar"]]` do NOT re-run the observer (the read is isolated)
+
+#### Scenario: confirm_sidebar branches on the pinned state
+
+- **WHEN** `confirm_sidebar(id, ui = fresh_body, title = "...")` is called and `sidebar_state(id)$pinned` is `TRUE`
+- **THEN** the panel is re-shown via `show_sidebar(id, ui = fresh_body, title = "...")` so the user can chain another action
+
+- **WHEN** `confirm_sidebar(id, ui = fresh_body, title = "...")` is called and `sidebar_state(id)$pinned` is `FALSE`
+- **THEN** the panel is hidden via `hide_sidebar(id)`
 
 ### Requirement: Auto-open on empty board
 

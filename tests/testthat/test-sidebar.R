@@ -167,3 +167,39 @@ test_that("sidebar_state errors outside a Shiny session", {
     class = "blockr_ui_no_session"
   )
 })
+
+test_that("confirm_sidebar hides when not pinned", {
+  ctx <- mock_session_with_capture()
+  # No prior state set => pinned = FALSE => hide branch.
+
+  confirm_sidebar(
+    "main_sidebar",
+    ui = shiny::tags$div("fresh"),
+    title = "Add new block",
+    session = ctx$session
+  )
+
+  msgs <- ctx$messages()
+  expect_length(msgs, 1L)
+  expect_identical(msgs[[1L]]$id, "main_sidebar")
+  expect_identical(msgs[[1L]]$message, list(action = "hide"))
+})
+
+test_that("confirm_sidebar re-shows with fresh ui when pinned", {
+  ctx <- mock_session_with_capture()
+  ctx$session$setInputs(main_sidebar = list(open = TRUE, pinned = TRUE))
+
+  confirm_sidebar(
+    "main_sidebar",
+    ui = shiny::tagList(shiny::textInput("block_name", "Name")),
+    title = "Add new block",
+    session = ctx$session
+  )
+
+  msgs <- ctx$messages()
+  expect_length(msgs, 1L)
+  payload <- msgs[[1L]]$message
+  expect_identical(payload$action, "show")
+  expect_identical(payload$title, "Add new block")
+  expect_match(payload$html, "id=\"block_name\"", fixed = TRUE)
+})

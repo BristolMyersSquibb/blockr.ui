@@ -29,6 +29,10 @@
 #'   wants to decide whether to chain (re-render the form) or close the
 #'   panel after a successful confirm: pinned panels should stay open
 #'   per the user's opt-in, unpinned panels close.
+#' - `confirm_sidebar()` is the convenience built on top of
+#'   `sidebar_state()` for the action-handler confirm flow: when the
+#'   panel is pinned it re-shows with the supplied (fresh) `ui` so the
+#'   user can chain another action; otherwise it hides the panel.
 #'
 #' @examples
 #' if (interactive()) {
@@ -164,6 +168,17 @@ sidebar_state <- function(id, session = shiny::getDefaultReactiveDomain()) {
     list(open = FALSE, pinned = FALSE)
   } else {
     state
+  }
+}
+
+#' @rdname sidebar
+#' @export
+confirm_sidebar <- function(id, ui, title = NULL,
+                            session = shiny::getDefaultReactiveDomain()) {
+  if (isTRUE(sidebar_state(id, session = session)$pinned)) {
+    show_sidebar(id, ui = ui, title = title, session = session)
+  } else {
+    hide_sidebar(id, session = session)
   }
 }
 

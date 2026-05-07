@@ -7,6 +7,7 @@
 \alias{show_sidebar}
 \alias{hide_sidebar}
 \alias{sidebar_state}
+\alias{confirm_sidebar}
 \title{Sidebar primitive}
 \usage{
 sidebar_ui(id, side = c("right", "left"), width = "360px")
@@ -18,6 +19,13 @@ show_sidebar(id, ui, title = NULL, session = shiny::getDefaultReactiveDomain())
 hide_sidebar(id, session = shiny::getDefaultReactiveDomain())
 
 sidebar_state(id, session = shiny::getDefaultReactiveDomain())
+
+confirm_sidebar(
+  id,
+  ui,
+  title = NULL,
+  session = shiny::getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{id}{A character scalar. The DOM id used for the panel element. The
@@ -50,6 +58,10 @@ read from the root session's input. Useful when an action handler
 wants to decide whether to chain (re-render the form) or close the
 panel after a successful confirm: pinned panels should stay open
 per the user's opt-in, unpinned panels close.
+\item \code{confirm_sidebar()} is the convenience built on top of
+\code{sidebar_state()} for the action-handler confirm flow: when the
+panel is pinned it re-shows with the supplied (fresh) \code{ui} so the
+user can chain another action; otherwise it hides the panel.
 }
 }
 \description{
