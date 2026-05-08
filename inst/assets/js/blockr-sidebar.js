@@ -42,24 +42,28 @@
   }
 
   function refreshBodyReflow() {
-    // Push-mode panels shift body content aside via a body class + a CSS
-    // variable whenever they are open. Overlay-mode panels never reflow
-    // the body. The choice is independent of pin state.
-    var body = document.body;
-    body.classList.remove(
-      "blockr-body-pushed-left",
-      "blockr-body-pushed-right"
+    // Push-mode panels shift the page content aside via a class + CSS
+    // variable on `<html>` whenever they are open. We apply to `<html>`
+    // (rather than `<body>`) because bslib's page-fill layouts pin body
+    // to 100% of html and zero its padding inline — body-level padding /
+    // margin no longer constrains the visible viewport. Padding on html
+    // shrinks html's content area, and body (sized 100% of it) follows.
+    // Overlay-mode panels never reflow.
+    var root = document.documentElement;
+    root.classList.remove(
+      "blockr-html-pushed-left",
+      "blockr-html-pushed-right"
     );
     var pushedOpen = document.querySelector(
       ".blockr-sidebar.blockr-sidebar-open[data-mode=\"push\"]"
     );
     if (pushedOpen) {
       var side = pushedOpen.dataset.side || "right";
-      body.classList.add("blockr-body-pushed-" + side);
+      root.classList.add("blockr-html-pushed-" + side);
       var width = pushedOpen.getBoundingClientRect().width;
-      body.style.setProperty("--blockr-sidebar-width", width + "px");
+      root.style.setProperty("--blockr-sidebar-width", width + "px");
     } else {
-      body.style.setProperty("--blockr-sidebar-width", "0px");
+      root.style.setProperty("--blockr-sidebar-width", "0px");
     }
   }
 

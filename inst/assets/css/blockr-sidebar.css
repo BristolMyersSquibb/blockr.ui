@@ -133,14 +133,21 @@
   pointer-events: auto;
 }
 
-/* Push mode: shift body content aside when an open push-mode sidebar exists.
-   The class + variable are managed by the JS bundle. */
-body.blockr-body-pushed-right {
+/* Push mode: shift the page content aside when an open push-mode sidebar
+   exists. The class + variable are managed by the JS bundle. We push by
+   shrinking `<html>` via padding (not `<body>`) because bslib's page-fill
+   layouts pin body to 100% of html and zero its padding inline, so any
+   body-level padding/margin is either overridden or simply doesn't shrink
+   the visible viewport. Padding on html shrinks html's content area, and
+   body (sized 100% of that) shrinks with it. */
+html.blockr-html-pushed-right {
   padding-right: var(--blockr-sidebar-width, 0px);
   transition: padding-right 200ms ease;
+  box-sizing: border-box;
 }
 
-body.blockr-body-pushed-left {
+html.blockr-html-pushed-left {
   padding-left: var(--blockr-sidebar-width, 0px);
   transition: padding-left 200ms ease;
+  box-sizing: border-box;
 }

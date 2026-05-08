@@ -53,7 +53,7 @@ click_js <- function(app, selector) {
   app$wait_for_idle(500)
 }
 
-test_that("mode = 'push' adds .blockr-body-pushed-* and a width on open", {
+test_that("mode = 'push' adds .blockr-html-pushed-* and a width on open", {
   push_app <- system.file("examples/push", package = "blockr.ui")
   if (!nzchar(push_app)) {
     push_app <- file.path("..", "..", "inst", "examples", "push")
@@ -68,29 +68,31 @@ test_that("mode = 'push' adds .blockr-body-pushed-* and a width on open", {
   )
   on.exit(app$stop(), add = TRUE)
 
-  body_class_initial <- app$get_js("document.body.className")
-  expect_false(grepl("blockr-body-pushed", body_class_initial %||% ""))
+  html_class_initial <- app$get_js("document.documentElement.className")
+  expect_false(grepl("blockr-html-pushed", html_class_initial %||% ""))
 
   app$click("open")
   app$wait_for_idle(500)
 
-  body_class_open <- app$get_js("document.body.className")
-  expect_match(body_class_open, "blockr-body-pushed-right")
+  html_class_open <- app$get_js("document.documentElement.className")
+  expect_match(html_class_open, "blockr-html-pushed-right")
 
-  width_open <- app$get_js(
-    "document.body.style.getPropertyValue('--blockr-sidebar-width')"
-  )
+  width_open <- app$get_js(paste0(
+    "document.documentElement.style.",
+    "getPropertyValue('--blockr-sidebar-width')"
+  ))
   expect_match(width_open, "[0-9]+px")
   expect_false(width_open == "0px")
 
   click_js(app, "#main_sidebar .blockr-sidebar-close")
 
-  body_class_closed <- app$get_js("document.body.className")
-  expect_false(grepl("blockr-body-pushed", body_class_closed %||% ""))
+  html_class_closed <- app$get_js("document.documentElement.className")
+  expect_false(grepl("blockr-html-pushed", html_class_closed %||% ""))
   expect_equal(
-    app$get_js(
-      "document.body.style.getPropertyValue('--blockr-sidebar-width')"
-    ),
+    app$get_js(paste0(
+      "document.documentElement.style.",
+      "getPropertyValue('--blockr-sidebar-width')"
+    )),
     "0px"
   )
 })
