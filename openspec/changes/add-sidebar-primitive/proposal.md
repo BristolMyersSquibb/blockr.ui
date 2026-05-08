@@ -10,16 +10,16 @@ This change is the first such increment. It ships a **sidebar primitive** in `bl
 - gives `blockr.ui` its first concrete consumer, and
 - proves out the "extract one piece at a time" pattern that subsequent changes will follow.
 
-The API is intentionally tiny and modelled on Shiny's `showModal()` / `removeModal()`: two server helpers (`sidebar_show()` / `sidebar_hide()`) plus a UI builder and a dependency. The diff at every `blockr.dock` call site is approximately `showModal(modalDialog(body))` → `sidebar_show(id, body)` and `removeModal()` → `sidebar_hide(id)`. No S3 generic for content, no trigger types, no content registry, no nested `moduleServer`s, no session walking. The previous attempt's pain points are explicitly avoided.
+The API is intentionally tiny and modelled on Shiny's `showModal()` / `removeModal()`: two server helpers (`show_sidebar()` / `hide_sidebar()`) plus a UI builder and a dependency. The diff at every `blockr.dock` call site is approximately `showModal(modalDialog(body))` → `show_sidebar(id, body)` and `removeModal()` → `hide_sidebar(id)`. No S3 generic for content, no trigger types, no content registry, no nested `moduleServer`s, no session walking. The previous attempt's pain points are explicitly avoided.
 
 ## What Changes
 
 - **NEW** `blockr.ui::sidebar_ui(id, ...)` — a Bootstrap-free, `bslib`-free slide-in panel container. Mounted once per app; the body is empty initially.
-- **NEW** `blockr.ui::sidebar_show(id, ui, title = NULL)` — pre-renders `ui` via `htmltools::renderTags()`, ships HTML + dependencies + title to the client; the client unbinds existing body bindings, installs new dependencies via `Shiny.renderDependencies()`, replaces children, runs `Shiny.initializeInputs()` and `Shiny.bindAll()` over the new body, opens the panel. Mirrors `shiny::showModal()`.
-- **NEW** `blockr.ui::sidebar_hide(id)` — unbinds the panel body and removes the open class. Mirrors `shiny::removeModal()`.
-- **NEW** `blockr.ui::sidebar_dep()` — `htmlDependency` carrying the panel's CSS and JS (single custom-message handler + tiny class-toggling logic for Esc-to-close, pin button, focus trap). Attached automatically by `sidebar_ui()`.
-- **NEW** Shiny input binding registered against `.blockr-sidebar` exposing `list(open, pinned)`. Server-side code can read `input[[id]]$open` and `input[[id]]$pinned` to react to user-driven open / close (Esc, X button, pin toggle) without round-tripping through R. Useful for example to coordinate an auto-open recipe: when an app first loads and the board is empty, the renderer can call `sidebar_show()` with an "Add your first block" hint UI, while still respecting a later user dismissal via `input[[id]]$open == FALSE`.
-- **MODIFIED (in `blockr.dock`)** the action handlers `add_block_action()`, `append_block_action()`, `prepend_block_action()`, `add_link_action()`, `add_stack_action()`, `edit_stack_action()` switch from `showModal()` / `removeModal()` to `blockr.ui::sidebar_show()` / `blockr.ui::sidebar_hide()`. The existing modal-body builders (`block_modal`, `link_modal`, `stack_modal`) keep their bodies but lose the `modalDialog()` wrapper — their input ids and form structure are unchanged, so the action handlers' `observeEvent(input$add_block_confirm, ...)` etc. keep working as-is.
+- **NEW** `blockr.ui::show_sidebar(id, ui, title = NULL)` — pre-renders `ui` via `htmltools::renderTags()`, ships HTML + dependencies + title to the client through `session$rootScope()$sendInputMessage(id, ...)`; the panel's `Shiny.InputBinding` receives the message, unbinds existing body bindings, installs new dependencies via `Shiny.renderDependencies()`, replaces children, runs `Shiny.initializeInputs()` and `Shiny.bindAll()` over the new body, and opens the panel. Mirrors `shiny::showModal()`.
+- **NEW** `blockr.ui::hide_sidebar(id)` — unbinds the panel body and removes the open class via the same input-message path. Mirrors `shiny::removeModal()`.
+- **NEW** `blockr.ui::sidebar_dep()` — `htmlDependency` carrying the panel's CSS and JS (a single `Shiny.InputBinding` whose `receiveMessage` handles show / hide, plus tiny class-toggling logic for the pin button, close button, Esc-to-close, outside-click-to-close, and focus trap). Attached automatically by `sidebar_ui()`.
+- **NEW** Shiny input binding registered against `.blockr-sidebar` exposing `list(open, pinned)`. Server-side code can read `input[[id]]$open` and `input[[id]]$pinned` to react to user-driven open / close (Esc, X button, pin toggle) without round-tripping through R. Useful for example to coordinate an auto-open recipe: when an app first loads and the board is empty, the renderer can call `show_sidebar()` with an "Add your first block" hint UI, while still respecting a later user dismissal via `input[[id]]$open == FALSE`.
+- **MODIFIED (in `blockr.dock`)** the action handlers `add_block_action()`, `append_block_action()`, `prepend_block_action()`, `add_link_action()`, `add_stack_action()`, `edit_stack_action()` switch from `showModal()` / `removeModal()` to `blockr.ui::show_sidebar()` / `blockr.ui::hide_sidebar()`. The existing modal-body builders (`block_modal`, `link_modal`, `stack_modal`) keep their bodies but lose the `modalDialog()` wrapper — their input ids and form structure are unchanged, so the action handlers' `observeEvent(input$add_block_confirm, ...)` etc. keep working as-is.
 - **MODIFIED (in `blockr.dock`)** `board_ui.dock_board()` mounts a sidebar via `blockr.ui::sidebar_ui(NS(id, "main_sidebar"))` and the navbar's settings gear opens it with the existing options-accordion content (no more Bootstrap settings offcanvas).
 
 ## What's *not* in this change
@@ -42,7 +42,7 @@ Each of those will land as its own change with its own proposal / design / tasks
 
 ### New Capabilities
 
-- `sidebar`: The sidebar UI builder (`sidebar_ui()`), its dependency (`sidebar_dep()`), and the two server helpers (`sidebar_show()`, `sidebar_hide()`) plus the JS handler that processes them. That's it.
+- `sidebar`: The sidebar UI builder (`sidebar_ui()`), its dependency (`sidebar_dep()`), and the two server helpers (`show_sidebar()`, `hide_sidebar()`) plus the JS handler that processes them. That's it.
 
 ### Modified Capabilities
 
@@ -52,7 +52,7 @@ None. `blockr.ui`'s only existing artefact is the package skeleton.
 
 Implementation is sequenced as two independently shippable PRs:
 
-1. **Phase 1 (PR 1):** Sidebar primitive in `blockr.ui` — `sidebar_ui()`, `sidebar_dep()`, `sidebar_show()`, `sidebar_hide()`, JS handler, CSS. `R CMD check` clean. `blockr.dock` untouched. A non-dock Shiny app can mount and drive the sidebar.
+1. **Phase 1 (PR 1):** Sidebar primitive in `blockr.ui` — `sidebar_ui()`, `sidebar_dep()`, `show_sidebar()`, `hide_sidebar()`, JS handler, CSS. `R CMD check` clean. `blockr.dock` untouched. A non-dock Shiny app can mount and drive the sidebar.
 2. **Phase 2 (PR 2):** `blockr.dock` adopts the sidebar — six action handlers switched, settings gear switched, `board_ui.dock_board()` mounts the sidebar. The modal-body builders stay but lose the `modalDialog()` wrapper; the settings Bootstrap offcanvas is removed. `R CMD check` clean on both packages, all existing tests pass.
 
 ## Future change ideas (NOT in this change)
