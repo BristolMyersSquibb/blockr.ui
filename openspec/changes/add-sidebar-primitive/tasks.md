@@ -29,20 +29,20 @@ Self-contained: no `blockr.dock` change. After this phase, a non-dock Shiny app 
 
 ## 3. Phase 2 — `blockr.dock` adopts the sidebar (PR 2)
 
-- [ ] 3.1 Add `blockr.ui` to `blockr.dock`'s `Imports` in `DESCRIPTION`.
-- [ ] 3.2 In each existing modal builder (`block_modal`, `link_modal`, `stack_modal`), keep the body `tagList()` but drop the `modalDialog(...)` wrapper. Rename to `*_body()` (or similar) so the call site reads `block_modal_body(...)`. Input ids and form structure unchanged.
-- [ ] 3.3 Switch each action handler from `showModal(*_modal(...))` / `removeModal()` to `blockr.ui::show_sidebar(sidebar_id, ui = *_body(...), title = ...)` / `blockr.ui::hide_sidebar(sidebar_id)`. Add a `sidebar_id = "main_sidebar"` parameter (default value matches what `board_ui.dock_board()` mounts). On confirm, branch on `blockr.ui::sidebar_state(sidebar_id)$pinned` — when pinned, re-show with a fresh body so the user can chain another add; when not pinned, `hide_sidebar()`. Applies to:
+- [x] 3.1 Add `blockr.ui` to `blockr.dock`'s `Imports` in `DESCRIPTION`.
+- [x] 3.2 In each existing modal builder (`block_modal`, `link_modal`, `stack_modal`), keep the body `tagList()` but drop the `modalDialog(...)` wrapper. Rename to `*_body()` (or similar) so the call site reads `block_modal_body(...)`. Input ids and form structure unchanged.
+- [x] 3.3 Switch each action handler from `showModal(*_modal(...))` / `removeModal()` to `blockr.ui::show_sidebar(sidebar_id, ui = *_body(...), title = ...)` / `blockr.ui::hide_sidebar(sidebar_id)`. Add a `sidebar_id = "main_sidebar"` parameter (default value matches what `board_ui.dock_board()` mounts). On confirm, branch on `blockr.ui::sidebar_state(sidebar_id)$pinned` — when pinned, re-show with a fresh body so the user can chain another add; when not pinned, `hide_sidebar()`. Applies to:
   - `add_block_action()`
   - `append_block_action()`
   - `prepend_block_action()`
   - `add_link_action()`
   - `add_stack_action()`
   - `edit_stack_action()`
-- [ ] 3.4 Update `board_ui.dock_board()` to mount `blockr.ui::sidebar_ui(NS(id, "main_sidebar"))` somewhere in the page.
-- [ ] 3.5 Replace the navbar settings gear's `data-bs-toggle="offcanvas"` markup with a regular `actionButton()` whose `observeEvent` (in `board_server_callback()` or a small new internal helper) calls `blockr.ui::show_sidebar(sidebar_id, ui = settings_body(id, board, options))` — where `settings_body()` is the existing options-accordion content extracted from `board_ui.dock_board()`. The Bootstrap settings offcanvas markup is removed.
-- [ ] 3.6 Tests: existing action-handler tests adapted — replace `expect`s on modal-specific input ids with `with_mocked_bindings()` around `blockr.ui::show_sidebar` / `hide_sidebar` to verify the action handler triggers the right call. Existing form-validation logic is unchanged so the bulk of the tests stays.
-- [ ] 3.7 `devtools::check()` on `blockr.dock` clean (0/0/0 modulo timestamp NOTE); all tests pass.
-- [ ] 3.8 Manual smoke test: run the dock + dag example (right-click append node, "+" toolbar button, settings gear) and confirm the sidebar opens / closes / accepts input correctly.
+- [x] 3.4 Update `board_ui.dock_board()` to mount `blockr.ui::sidebar_ui(NS(id, "main_sidebar"))` somewhere in the page.
+- [x] 3.5 Replace the navbar settings gear's `data-bs-toggle="offcanvas"` markup with a regular `actionButton()` whose `observeEvent` (in `board_server_callback()` or a small new internal helper) calls `blockr.ui::show_sidebar(sidebar_id, ui = settings_body(id, board, options))` — where `settings_body()` is the existing options-accordion content extracted from `board_ui.dock_board()`. The Bootstrap settings offcanvas markup is removed.
+- [x] 3.6 Tests: existing action-handler tests adapted — replace `expect`s on modal-specific input ids with `with_mocked_bindings()` around `blockr.ui::show_sidebar` / `hide_sidebar` to verify the action handler triggers the right call. Existing form-validation logic is unchanged so the bulk of the tests stays.
+- [x] 3.7 `devtools::check()` on `blockr.dock` clean (0/0/0 modulo timestamp NOTE); all tests pass.
+- [x] 3.8 Manual smoke test: run the dock + dag example (right-click append node, "+" toolbar button, settings gear) and confirm the sidebar opens / closes / accepts input correctly.
 
 ## 4. Validation
 
