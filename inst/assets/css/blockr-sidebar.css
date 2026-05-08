@@ -95,6 +95,21 @@
   outline-offset: 2px;
 }
 
+.blockr-sidebar-btn svg {
+  width: 10px;
+  height: 10px;
+  display: block;
+  transition: transform 180ms ease;
+}
+
+/* Visual feedback for the pin toggle: the path's head sits naturally
+   at top-right (head tilted, tip at bottom-left). Unpinned keeps that
+   slight side tilt; pinned rotates -45° so the head is straight up and
+   the tip points straight down — "stuck in". */
+.blockr-sidebar.blockr-sidebar-pinned .blockr-sidebar-pin svg {
+  transform: rotate(-45deg);
+}
+
 .blockr-sidebar.blockr-sidebar-pinned .blockr-sidebar-pin {
   background: rgba(37, 99, 235, 0.1);
   color: #1d4ed8;
