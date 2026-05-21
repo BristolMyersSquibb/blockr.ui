@@ -43,6 +43,7 @@ Self-contained: no `blockr.dock` change. After this phase, a non-dock Shiny app 
 - [x] 3.6 Tests: existing action-handler tests adapted — replace `expect`s on modal-specific input ids with `with_mocked_bindings()` around `blockr.ui::show_sidebar` / `hide_sidebar` to verify the action handler triggers the right call. Existing form-validation logic is unchanged so the bulk of the tests stays.
 - [x] 3.7 `devtools::check()` on `blockr.dock` clean (0/0/0 modulo timestamp NOTE); all tests pass.
 - [x] 3.8 Manual smoke test: run the dock + dag example (right-click append node, "+" toolbar button, settings gear) and confirm the sidebar opens / closes / accepts input correctly.
+- [x] 3.9 Selectize-aware focus: extend `showPanel` in `inst/assets/js/blockr-sidebar.js` so that after `focusables[0].focus()` it walks up to `.selectize-control`, finds the inner `select.selectized`, and calls `select.selectize.focus()`. Restores the keyboard UX previously wired per-form via `shown.bs.modal` in `blockr.dock`'s `auto_focus_script()`, without requiring per-consumer opt-in. `blockr.dock`'s `*_sidebar_body` builders therefore stay free of focus-wiring code.
 
 ## 4. Validation
 

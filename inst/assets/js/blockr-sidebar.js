@@ -142,7 +142,25 @@
     // Move focus to first focusable element inside the body.
     var focusables = getFocusables(body);
     if (focusables.length) {
-      focusables[0].focus();
+      var first = focusables[0];
+      first.focus();
+      // Selectize-aware: if the first focusable belongs to a selectize
+      // control, also call the selectize API so the dropdown pops open.
+      // Plain `.focus()` lands on the visible `.selectize-input` div but
+      // does not trigger the open behaviour, so consumers used to wire
+      // `$('#id')[0].selectize.focus()` to `shown.bs.modal`. Doing it
+      // here means every sidebar consumer benefits without per-form opt-in.
+      var ctrl = first.closest && first.closest(".selectize-control");
+      if (ctrl) {
+        var select = ctrl.querySelector("select.selectized");
+        if (
+          select &&
+          select.selectize &&
+          typeof select.selectize.focus === "function"
+        ) {
+          select.selectize.focus();
+        }
+      }
     } else {
       panel.focus();
     }

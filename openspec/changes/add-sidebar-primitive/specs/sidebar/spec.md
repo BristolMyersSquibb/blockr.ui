@@ -117,6 +117,8 @@ The pin state lives entirely in the DOM (a class on the panel element). It is no
 
 On open the panel SHALL move keyboard focus to the first focusable element inside the body and remember the previously-focused element. While the panel is open, Tab and Shift+Tab SHALL cycle focus among focusable descendants of the panel (focus trap). On close the panel SHALL restore focus to the previously-focused element.
 
+When that first focusable element belongs to a selectize control (i.e. lives inside a `.selectize-control` wrapping a `<select class="selectized">` whose `.selectize` JS API is attached), the panel SHALL additionally call `select.selectize.focus()` so the dropdown opens, matching the keyboard UX previously wired per-form via `shown.bs.modal` listeners. Plain `HTMLElement.focus()` is insufficient for selectize because it lands on the visible `.selectize-input` div without triggering open-on-focus. Selectize awareness lives in the primitive so every consumer benefits without per-form opt-in.
+
 While the panel is open AND not pinned, pressing `Escape` SHALL close it AND clicking outside the panel SHALL close it. While pinned, neither `Escape` nor an outside click SHALL close it - only the X button closes a pinned panel. The pin button is therefore the user's opt-in to "stay open while I work elsewhere on the page".
 
 #### Scenario: Esc closes when not pinned
@@ -144,6 +146,17 @@ While the panel is open AND not pinned, pressing `Escape` SHALL close it AND cli
 
 - **WHEN** focus is on a button, the user opens the panel, then closes it
 - **THEN** keyboard focus returns to the same button
+
+#### Scenario: Selectize dropdown opens automatically on show
+
+- **WHEN** the panel opens with a body whose first focusable element is a selectized `<select>` (e.g. `block_registry_selectize(...)`)
+- **THEN** keyboard focus lands inside the selectize control
+- **AND** the selectize dropdown is open (`select.selectize.isOpen` is `TRUE`), without the form needing its own `shown.bs.*` or panel-open listener
+
+#### Scenario: Non-selectize first focusable is left alone
+
+- **WHEN** the panel opens with a body whose first focusable element is an ordinary `<input>` or `<button>` (not inside a `.selectize-control`)
+- **THEN** keyboard focus lands on that element via `HTMLElement.focus()` and no selectize API is invoked
 
 ### Requirement: Shiny input binding exposes `{open, pinned}`
 
