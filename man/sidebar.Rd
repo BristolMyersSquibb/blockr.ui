@@ -82,6 +82,15 @@ A Bootstrap-free slide-in panel mirroring \code{\link[shiny:showModal]{shiny::sh
 once per page; \code{show_sidebar()} and \code{hide_sidebar()} drive its content
 from any \code{moduleServer()} body, exactly like a modal.
 }
+\details{
+Each panel id is a single concern: \code{show_sidebar()} replaces the
+panel's body and title in place, and pin state is bound to the panel
+element. Re-showing with fresh content from the same caller is the
+supported pattern (see \code{\link[=keep_or_hide_sidebar]{keep_or_hide_sidebar()}}). Two unrelated
+concerns should each mount their own \code{sidebar_ui(id)} - reusing one
+id from different callers will silently overwrite a pinned panel's
+content the next time \code{show_sidebar()} is called against it.
+}
 \examples{
 if (interactive()) {
   library(shiny)

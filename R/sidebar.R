@@ -5,6 +5,14 @@
 #' once per page; `show_sidebar()` and `hide_sidebar()` drive its content
 #' from any `moduleServer()` body, exactly like a modal.
 #'
+#' Each panel id is a single concern: `show_sidebar()` replaces the
+#' panel's body and title in place, and pin state is bound to the panel
+#' element. Re-showing with fresh content from the same caller is the
+#' supported pattern (see [keep_or_hide_sidebar()]). Two unrelated
+#' concerns should each mount their own `sidebar_ui(id)` - reusing one
+#' id from different callers will silently overwrite a pinned panel's
+#' content the next time `show_sidebar()` is called against it.
+#'
 #' @param id A character scalar. The DOM id used for the panel element. The
 #'   same id is what `show_sidebar()` / `hide_sidebar()` target and what R
 #'   reads as `input[[id]]` to observe `{open, pinned}` state.

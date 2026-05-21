@@ -71,6 +71,19 @@ observe({
 })
 ```
 
+## One id per concern
+
+`show_sidebar()` replaces the panel's body and title in place, and pin
+state is bound to the panel element. Re-showing the same panel with
+fresh content from the same caller (the "chain after confirm" flow,
+which `keep_or_hide_sidebar()` builds on) is the supported pattern.
+
+Two unrelated concerns - say a "Settings" panel and an "Add block"
+form - should mount two `sidebar_ui()` panels with distinct ids. Sharing
+one id between unrelated callers means the second `show_sidebar()` will
+silently overwrite the first, including any pinned content the user
+expected to stay put.
+
 ## Auto-open on an empty board
 
 A common renderer pattern is to open the sidebar with a "first block"
