@@ -1,12 +1,7 @@
-# blockr.ui: Cross-Cutting User Interface for the 'blockr' Ecosystem
+# blockr.ui: User Interface Components for the 'blockr' Ecosystem
 
-Provides the cross-cutting user-interface surface used by
-'blockr'-flavoured Shiny apps: design tokens, base CSS, the block card,
-page chrome (app shell, navbar, options renderer), and a reusable
-sidebar primitive with a content registry. Designed to sit between
-'blockr.core' and renderers such as 'blockr.dock', so extensions and
-embedded apps can adopt the look and feel without pulling in
-'dockViewR'.
+User-interface primitives shared across the 'blockr' ecosystem. Designed
+to sit between 'blockr.core' and renderers such as 'blockr.dock'.
 
 ## See also
 

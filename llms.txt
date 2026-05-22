@@ -1,10 +1,101 @@
-Provides the cross-cutting user-interface surface used by
-'blockr'-flavoured Shiny apps: design tokens, base CSS, the block card,
-page chrome (app shell, navbar, options renderer), and a reusable
-sidebar primitive with a content registry. Designed to sit between
-'blockr.core' and renderers such as 'blockr.dock', so extensions and
-embedded apps can adopt the look and feel without pulling in
-'dockViewR'.
+# blockr.ui
 
-# 
+User-interface primitives shared across the
+[blockr](https://blockr.site/) ecosystem. Designed to sit between
+`blockr.core` and renderers such as `blockr.dock`.
 
+## Installation
+
+You can install the development version of blockr.ui from
+[GitHub](https://github.com/BristolMyersSquibb/blockr.ui) with:
+
+``` r
+
+# install.packages("pak")
+pak::pak("BristolMyersSquibb/blockr.ui")
+```
+
+## Example
+
+### Minimal sidebar
+
+A slide-in panel that hosts arbitrary Shiny content. See
+[`vignette("sidebar", package = "blockr.ui")`](https://bristolmyerssquibb.github.io/blockr.ui/articles/sidebar.md)
+for the full API.
+
+``` r
+
+library(shiny)
+library(blockr.ui)
+
+ui <- fluidPage(
+  titlePanel("blockr.ui sidebar primitive"),
+  actionButton("open", "Open sidebar", class = "btn-primary"),
+  verbatimTextOutput("state"),
+  sidebar_ui("main_sidebar")
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$open, {
+    show_sidebar(
+      "main_sidebar",
+      title = "Add a new block",
+      ui = tagList(
+        textInput("block_name", "Name"),
+        selectInput(
+          "block_kind",
+          "Type",
+          c("data", "transform", "plot")
+        ),
+        actionButton("confirm", "Add", class = "btn-primary")
+      )
+    )
+  })
+
+  observeEvent(input$confirm, {
+    hide_sidebar("main_sidebar")
+  })
+
+  output$state <- renderPrint({
+    state <- input$main_sidebar
+    if (is.null(state)) return("sidebar: not yet rendered")
+    sprintf(
+      "sidebar: open = %s, pinned = %s",
+      state$open, state$pinned
+    )
+  })
+}
+
+shinyApp(ui, server)
+```
+
+![blockr.ui minimal sidebar
+example](reference/figures/sidebar-minimal.png)
+
+blockr.ui minimal sidebar example
+
+## Code of Conduct
+
+Please note that the blockr.ui project is released with a [Contributor
+Code of
+Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
+
+# Package index
+
+## All functions
+
+- [`sidebar_ui()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
+  [`sidebar_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
+  [`show_sidebar()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
+  [`hide_sidebar()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
+  [`sidebar_state()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
+  [`keep_or_hide_sidebar()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
+  : Sidebar primitive
+
+# Articles
+
+### All vignettes
+
+- [Driving the sidebar
+  primitive](https://bristolmyerssquibb.github.io/blockr.ui/articles/sidebar.md):
