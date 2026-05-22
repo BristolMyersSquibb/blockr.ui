@@ -27,6 +27,6 @@ Suggests:
     testthat (>= 3.0.0),
     withr
 Remotes:
-    BristolMyersSquibb/blockr.core
+    BristolMyersSquibb/blockr.core#176
 Config/testthat/edition: 3
 VignetteBuilder: knitr
