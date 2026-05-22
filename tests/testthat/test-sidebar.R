@@ -1,0 +1,288 @@
+test_that("sidebar_ui markup is Bootstrap-free", {
+  panel <- sidebar_ui("main_sidebar")
+  html <- as.character(panel)
+
+  expect_false(grepl("\\boffcanvas\\b", html, ignore.case = TRUE))
+  expect_false(grepl("class=\"[^\"]*\\bmodal\\b", html, ignore.case = TRUE))
+  expect_false(grepl("data-bs-[a-z-]+=", html))
+})
+
+test_that("sidebar_ui sets initial state attributes", {
+  panel <- sidebar_ui("main_sidebar", side = "left", width = "400px")
+  html <- as.character(panel)
+
+  expect_match(html, "id=\"main_sidebar\"", fixed = TRUE)
+  expect_match(html, "data-side=\"left\"", fixed = TRUE)
+  expect_match(html, "width: 400px", fixed = TRUE)
+  expect_match(html, "aria-hidden=\"true\"", fixed = TRUE)
+  expect_match(html, "class=\"blockr-sidebar\"", fixed = TRUE)
+})
+
+test_that("sidebar_ui attaches sidebar_dep() automatically", {
+  panel <- sidebar_ui("main_sidebar")
+  deps <- htmltools::findDependencies(panel)
+  dep_names <- vapply(deps, function(x) x$name, character(1))
+
+  expect_true("blockr-sidebar" %in% dep_names)
+})
+
+test_that("sidebar_ui rejects malformed inputs", {
+  expect_error(sidebar_ui(""))
+  expect_error(sidebar_ui(NULL))
+  expect_error(sidebar_ui(c("a", "b")))
+  expect_error(sidebar_ui("ok", side = "top"))
+  expect_error(sidebar_ui("ok", width = ""))
+  expect_error(sidebar_ui("ok", mode = "stretch"))
+})
+
+test_that("sidebar_ui defaults to overlay mode", {
+  panel <- sidebar_ui("main_sidebar")
+  html <- as.character(panel)
+  expect_match(html, "data-mode=\"overlay\"", fixed = TRUE)
+})
+
+test_that("sidebar_ui carries data-mode='push' when requested", {
+  panel <- sidebar_ui("main_sidebar", mode = "push")
+  html <- as.character(panel)
+  expect_match(html, "data-mode=\"push\"", fixed = TRUE)
+})
+
+test_that("sidebar_dep references the bundled CSS and JS files", {
+  dep <- sidebar_dep()
+
+  expect_s3_class(dep, "html_dependency")
+  expect_identical(dep$name, "blockr-sidebar")
+  expect_identical(dep$stylesheet, "css/blockr-sidebar.css")
+  expect_identical(dep$script, "js/blockr-sidebar.js")
+
+  src_dir <- system.file(dep$src$file, package = dep$package)
+  expect_true(nzchar(src_dir))
+  expect_true(
+    file.exists(file.path(src_dir, "css/blockr-sidebar.css"))
+  )
+  expect_true(
+    file.exists(file.path(src_dir, "js/blockr-sidebar.js"))
+  )
+})
+
+test_that("show_sidebar emits a `show` input message with HTML, deps, title", {
+  ctx <- mock_session_with_capture()
+
+  show_sidebar(
+    "main_sidebar",
+    title = "Add block",
+    ui = shiny::tagList(
+      shiny::textInput("block_name", "Name"),
+      shiny::actionButton("confirm", "Add")
+    ),
+    session = ctx$session
+  )
+
+  msgs <- ctx$messages()
+  expect_length(msgs, 1L)
+
+  expect_identical(msgs[[1L]]$id, "main_sidebar")
+  payload <- msgs[[1L]]$message
+  expect_identical(payload$action, "show")
+  expect_identical(payload$title, "Add block")
+  expect_type(payload$html, "character")
+  expect_match(payload$html, "id=\"block_name\"", fixed = TRUE)
+  expect_match(payload$html, "id=\"confirm\"", fixed = TRUE)
+  expect_type(payload$dependencies, "list")
+})
+
+test_that("show_sidebar forwards htmltools dependencies", {
+  ctx <- mock_session_with_capture()
+
+  ui_with_dep <- htmltools::attachDependencies(
+    shiny::tags$div("hello"),
+    htmltools::htmlDependency(
+      name = "fake-dep",
+      version = "1.0.0",
+      src = c(href = "https://example.com/"),
+      script = "fake.js"
+    )
+  )
+
+  show_sidebar("main_sidebar", ui = ui_with_dep, session = ctx$session)
+
+  payload <- ctx$messages()[[1L]]$message
+  dep_names <- vapply(payload$dependencies, function(x) x$name, character(1))
+  expect_true("fake-dep" %in% dep_names)
+})
+
+test_that("hide_sidebar emits a single `hide` input message", {
+  ctx <- mock_session_with_capture()
+
+  hide_sidebar("main_sidebar", session = ctx$session)
+
+  msgs <- ctx$messages()
+  expect_length(msgs, 1L)
+  expect_identical(msgs[[1L]]$id, "main_sidebar")
+  expect_identical(msgs[[1L]]$message, list(action = "hide"))
+})
+
+test_that("show_sidebar / hide_sidebar dispatch via the root session", {
+  # A nested session-proxy must still target the absolute DOM id, not its
+  # own namespaced id. `MockShinySession$makeScope("mod_a")` mimics what
+  # Shiny does for moduleServer().
+  ctx <- mock_session_with_capture()
+  nested <- ctx$session$makeScope("mod_a")
+
+  show_sidebar(
+    "main_sidebar",
+    ui = shiny::tags$div("hi"),
+    session = nested
+  )
+  hide_sidebar("main_sidebar", session = nested)
+
+  msgs <- ctx$messages()
+  expect_length(msgs, 2L)
+  # Both calls reached the root session and used the absolute id.
+  expect_identical(msgs[[1L]]$id, "main_sidebar")
+  expect_identical(msgs[[2L]]$id, "main_sidebar")
+})
+
+test_that("show_sidebar / hide_sidebar error outside a Shiny session", {
+  expect_error(
+    show_sidebar("main_sidebar", ui = shiny::div(), session = NULL),
+    class = "blockr_ui_no_session"
+  )
+  expect_error(
+    hide_sidebar("main_sidebar", session = NULL),
+    class = "blockr_ui_no_session"
+  )
+})
+
+test_that("sidebar_state defaults to FALSE/FALSE before binding reports", {
+  sess <- shiny::MockShinySession$new()
+
+  state <- sidebar_state("main_sidebar", session = sess)
+  expect_identical(state, list(open = FALSE, pinned = FALSE))
+})
+
+test_that("sidebar_state reads from the root session, not the calling scope", {
+  sess <- shiny::MockShinySession$new()
+  # Simulate the binding having reported a state up to the root session.
+  sess$setInputs(main_sidebar = list(open = TRUE, pinned = TRUE))
+
+  # Calling from a deeply-namespaced session_proxy must still pick up
+  # the absolute-id state from the root.
+  nested <- sess$makeScope("mod_a")$makeScope("add_block_action")
+  state <- sidebar_state("main_sidebar", session = nested)
+
+  expect_identical(state, list(open = TRUE, pinned = TRUE))
+})
+
+test_that("sidebar_state errors outside a Shiny session", {
+  expect_error(
+    sidebar_state("main_sidebar", session = NULL),
+    class = "blockr_ui_no_session"
+  )
+})
+
+test_that("keep_or_hide_sidebar hides when not pinned", {
+  ctx <- mock_session_with_capture()
+  # No prior state set => pinned = FALSE => hide branch.
+
+  keep_or_hide_sidebar(
+    "main_sidebar",
+    ui = shiny::tags$div("fresh"),
+    title = "Add new block",
+    session = ctx$session
+  )
+
+  msgs <- ctx$messages()
+  expect_length(msgs, 1L)
+  expect_identical(msgs[[1L]]$id, "main_sidebar")
+  expect_identical(msgs[[1L]]$message, list(action = "hide"))
+})
+
+test_that("sidebar_ui pre-renders body and title when ui/title are supplied", {
+  panel <- sidebar_ui(
+    "settings_sidebar",
+    ui = shiny::tagList(
+      shiny::tags$h3("Board options"),
+      shiny::textInput("opt_a", "A")
+    ),
+    title = "Board options"
+  )
+  html <- as.character(panel)
+
+  # Body slot carries the pre-rendered content (not empty).
+  expect_match(html, "id=\"opt_a\"", fixed = TRUE)
+  expect_match(html, "Board options", fixed = TRUE)
+  # Title slot is populated.
+  expect_match(
+    html,
+    "<h2 class=\"blockr-sidebar-title\">Board options</h2>",
+    fixed = TRUE
+  )
+  # Panel remains closed by default.
+  expect_match(html, "aria-hidden=\"true\"", fixed = TRUE)
+  expect_false(grepl("blockr-sidebar-open", html, fixed = TRUE))
+})
+
+test_that("sidebar_ui carries body-level htmltools dependencies", {
+  body <- htmltools::attachDependencies(
+    shiny::tags$div("hi"),
+    htmltools::htmlDependency(
+      name = "body-dep",
+      version = "1.0.0",
+      src = c(href = "https://example.com/"),
+      script = "body.js"
+    )
+  )
+
+  panel <- sidebar_ui("settings_sidebar", ui = body)
+  deps <- htmltools::findDependencies(panel)
+  dep_names <- vapply(deps, function(x) x$name, character(1))
+
+  expect_true("blockr-sidebar" %in% dep_names)
+  expect_true("body-dep" %in% dep_names)
+})
+
+test_that("show_sidebar omits html/dependencies when ui is NULL (open-only)", {
+  ctx <- mock_session_with_capture()
+
+  show_sidebar("settings_sidebar", session = ctx$session)
+
+  msgs <- ctx$messages()
+  expect_length(msgs, 1L)
+  payload <- msgs[[1L]]$message
+  expect_identical(payload$action, "show")
+  expect_false("html" %in% names(payload))
+  expect_false("dependencies" %in% names(payload))
+  expect_false("title" %in% names(payload))
+})
+
+test_that("show_sidebar with title only updates the title slot", {
+  ctx <- mock_session_with_capture()
+
+  show_sidebar("settings_sidebar", title = "Updated", session = ctx$session)
+
+  payload <- ctx$messages()[[1L]]$message
+  expect_identical(payload$action, "show")
+  expect_identical(payload$title, "Updated")
+  expect_false("html" %in% names(payload))
+  expect_false("dependencies" %in% names(payload))
+})
+
+test_that("keep_or_hide_sidebar re-shows with fresh ui when pinned", {
+  ctx <- mock_session_with_capture()
+  ctx$session$setInputs(main_sidebar = list(open = TRUE, pinned = TRUE))
+
+  keep_or_hide_sidebar(
+    "main_sidebar",
+    ui = shiny::tagList(shiny::textInput("block_name", "Name")),
+    title = "Add new block",
+    session = ctx$session
+  )
+
+  msgs <- ctx$messages()
+  expect_length(msgs, 1L)
+  payload <- msgs[[1L]]$message
+  expect_identical(payload$action, "show")
+  expect_identical(payload$title, "Add new block")
+  expect_match(payload$html, "id=\"block_name\"", fixed = TRUE)
+})
