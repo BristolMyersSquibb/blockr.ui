@@ -12,6 +12,8 @@
 \usage{
 sidebar_ui(
   id,
+  ui = NULL,
+  title = NULL,
   side = c("right", "left"),
   width = "360px",
   mode = c("overlay", "push")
@@ -19,7 +21,12 @@ sidebar_ui(
 
 sidebar_dep()
 
-show_sidebar(id, ui, title = NULL, session = shiny::getDefaultReactiveDomain())
+show_sidebar(
+  id,
+  ui = NULL,
+  title = NULL,
+  session = shiny::getDefaultReactiveDomain()
+)
 
 hide_sidebar(id, session = shiny::getDefaultReactiveDomain())
 
@@ -37,6 +44,11 @@ keep_or_hide_sidebar(
 same id is what \code{show_sidebar()} / \code{hide_sidebar()} target and what R
 reads as \code{input[[id]]} to observe \verb{\{open, pinned\}} state.}
 
+\item{ui}{A Shiny tag tree to render inside the panel body. Pre-rendered
+via \code{\link[htmltools:renderTags]{htmltools::renderTags()}} so dependencies travel with the content.}
+
+\item{title}{Optional title shown in the panel header. \code{NULL} clears it.}
+
 \item{side}{Which side of the viewport the panel slides in from.}
 
 \item{width}{A CSS length applied to the panel as
@@ -49,11 +61,6 @@ untouched. In \code{"push"} mode the bundled CSS adds
 \verb{padding-<side>: var(--blockr-sidebar-width)} on \verb{<body>} whenever
 the panel is open, so the page content shifts aside instead of being
 covered. The choice is independent of pin state.}
-
-\item{ui}{A Shiny tag tree to render inside the panel body. Pre-rendered
-via \code{\link[htmltools:renderTags]{htmltools::renderTags()}} so dependencies travel with the content.}
-
-\item{title}{Optional title shown in the panel header. \code{NULL} clears it.}
 
 \item{session}{The Shiny session. Defaults to the calling reactive
 domain - same as \code{\link[shiny:showModal]{shiny::showModal()}}.}
@@ -90,6 +97,20 @@ supported pattern (see \code{\link[=keep_or_hide_sidebar]{keep_or_hide_sidebar()
 concerns should each mount their own \code{sidebar_ui(id)} - reusing one
 id from different callers will silently overwrite a pinned panel's
 content the next time \code{show_sidebar()} is called against it.
+
+A panel can be opened in two complementary ways. The original
+"modal-like" form is \verb{show_sidebar(id, ui = <tags>)} from the server,
+rendered on demand. The "offcanvas-like" form pre-renders the body at
+\code{sidebar_ui()} time (pass \code{ui} and optionally \code{title}) and opens
+client-side: any element on the page carrying
+\code{data-blockr-sidebar-target = "<id>"} toggles the matching panel on
+click, with no R round-trip. This is the right model for a static
+settings panel triggered by a navbar icon - the click latency stays
+at one frame instead of a full Shiny round-trip. The two forms
+coexist on the same DOM mount: a later \code{show_sidebar(id, ui = ...)}
+replaces the pre-rendered body if the consumer later wants dynamic
+behaviour, and \code{show_sidebar(id)} (no \code{ui}) opens a pre-rendered
+panel from the server without re-shipping the HTML.
 }
 \examples{
 if (interactive()) {

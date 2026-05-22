@@ -71,6 +71,39 @@ observe({
 })
 ```
 
+## Static body + client-side trigger
+
+For a panel whose body is known at UI-build time (a settings form, a
+help panel, an "About" sheet), you don't need a server round-trip to
+open it. Pre-render the body at `sidebar_ui()` time and put
+`data-blockr-sidebar-target = "<id>"` on any element that should toggle
+it.
+
+```{r}
+ui <- fluidPage(
+  actionButton(
+    "settings_btn", icon("gear"),
+    `data-blockr-sidebar-target` = "settings_sidebar"
+  ),
+  sidebar_ui(
+    "settings_sidebar",
+    side = "left",
+    title = "Board options",
+    ui = tagList(
+      checkboxInput("opt_a", "Option A", value = TRUE),
+      sliderInput("opt_b", "Option B", min = 0, max = 100, value = 50)
+    )
+  )
+)
+```
+
+Clicking the gear toggles the panel open / closed entirely on the
+client. The inputs inside (`input$opt_a`, `input$opt_b`) are observable
+from the server exactly as if they sat in the page directly. A later
+`show_sidebar("settings_sidebar")` (no `ui`) still opens the panel from
+the server when needed; `show_sidebar("settings_sidebar", ui = <tags>)`
+replaces the pre-rendered body if you want to swap it dynamically.
+
 ## One id per concern
 
 `show_sidebar()` replaces the panel's body and title in place, and pin

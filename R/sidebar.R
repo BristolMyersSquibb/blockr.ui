@@ -13,6 +13,20 @@
 #' id from different callers will silently overwrite a pinned panel's
 #' content the next time `show_sidebar()` is called against it.
 #'
+#' A panel can be opened in two complementary ways. The original
+#' "modal-like" form is `show_sidebar(id, ui = <tags>)` from the server,
+#' rendered on demand. The "offcanvas-like" form pre-renders the body at
+#' `sidebar_ui()` time (pass `ui` and optionally `title`) and opens
+#' client-side: any element on the page carrying
+#' `data-blockr-sidebar-target = "<id>"` toggles the matching panel on
+#' click, with no R round-trip. This is the right model for a static
+#' settings panel triggered by a navbar icon - the click latency stays
+#' at one frame instead of a full Shiny round-trip. The two forms
+#' coexist on the same DOM mount: a later `show_sidebar(id, ui = ...)`
+#' replaces the pre-rendered body if the consumer later wants dynamic
+#' behaviour, and `show_sidebar(id)` (no `ui`) opens a pre-rendered
+#' panel from the server without re-shipping the HTML.
+#'
 #' @param id A character scalar. The DOM id used for the panel element. The
 #'   same id is what `show_sidebar()` / `hide_sidebar()` target and what R
 #'   reads as `input[[id]]` to observe `{open, pinned}` state.
