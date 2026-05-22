@@ -118,8 +118,10 @@ empty_board_renderer <- function(id, board) {
 }
 ```
 
-The pinned panel reflows the page content via the
-`--blockr-sidebar-width` CSS custom property on `<body>`. Apps that
-want the main canvas to slide alongside (rather than be overlaid by)
-a pinned panel can use `margin-right: var(--blockr-sidebar-width, 0px)`
-on their main container.
+Push-mode panels reflow the page content via padding on `<html>`,
+driven by `--blockr-sidebar-width-left` and
+`--blockr-sidebar-width-right` custom properties (both nonzero when
+both sides are open). The legacy `--blockr-sidebar-width` is also
+set to the open side's width when a single panel is open, so
+existing consumers of the form
+`margin-right: var(--blockr-sidebar-width, 0px)` keep working.

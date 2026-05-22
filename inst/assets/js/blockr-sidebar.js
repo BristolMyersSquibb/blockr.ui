@@ -54,17 +54,31 @@
       "blockr-html-pushed-left",
       "blockr-html-pushed-right"
     );
-    var pushedOpen = document.querySelector(
+
+    // Both sides may be open simultaneously; track each width separately
+    // so the page content is constrained between them rather than hidden
+    // under whichever sidebar was opened second.
+    var pushedOpen = document.querySelectorAll(
       ".blockr-sidebar.blockr-sidebar-open[data-mode=\"push\"]"
     );
-    if (pushedOpen) {
-      var side = pushedOpen.dataset.side || "right";
+    var widths = { left: 0, right: 0 };
+    for (var i = 0; i < pushedOpen.length; i++) {
+      var panel = pushedOpen[i];
+      var side = panel.dataset.side === "left" ? "left" : "right";
+      widths[side] = panel.getBoundingClientRect().width;
       root.classList.add("blockr-html-pushed-" + side);
-      var width = pushedOpen.getBoundingClientRect().width;
-      root.style.setProperty("--blockr-sidebar-width", width + "px");
-    } else {
-      root.style.setProperty("--blockr-sidebar-width", "0px");
     }
+    root.style.setProperty(
+      "--blockr-sidebar-width-left", widths.left + "px"
+    );
+    root.style.setProperty(
+      "--blockr-sidebar-width-right", widths.right + "px"
+    );
+    // Back-compat: keep the singular var pointing at the open side when
+    // only one is open. With both open consumers should switch to the
+    // side-specific vars.
+    var legacy = widths.right || widths.left || 0;
+    root.style.setProperty("--blockr-sidebar-width", legacy + "px");
   }
 
   function trapFocus(panel, event) {

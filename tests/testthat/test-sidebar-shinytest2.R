@@ -97,6 +97,58 @@ test_that("mode = 'push' adds .blockr-html-pushed-* and a width on open", {
   )
 })
 
+test_that("two push sidebars constrain body between them, not under one", {
+  push_both <- system.file("examples/push-both", package = "blockr.ui")
+  if (!nzchar(push_both)) {
+    push_both <- file.path("..", "..", "inst", "examples", "push-both")
+  }
+  skip_if_not(
+    dir.exists(push_both),
+    "push-both example app not found on disk"
+  )
+
+  app <- shinytest2::AppDriver$new(
+    push_both,
+    name = "sidebar-push-both",
+    load_timeout = 20 * 1000,
+    timeout = 10 * 1000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  width_var <- function(name) {
+    app$get_js(sprintf(
+      "document.documentElement.style.getPropertyValue('%s')", name
+    ))
+  }
+
+  # Open left first: only left class + left width.
+  app$click("open_left")
+  app$wait_for_idle(500)
+  html_class <- app$get_js("document.documentElement.className")
+  expect_match(html_class, "blockr-html-pushed-left")
+  expect_false(grepl("blockr-html-pushed-right", html_class))
+  expect_match(width_var("--blockr-sidebar-width-left"), "[0-9]+px")
+  expect_false(width_var("--blockr-sidebar-width-left") == "0px")
+  expect_equal(width_var("--blockr-sidebar-width-right"), "0px")
+
+  # Open right while left stays open: both classes + both widths.
+  app$click("open_right")
+  app$wait_for_idle(500)
+  html_class <- app$get_js("document.documentElement.className")
+  expect_match(html_class, "blockr-html-pushed-left")
+  expect_match(html_class, "blockr-html-pushed-right")
+  expect_false(width_var("--blockr-sidebar-width-left") == "0px")
+  expect_false(width_var("--blockr-sidebar-width-right") == "0px")
+
+  # Close right; left persists.
+  click_js(app, "#right_sidebar .blockr-sidebar-close")
+  html_class <- app$get_js("document.documentElement.className")
+  expect_match(html_class, "blockr-html-pushed-left")
+  expect_false(grepl("blockr-html-pushed-right", html_class))
+  expect_false(width_var("--blockr-sidebar-width-left") == "0px")
+  expect_equal(width_var("--blockr-sidebar-width-right"), "0px")
+})
+
 test_that("minimal example: pin / unpin / Esc / outside-click / X-button", {
   app <- shinytest2::AppDriver$new(
     app_path,

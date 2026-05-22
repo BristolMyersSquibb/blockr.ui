@@ -88,30 +88,47 @@ On `data.action == "hide"`, `receiveMessage` MUST `Shiny.unbindAll(body)`, remov
 
 `sidebar_ui()` SHALL accept a `mode` argument with values `"overlay"` (default) or `"push"`. The mode is set on the panel as `data-mode="<mode>"` and is independent of pin state (pin only affects dismissal).
 
-In `"overlay"` mode, the panel slides over page content; the page layout is untouched. In `"push"` mode, the bundled JS sets `--blockr-sidebar-width` on `<html>` to the panel's pixel width and adds a `.blockr-html-pushed-<side>` class while the panel is open; the bundled CSS uses these to apply `padding-<side>: var(--blockr-sidebar-width)` on `<html>` (with `box-sizing: border-box`), so page content shifts aside instead of being covered. The class + variable live on `<html>` rather than `<body>` because bslib's page-fill layouts pin body to 100% of html and zero its padding inline — body-level padding/margin no longer constrains the visible viewport. When the panel closes, the class and width are removed.
+In `"overlay"` mode, the panel slides over page content; the page layout is untouched. In `"push"` mode, the bundled JS adds a `.blockr-html-pushed-<side>` class on `<html>` while the panel is open and sets a side-specific CSS custom property — `--blockr-sidebar-width-left` or `--blockr-sidebar-width-right` — to the panel's pixel width. The bundled CSS uses these to apply `padding-<side>: var(--blockr-sidebar-width-<side>)` on `<html>` (with `box-sizing: border-box`), so page content shifts aside instead of being covered. The class + variables live on `<html>` rather than `<body>` because bslib's page-fill layouts pin body to 100% of html and zero its padding inline — body-level padding/margin no longer constrains the visible viewport.
+
+Two push panels on opposite sides MAY be open simultaneously. Each side contributes its own padding via its own variable so the page content is constrained between them rather than disappearing under whichever side opened second. For backwards compatibility with single-side consumers, the legacy `--blockr-sidebar-width` (without side suffix) is also set to the open side's width when exactly one push panel is open; it is `"0px"` when no push panel is open. When both sides are open, consumers reading the legacy variable see only the right side's width and SHOULD switch to the side-specific variables.
+
+When a panel closes, its side's class is removed from `<html>` and its side-specific variable is set to `"0px"`. The opposite side, if still open, is unaffected.
 
 The pin state lives entirely in the DOM (a class on the panel element). It is not exposed as a Shiny input value beyond what the binding's `getValue()` returns. Pin no longer drives body reflow — that is `mode`'s job.
 
 #### Scenario: Push mode shifts page content aside while open
 
 - **WHEN** a panel with `mode = "push"` and `side = "right"` opens
-- **THEN** `document.documentElement` (the `<html>` element) has the class `blockr-html-pushed-right`
-- **AND** `document.documentElement.style.getPropertyValue('--blockr-sidebar-width')` is the panel's pixel width
+- **THEN** `document.documentElement` has the class `blockr-html-pushed-right`
+- **AND** `document.documentElement.style.getPropertyValue('--blockr-sidebar-width-right')` is the panel's pixel width
+- **AND** the legacy `--blockr-sidebar-width` equals the same value
 
 - **WHEN** that same panel closes
 - **THEN** `document.documentElement` no longer has `blockr-html-pushed-right`
-- **AND** `--blockr-sidebar-width` is `"0px"`
+- **AND** both `--blockr-sidebar-width-right` and `--blockr-sidebar-width` are `"0px"`
+
+#### Scenario: Two push panels on opposite sides coexist
+
+- **WHEN** a `mode = "push"`, `side = "left"` panel is already open AND a `mode = "push"`, `side = "right"` panel opens
+- **THEN** `document.documentElement` has BOTH `blockr-html-pushed-left` AND `blockr-html-pushed-right`
+- **AND** `--blockr-sidebar-width-left` and `--blockr-sidebar-width-right` are each set to their panel's pixel width
+- **AND** the page content's `<html>` content area is shrunk on both sides (constrained between the two panels), not hidden under either
+
+- **WHEN** the right panel then closes (the left remains open)
+- **THEN** `document.documentElement` has only `blockr-html-pushed-left`
+- **AND** `--blockr-sidebar-width-right` is `"0px"`
+- **AND** `--blockr-sidebar-width-left` is unchanged from before the right side closed
 
 #### Scenario: Overlay mode never reflows
 
 - **WHEN** a panel with `mode = "overlay"` (the default) is open
 - **THEN** `document.documentElement` has neither `blockr-html-pushed-left` nor `blockr-html-pushed-right`
-- **AND** `--blockr-sidebar-width` is `"0px"` (the panel overlays the content)
+- **AND** all three width variables (`--blockr-sidebar-width`, `--blockr-sidebar-width-left`, `--blockr-sidebar-width-right`) are `"0px"` (the panel overlays the content)
 
 #### Scenario: Pin state does not affect page reflow
 
 - **WHEN** an open panel's pin button is toggled
-- **THEN** `document.documentElement.classList` and `--blockr-sidebar-width` are unchanged (reflow is governed by `data-mode`, not by pin)
+- **THEN** `document.documentElement.classList` and the width variables are unchanged (reflow is governed by `data-mode`, not by pin)
 
 ### Requirement: Dismissal, keyboard support, and focus management
 
