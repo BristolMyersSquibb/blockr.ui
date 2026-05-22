@@ -76,14 +76,28 @@ NULL
 
 #' @rdname sidebar
 #' @export
-sidebar_ui <- function(id, side = c("right", "left"), width = "360px",
+sidebar_ui <- function(id, ui = NULL, title = NULL,
+                       side = c("right", "left"), width = "360px",
                        mode = c("overlay", "push")) {
   stopifnot(
     is.character(id), length(id) == 1L, nzchar(id),
-    is.character(width), length(width) == 1L, nzchar(width)
+    is.character(width), length(width) == 1L, nzchar(width),
+    is.null(title) || (is.character(title) && length(title) == 1L)
   )
   side <- match.arg(side)
   mode <- match.arg(mode)
+
+  # Body slot: empty by default ("modal-like" use; populate later via
+  # show_sidebar()) or pre-rendered from `ui` ("offcanvas-like" use; the
+  # panel is ready to open with no server round-trip via the data-attribute
+  # trigger or `show_sidebar(id)` with no `ui`).
+  body_children <- list()
+  body_deps <- list()
+  if (!is.null(ui)) {
+    rendered <- htmltools::renderTags(ui)
+    body_children <- list(htmltools::HTML(rendered$html))
+    body_deps <- rendered$dependencies
+  }
 
   panel <- shiny::tags$div(
     id = id,
@@ -95,7 +109,7 @@ sidebar_ui <- function(id, side = c("right", "left"), width = "360px",
     style = paste0("--blockr-sidebar-panel-width: ", width, ";"),
     shiny::tags$header(
       class = "blockr-sidebar-header",
-      shiny::tags$h2(class = "blockr-sidebar-title"),
+      shiny::tags$h2(class = "blockr-sidebar-title", title),
       shiny::tags$div(
         class = "blockr-sidebar-actions",
         shiny::tags$button(
@@ -115,14 +129,20 @@ sidebar_ui <- function(id, side = c("right", "left"), width = "360px",
         )
       )
     ),
-    shiny::tags$div(
-      class = "blockr-sidebar-body",
-      role = "region",
-      `aria-live` = "polite"
+    do.call(
+      shiny::tags$div,
+      c(
+        list(
+          class = "blockr-sidebar-body",
+          role = "region",
+          `aria-live` = "polite"
+        ),
+        body_children
+      )
     )
   )
 
-  htmltools::attachDependencies(panel, sidebar_dep())
+  htmltools::attachDependencies(panel, c(list(sidebar_dep()), body_deps))
 }
 
 #' @rdname sidebar
@@ -141,7 +161,7 @@ sidebar_dep <- function() {
 
 #' @rdname sidebar
 #' @export
-show_sidebar <- function(id, ui, title = NULL,
+show_sidebar <- function(id, ui = NULL, title = NULL,
                          session = shiny::getDefaultReactiveDomain()) {
   stopifnot(
     is.character(id), length(id) == 1L, nzchar(id),
@@ -149,16 +169,25 @@ show_sidebar <- function(id, ui, title = NULL,
   )
   root <- root_session(session)
 
-  rendered <- htmltools::renderTags(ui)
-  root$sendInputMessage(id, list(
-    action = "show",
-    html = rendered$html,
-    dependencies = lapply(
+  # Two modes:
+  #   * `ui` non-NULL: full content-swap (modal-like). Pre-render via
+  #     renderTags and ship html + deps.
+  #   * `ui = NULL`: open-only. The body was either pre-rendered at
+  #     `sidebar_ui(ui = ...)` time or left in place by an earlier show.
+  #     Skip the html / deps fields so the JS skips the swap sequence.
+  payload <- list(action = "show")
+  if (!is.null(ui)) {
+    rendered <- htmltools::renderTags(ui)
+    payload$html <- rendered$html
+    payload$dependencies <- lapply(
       htmltools::resolveDependencies(rendered$dependencies),
       shiny::createWebDependency
-    ),
-    title = title
-  ))
+    )
+  }
+  if (!is.null(title)) {
+    payload$title <- title
+  }
+  root$sendInputMessage(id, payload)
   invisible(NULL)
 }
 

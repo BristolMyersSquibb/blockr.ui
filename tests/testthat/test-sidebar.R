@@ -198,6 +198,76 @@ test_that("keep_or_hide_sidebar hides when not pinned", {
   expect_identical(msgs[[1L]]$message, list(action = "hide"))
 })
 
+test_that("sidebar_ui pre-renders body and title when ui/title are supplied", {
+  panel <- sidebar_ui(
+    "settings_sidebar",
+    ui = shiny::tagList(
+      shiny::tags$h3("Board options"),
+      shiny::textInput("opt_a", "A")
+    ),
+    title = "Board options"
+  )
+  html <- as.character(panel)
+
+  # Body slot carries the pre-rendered content (not empty).
+  expect_match(html, "id=\"opt_a\"", fixed = TRUE)
+  expect_match(html, "Board options", fixed = TRUE)
+  # Title slot is populated.
+  expect_match(
+    html,
+    "<h2 class=\"blockr-sidebar-title\">Board options</h2>",
+    fixed = TRUE
+  )
+  # Panel remains closed by default.
+  expect_match(html, "aria-hidden=\"true\"", fixed = TRUE)
+  expect_false(grepl("blockr-sidebar-open", html, fixed = TRUE))
+})
+
+test_that("sidebar_ui carries body-level htmltools dependencies", {
+  body <- htmltools::attachDependencies(
+    shiny::tags$div("hi"),
+    htmltools::htmlDependency(
+      name = "body-dep",
+      version = "1.0.0",
+      src = c(href = "https://example.com/"),
+      script = "body.js"
+    )
+  )
+
+  panel <- sidebar_ui("settings_sidebar", ui = body)
+  deps <- htmltools::findDependencies(panel)
+  dep_names <- vapply(deps, function(x) x$name, character(1))
+
+  expect_true("blockr-sidebar" %in% dep_names)
+  expect_true("body-dep" %in% dep_names)
+})
+
+test_that("show_sidebar omits html/dependencies when ui is NULL (open-only)", {
+  ctx <- mock_session_with_capture()
+
+  show_sidebar("settings_sidebar", session = ctx$session)
+
+  msgs <- ctx$messages()
+  expect_length(msgs, 1L)
+  payload <- msgs[[1L]]$message
+  expect_identical(payload$action, "show")
+  expect_false("html" %in% names(payload))
+  expect_false("dependencies" %in% names(payload))
+  expect_false("title" %in% names(payload))
+})
+
+test_that("show_sidebar with title only updates the title slot", {
+  ctx <- mock_session_with_capture()
+
+  show_sidebar("settings_sidebar", title = "Updated", session = ctx$session)
+
+  payload <- ctx$messages()[[1L]]$message
+  expect_identical(payload$action, "show")
+  expect_identical(payload$title, "Updated")
+  expect_false("html" %in% names(payload))
+  expect_false("dependencies" %in% names(payload))
+})
+
 test_that("keep_or_hide_sidebar re-shows with fresh ui when pinned", {
   ctx <- mock_session_with_capture()
   ctx$session$setInputs(main_sidebar = list(open = TRUE, pinned = TRUE))

@@ -2,7 +2,15 @@
 
 ### Requirement: sidebar_ui builder
 
-`blockr.ui` SHALL export `sidebar_ui(id, side = c("right", "left"), width = "360px")` returning a `<div class="blockr-sidebar">` with header (title slot, pin button, close button) and body slots, plus `data-side` and `aria-hidden` attributes. The element MUST NOT use any Bootstrap `.offcanvas` or `.modal` classes or `data-bs-*` attributes. The function SHALL attach `sidebar_dep()` via `htmltools::attachDependencies()` so callers do not need to attach the dependency separately.
+`blockr.ui` SHALL export `sidebar_ui(id, ui = NULL, title = NULL, side = c("right", "left"), width = "360px", mode = c("overlay", "push"))` returning a `<div class="blockr-sidebar">` with header (title slot, pin button, close button) and body slots, plus `data-side` and `aria-hidden` attributes. The element MUST NOT use any Bootstrap `.offcanvas` or `.modal` classes or `data-bs-*` attributes. The function SHALL attach `sidebar_dep()` via `htmltools::attachDependencies()` so callers do not need to attach the dependency separately.
+
+A panel can be driven in two complementary ways:
+
+1. **Dynamic content (modal-like).** `ui` is left at its default `NULL` and the body slot ships empty. The server populates it on demand by calling `show_sidebar(id, ui, title)`. This is the original use case and remains the right model for one-off content that varies per open (forms, transient action panels).
+
+2. **Static content (offcanvas-like).** `ui` (and optionally `title`) is supplied at UI-build time. The body slot is pre-rendered via `htmltools::renderTags()` so HTML dependencies travel with the content, the title is set on the header, and the panel is ready to open with **zero server round-trip**. Opens are wired client-side via the data-attribute trigger described in a separate requirement below. A subsequent `show_sidebar(id, ui = ...)` still works and replaces the pre-rendered body if the consumer later wants dynamic behaviour.
+
+The two modes are mutually compatible on the same DOM mount: pre-rendered content can be swapped out by a later `show_sidebar()`, and a pre-rendered panel can still be opened from the server (see the updated `show_sidebar()` contract where `ui` becomes optional).
 
 #### Scenario: Markup is Bootstrap-free
 
@@ -21,13 +29,37 @@
 - **WHEN** the result of `sidebar_ui("main_sidebar")` is passed through `htmltools::findDependencies()`
 - **THEN** the resolved dependencies include `blockr-sidebar` (the dep produced by `sidebar_dep()`)
 
+#### Scenario: Empty body by default
+
+- **WHEN** a caller invokes `sidebar_ui("main_sidebar")` (i.e. `ui = NULL`)
+- **THEN** the `.blockr-sidebar-body` slot has no child elements
+- **AND** the `.blockr-sidebar-title` slot is empty
+
+#### Scenario: Pre-rendered body content
+
+- **WHEN** a caller invokes `sidebar_ui("settings_sidebar", ui = tagList(h3("Hi"), p("there")), title = "Board options")`
+- **THEN** the `.blockr-sidebar-body` slot contains the rendered HTML for `tagList(h3("Hi"), p("there"))`
+- **AND** the `.blockr-sidebar-title` slot's text content is `"Board options"`
+- **AND** any HTML dependencies attached to `ui` are carried with the tag tree so `htmltools::findDependencies()` resolves them alongside `blockr-sidebar`
+- **AND** the panel remains closed (`aria-hidden="true"`, no `.blockr-sidebar-open` class) until a trigger (data-attribute or `show_sidebar()`) opens it
+
+#### Scenario: show_sidebar replaces pre-rendered content
+
+- **WHEN** a panel was mounted with `sidebar_ui("settings_sidebar", ui = static_body)` and the server later calls `show_sidebar("settings_sidebar", ui = fresh_body)`
+- **THEN** the body slot's children are replaced with the rendered HTML of `fresh_body`, identical in behaviour to a panel that had been mounted with `ui = NULL`
+
 ### Requirement: Server-side show / hide helpers
 
-`blockr.ui` SHALL export `show_sidebar(id, ui, title = NULL, session = shiny::getDefaultReactiveDomain())` and `hide_sidebar(id, session = shiny::getDefaultReactiveDomain())`. These mirror Shiny's `showModal()` / `removeModal()` in spirit.
+`blockr.ui` SHALL export `show_sidebar(id, ui = NULL, title = NULL, session = shiny::getDefaultReactiveDomain())` and `hide_sidebar(id, session = shiny::getDefaultReactiveDomain())`. These mirror Shiny's `showModal()` / `removeModal()` in spirit, with `show_sidebar()` extended to also act as "just open" when the body is already populated.
 
 Both helpers MUST dispatch through the calling session's root scope (`session$rootScope()$sendInputMessage(id, ...)`) so the panel id is treated as an absolute DOM id and is NOT prefixed by the calling module's namespace. The id passed at call time MUST match the id that was passed to `sidebar_ui()` at mount time.
 
-`show_sidebar()` MUST pre-render `ui` via `htmltools::renderTags()` and emit a single input message with `list(action = "show", html = rendered$html, dependencies = <resolved deps>, title = title)`. `hide_sidebar()` MUST emit `list(action = "hide")`. There is no custom-message handler: the input message is delivered to the panel's `Shiny.InputBinding` via its `receiveMessage(el, data)` method.
+`show_sidebar()`'s behaviour depends on whether `ui` is supplied:
+
+- **`ui` non-NULL**: MUST pre-render `ui` via `htmltools::renderTags()` and emit a single input message with `list(action = "show", html = rendered$html, dependencies = <resolved deps>, title = title)`. The client replaces the body and opens.
+- **`ui = NULL`**: MUST emit `list(action = "show", title = title)` with NO `html` and NO `dependencies` fields. The client opens the panel without touching its body, so consumers that pre-rendered content via `sidebar_ui(id, ui = ...)` (or that left the previous body in place from an earlier show) can open from the server without re-shipping HTML. When `title` is also `NULL`, the existing header title (if any) is left untouched; when `title` is supplied, the header is updated.
+
+`hide_sidebar()` MUST emit `list(action = "hide")`. There is no custom-message handler: the input message is delivered to the panel's `Shiny.InputBinding` via its `receiveMessage(el, data)` method.
 
 #### Scenario: show_sidebar ships HTML and resolved dependencies
 
@@ -41,6 +73,19 @@ Both helpers MUST dispatch through the calling session's root scope (`session$ro
 - **WHEN** server code calls `hide_sidebar("main_sidebar")`
 - **THEN** the root session emits one `sendInputMessage` call with `inputId = "main_sidebar"` and payload `list(action = "hide")`
 
+#### Scenario: show_sidebar opens without re-shipping content
+
+- **WHEN** server code calls `show_sidebar("settings_sidebar")` (no `ui`, no `title`) on a panel whose body was pre-rendered at `sidebar_ui()` time
+- **THEN** the root session emits one `sendInputMessage` call with `inputId = "settings_sidebar"` and payload `list(action = "show", title = NULL)`
+- **AND** the payload has NO `html` field and NO `dependencies` field
+- **AND** the client opens the panel without touching the body content already in the DOM
+
+#### Scenario: show_sidebar opens and updates only the title
+
+- **WHEN** server code calls `show_sidebar("settings_sidebar", title = "Updated")` on a panel with pre-rendered body
+- **THEN** the payload is `list(action = "show", title = "Updated")` with no `html` / `dependencies` fields
+- **AND** the client updates the header title text without touching the body
+
 #### Scenario: Calling session is the modal-equivalent default
 
 - **WHEN** `show_sidebar()` is called from inside a `moduleServer` body without an explicit `session` argument
@@ -51,14 +96,17 @@ Both helpers MUST dispatch through the calling session's root scope (`session$ro
 
 The panel's `Shiny.InputBinding` (registered against `.blockr-sidebar`) MUST implement `receiveMessage(el, data)` that switches on `data.action`. There SHALL NOT be a separate `Shiny.addCustomMessageHandler(...)` registration: the same binding owns both directions of the R↔JS conversation.
 
-On `data.action == "show"`, `receiveMessage` MUST execute the following sequence in order on the panel's `.blockr-sidebar-body` element:
+On `data.action == "show"`, the handler MUST branch on whether `data.html` is present:
 
-1. `Shiny.unbindAll(body)` — tear down stale Shiny bindings.
-2. `Shiny.renderDependencies(data.dependencies)` if any — install new CSS / JS deps before rendering.
-3. `body.replaceChildren(...$.parseHTML(data.html))` — swap the children.
-4. `Shiny.initializeInputs(body)` — initialise input default values.
-5. `Shiny.bindAll(body)` — wire up new bindings.
-6. Set the panel's title slot to `data.title` (or empty if `null`); add the `.blockr-sidebar-open` class; set `aria-hidden="false"`; move keyboard focus to the first focusable element inside the body, remembering the previously-focused element so close can restore it.
+- **`data.html` present (content swap)**: execute the following sequence in order on the panel's `.blockr-sidebar-body` element:
+  1. `Shiny.unbindAll(body)` to tear down stale Shiny bindings.
+  2. `Shiny.renderDependencies(data.dependencies)` if any, to install new CSS / JS deps before rendering.
+  3. `body.replaceChildren(...$.parseHTML(data.html))` to swap the children.
+  4. `Shiny.initializeInputs(body)` to initialise input default values.
+  5. `Shiny.bindAll(body)` to wire up new bindings.
+- **`data.html` absent (open-only)**: skip the unbind / dependencies / replace / init / bind sequence entirely. The existing body and its bindings (whether installed by a previous show or by `sidebar_ui(ui = ...)` at page-build time) remain intact.
+
+After the body branch, in both cases: if `data.title` is present (non-`undefined`), set the panel's title slot to `data.title` (or empty string if `null`); when `data.title` is absent, leave the title slot unchanged. Then add the `.blockr-sidebar-open` class, set `aria-hidden="false"`, and move keyboard focus to the first focusable element inside the body, remembering the previously-focused element so close can restore it.
 
 On `data.action == "hide"`, `receiveMessage` MUST `Shiny.unbindAll(body)`, remove the `.blockr-sidebar-open` class, set `aria-hidden="true"`, and restore focus to the remembered previously-focused element.
 
@@ -83,6 +131,48 @@ On `data.action == "hide"`, `receiveMessage` MUST `Shiny.unbindAll(body)`, remov
 
 - **WHEN** the bundled JS loads in a Shiny page
 - **THEN** it does NOT register a `Shiny.addCustomMessageHandler` for sidebar control; all R-driven state changes flow through the InputBinding's `receiveMessage`
+
+#### Scenario: Open-only show preserves existing body
+
+- **WHEN** `receiveMessage` fires with `data.action == "show"` and no `html` field on a panel whose body already contains content (from `sidebar_ui(ui = ...)` or a previous show)
+- **THEN** `Shiny.unbindAll` / `Shiny.renderDependencies` / `replaceChildren` / `Shiny.initializeInputs` / `Shiny.bindAll` are NOT invoked
+- **AND** the panel opens (`.blockr-sidebar-open` class added, `aria-hidden="false"`) with its existing body intact
+- **AND** existing inputs inside the body remain bound to Shiny
+
+### Requirement: JS-triggered open via `data-blockr-sidebar-target`
+
+Any element in the page MAY act as a client-side open trigger for a mounted panel by carrying a `data-blockr-sidebar-target="<id>"` attribute, where `<id>` matches the DOM id of a `sidebar_ui()`. The bundled JS SHALL listen for `click` events on the document and, when the event target (or any of its ancestors via `.closest()`) carries the attribute, toggle the panel's open state without an R round-trip.
+
+Toggle semantics: if the target panel is closed, clicking opens it; if it is open, clicking closes it. The same dismissal rules apply regardless of how the panel was opened (Esc / outside-click / X button still work when not pinned, etc.).
+
+When opening via this trigger, the JS MUST run the same "open" steps as the open-only branch of `receiveMessage` (add the open class, set `aria-hidden="false"`, refresh body reflow, attach the outside-click handler, dispatch the state event, move focus). It MUST NOT touch the body or the title; the consumer is expected to have populated those via `sidebar_ui(ui = ..., title = ...)`.
+
+Because every state change still dispatches `blockr-sidebar:state`, the binding's `getValue()` and `input[[id]]$open` continue to reflect reality regardless of whether the open was R-driven or JS-driven. Server-side observers can react to the resulting `$open == TRUE` if they need to.
+
+#### Scenario: Click on a target element opens the matching panel
+
+- **WHEN** a page mounts `sidebar_ui("settings_sidebar", ui = static_body, title = "Board options")` and a button with `data-blockr-sidebar-target="settings_sidebar"`
+- **AND** the user clicks the button
+- **THEN** the panel `#settings_sidebar` receives the `.blockr-sidebar-open` class and `aria-hidden="false"`
+- **AND** the panel's body content is unchanged (no `unbindAll` / `replaceChildren` / `bindAll`)
+- **AND** keyboard focus moves to the first focusable element inside the body
+- **AND** no `sendInputMessage` is issued by R (open is purely client-side)
+
+#### Scenario: Click on a target element with the panel already open closes it
+
+- **WHEN** the panel is open and the user clicks an element with `data-blockr-sidebar-target="settings_sidebar"`
+- **THEN** the panel closes (same path as the X button / Esc / outside-click)
+
+#### Scenario: Trigger nested inside a larger clickable region
+
+- **WHEN** the trigger attribute is on an ancestor (e.g. a `<button>` wrapping an `<i>` icon) and the user clicks the `<i>`
+- **THEN** the click handler still finds the trigger via `event.target.closest("[data-blockr-sidebar-target]")`
+- **AND** the matching panel toggles
+
+#### Scenario: input[[id]]$open reflects JS-driven opens
+
+- **WHEN** a JS-driven open fires via the data-attribute trigger
+- **THEN** `input[["settings_sidebar"]]$open` becomes `TRUE` on the next reactive flush (the `blockr-sidebar:state` event still fires, so the input binding still updates)
 
 ### Requirement: `mode = "overlay"` vs `mode = "push"`
 

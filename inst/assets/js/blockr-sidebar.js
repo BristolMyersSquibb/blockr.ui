@@ -123,13 +123,11 @@
     panel._blockrSidebarOutsideHandler = null;
   }
 
-  function showPanel(panel, data) {
-    var body = getBody(panel);
-    if (!body) return;
-
-    // Remember previously-focused element so close can restore it.
-    panel._blockrSidebarPreviousActive = document.activeElement;
-
+  // Swap the body content with new HTML + deps. Used by `show_sidebar(id,
+  // ui = ...)` from R; skipped on open-only shows and on JS-driven opens
+  // (`data-blockr-sidebar-target`), where the body was either pre-rendered
+  // at `sidebar_ui(ui = ...)` time or left in place by an earlier show.
+  function swapBody(body, data) {
     Shiny.unbindAll(body);
     if (data.dependencies && data.dependencies.length) {
       Shiny.renderDependencies(data.dependencies);
@@ -140,11 +138,18 @@
     );
     Shiny.initializeInputs(body);
     Shiny.bindAll(body);
+  }
 
-    var titleEl = getTitle(panel);
-    if (titleEl) {
-      titleEl.textContent = data.title == null ? "" : String(data.title);
-    }
+  // Visual / a11y / focus side of opening a panel. Reused by:
+  //   * `receiveMessage` after a body-swap show
+  //   * `receiveMessage` on open-only shows (no `data.html`)
+  //   * the document-level `[data-blockr-sidebar-target]` click trigger
+  function openPanel(panel) {
+    var body = getBody(panel);
+    if (!body) return;
+
+    // Remember previously-focused element so close can restore it.
+    panel._blockrSidebarPreviousActive = document.activeElement;
 
     panel.classList.add("blockr-sidebar-open");
     panel.setAttribute("aria-hidden", "false");
@@ -177,6 +182,51 @@
       }
     } else {
       panel.focus();
+    }
+  }
+
+  function showPanel(panel, data) {
+    var body = getBody(panel);
+    if (!body) return;
+
+    // Body-swap branch: only when the R helper shipped new content
+    // (`show_sidebar(id, ui = <tags>)`). `show_sidebar(id)` with no `ui`
+    // omits `data.html` entirely so we leave the existing body alone.
+    if (typeof data.html !== "undefined") {
+      swapBody(body, data);
+    }
+
+    // Title is independently optional: only update when the payload
+    // explicitly carries one. Absent `title` leaves whatever was set at
+    // `sidebar_ui(title = ...)` time (or by a previous show) untouched.
+    if (typeof data.title !== "undefined") {
+      var titleEl = getTitle(panel);
+      if (titleEl) {
+        titleEl.textContent = data.title == null ? "" : String(data.title);
+      }
+    }
+
+    openPanel(panel);
+  }
+
+  // Document-level click handler: any element with
+  // `data-blockr-sidebar-target="<id>"` toggles the matching panel
+  // without an R round-trip. Lives at document scope so triggers placed
+  // anywhere in the page (including nested DOM swaps) just work.
+  function handleTriggerClick(event) {
+    if (!event.target || !event.target.closest) return;
+    var trigger = event.target.closest("[data-blockr-sidebar-target]");
+    if (!trigger) return;
+    var targetId = trigger.getAttribute("data-blockr-sidebar-target");
+    if (!targetId) return;
+    var panel = document.getElementById(targetId);
+    if (!panel || !panel.classList.contains("blockr-sidebar")) return;
+    event.preventDefault();
+    initPanel(panel);
+    if (isOpen(panel)) {
+      hidePanel(panel);
+    } else {
+      openPanel(panel);
     }
   }
 
@@ -283,4 +333,12 @@
   });
 
   Shiny.inputBindings.register(binding, "blockr.ui.sidebar");
+
+  // Register the document-level trigger listener exactly once, even if
+  // the bundle is loaded multiple times (e.g. via repeated dependency
+  // injection across renderUI swaps). Guarded by a flag on the document.
+  if (!document._blockrSidebarTriggerInit) {
+    document.addEventListener("click", handleTriggerClick);
+    document._blockrSidebarTriggerInit = true;
+  }
 })();
