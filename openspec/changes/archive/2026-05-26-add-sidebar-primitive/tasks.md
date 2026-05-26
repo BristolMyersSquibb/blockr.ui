@@ -64,11 +64,11 @@ Folded into the same PR. Resolves the chain we discovered while threading `serve
 - [x] 3.11 Change the gear `actionButton()` in `board_ui.dock_board()` to carry `data-blockr-sidebar-target="settings_sidebar"`; drop the `inputId = "settings_btn"` since no server observer is needed.
 - [x] 3.12 Delete `settings_observer()` from `R/board-server.R`, the call to it from `board_server_callback()`, and the `app_options` parameter on `board_server_callback()`. Drop the closure in `blockr_app_server.dock_board()` that captured `options` to inject `app_options`; `board_server_callback` becomes the direct callback again. The `options` parameter on `blockr_app_server.dock_board()` is still consumed by `blockr.core::board_server()` for its userData wiring.
 - [x] 3.13 Tests: rewrite `settings_observer` tests as `board_ui.dock_board()` markup assertions — the mounted `<div id="settings_sidebar">` contains the rendered options accordion; the gear button carries `data-blockr-sidebar-target="settings_sidebar"`. Add a `serve(board, options = custom_options(...))` test that asserts the rendered settings sidebar body reflects the override.
-- [ ] 3.14 Manual smoke: load the dock + dag example, click gear, panel opens without a visible Shiny-busy round-trip; change an option, save, restore, verify the option round-trips correctly (also confirms the save-restore regression flagged during PR 2 review).
+- [x] 3.14 Manual smoke: load the dock + dag example, click gear, panel opens without a visible Shiny-busy round-trip; change an option, save, restore, verify the option round-trips correctly (also confirms the save-restore regression flagged during PR 2 review).
 
 ## 4. Validation
 
-- [ ] 4.1 `openspec validate add-sidebar-primitive` — no spec / template / scenario errors.
-- [ ] 4.2 `devtools::check(remote = TRUE, manual = TRUE)` on `blockr.ui` — 0 errors / 0 warnings / 0 notes.
-- [ ] 4.3 `devtools::check()` on `blockr.dock` after Phase 2 — 0 errors / 0 warnings / 0 notes.
-- [ ] 4.4 Confirm dependency graph: `blockr.core` ← `blockr.ui` ← `blockr.dock` ← extensions, no cycles.
+- [x] 4.1 `openspec validate add-sidebar-primitive` — no spec / template / scenario errors.
+- [x] 4.2 `devtools::check(remote = TRUE, manual = TRUE)` on `blockr.ui` — 0 errors / 0 warnings / 0 notes.
+- [x] 4.3 `devtools::check()` on `blockr.dock` after Phase 2 — 0 errors / 0 warnings / 0 notes.
+- [x] 4.4 Confirm dependency graph: `blockr.core` ← `blockr.ui` ← `blockr.dock` ← extensions, no cycles.
