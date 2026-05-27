@@ -45,7 +45,7 @@
     // Push-mode panels shift the page content aside via a class + CSS
     // variable on `<html>` whenever they are open. We apply to `<html>`
     // (rather than `<body>`) because bslib's page-fill layouts pin body
-    // to 100% of html and zero its padding inline — body-level padding /
+    // to 100% of html and zero its padding inline - body-level padding /
     // margin no longer constrains the visible viewport. Padding on html
     // shrinks html's content area, and body (sized 100% of it) follows.
     // Overlay-mode panels never reflow.
@@ -319,7 +319,7 @@
       initPanel(el);
       // Shiny's input-binding callback expects to be invoked with no args.
       // addEventListener passes the Event object, which silently breaks the
-      // value-update path inside Shiny — so wrap to drop it.
+      // value-update path inside Shiny - so wrap to drop it.
       var handler = function () { callback(); };
       el._blockrSidebarHandler = handler;
       el.addEventListener(STATE_EVENT, handler);

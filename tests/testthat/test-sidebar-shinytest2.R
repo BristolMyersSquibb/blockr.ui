@@ -45,7 +45,7 @@ press_esc <- function(app) {
   app$wait_for_idle(500)
 }
 
-# Click an element in the running app via JS — keeps the long
+# Click an element in the running app via JS - keeps the long
 # `document.querySelector(...).click()` calls inside a single helper so the
 # call sites stay under 80 columns.
 click_js <- function(app, selector) {

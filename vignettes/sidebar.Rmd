@@ -50,7 +50,7 @@ shinyApp(ui, server)
 ```
 
 The inputs inside the body (`input$block_name`, `input$block_kind`,
-`input$confirm`) live in the calling session — exactly as they would
+`input$confirm`) live in the calling session - exactly as they would
 inside a `modalDialog()`. No nested `moduleServer()` is required.
 
 ## Observing user-driven dismissals
@@ -58,10 +58,10 @@ inside a `modalDialog()`. No nested `moduleServer()` is required.
 Each `sidebar_ui()` call also registers a Shiny input under the same
 id, exposing two logical fields:
 
-- `input[[id]]$open` — `TRUE` while the panel is open, `FALSE` once
+- `input[[id]]$open` - `TRUE` while the panel is open, `FALSE` once
   the user closes it (Esc, X button) or the server calls
   `hide_sidebar()`.
-- `input[[id]]$pinned` — `TRUE` while the user has the panel pinned.
+- `input[[id]]$pinned` - `TRUE` while the user has the panel pinned.
 
 ```{r}
 observe({
@@ -122,7 +122,7 @@ expected to stay put.
 A common renderer pattern is to open the sidebar with a "first block"
 hint when the session starts on an empty board, while still respecting
 a later user dismissal. The recipe is built on top of `show_sidebar()`
-and `input[[id]]$open` — no special opt-in is needed on `sidebar_ui()`.
+and `input[[id]]$open` - no special opt-in is needed on `sidebar_ui()`.
 
 ```{r}
 empty_board_renderer <- function(id, board) {
