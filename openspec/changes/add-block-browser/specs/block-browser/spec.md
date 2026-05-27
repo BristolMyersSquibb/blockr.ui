@@ -2,15 +2,15 @@
 
 ### Requirement: `block_browser_ui()` builder
 
-The block browser SHALL be a Shiny module. `blockr.ui` SHALL export `block_browser_ui(id, board, mode = c("add", "append", "prepend"), trigger_id = NULL)` returning an `htmltools::tag` with `block_browser_dep()` attached, where `id` is the module id (the `*_ui()` call site passes `NS(id)("...")` from the parent). The function MUST render one `.blockr-block-browser-card` per registered block (from `available_blocks()`) grouped under one `.blockr-block-browser-category` per distinct category in `blks_metadata()$category`. Blocks with a missing or empty `category` SHALL render under a `"Uncategorized"` category.
+The block browser SHALL be a Shiny module. `blockr.ui` SHALL export `block_browser_ui(id, board, target = NULL)` returning an `htmltools::tag` with `block_browser_dep()` attached, where `id` is the module id (the `*_ui()` call site passes `NS(id)("...")` from the parent). The flow is selected by `target` (see the target-descriptor requirement): `NULL` is *add*, `append_to(id)` is *append*, `prepend_to(id)` is *prepend*. The function MUST render one `.blockr-block-browser-card` per registered block (from `available_blocks()`) grouped under one `.blockr-block-browser-category` per distinct category in `blks_metadata()$category`. Blocks with a missing or empty `category` SHALL render under a `"Uncategorized"` category.
 
-The root element's `id` SHALL be `NS(id)("commit")` - this is the Shiny input id the `blockr.ui.blockBrowser` input binding reports against, and what `block_browser_server(id)` reads as `input$commit`. The root SHALL carry a `data-mode` attribute set to the mode. When `mode = "prepend"` and `trigger_id` is non-NULL, the root SHALL also carry `data-target-arity` set to the target block's input arity (an integer for finite arities, or `"inf"` for variadic / `NA`).
+The root element's `id` SHALL be `NS(id)("commit")` - this is the Shiny input id the `blockr.ui.blockBrowser` input binding reports against, and what `block_browser_server(id)` reads as `input$commit`. The root SHALL carry a `data-mode` attribute set to the resolved flow (`"add"` / `"append"` / `"prepend"`). When the target is a `prepend_to()`, the root SHALL also carry `data-target-arity` set to the target block's input arity (an integer for finite arities, or `"inf"` for variadic / `NA`).
 
 The function SHALL NOT create per-field Shiny `inputId`s for the per-card form (`id`, `title`, `link_id`, `block_input`, `target_input`). Those fields are real DOM `<input>` / `<select>` elements with stable ids namespaced by module id + block type (e.g. `NS(id)(paste0(block_type, "_id"))`), read by the bundled JS when a block is added rather than wired through Shiny's input system.
 
 #### Scenario: One card per registered block
 
-- **WHEN** a caller invokes `block_browser_ui(id, board, mode = "add")` with at least one registered block
+- **WHEN** a caller invokes `block_browser_ui(id, board)` with at least one registered block
 - **THEN** the rendered tag tree contains exactly `length(available_blocks())` elements with class `blockr-block-browser-card`
 - **AND** each card carries `data-block-type`, `data-name`, `data-description`, `data-package`, `data-category`
 
@@ -28,33 +28,55 @@ The function SHALL NOT create per-field Shiny `inputId`s for the per-card form (
 
 #### Scenario: Commit-input id and mode are stamped on the root
 
-- **WHEN** `block_browser_ui("mod_a", board, mode = "append")` is rendered
+- **WHEN** `block_browser_ui("mod_a", board, append_to("src"))` is rendered
 - **THEN** the root `.blockr-block-browser` element has `id="mod_a-commit"` and `data-mode="append"`
 
 #### Scenario: Target arity is stamped for prepend
 
-- **WHEN** `block_browser_ui(id, board, mode = "prepend", trigger_id = "merge_xyz")` is rendered AND `"merge_xyz"` has input arity 2
+- **WHEN** `block_browser_ui(id, board, prepend_to("merge_xyz"))` is rendered AND `"merge_xyz"` has input arity 2
 - **THEN** the root has `data-target-arity="2"`
 
 - **WHEN** the target has variadic (`NA`) arity
 - **THEN** the root has `data-target-arity="inf"`
 
-- **WHEN** `mode = "add"` or `mode = "append"`
+- **WHEN** the flow is add (`NULL` target) or an `append_to()`
 - **THEN** the root has no `data-target-arity` attribute
 
-#### Scenario: trigger_id surfaces context for append / prepend
+#### Scenario: target surfaces context for append / prepend
 
-- **WHEN** `block_browser_ui(id, board, mode = "append", trigger_id = "block_a")`
+- **WHEN** `block_browser_ui(id, board, append_to("block_a"))`
 - **THEN** the panel header includes a `.blockr-block-browser-context` subtitle referencing the human name of `block_a`
 
-- **WHEN** `mode = "add"`
+- **WHEN** the target is `NULL` (add)
 - **THEN** there is no `.blockr-block-browser-context` element
 
 #### Scenario: Per-card form fields are not registered as Shiny inputs
 
-- **WHEN** `block_browser_ui(id, board, mode = "append")` is rendered
+- **WHEN** `block_browser_ui(id, board, append_to("src"))` is rendered
 - **THEN** no element inside any `.blockr-block-browser-card-advanced` carries the `shiny-input-*` / `shiny-bound-input` classes
 - **AND** the only Shiny-registered input owned by the browser is the root's `NS(id)("commit")`
+
+### Requirement: Target descriptor (`append_to()` / `prepend_to()`)
+
+`blockr.ui` SHALL export `append_to(block_id)` and `prepend_to(block_id)` constructors returning a `bb_target` descriptor that carries both the flow (`"append"` / `"prepend"`) and the block id the new block attaches to. `block_browser_ui()`'s `target` argument SHALL accept `NULL` (an add) or a `bb_target`, and SHALL reject any other value. This makes invalid flow/trigger combinations unrepresentable - there is no way to express "append with no source" or "add with a trigger".
+
+#### Scenario: Constructors carry the flow and id
+
+- **WHEN** `append_to("src")` is called
+- **THEN** it returns a `bb_target` whose flow is `"append"` and whose id is `"src"`
+
+- **WHEN** `prepend_to("merge1")` is called
+- **THEN** it returns a `bb_target` whose flow is `"prepend"` and whose id is `"merge1"`
+
+#### Scenario: Constructors validate the block id
+
+- **WHEN** `append_to("")` or `prepend_to(c("a", "b"))` is called
+- **THEN** an error is raised
+
+#### Scenario: block_browser_ui rejects a non-target value
+
+- **WHEN** `block_browser_ui(id, board, target = "src")` is called (a bare string, not a `bb_target`)
+- **THEN** an error is raised
 
 ### Requirement: `block_browser_dep()` dependency
 
@@ -68,7 +90,7 @@ The function SHALL NOT create per-field Shiny `inputId`s for the per-card form (
 
 #### Scenario: `block_browser_ui()` attaches the dependency
 
-- **WHEN** the result of `block_browser_ui(id, board, mode = "add")` is passed through `htmltools::findDependencies()`
+- **WHEN** the result of `block_browser_ui(id, board)` is passed through `htmltools::findDependencies()`
 - **THEN** the resolved dependencies include `blockr-block-browser`
 
 ### Requirement: Client-side search filters cards in place
@@ -91,7 +113,7 @@ The bundled JS SHALL listen for `input` events on `.blockr-block-browser-search`
 
 Each card SHALL have a `.blockr-block-browser-card-chevron` element. Clicking the chevron SHALL toggle `.card-expanded` on its card, revealing the per-card advanced form (`id`, `title`, and the mode-appropriate `link_id` / `block_input` / `target_input`) and an in-card add button. The chevron toggle is symmetric (a second click collapses) and MUST NOT add the block.
 
-The per-card form SHALL be rendered once with every possible field; CSS SHALL hide the fields that don't apply to the current mode. The card's description SHALL be clamped while collapsed and shown in full when the card is expanded.
+`block_browser_ui()` SHALL render only the fields the resolved flow needs: `id` and `title` always; `link_id` for append and prepend; `block_input` for append; `target_input` for prepend into a target with more than one input slot. The inapplicable fields SHALL be absent from the DOM (not rendered-then-hidden), so no per-mode CSS hiding is required. The card's description SHALL be clamped while collapsed and shown in full when the card is expanded.
 
 #### Scenario: Chevron toggles the form without adding
 
@@ -102,19 +124,19 @@ The per-card form SHALL be rendered once with every possible field; CSS SHALL hi
 - **WHEN** the chevron is clicked again
 - **THEN** the card loses `.card-expanded`
 
-#### Scenario: Mode-specific fields
+#### Scenario: Flow-specific fields
 
-- **WHEN** `mode = "add"`
-- **THEN** the advanced form shows `id` and `title` only
+- **WHEN** the flow is add (`NULL` target)
+- **THEN** the advanced form renders `id` and `title` only (no `link_id` / `block_input` / `target_input` fields)
 
-- **WHEN** `mode = "append"`
-- **THEN** the form also shows `link_id` and `block_input`
+- **WHEN** the flow is an `append_to()`
+- **THEN** the form also renders `link_id` and `block_input`
 
-- **WHEN** `mode = "prepend"` AND the target arity is finite and greater than 1
-- **THEN** the form shows `link_id` and `target_input`
+- **WHEN** the flow is a `prepend_to()` whose target arity is finite and greater than 1
+- **THEN** the form renders `link_id` and `target_input`
 
-- **WHEN** `mode = "prepend"` AND the target arity is 1 or variadic (`inf`)
-- **THEN** the `target_input` field is hidden
+- **WHEN** the flow is a `prepend_to()` whose target arity is 1 or variadic (`inf`)
+- **THEN** the `target_input` field is not rendered
 
 ### Requirement: Adding a block publishes a single-block commit via an input binding
 
@@ -132,7 +154,7 @@ Adding a block SHALL set the binding's value to a single-block spec and fire its
 
 #### Scenario: Card-body click adds with defaults
 
-- **WHEN** a user clicks a card's header (a dataset block) in `mode = "add"`
+- **WHEN** a user clicks a card's header (a dataset block) in the add flow
 - **THEN** `input[["<root id>"]]` becomes an object whose `type` is `"new_dataset_block"` and whose `id` is the card's non-empty default id
 - **AND** the card does NOT gain `.card-expanded`
 - **AND** adding the same card again re-fires the event (the `nonce` changes)
@@ -150,7 +172,7 @@ Adding a block SHALL set the binding's value to a single-block spec and fire its
 
 #### Scenario: Inapplicable fields are null
 
-- **WHEN** a block is added in `mode = "add"`
+- **WHEN** a block is added in the add flow
 - **THEN** the published spec has `link_id = null`, `block_input = null`, `target_input = null`
 
 ### Requirement: `block_browser_server()` returns the committed block
@@ -175,7 +197,7 @@ Because the caller re-renders the browser with the updated board after each add,
 
 #### Scenario: Default ids avoid existing board ids
 
-- **WHEN** the board already contains blocks with ids `"aaa"` and `"bbb"` and `block_browser_ui(id, board, mode = "add")` is rendered
+- **WHEN** the board already contains blocks with ids `"aaa"` and `"bbb"` and `block_browser_ui(id, board)` is rendered
 - **THEN** no card's default `id` value equals `"aaa"` or `"bbb"`
 - **AND** the default ids are unique across cards
 
@@ -190,7 +212,7 @@ Each card's icon tile SHALL be tinted according to its category using the Okabe-
 
 ### Requirement: Drop-in replacement for `block_sidebar_body()` add / append / prepend modes
 
-`blockr.dock`'s action handlers (`add_block_action`, `append_block_action`, `prepend_block_action`) SHALL mount the block browser as a module: `block_browser_server(<sub_id>)` once (returning the committed-block reactive), and on the trigger `show_sidebar(ui = blockr.ui::block_browser_ui(session$ns(<sub_id>), board$board, mode = <mode>, trigger_id = trigger()))` (`trigger_id` omitted for `mode = "add"`). The action handler SHALL `observeEvent()` the returned reactive to build the block + link(s), replacing the per-field observers (`input$<mode>_block_selection`, `input$<mode>_block_id`, `input$<mode>_block_name`, `input$<mode>_link_id`, `input$<mode>_block_input`, `input$<mode>_block_confirm`).
+`blockr.dock`'s action handlers (`add_block_action`, `append_block_action`, `prepend_block_action`) SHALL mount the block browser as a module: `block_browser_server(<sub_id>)` once (returning the committed-block reactive), and on the trigger `show_sidebar(ui = blockr.ui::block_browser_ui(session$ns(<sub_id>), board$board, target))` where `target` is `NULL` (add), `append_to(trigger())`, or `prepend_to(trigger())`. The action handler SHALL `observeEvent()` the returned reactive to build the block + link(s), replacing the per-field observers (`input$<mode>_block_selection`, `input$<mode>_block_id`, `input$<mode>_block_name`, `input$<mode>_link_id`, `input$<mode>_block_input`, `input$<mode>_block_confirm`).
 
 #### Scenario: Add fires a single observer in the action handler
 

@@ -23,17 +23,10 @@
     );
   }
 
-  // A field is "applicable" to the current mode iff CSS has not hidden
-  // it. The computed-style check keeps the (mode -> visible fields)
-  // matrix in one place (the CSS).
-  function fieldApplicable(card, fieldClass) {
-    var container = card.querySelector("." + fieldClass);
-    if (!container) return false;
-    return window.getComputedStyle(container).display !== "none";
-  }
-
+  // Fields are rendered only for the flows that use them, so an absent
+  // field simply means "not applicable" -> null. An empty value is also
+  // reported as null.
   function getFieldValue(card, fieldClass) {
-    if (!fieldApplicable(card, fieldClass)) return null;
     var el = getField(card, fieldClass);
     if (!el) return null;
     var v = el.value;

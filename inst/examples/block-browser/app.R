@@ -41,24 +41,21 @@ server <- function(input, output, session) {
   # One block browser module instance, reused across the four triggers.
   added <- blockr.ui::block_browser_server("browser")
 
-  open_browser <- function(mode, trigger_id = NULL) {
+  open_browser <- function(title, target = NULL) {
     show_sidebar(
       "panel",
-      title = switch(mode,
-        add = "Add new block",
-        append = "Append block",
-        prepend = "Prepend block"
-      ),
-      ui = blockr.ui::block_browser_ui(
-        session$ns("browser"), board, mode = mode, trigger_id = trigger_id
-      )
+      title = title,
+      ui = blockr.ui::block_browser_ui(session$ns("browser"), board, target)
     )
   }
 
-  observeEvent(input$open_add, open_browser("add"))
-  observeEvent(input$open_append, open_browser("append", "src"))
-  observeEvent(input$open_prepend_h, open_browser("prepend", "head1"))
-  observeEvent(input$open_prepend_m, open_browser("prepend", "merge1"))
+  observeEvent(input$open_add, open_browser("Add new block"))
+  observeEvent(input$open_append,
+               open_browser("Append block", blockr.ui::append_to("src")))
+  observeEvent(input$open_prepend_h,
+               open_browser("Prepend block", blockr.ui::prepend_to("head1")))
+  observeEvent(input$open_prepend_m,
+               open_browser("Prepend block", blockr.ui::prepend_to("merge1")))
 
   observeEvent(added(), last_commit(added()))
 

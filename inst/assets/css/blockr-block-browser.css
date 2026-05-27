@@ -310,35 +310,9 @@
   border-color: transparent;
 }
 
-/* Per-mode field visibility. id and title always show; link / port
-   fields opt in by mode. */
-.blockr-block-browser-field-link-id,
-.blockr-block-browser-field-block-input,
-.blockr-block-browser-field-target-input {
-  display: none;
-}
-
-.blockr-block-browser[data-mode="append"] .blockr-block-browser-field-link-id,
-.blockr-block-browser[data-mode="prepend"] .blockr-block-browser-field-link-id {
-  display: flex;
-}
-
-.blockr-block-browser[data-mode="append"] .blockr-block-browser-field-block-input {
-  display: flex;
-}
-
-/* target_input shows only for prepend into a finite arity > 1 target. */
-.blockr-block-browser[data-mode="prepend"] .blockr-block-browser-field-target-input {
-  display: flex;
-}
-.blockr-block-browser[data-mode="prepend"][data-target-arity="1"]
-  .blockr-block-browser-field-target-input,
-.blockr-block-browser[data-mode="prepend"][data-target-arity="inf"]
-  .blockr-block-browser-field-target-input,
-.blockr-block-browser[data-mode="prepend"]:not([data-target-arity])
-  .blockr-block-browser-field-target-input {
-  display: none;
-}
+/* Field visibility is decided server-side: block_browser_ui() renders
+   only the fields a flow needs (id/title always; link/port per mode),
+   so no per-mode CSS hiding is required. */
 
 /* Per-card add / append / prepend button, inside the advanced form. */
 .blockr-block-browser-card-add {

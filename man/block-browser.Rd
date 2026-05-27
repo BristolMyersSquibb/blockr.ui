@@ -3,16 +3,17 @@
 \name{block-browser}
 \alias{block-browser}
 \alias{block_browser_ui}
+\alias{append_to}
+\alias{prepend_to}
 \alias{block_browser_server}
 \alias{block_browser_dep}
 \title{Block browser}
 \usage{
-block_browser_ui(
-  id,
-  board,
-  mode = c("add", "append", "prepend"),
-  trigger_id = NULL
-)
+block_browser_ui(id, board, target = NULL)
+
+append_to(block_id)
+
+prepend_to(block_id)
 
 block_browser_server(id)
 
@@ -23,17 +24,16 @@ block_browser_dep()
 from the parent at the \verb{*_ui()} call site and the bare id to
 \verb{*_server()}.}
 
-\item{board}{The current board state. Used to look up the trigger
-block's input arity (for \code{mode = "prepend"}) and to seed unique
-default ids avoiding the board's existing block / link ids.}
+\item{board}{The current board state. Used to resolve the target
+block's input arity (for prepend) and to seed unique default ids
+avoiding the board's existing block / link ids.}
 
-\item{mode}{One of \code{"add"}, \code{"append"}, \code{"prepend"}. Controls which
-per-card fields are shown and what the commit spec carries.}
+\item{target}{Where the new block attaches. \code{NULL} (default) is a
+plain add; \code{\link[=append_to]{append_to()}} appends from a source block;
+\code{\link[=prepend_to]{prepend_to()}} prepends into a target block.}
 
-\item{trigger_id}{The block the new block attaches to: the source
-block for \code{mode = "append"}, the target block for \code{mode = "prepend"}. Drives the panel's context subtitle, and for \code{prepend}
-resolves the target's input arity / slot names (which populate the
-\code{target_input} picker). Ignored for \code{mode = "add"}.}
+\item{block_id}{Block id the new block attaches to: a source block
+for \code{\link[=append_to]{append_to()}}, a target block for \code{\link[=prepend_to]{prepend_to()}}.}
 }
 \value{
 \itemize{
@@ -41,6 +41,7 @@ resolves the target's input arity / slot names (which populate the
 \code{\link[=block_browser_dep]{block_browser_dep()}} attached.
 \item \code{block_browser_server()} returns a \link[shiny:reactive]{shiny::reactive} of the
 committed block spec (a list), firing once per add.
+\item \code{append_to()} / \code{prepend_to()} return a \code{bb_target} descriptor.
 \item \code{block_browser_dep()} returns an \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
 }
 }
@@ -65,10 +66,16 @@ The block browser is a Shiny module. \code{block_browser_ui(id, ...)}
 renders the panel; \code{block_browser_server(id)} returns a reactive that
 fires once per add with the block to create:
 \code{list(type, id, title, link_id, block_input, target_input)}. Fields
-not applicable to the current mode are \code{NULL}. Because the suggested
+not applicable to the current flow are \code{NULL}. Because the suggested
 ids are generated avoiding the board's existing block / link ids,
 clicking the same card repeatedly (with a pinned sidebar) yields
 distinct blocks.
+
+The flow is selected by the \code{target} argument: \code{NULL} (default) adds
+a standalone block, \code{\link[=append_to]{append_to()}} appends from a source block, and
+\code{\link[=prepend_to]{prepend_to()}} prepends into a target block. Because the append /
+prepend constructors always carry the block they attach to, the flow
+and its trigger can never disagree.
 
 Internally the panel publishes its value through the
 \code{blockr.ui.blockBrowser} \code{Shiny.InputBinding} (the root element's
@@ -89,7 +96,7 @@ if (interactive()) {
         show_sidebar(
           "panel",
           title = "Add new block",
-          ui = block_browser_ui(session$ns("browser"), NULL, mode = "add")
+          ui = block_browser_ui(session$ns("browser"), NULL)
         )
       })
       shiny::observeEvent(added(), print(added()))

@@ -38,15 +38,19 @@ The block browser is a Shiny module:
 block_browser_ui(
   id,                                    # module id (parent passes session$ns("..."))
   board,                                 # board (current state)
-  mode = c("add", "append", "prepend"),
-  trigger_id = NULL                      # source / target block id for append / prepend
+  target = NULL                          # NULL=add, append_to(id), prepend_to(id)
 )
 
+append_to(block_id)                       # bb_target: append from a source block
+prepend_to(block_id)                      # bb_target: prepend into a target block
 block_browser_server(id)                  # returns reactive(committed block spec)
 block_browser_dep()                       # htmlDependency, attached automatically
 ```
 
-`id` is the module id - `ns` was the tell that the old fragment wanted to be a module, so it now follows the standard pattern (`block_browser_ui(session$ns("browser"), ...)` at the call site, `block_browser_server("browser")` for the server). When `mode = "prepend"` and `trigger_id` is non-NULL, `block_browser_ui()` reads the target block's input arity and stamps it on the root via `data-target-arity` (integer for finite, `"inf"` for variadic/`NA`). The CSS uses it to show the `target_input` picker only when the target has more than one input slot.
+Two things to call out:
+
+- **`target` collapses the old `mode` + `trigger_id` pair.** Those two args constrained each other (append/prepend *need* a trigger, add *forbids* one), so the pair could express illegal states. `append_to()` / `prepend_to()` carry the flow and the block id together; `NULL` is add. Illegal combinations are now unrepresentable. The resolved flow (`target_mode(target)`) still drives rendering internally and is stamped as `data-mode`.
+- **`block_browser_ui()` is a thin orchestrator.** It delegates to focused internals - `browser_block_metas(board, mode)` (registry rows + seeded ids; block-input slots only for append), `resolve_target(board, target)` (context subtitle + the target's slot names / `data-target-arity`), and `browser_panel(ns, metas, mode, tgt)` (assembles search + categories + empty-state) - so the public function stays small and each concern is independently testable.
 
 ### Server-side flow
 
@@ -58,8 +62,7 @@ observeEvent(trigger(), {
   blockr.ui::show_sidebar(
     sidebar_id,
     title = "Add new block",
-    ui = blockr.ui::block_browser_ui(session$ns("browser"), board$board,
-                                     mode = "add")
+    ui = blockr.ui::block_browser_ui(session$ns("browser"), board$board)
   )
 })
 
@@ -78,8 +81,7 @@ observeEvent(added(), {
   # suggested id is fresh, or hide it (unpinned):
   blockr.ui::keep_or_hide_sidebar(
     sidebar_id,
-    ui = blockr.ui::block_browser_ui(session$ns("browser"), board$board,
-                                     mode = "add"),
+    ui = blockr.ui::block_browser_ui(session$ns("browser"), board$board),
     title = "Add new block"
   )
 })
@@ -93,7 +95,7 @@ The card list is plain HTML. JS does three things:
 2. **Per-card expand.** Clicking the chevron toggles `.card-expanded`, revealing the advanced form (id / title / link / port) and the in-card add button.
 3. **Add.** A plain card-body click commits the block with its (default) field values. The in-card add button commits with the (possibly edited) field values. Clicks elsewhere inside the advanced form (the inputs) do nothing. Commit gathers the card's applicable fields, records them on the root element, and dispatches a `blockr-block-browser:commit` event.
 
-Field applicability is read from computed style (a hidden field returns `null`), so the mode → visible-fields matrix lives only in the CSS.
+`block_browser_ui()` renders only the fields the flow needs, so an inapplicable field is simply absent from the DOM; the JS reads a missing field as `null`. There is no render-all-then-hide CSS.
 
 The browser is a proper **`Shiny.InputBinding`** (`blockr.ui.blockBrowser`, bound to `.blockr-block-browser`), not an ad-hoc `Shiny.setInputValue` caller: `getValue` returns the recorded spec (with a `nonce` so repeat adds re-fire), `subscribe` listens for the commit event, and `receiveMessage` is reserved for the R→JS card filter the AI-search change will use. Because `show_sidebar()`'s content swap runs `Shiny.bindAll()`, the binding is mounted through Shiny's normal lifecycle - no MutationObserver needed. Bundled JS lives in `inst/assets/js/blockr-block-browser.js`.
 

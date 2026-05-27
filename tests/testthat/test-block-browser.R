@@ -1,5 +1,5 @@
 test_that("block_browser_ui renders one card per registered block", {
-  panel <- block_browser_ui("mod_a", NULL, mode = "add")
+  panel <- block_browser_ui("mod_a", NULL)
   html <- as.character(htmltools::renderTags(panel)$html)
 
   cards <- gregexpr("data-block-type=\"[^\"]+\"", html)[[1]]
@@ -7,7 +7,7 @@ test_that("block_browser_ui renders one card per registered block", {
 })
 
 test_that("each card carries metadata data-attributes", {
-  panel <- block_browser_ui("mod_a", NULL, mode = "add")
+  panel <- block_browser_ui("mod_a", NULL)
   html <- as.character(htmltools::renderTags(panel)$html)
 
   expect_match(html, "data-name=", fixed = TRUE)
@@ -17,7 +17,7 @@ test_that("each card carries metadata data-attributes", {
 })
 
 test_that("cards group under category sections with Uncategorized fallback", {
-  panel <- block_browser_ui("mod_a", NULL, mode = "add")
+  panel <- block_browser_ui("mod_a", NULL)
   html <- as.character(htmltools::renderTags(panel)$html)
 
   expect_match(html, "blockr-block-browser-category", fixed = TRUE)
@@ -25,20 +25,29 @@ test_that("cards group under category sections with Uncategorized fallback", {
   expect_true(length(cats) > 0)
 })
 
-test_that("each card has an add button with a mode-specific label", {
-  for (m in c("add", "append", "prepend")) {
-    panel <- block_browser_ui("mod_a", NULL, mode = m,
-                              trigger_id = if (m == "add") NULL else "x")
-    html <- as.character(htmltools::renderTags(panel)$html)
-    expect_match(html, "blockr-block-browser-card-add", fixed = TRUE)
-    label <- switch(m, add = ">Add<", append = ">Append<",
-                    prepend = ">Prepend<")
-    expect_match(html, label, fixed = TRUE)
-  }
+test_that("the add button label matches the flow", {
+  expect_match(
+    as.character(htmltools::renderTags(block_browser_ui("a", NULL))$html),
+    ">Add<", fixed = TRUE
+  )
+  m <- blockr.core::new_merge_block()
+  board <- blockr.core::new_board(blocks = list(m = m))
+  expect_match(
+    as.character(htmltools::renderTags(
+      block_browser_ui("a", board, append_to("m"))
+    )$html),
+    ">Append<", fixed = TRUE
+  )
+  expect_match(
+    as.character(htmltools::renderTags(
+      block_browser_ui("a", board, prepend_to("m"))
+    )$html),
+    ">Prepend<", fixed = TRUE
+  )
 })
 
 test_that("the browser has no multiselect footer / connection / chip UI", {
-  panel <- block_browser_ui("mod_a", NULL, mode = "add")
+  panel <- block_browser_ui("mod_a", NULL)
   html <- as.character(htmltools::renderTags(panel)$html)
 
   expect_false(grepl("blockr-block-browser-footer", html, fixed = TRUE))
@@ -48,80 +57,107 @@ test_that("the browser has no multiselect footer / connection / chip UI", {
 })
 
 test_that("root id is NS(id)('commit') - the input-binding target", {
-  panel <- block_browser_ui("mod_a", NULL, mode = "append", trigger_id = "x")
+  m <- blockr.core::new_merge_block()
+  board <- blockr.core::new_board(blocks = list(m = m))
+  panel <- block_browser_ui("mod_a", board, append_to("m"))
   html <- as.character(htmltools::renderTags(panel)$html)
 
   expect_match(html, "id=\"mod_a-commit\"", fixed = TRUE)
-  # The ad-hoc data-commit-input attribute is gone (binding uses el.id).
   expect_false(grepl("data-commit-input", html, fixed = TRUE))
 })
 
-test_that("data-mode reflects the requested mode", {
-  for (m in c("add", "append", "prepend")) {
-    panel <- block_browser_ui("mod_a", NULL, mode = m,
-                              trigger_id = if (m == "add") NULL else "x")
-    html <- as.character(htmltools::renderTags(panel)$html)
-    expect_match(html, paste0("data-mode=\"", m, "\""), fixed = TRUE)
-  }
-})
-
-test_that("prepend with finite-arity target stamps the integer arity", {
+test_that("data-mode reflects the resolved flow", {
   m <- blockr.core::new_merge_block()
   board <- blockr.core::new_board(blocks = list(m = m))
-  panel <- block_browser_ui("mod_a", board, mode = "prepend", trigger_id = "m")
-  html <- as.character(htmltools::renderTags(panel)$html)
 
-  expect_match(html, "data-target-arity=\"2\"", fixed = TRUE)
+  add <- as.character(block_browser_ui("a", NULL))
+  app <- as.character(block_browser_ui("a", board, append_to("m")))
+  pre <- as.character(block_browser_ui("a", board, prepend_to("m")))
+
+  expect_match(add, "data-mode=\"add\"", fixed = TRUE)
+  expect_match(app, "data-mode=\"append\"", fixed = TRUE)
+  expect_match(pre, "data-mode=\"prepend\"", fixed = TRUE)
 })
 
-test_that("prepend with arity-1 target stamps '1'", {
-  h <- blockr.core::new_head_block()
-  board <- blockr.core::new_board(blocks = list(h = h))
-  panel <- block_browser_ui("mod_a", board, mode = "prepend", trigger_id = "h")
-  html <- as.character(htmltools::renderTags(panel)$html)
-
-  expect_match(html, "data-target-arity=\"1\"", fixed = TRUE)
+test_that("append_to / prepend_to build validated bb_target descriptors", {
+  expect_s3_class(append_to("x"), "bb_target")
+  expect_s3_class(prepend_to("x"), "bb_target")
+  expect_identical(append_to("x")$mode, "append")
+  expect_identical(prepend_to("y")$id, "y")
+  expect_error(append_to(""))
+  expect_error(prepend_to(c("a", "b")))
 })
 
-test_that("prepend with variadic target stamps 'inf'", {
-  r <- blockr.core::new_rbind_block()
-  board <- blockr.core::new_board(blocks = list(r = r))
-  panel <- block_browser_ui("mod_a", board, mode = "prepend", trigger_id = "r")
-  html <- as.character(htmltools::renderTags(panel)$html)
-
-  expect_match(html, "data-target-arity=\"inf\"", fixed = TRUE)
+test_that("prepend stamps data-target-arity from the target block", {
+  for (tc in list(
+    list(blk = blockr.core::new_merge_block(), arity = "2"),
+    list(blk = blockr.core::new_head_block(),  arity = "1"),
+    list(blk = blockr.core::new_rbind_block(), arity = "inf")
+  )) {
+    board <- blockr.core::new_board(blocks = list(t = tc$blk))
+    html <- as.character(block_browser_ui("a", board, prepend_to("t")))
+    expect_match(html, paste0("data-target-arity=\"", tc$arity, "\""),
+                 fixed = TRUE)
+  }
 })
 
 test_that("add and append never stamp data-target-arity", {
   m <- blockr.core::new_merge_block()
   board <- blockr.core::new_board(blocks = list(m = m))
 
-  panel_add <- block_browser_ui("mod_a", board, mode = "add")
-  expect_false(grepl("data-target-arity", as.character(panel_add)))
-
-  panel_app <- block_browser_ui("mod_a", board, mode = "append",
-                                trigger_id = "m")
-  expect_false(grepl("data-target-arity", as.character(panel_app)))
+  expect_false(grepl("data-target-arity", as.character(
+    block_browser_ui("a", board)
+  )))
+  expect_false(grepl("data-target-arity", as.character(
+    block_browser_ui("a", board, append_to("m"))
+  )))
 })
 
 test_that("append / prepend render a context subtitle; add does not", {
   m <- blockr.core::new_merge_block()
   board <- blockr.core::new_board(blocks = list(m = m))
 
-  for (mode in c("append", "prepend")) {
-    panel <- block_browser_ui("mod_a", board, mode = mode, trigger_id = "m")
-    html <- as.character(htmltools::renderTags(panel)$html)
-    expect_match(html, "blockr-block-browser-context", fixed = TRUE,
-                 info = paste0("mode=", mode))
+  for (target in list(append_to("m"), prepend_to("m"))) {
+    html <- as.character(block_browser_ui("a", board, target))
+    expect_match(html, "blockr-block-browser-context", fixed = TRUE)
+  }
+  expect_false(grepl("blockr-block-browser-context",
+                     as.character(block_browser_ui("a", board)), fixed = TRUE))
+})
+
+test_that("only the flow's fields are rendered", {
+  m <- blockr.core::new_merge_block()   # arity 2
+  h <- blockr.core::new_head_block()    # arity 1
+  board <- blockr.core::new_board(blocks = list(m = m, h = h))
+
+  has_field <- function(html, suffix) {
+    grepl(paste0("blockr-block-browser-field-", suffix), html, fixed = TRUE)
   }
 
-  panel_add <- block_browser_ui("mod_a", board, mode = "add")
-  html_add <- as.character(htmltools::renderTags(panel_add)$html)
-  expect_false(grepl("blockr-block-browser-context", html_add, fixed = TRUE))
+  add <- as.character(block_browser_ui("a", board))
+  expect_true(has_field(add, "id"))
+  expect_true(has_field(add, "title"))
+  expect_false(has_field(add, "link-id"))
+  expect_false(has_field(add, "block-input"))
+  expect_false(has_field(add, "target-input"))
+
+  app <- as.character(block_browser_ui("a", board, append_to("m")))
+  expect_true(has_field(app, "link-id"))
+  expect_true(has_field(app, "block-input"))
+  expect_false(has_field(app, "target-input"))
+
+  pre2 <- as.character(block_browser_ui("a", board, prepend_to("m")))
+  expect_true(has_field(pre2, "link-id"))
+  expect_true(has_field(pre2, "target-input"))    # arity 2 -> shown
+  expect_false(has_field(pre2, "block-input"))
+
+  pre1 <- as.character(block_browser_ui("a", board, prepend_to("h")))
+  expect_true(has_field(pre1, "link-id"))
+  expect_false(has_field(pre1, "target-input"))   # arity 1 -> hidden
 })
 
 test_that("per-card form field ids are namespaced by id + block type", {
-  panel <- block_browser_ui("mod_a", NULL, mode = "add")
+  panel <- block_browser_ui("mod_a", NULL)
   html <- as.character(htmltools::renderTags(panel)$html)
 
   expect_match(html, "id=\"mod_a-new_dataset_block_id\"", fixed = TRUE)
@@ -137,7 +173,7 @@ test_that("default block ids are unique and avoid the board's existing ids", {
       existing
     )
   )
-  panel <- block_browser_ui("mod_a", board, mode = "add")
+  panel <- block_browser_ui("mod_a", board)
   html <- as.character(htmltools::renderTags(panel)$html)
 
   vals <- regmatches(
@@ -146,12 +182,14 @@ test_that("default block ids are unique and avoid the board's existing ids", {
   )[[1]]
   ids <- sub(".*value=\"([^\"]+)\"$", "\\1", vals)
   expect_true(length(ids) >= 1)
-  expect_equal(length(ids), length(unique(ids)))      # unique among cards
-  expect_false(any(ids %in% existing))                 # avoid board ids
+  expect_equal(length(ids), length(unique(ids)))
+  expect_false(any(ids %in% existing))
 })
 
 test_that("per-card forms never register Shiny-bound inputs", {
-  panel <- block_browser_ui("mod_a", NULL, mode = "append", trigger_id = "x")
+  m <- blockr.core::new_merge_block()
+  board <- blockr.core::new_board(blocks = list(m = m))
+  panel <- block_browser_ui("mod_a", board, append_to("m"))
   html <- as.character(htmltools::renderTags(panel)$html)
 
   expect_false(grepl("class=\"[^\"]*shiny-bound-input", html))
@@ -175,7 +213,7 @@ test_that("block_browser_dep references the bundled CSS and JS files", {
 })
 
 test_that("block_browser_ui attaches the dependency", {
-  panel <- block_browser_ui("mod_a", NULL, mode = "add")
+  panel <- block_browser_ui("mod_a", NULL)
   deps <- htmltools::findDependencies(panel)
   dep_names <- vapply(deps, function(x) x$name, character(1))
   expect_true("blockr-block-browser" %in% dep_names)
@@ -200,9 +238,7 @@ test_that("block_browser_server returns the committed spec without nonce", {
 })
 
 test_that("malformed inputs are rejected", {
-  expect_error(block_browser_ui(character(0), NULL, mode = "add"))
-  expect_error(block_browser_ui(c("a", "b"), NULL, mode = "add"))
-  expect_error(block_browser_ui("mod_a", NULL, mode = "noop"))
-  expect_error(block_browser_ui("mod_a", NULL, mode = "append",
-                                trigger_id = c("a", "b")))
+  expect_error(block_browser_ui(character(0), NULL))
+  expect_error(block_browser_ui(c("a", "b"), NULL))
+  expect_error(block_browser_ui("mod_a", NULL, target = "not-a-target"))
 })
