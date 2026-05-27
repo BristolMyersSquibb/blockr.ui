@@ -1,0 +1,384 @@
+/* Block browser: a card-list block picker designed to live inside the
+   sidebar primitive. Search bar at top, scrollable category-grouped
+   card list below. Clicking a card adds the block immediately with
+   default settings; opening a card (chevron) reveals a small form and
+   an explicit add button for tweaking id / title / link / port first.
+   Bootstrap-free; namespaced under .blockr-block-browser-*. */
+
+.blockr-block-browser {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  margin: -16px;
+  padding: 16px;
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  color: #1f2937;
+}
+
+.blockr-block-browser-context {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.blockr-block-browser-context strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Search input. */
+.blockr-block-browser-search {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 6px;
+  background: #ffffff
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236b7280'><path d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/></svg>")
+    no-repeat 10px center / 14px 14px;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.blockr-block-browser-search:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+/* Scrollable cards area. */
+.blockr-block-browser-categories {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 4px;
+}
+
+.blockr-block-browser-category h3 {
+  margin: 0 0 8px 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+/* Collapse empty category sections via :has() - no JS needed. */
+.blockr-block-browser-category:not(:has(.blockr-block-browser-card:not(.hidden))) {
+  display: none;
+}
+
+.blockr-block-browser-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Card shell. The whole card is a click target (adds the block), so it
+   reads as interactive on hover. The chevron and the advanced form opt
+   out of that behaviour in the JS. */
+.blockr-block-browser-card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.blockr-block-browser-card:hover {
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.12);
+}
+
+.blockr-block-browser-card.hidden {
+  display: none;
+}
+
+.blockr-block-browser-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.blockr-block-browser-card-icon {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: rgba(120, 120, 120, 0.12);
+  color: #6b7280;
+}
+
+.blockr-block-browser-card-icon svg,
+.blockr-block-browser-card-icon img {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+/* Per-category colours (Okabe-Ito palette, matching blockr.dock's
+   blk_color()). The icon tile is tinted with the category colour and
+   the category heading echoes it. Driven entirely by data-category. */
+.blockr-block-browser-card[data-category="input"] .blockr-block-browser-card-icon {
+  background: rgba(0, 114, 178, 0.15);
+  color: #0072b2;
+}
+.blockr-block-browser-card[data-category="transform"] .blockr-block-browser-card-icon {
+  background: rgba(0, 158, 115, 0.15);
+  color: #009e73;
+}
+.blockr-block-browser-card[data-category="structured"] .blockr-block-browser-card-icon {
+  background: rgba(86, 180, 233, 0.18);
+  color: #2b8fd0;
+}
+.blockr-block-browser-card[data-category="plot"] .blockr-block-browser-card-icon {
+  background: rgba(230, 159, 0, 0.18);
+  color: #b97c00;
+}
+.blockr-block-browser-card[data-category="table"] .blockr-block-browser-card-icon {
+  background: rgba(204, 121, 167, 0.18);
+  color: #cc79a7;
+}
+.blockr-block-browser-card[data-category="model"] .blockr-block-browser-card-icon {
+  background: rgba(240, 228, 66, 0.25);
+  color: #9a8f00;
+}
+.blockr-block-browser-card[data-category="output"] .blockr-block-browser-card-icon {
+  background: rgba(213, 94, 0, 0.16);
+  color: #d55e00;
+}
+.blockr-block-browser-card[data-category="utility"] .blockr-block-browser-card-icon {
+  background: rgba(120, 120, 120, 0.16);
+  color: #6b7280;
+}
+
+.blockr-block-browser-category[data-category="input"] h3 {
+  color: #0072b2;
+}
+.blockr-block-browser-category[data-category="transform"] h3 {
+  color: #009e73;
+}
+.blockr-block-browser-category[data-category="structured"] h3 {
+  color: #2b8fd0;
+}
+.blockr-block-browser-category[data-category="plot"] h3 {
+  color: #b97c00;
+}
+.blockr-block-browser-category[data-category="table"] h3 {
+  color: #cc79a7;
+}
+.blockr-block-browser-category[data-category="model"] h3 {
+  color: #9a8f00;
+}
+.blockr-block-browser-category[data-category="output"] h3 {
+  color: #d55e00;
+}
+.blockr-block-browser-category[data-category="utility"] h3 {
+  color: #6b7280;
+}
+
+.blockr-block-browser-card-name {
+  flex: 1 1 auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blockr-block-browser-card-package {
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  background: #f3f4f6;
+  color: #6b7280;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.blockr-block-browser-card-chevron {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.blockr-block-browser-card-chevron:hover {
+  background: rgba(15, 23, 42, 0.06);
+  color: #111827;
+}
+
+.blockr-block-browser-card-chevron svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 150ms ease;
+}
+
+.blockr-block-browser-card.card-expanded .blockr-block-browser-card-chevron svg {
+  transform: rotate(180deg);
+}
+
+/* Description sits under the title. Clamped to two lines while the card
+   is collapsed; shown in full once the card is expanded. */
+.blockr-block-browser-card-description {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.blockr-block-browser-card.card-expanded .blockr-block-browser-card-description {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.blockr-block-browser-card-description:empty {
+  display: none;
+}
+
+/* Advanced form area, hidden until the card is .card-expanded. The form
+   fields inside are real <input>/<select> elements, not Shiny-bound;
+   the JS reads them when the add button is clicked. */
+.blockr-block-browser-card-advanced {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  flex-direction: column;
+  gap: 8px;
+  /* The advanced area opts out of the card's pointer affordance. */
+  cursor: default;
+}
+
+.blockr-block-browser-card.card-expanded .blockr-block-browser-card-advanced {
+  display: flex;
+}
+
+.blockr-block-browser-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.blockr-block-browser-field label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.blockr-block-browser-field input,
+.blockr-block-browser-field select {
+  padding: 6px 8px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 12px;
+}
+
+.blockr-block-browser-field input:focus,
+.blockr-block-browser-field select:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+/* Per-mode field visibility. id and title always show; link / port
+   fields opt in by mode. */
+.blockr-block-browser-field-link-id,
+.blockr-block-browser-field-block-input,
+.blockr-block-browser-field-target-input {
+  display: none;
+}
+
+.blockr-block-browser[data-mode="append"] .blockr-block-browser-field-link-id,
+.blockr-block-browser[data-mode="prepend"] .blockr-block-browser-field-link-id {
+  display: flex;
+}
+
+.blockr-block-browser[data-mode="append"] .blockr-block-browser-field-block-input {
+  display: flex;
+}
+
+/* target_input shows only for prepend into a finite arity > 1 target. */
+.blockr-block-browser[data-mode="prepend"] .blockr-block-browser-field-target-input {
+  display: flex;
+}
+.blockr-block-browser[data-mode="prepend"][data-target-arity="1"]
+  .blockr-block-browser-field-target-input,
+.blockr-block-browser[data-mode="prepend"][data-target-arity="inf"]
+  .blockr-block-browser-field-target-input,
+.blockr-block-browser[data-mode="prepend"]:not([data-target-arity])
+  .blockr-block-browser-field-target-input {
+  display: none;
+}
+
+/* Per-card add / append / prepend button, inside the advanced form. */
+.blockr-block-browser-card-add {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.blockr-block-browser-card-add:hover {
+  background: #1d4ed8;
+}
+
+.blockr-block-browser-card-add:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Empty-state shown when search filters out every card. */
+.blockr-block-browser-empty {
+  display: none;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 13px;
+  padding: 24px;
+  text-align: center;
+}
+
+.blockr-block-browser.is-empty .blockr-block-browser-empty {
+  display: flex;
+}
+
+.blockr-block-browser.is-empty .blockr-block-browser-categories {
+  display: none;
+}
