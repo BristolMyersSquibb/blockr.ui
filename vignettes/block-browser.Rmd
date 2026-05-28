@@ -74,7 +74,7 @@ The `<mode>_block_commit` input is a single block to create:
 
 ```r
 list(
-  type = "new_dataset_block",
+  type = "dataset_block",
   id = "intimate_hind",   # unique, avoids the board's existing ids
   title = NULL,           # NULL -> the block keeps its default title
   link_id = NULL,         # set for append / prepend

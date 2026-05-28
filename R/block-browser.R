@@ -171,8 +171,11 @@ browser_block_metas <- function(board, mode) {
   registry <- blockr.core::available_blocks()
   metas <- lapply(seq_along(registry), function(i) {
     entry <- registry[[i]]
+    # `type` is the registry uid (e.g. "dataset_block"), so consumers
+    # can do `blockr.core::create_block(spec$type, ...)` rather than
+    # rely on the constructor's function name being importable.
     list(
-      type = entry_attr(entry, "ctor_name", names(registry)[[i]]),
+      type = names(registry)[[i]],
       name = entry_attr(entry, "name", names(registry)[[i]]),
       description = entry_attr(entry, "description", ""),
       category = entry_attr(entry, "category", ""),

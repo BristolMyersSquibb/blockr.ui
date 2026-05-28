@@ -68,13 +68,14 @@ observeEvent(trigger(), {
 
 observeEvent(added(), {
   spec <- added()
-  # spec$type        registry name (e.g. "new_dataset_block")
+  # spec$type        registry uid (e.g. "dataset_block"); instantiate via
+  #                  blockr.core::create_block(spec$type, ...)
   # spec$id          unique block id (already avoids existing board ids)
   # spec$title       user title or NULL (NULL -> block keeps default name)
   # spec$link_id     append / prepend only
   # spec$block_input append only (new block's input port)
   # spec$target_input prepend into arity>1 target only
-  blk <- do.call(spec$type, list())
+  blk <- blockr.core::create_block(spec$type)
   if (!is.null(spec$title)) blockr.core::block_name(blk) <- spec$title
   update(list(blocks = stats::setNames(list(blk), spec$id), links = ...))
   # Re-render the browser (pinned) with the UPDATED board so the next

@@ -81,13 +81,13 @@ test_that("clicking a card body adds it immediately with defaults", {
 
   # A plain header click adds without expanding the card.
   click_js(app, paste0(
-    card_sel("new_dataset_block"), " .blockr-block-browser-card-header"
+    card_sel("dataset_block"), " .blockr-block-browser-card-header"
   ))
-  expect_false(card_has_class(app, "new_dataset_block", "card-expanded"))
+  expect_false(card_has_class(app, "dataset_block", "card-expanded"))
 
   # The single-block commit fires with the clicked block's type and a
   # non-empty default id.
-  expect_equal(app$get_value(output = "commit_type"), "new_dataset_block")
+  expect_equal(app$get_value(output = "commit_type"), "dataset_block")
   expect_true(nzchar(app$get_value(output = "commit_id")))
 })
 
@@ -103,9 +103,9 @@ test_that("chevron opens the form; the in-card button adds with edits", {
 
   # Chevron expands the card without adding.
   click_js(app, paste0(
-    card_sel("new_head_block"), " .blockr-block-browser-card-chevron"
+    card_sel("head_block"), " .blockr-block-browser-card-chevron"
   ))
-  expect_true(card_has_class(app, "new_head_block", "card-expanded"))
+  expect_true(card_has_class(app, "head_block", "card-expanded"))
   expect_equal(app$get_value(output = "commit_type"), "")
 
   # Type a custom id, then click the in-card add button.
@@ -113,12 +113,12 @@ test_that("chevron opens the form; the in-card button adds with edits", {
     "(function(){var el=document.querySelector(",
     "'%s .blockr-block-browser-field-id input');",
     "el.value='my_custom_id';})()"
-  ), card_sel("new_head_block")))
+  ), card_sel("head_block")))
   click_js(app, paste0(
-    card_sel("new_head_block"), " .blockr-block-browser-card-add"
+    card_sel("head_block"), " .blockr-block-browser-card-add"
   ))
 
-  expect_equal(app$get_value(output = "commit_type"), "new_head_block")
+  expect_equal(app$get_value(output = "commit_type"), "head_block")
   expect_equal(app$get_value(output = "commit_id"), "my_custom_id")
 })
 
@@ -133,11 +133,11 @@ test_that("clicking inside the form does not add the block", {
   app$wait_for_idle(500)
 
   click_js(app, paste0(
-    card_sel("new_dataset_block"), " .blockr-block-browser-card-chevron"
+    card_sel("dataset_block"), " .blockr-block-browser-card-chevron"
   ))
   # Clicking the id input must not trigger a commit.
   click_js(app, paste0(
-    card_sel("new_dataset_block"), " .blockr-block-browser-field-id input"
+    card_sel("dataset_block"), " .blockr-block-browser-field-id input"
   ))
   expect_equal(app$get_value(output = "commit_type"), "")
 })

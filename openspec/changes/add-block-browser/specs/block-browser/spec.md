@@ -155,7 +155,7 @@ Adding a block SHALL set the binding's value to a single-block spec and fire its
 #### Scenario: Card-body click adds with defaults
 
 - **WHEN** a user clicks a card's header (a dataset block) in the add flow
-- **THEN** `input[["<root id>"]]` becomes an object whose `type` is `"new_dataset_block"` and whose `id` is the card's non-empty default id
+- **THEN** `input[["<root id>"]]` becomes an object whose `type` is `"dataset_block"` and whose `id` is the card's non-empty default id
 - **AND** the card does NOT gain `.card-expanded`
 - **AND** adding the same card again re-fires the event (the `nonce` changes)
 
@@ -181,8 +181,8 @@ Adding a block SHALL set the binding's value to a single-block spec and fire its
 
 #### Scenario: Server returns the spec without the nonce
 
-- **WHEN** the binding sets `input$commit` to `list(type = "new_dataset_block", id = "foo", nonce = 1)` (other fields `NULL`)
-- **THEN** `block_browser_server("browser")`'s returned reactive yields a list with `type = "new_dataset_block"`, `id = "foo"`, and no `nonce`
+- **WHEN** the binding sets `input$commit` to `list(type = "dataset_block", id = "foo", nonce = 1)` (other fields `NULL`)
+- **THEN** `block_browser_server("browser")`'s returned reactive yields a list with `type = "dataset_block"`, `id = "foo"`, and no `nonce`
 
 #### Scenario: Repeat adds re-fire the reactive
 

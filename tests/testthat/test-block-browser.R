@@ -160,8 +160,8 @@ test_that("per-card form field ids are namespaced by id + block type", {
   panel <- block_browser_ui("mod_a", NULL)
   html <- as.character(htmltools::renderTags(panel)$html)
 
-  expect_match(html, "id=\"mod_a-new_dataset_block_id\"", fixed = TRUE)
-  expect_match(html, "id=\"mod_a-new_dataset_block_title\"", fixed = TRUE)
+  expect_match(html, "id=\"mod_a-dataset_block_id\"", fixed = TRUE)
+  expect_match(html, "id=\"mod_a-dataset_block_title\"", fixed = TRUE)
 })
 
 test_that("default block ids are unique and avoid the board's existing ids", {
@@ -225,12 +225,12 @@ test_that("block_browser_server returns the committed spec without nonce", {
     args = list(id = "browser"),
     {
       session$setInputs(
-        commit = list(type = "new_dataset_block", id = "foo",
+        commit = list(type = "dataset_block", id = "foo",
                       title = NULL, link_id = NULL, block_input = NULL,
                       target_input = NULL, nonce = 1)
       )
       out <- session$returned()
-      expect_equal(out$type, "new_dataset_block")
+      expect_equal(out$type, "dataset_block")
       expect_equal(out$id, "foo")
       expect_null(out$nonce)
     }
