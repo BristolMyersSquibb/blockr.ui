@@ -185,10 +185,33 @@ browser_block_metas <- function(board, mode) {
     )
   })
 
-  n <- length(metas)
   need_link <- mode %in% c("append", "prepend")
   need_inputs <- mode == "append"
 
+  # For append, the new block has to receive a link from the source, so
+  # candidates need either a named input slot or variadic arity (`NA`)
+  # which accepts arbitrary fresh slots. Source-only blocks (arity 0,
+  # e.g. dataset_block) can't be appended and are filtered out.
+  # Variadic blocks (e.g. rbind_block) return character(0) from
+  # block_inputs() but DO accept links - the dock generates a fresh
+  # slot name. Prepend / add are unfiltered.
+  if (need_inputs) {
+    for (i in seq_along(metas)) {
+      metas[[i]]$inputs <- safe_block_inputs(metas[[i]]$ctor)
+      metas[[i]]$variadic <- safe_block_variadic(metas[[i]]$ctor)
+    }
+    metas <- Filter(
+      function(m) length(m$inputs) > 0L || isTRUE(m$variadic),
+      metas
+    )
+  } else {
+    for (i in seq_along(metas)) {
+      metas[[i]]$inputs <- character()
+      metas[[i]]$variadic <- FALSE
+    }
+  }
+
+  n <- length(metas)
   id_defaults <- seed_ids(
     safe_board_ids(board, blockr.core::board_block_ids), n
   )
@@ -199,11 +222,6 @@ browser_block_metas <- function(board, mode) {
   }
 
   for (i in seq_along(metas)) {
-    metas[[i]]$inputs <- if (need_inputs) {
-      safe_block_inputs(metas[[i]]$ctor)
-    } else {
-      character()
-    }
     metas[[i]]$id_default <- id_defaults[[i]]
     metas[[i]]$link_default <- link_defaults[[i]]
   }
@@ -235,7 +253,12 @@ resolve_target <- function(board, target) {
   inputs <- character()
   attrs <- list()
   if (target$mode == "prepend" && !is.null(blk)) {
-    inputs <- blockr.core::block_inputs(blk)
+    # Filter out slots already taken by incoming links to the target,
+    # so the user is never offered a port they can't actually use.
+    inputs <- setdiff(
+      blockr.core::block_inputs(blk),
+      taken_inputs(board, target$id)
+    )
     arity <- blockr.core::block_arity(blk)
     if (is.na(arity)) {
       attrs <- list(`data-target-arity` = "inf")
@@ -344,7 +367,10 @@ block_card <- function(meta, ns, mode, target_inputs) {
 card_advanced <- function(meta, ns, mode, target_inputs) {
   field_id <- function(suffix) ns(paste0(meta$type, "_", suffix))
   show_link <- mode %in% c("append", "prepend")
-  show_block_input <- mode == "append"
+  # Only ask the user to pick a slot when there is an actual choice
+  # (>= 2 slots). With a single slot the new-block input port is
+  # forced; the dock falls back to `block_inputs(blk)[1L]`.
+  show_block_input <- mode == "append" && length(meta$inputs) > 1L
   show_target_input <- mode == "prepend" && length(target_inputs) > 1L
   add_label <- switch(mode,
     add = "Add",
@@ -480,6 +506,17 @@ safe_block_inputs <- function(ctor) {
   )
 }
 
+# TRUE when the block has variadic arity (NA) - accepts an arbitrary
+# number of input links with fresh slot names. False otherwise (arity
+# 0 or finite). Used to keep variadic blocks as valid append targets
+# even though `block_inputs()` returns character(0).
+safe_block_variadic <- function(ctor) {
+  tryCatch(
+    is.na(blockr.core::block_arity(ctor())),
+    error = function(e) FALSE
+  )
+}
+
 safe_board_ids <- function(board, getter) {
   if (is.null(board)) return(character())
   tryCatch(getter(board), error = function(e) character())
@@ -490,4 +527,20 @@ board_block <- function(board, id) {
   blocks <- tryCatch(blockr.core::board_blocks(board), error = function(e) NULL)
   if (is.null(blocks)) return(NULL)
   blocks[[id]]
+}
+
+# Input slots of `block_id` that are already wired by an incoming link
+# on `board`. Used to filter the `target_input` picker for prepend so a
+# taken slot is never offered.
+taken_inputs <- function(board, block_id) {
+  if (is.null(board)) return(character())
+  links_df <- tryCatch(
+    as.data.frame(blockr.core::board_links(board)),
+    error = function(e) NULL
+  )
+  if (is.null(links_df) || !nrow(links_df) ||
+        !all(c("to", "input") %in% names(links_df))) {
+    return(character())
+  }
+  as.character(links_df$input[links_df$to == block_id])
 }
