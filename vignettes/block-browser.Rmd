@@ -1,0 +1,119 @@
+---
+title: "The block browser"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{The block browser}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE, comment = "#>")
+```
+
+`blockr.ui::block_browser_ui()` is a card-list block picker designed to
+live inside the [sidebar primitive](sidebar.html). It replaces the
+legacy single-select form used by `blockr.dock`'s add / append /
+prepend block flows. Each card represents a registered block (one row
+of `blockr.core::available_blocks()`), grouped by category and
+filterable with the search bar.
+
+## Adding a block
+
+Adding is single-shot and works two ways:
+
+* **Click the card body** to add the block immediately with sensible
+  defaults - a freshly-generated unique id, the block's default title,
+  and (for append / prepend) a default link and input port.
+* **Open the card** with its chevron to tweak the id, title, link id
+  and input port first, then click the in-card add button.
+
+Either way the browser publishes a single Shiny input
+`<mode>_block_commit` carrying the block to create.
+
+## Minimal example
+
+```{r}
+library(shiny)
+library(blockr.ui)
+library(blockr.core)
+
+board <- new_board(blocks = list(src = new_dataset_block()))
+
+ui <- fluidPage(
+  actionButton("open", "Add block"),
+  sidebar_ui("panel", side = "right", width = "420px"),
+  verbatimTextOutput("spec")
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$open, {
+    show_sidebar(
+      "panel",
+      title = "Add new block",
+      ui = block_browser_ui(session$ns, board, mode = "add")
+    )
+  })
+
+  observeEvent(input$add_block_commit, {
+    str(input$add_block_commit)
+  })
+
+  output$spec <- renderPrint({
+    spec <- input$add_block_commit
+    if (is.null(spec)) cat("(no commit yet)") else str(spec)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+## The commit spec
+
+The `<mode>_block_commit` input is a single block to create:
+
+```r
+list(
+  type = "dataset_block",
+  id = "intimate_hind",   # unique, avoids the board's existing ids
+  title = NULL,           # NULL -> the block keeps its default title
+  link_id = NULL,         # set for append / prepend
+  block_input = NULL,     # set for append (the new block's input port)
+  target_input = NULL     # set for prepend into a multi-input target
+)
+```
+
+Fields not applicable to the current mode are `NULL` (R reads JS's
+`null` as `NULL`). The action handler turns this into a single
+`update()` call against the board.
+
+## Unique ids and repeated adds
+
+The suggested `id` (and `link_id`) defaults are generated avoiding the
+board's existing block / link ids. When the action handler re-renders
+the browser with the updated board after each add (e.g. while the
+sidebar is pinned), the next suggestion is fresh. This means clicking
+the same card several times produces several distinct blocks - the
+simple way to, say, drop three dataset blocks onto the board.
+
+## Per-mode fields
+
+The per-card form shows only the fields relevant to the mode:
+
+| Mode      | Fields                                                     |
+|-----------|------------------------------------------------------------|
+| `add`     | `id`, `title`                                              |
+| `append`  | `id`, `title`, `link_id`, `block_input`                    |
+| `prepend` | `id`, `title`, `link_id`, `target_input` (only if arity>1) |
+
+For `prepend`, `target_input` is shown only when the target block has
+more than one input slot (e.g. a merge block, arity 2); arity-1 and
+variadic targets hide it.
+
+## Search
+
+The search bar does a case-insensitive substring match against each
+card's `name + description + package + category`. Empty category
+sections collapse automatically. (A future iteration may replace this
+with an AI-assisted search that maps a natural-language question to
+candidate blocks - see the change's design notes.)

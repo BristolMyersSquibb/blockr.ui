@@ -105,7 +105,7 @@
 /* Visual feedback for the pin toggle: the path's head sits naturally
    at top-right (head tilted, tip at bottom-left). Unpinned keeps that
    slight side tilt; pinned rotates -45° so the head is straight up and
-   the tip points straight down — "stuck in". */
+   the tip points straight down - "stuck in". */
 .blockr-sidebar.blockr-sidebar-pinned .blockr-sidebar-pin svg {
   transform: rotate(-45deg);
 }
