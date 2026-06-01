@@ -85,6 +85,12 @@ By contributing to this project, you agree to abide by its terms.
 
 ## All functions
 
+- [`block_browser_ui()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block-browser.md)
+  [`append_to()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block-browser.md)
+  [`prepend_to()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block-browser.md)
+  [`block_browser_server()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block-browser.md)
+  [`block_browser_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block-browser.md)
+  : Block browser
 - [`sidebar_ui()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
   [`sidebar_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
   [`show_sidebar()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
@@ -97,5 +103,7 @@ By contributing to this project, you agree to abide by its terms.
 
 ### All vignettes
 
+- [The block
+  browser](https://bristolmyerssquibb.github.io/blockr.ui/articles/block-browser.md):
 - [Driving the sidebar
   primitive](https://bristolmyerssquibb.github.io/blockr.ui/articles/sidebar.md):

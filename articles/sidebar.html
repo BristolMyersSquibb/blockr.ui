@@ -33,7 +33,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/sidebar.html">Driving the sidebar primitive</a></li>
+<li><a class="dropdown-item" href="../articles/block-browser.html">The block browser</a></li>
+    <li><a class="dropdown-item" href="../articles/sidebar.html">Driving the sidebar primitive</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -113,7 +114,7 @@ page with <code><a href="../reference/sidebar.html">sidebar_ui()</a></code>, the
 <span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
 <p>The inputs inside the body (<code>input$block_name</code>,
 <code>input$block_kind</code>, <code>input$confirm</code>) live in the
-calling session — exactly as they would inside a
+calling session - exactly as they would inside a
 <code><a href="https://rdrr.io/pkg/shiny/man/modalDialog.html" class="external-link">modalDialog()</a></code>. No nested <code><a href="https://rdrr.io/pkg/shiny/man/moduleServer.html" class="external-link">moduleServer()</a></code> is
 required.</p>
 </div>
@@ -124,11 +125,11 @@ required.</p>
 under the same id, exposing two logical fields:</p>
 <ul>
 <li>
-<code>input[[id]]$open</code> — <code>TRUE</code> while the panel is
+<code>input[[id]]$open</code> - <code>TRUE</code> while the panel is
 open, <code>FALSE</code> once the user closes it (Esc, X button) or the
 server calls <code><a href="../reference/sidebar.html">hide_sidebar()</a></code>.</li>
 <li>
-<code>input[[id]]$pinned</code> — <code>TRUE</code> while the user
+<code>input[[id]]$pinned</code> - <code>TRUE</code> while the user
 has the panel pinned.</li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -191,7 +192,7 @@ any pinned content the user expected to stay put.</p>
 <p>A common renderer pattern is to open the sidebar with a “first block”
 hint when the session starts on an empty board, while still respecting a
 later user dismissal. The recipe is built on top of
-<code><a href="../reference/sidebar.html">show_sidebar()</a></code> and <code>input[[id]]$open</code> — no
+<code><a href="../reference/sidebar.html">show_sidebar()</a></code> and <code>input[[id]]$open</code> - no
 special opt-in is needed on <code><a href="../reference/sidebar.html">sidebar_ui()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">empty_board_renderer</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">board</span><span class="op">)</span> <span class="op">{</span></span>

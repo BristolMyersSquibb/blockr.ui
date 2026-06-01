@@ -2,8 +2,9 @@ pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  block-browser: block-browser.html
   sidebar: sidebar.html
-last_built: 2026-05-26T06:45Z
+last_built: 2026-06-01T11:44Z
 urls:
   reference: https://bristolmyerssquibb.github.io/blockr.ui/reference
   article: https://bristolmyerssquibb.github.io/blockr.ui/articles

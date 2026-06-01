@@ -47,7 +47,7 @@ shinyApp(ui, server)
 ```
 
 The inputs inside the body (`input$block_name`, `input$block_kind`,
-`input$confirm`) live in the calling session — exactly as they would
+`input$confirm`) live in the calling session - exactly as they would
 inside a
 [`modalDialog()`](https://rdrr.io/pkg/shiny/man/modalDialog.html). No
 nested
@@ -61,10 +61,10 @@ Each
 call also registers a Shiny input under the same id, exposing two
 logical fields:
 
-- `input[[id]]$open` — `TRUE` while the panel is open, `FALSE` once the
+- `input[[id]]$open` - `TRUE` while the panel is open, `FALSE` once the
   user closes it (Esc, X button) or the server calls
   [`hide_sidebar()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md).
-- `input[[id]]$pinned` — `TRUE` while the user has the panel pinned.
+- `input[[id]]$pinned` - `TRUE` while the user has the panel pinned.
 
 ``` r
 
@@ -134,7 +134,7 @@ A common renderer pattern is to open the sidebar with a “first block”
 hint when the session starts on an empty board, while still respecting a
 later user dismissal. The recipe is built on top of
 [`show_sidebar()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
-and `input[[id]]$open` — no special opt-in is needed on
+and `input[[id]]$open` - no special opt-in is needed on
 [`sidebar_ui()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md).
 
 ``` r
