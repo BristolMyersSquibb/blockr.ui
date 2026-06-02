@@ -12,11 +12,11 @@
   var COMMIT_EVENT = "blockr-stack-menu:commit";
   var commitSeq = 0;
 
-  function getCards(root) {
-    return Array.prototype.slice.call(
-      root.querySelectorAll(".blockr-block-browser-card")
-    );
-  }
+  // Shared card-list helpers live on `window.BlockrUI.cardSearch`, set
+  // up by `blockr-block-browser.js`. `stack_menu_ui()` always attaches
+  // `block_browser_dep()` before `stack_menu_dep()`, so the namespace
+  // is in scope by the time this binding runs.
+  var cardSearch = window.BlockrUI.cardSearch;
 
   // The selection set lives on the root element. We keep it as an
   // ordered list of `data-block-type` strings (board block ids in this
@@ -48,34 +48,6 @@
       sel.splice(idx, 1);
       setCardSelected(card, false);
     }
-  }
-
-  // Search - same case-insensitive substring filter as the block
-  // browser, over (data-name + data-description + data-package +
-  // data-category). Selection state is preserved across visibility
-  // changes (we toggle .hidden, not .card-selected).
-  function applySearch(root, query) {
-    var q = (query || "").trim().toLowerCase();
-    var anyVisible = false;
-    getCards(root).forEach(function (card) {
-      if (q.length === 0) {
-        card.classList.remove("hidden");
-        anyVisible = true;
-        return;
-      }
-      var haystack = [
-        card.getAttribute("data-name") || "",
-        card.getAttribute("data-description") || "",
-        card.getAttribute("data-package") || "",
-        card.getAttribute("data-category") || ""
-      ]
-        .join(" ")
-        .toLowerCase();
-      var hit = haystack.indexOf(q) !== -1;
-      card.classList.toggle("hidden", !hit);
-      if (hit) anyVisible = true;
-    });
-    root.classList.toggle("is-empty", !anyVisible);
   }
 
   function commitSelection(root) {
@@ -198,7 +170,7 @@
     root.dataset.blockrStackMenuInit = "1";
 
     // Seed selection from any cards that already carry data-selected.
-    getCards(root).forEach(function (card) {
+    cardSearch.getCards(root).forEach(function (card) {
       if (card.getAttribute("data-selected") === "true") {
         var id = card.getAttribute("data-block-type");
         getSelection(root).push(id);
@@ -209,7 +181,7 @@
     var search = root.querySelector(".blockr-block-browser-search");
     if (search) {
       search.addEventListener("input", function () {
-        applySearch(root, search.value);
+        cardSearch.applySearch(root, search.value);
       });
     }
 

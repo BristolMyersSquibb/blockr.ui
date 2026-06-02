@@ -11,11 +11,45 @@
   var COMMIT_EVENT = "blockr-block-browser:commit";
   var commitSeq = 0;
 
-  function getCards(root) {
-    return Array.prototype.slice.call(
-      root.querySelectorAll(".blockr-block-browser-card")
-    );
-  }
+  // Card-list helpers shared with the stack-menu binding. Both modules
+  // render the same `.blockr-block-browser-card` markup and the same
+  // `data-name` / `data-description` / `data-package` / `data-category`
+  // search contract, so the filter and the card-iteration helper live
+  // on a tiny `window.BlockrUI.cardSearch` namespace. The stack-menu
+  // module depends on `block_browser_dep()` being attached first
+  // (which it is wherever `stack_menu_ui()` is rendered) and just
+  // calls into this API. Keep the surface deliberately small.
+  var BlockrUI = window.BlockrUI = window.BlockrUI || {};
+  BlockrUI.cardSearch = BlockrUI.cardSearch || {
+    getCards: function (root) {
+      return Array.prototype.slice.call(
+        root.querySelectorAll(".blockr-block-browser-card")
+      );
+    },
+    applySearch: function (root, query) {
+      var q = (query || "").trim().toLowerCase();
+      var anyVisible = false;
+      BlockrUI.cardSearch.getCards(root).forEach(function (card) {
+        if (q.length === 0) {
+          card.classList.remove("hidden");
+          anyVisible = true;
+          return;
+        }
+        var haystack = [
+          card.getAttribute("data-name") || "",
+          card.getAttribute("data-description") || "",
+          card.getAttribute("data-package") || "",
+          card.getAttribute("data-category") || ""
+        ]
+          .join(" ")
+          .toLowerCase();
+        var hit = haystack.indexOf(q) !== -1;
+        card.classList.toggle("hidden", !hit);
+        if (hit) anyVisible = true;
+      });
+      root.classList.toggle("is-empty", !anyVisible);
+    }
+  };
 
   function getField(card, fieldClass) {
     return card.querySelector(
@@ -56,32 +90,6 @@
     root.dispatchEvent(new CustomEvent(COMMIT_EVENT));
   }
 
-  // Search - hide non-matching cards via .hidden, collapse empty
-  // category sections via CSS, show the empty-state when nothing matches.
-  function applySearch(root, query) {
-    var q = (query || "").trim().toLowerCase();
-    var anyVisible = false;
-    getCards(root).forEach(function (card) {
-      if (q.length === 0) {
-        card.classList.remove("hidden");
-        anyVisible = true;
-        return;
-      }
-      var haystack = [
-        card.getAttribute("data-name") || "",
-        card.getAttribute("data-description") || "",
-        card.getAttribute("data-package") || "",
-        card.getAttribute("data-category") || ""
-      ]
-        .join(" ")
-        .toLowerCase();
-      var hit = haystack.indexOf(q) !== -1;
-      card.classList.toggle("hidden", !hit);
-      if (hit) anyVisible = true;
-    });
-    root.classList.toggle("is-empty", !anyVisible);
-  }
-
   // Wire the search box and the delegated card-area click handler.
   // Idempotent: safe to call from both initialize() and subscribe()
   // (Shiny may invoke either first).
@@ -92,7 +100,7 @@
     var search = root.querySelector(".blockr-block-browser-search");
     if (search) {
       search.addEventListener("input", function () {
-        applySearch(root, search.value);
+        BlockrUI.cardSearch.applySearch(root, search.value);
       });
     }
 
