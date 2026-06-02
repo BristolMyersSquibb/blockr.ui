@@ -33,14 +33,18 @@ the prior two:
   `link_menu_server()` - that the add-link action handler mounts in
   place of `link_sidebar_body()`.
 - **Bidirectional cards.** The anchor block is the right-clicked
-  block. The menu renders up to two sections:
-  - **OUTGOING** ("Connect to..."): blocks the anchor can link TO.
-    Eligibility = every block other than the anchor that has at least
-    one free named input port or is variadic.
-  - **INCOMING** ("Connect from..."): blocks that can link INTO the
-    anchor. Eligibility = every block other than the anchor, gated on
-    the anchor itself having at least one free named input port or
-    being variadic.
+  block. The menu renders up to two sections, with INPUT FROM
+  shown above OUTPUT TO so the order matches the visual
+  left-to-right data flow (sources feed the anchor; the anchor
+  feeds targets):
+  - **INPUT FROM** (INCOMING, card -> anchor): blocks that can link
+    INTO the anchor. Eligibility = every block other than the
+    anchor, gated on the anchor itself having at least one free
+    named input port or being variadic.
+  - **OUTPUT TO** (OUTGOING, anchor -> card): blocks the anchor can
+    link TO. Eligibility = every block other than the anchor that
+    has at least one free named input port or is variadic.
+
   Both sections are also internally grouped by category (mirroring
   the block browser and stack menu) for at-a-glance scanning.
 - Same card chrome as the stack menu (icon + name + `id: <block_id>`
@@ -275,8 +279,8 @@ picks.
 The cards section is preceded by an uppercase section header per
 direction. Examples:
 
-- "CONNECT TO" - cards in this section are OUTGOING from the anchor.
-- "CONNECT FROM" - cards in this section are INCOMING into the anchor.
+- "OUTPUT TO" - cards in this section are OUTGOING from the anchor.
+- "INPUT FROM" - cards in this section are INCOMING into the anchor.
 
 Header treatment matches the stack menu's section headers (small
 uppercase / tracked / muted colour, sized to out-rank the per-category

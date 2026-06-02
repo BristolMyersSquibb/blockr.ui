@@ -4,10 +4,10 @@
 
 `blockr.ui` SHALL export `link_menu_ui(id, board, anchor)` returning an `htmltools::tag` with `link_menu_dep()` attached, where `id` is the module id and `anchor` is a non-empty character scalar naming the right-clicked block (the anchor of the new link). `anchor` MUST be a member of `blockr.core::board_block_ids(board)`; otherwise a clean error of class `blockr_ui_link_menu_unknown_anchor` SHALL be raised.
 
-The panel SHALL render up to two category-grouped sections:
+The panel SHALL render up to two category-grouped sections. When both render, INCOMING SHALL appear above OUTGOING so the order matches the natural left-to-right data flow (sources feed the anchor; the anchor feeds targets):
 
-- **OUTGOING** (header text "CONNECT TO"): cards represent eligible target blocks for an outgoing link. Eligibility = every board block id other than `anchor` that has at least one free named input port (per `blockr.core::block_input_select(blk, id, links, mode = "inputs")`) or has variadic arity (`is.na(blockr.core::block_arity(blk))`).
-- **INCOMING** (header text "CONNECT FROM"): cards represent eligible source blocks for an incoming link. The section is rendered only when `anchor` itself has at least one free named input port or is variadic. When the section renders, eligibility = every board block id other than `anchor` (any block can be a source).
+- **INCOMING** (header text "INPUT FROM", card -> anchor): cards represent eligible source blocks for an incoming link. The section is rendered only when `anchor` itself has at least one free named input port or is variadic. When the section renders, eligibility = every board block id other than `anchor`. Candidates that `anchor` already reaches SHALL be excluded - adding `candidate -> anchor` would close a cycle.
+- **OUTGOING** (header text "OUTPUT TO", anchor -> card): cards represent eligible target blocks for an outgoing link. Eligibility = every board block id other than `anchor` that has at least one free named input port (computed via `blockr.core::block_inputs()` minus already-wired ports) or has variadic arity (`is.na(blockr.core::block_arity(blk))`). Candidates that already reach `anchor` through the existing link graph SHALL be excluded - adding `anchor -> candidate` would close a cycle (direct or transitive).
 
 Each section header SHALL be rendered only when its pool is non-empty. When both pools are empty the panel SHALL render an empty-state inside the cards container instead.
 
@@ -42,6 +42,21 @@ An in-card "Add link" button SHALL commit using the form values; clicking the ca
 
 - **WHEN** the anchor is a variadic block (e.g. `rbind_block` with `block_arity = NA`) AND the board has at least one other block with free inputs
 - **THEN** both OUTGOING and INCOMING sections render (variadic accepts a fresh slot, so the anchor can be both source and target)
+
+#### Scenario: OUTGOING excludes cycle-creating candidates (direct)
+
+- **WHEN** an existing link `h -> r` is on the board AND `link_menu_ui("mod", board, anchor = "r")` is rendered
+- **THEN** `h` does NOT appear as an OUTGOING card (adding `r -> h` would close the cycle `h -> r -> h`)
+
+#### Scenario: OUTGOING excludes cycle-creating candidates (transitive)
+
+- **WHEN** existing links `a -> h` and `h -> r` are on the board AND `link_menu_ui("mod", board, anchor = "r")` is rendered
+- **THEN** both `h` (direct ancestor of `r`) and `a` (transitive ancestor) are excluded from the OUTGOING cards
+
+#### Scenario: INCOMING excludes blocks the anchor already reaches
+
+- **WHEN** an existing link `h -> r` is on the board AND `link_menu_ui("mod", board, anchor = "h")` is rendered
+- **THEN** `r` does NOT appear as an INCOMING card (adding `r -> h` would close the cycle `r -> h -> r`)
 
 #### Scenario: Targets with no free input ports are filtered out (OUTGOING)
 
@@ -135,11 +150,14 @@ The server SHALL strip the internal `nonce` before the spec is returned. The rea
 
 ### Requirement: Live pool updates via `receiveMessage` (multi-link sessions)
 
-The `blockr.ui.linkMenu` binding's `receiveMessage` SHALL accept a payload of the shape `list(type = "pool-update", eligible = list(outgoing = <chr>, incoming = <chr>), link_id_seed = <chr>)`. When such a message arrives, the binding SHALL:
+The `blockr.ui.linkMenu` binding's `receiveMessage` SHALL accept a payload of the shape `list(type = "pool-update", eligible = list(outgoing = <chr>, incoming = <chr>), free_inputs = <named list of <chr>>, link_id_seed = <chr>)`. When such a message arrives, the binding SHALL:
 
 - Toggle `.hidden` on every card based on whether the card's `data-block-type` is in the eligible pool for its `data-direction` - `outgoing` cards are filtered against `eligible$outgoing`, `incoming` cards against `eligible$incoming`.
+- Rebuild each card's block-input `<select>` options from `free_inputs[target_id]`, where `target_id` is the card's `data-block-type` for `outgoing` and the root's `data-anchor` for `incoming`. The previously selected port SHALL be preserved when still valid; otherwise the select SHALL snap to the first available option so a subsequent card-body click never wires to a port that was just consumed. The picker field itself SHALL be hidden (`display: none`) when the post-update pool offers <= 1 options - a single-option dropdown adds chrome with no real choice, and the consumer's fallback resolves the sole free port from `spec$block_input = NULL` anyway. Cards whose advanced area never rendered a picker in the first place (single-input or variadic targets) SHALL be unaffected.
 - Recompute the panel's `is-empty` state so the empty-state slot shows when every card is hidden.
 - Optionally re-seed per-card Link ID `<input>` defaults from `link_id_seed`, leaving any field the user has manually edited untouched. The binding MAY append a monotonic per-card suffix so two cards reading from the same seed propose distinct ids.
+
+The binding SHALL be tolerant of Shiny's `sendInputMessage` auto-unboxing of length-1 R character vectors - both `eligible$*` and `free_inputs[[...]]` values may arrive as JSON scalars instead of arrays, and the binding SHALL coerce as needed.
 
 The binding MUST NOT touch card-expansion state, scroll position, or the search input value. The handler is the multi-link session lifeline: consumers push it after each commit so the user can keep clicking cards without losing their place.
 
@@ -162,6 +180,13 @@ The binding MUST NOT touch card-expansion state, scroll position, or the search 
 - **THEN** the expanded card stays expanded
 - **AND** the scroll position is unchanged
 - **AND** the search input value still reads `"merge"` (the message handler does not clear the filter)
+
+#### Scenario: pool-update refreshes the per-card block-input select options
+
+- **WHEN** an OUTGOING card targets `m` (arity 2, both ports `x` / `y` initially free) and the card's block-input select shows `c("x", "y")`
+- **AND** a link to `m` on port `x` has been committed and the binding receives a `pool-update` whose `free_inputs[["m"]]` is `c("y")`
+- **THEN** the card's block-input select is rebuilt to offer only `"y"`
+- **AND** an OUTGOING card whose target had a single named input (arity 1) or is variadic - where the advanced area never rendered a picker in the first place - is left untouched
 
 ### Requirement: `link_eligible_pools()` helper
 
