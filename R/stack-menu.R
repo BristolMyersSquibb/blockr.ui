@@ -132,8 +132,9 @@ stack_menu_dep <- function() {
 
 # Resolve everything the panel needs to know about the create / edit
 # context in one place: the pool of eligible block ids, the pre-selected
-# subset, the pre-filled name / color, the seeded stack id default, and
-# the panel subtitle.
+# subset, the pre-filled name / color, and the seeded stack id default.
+# The caller (a sidebar or modal) owns its own title chrome; the menu
+# does not render context labels.
 resolve_stack_target <- function(board, target) {
   pool <- stack_eligible_blocks(board)
 
@@ -144,15 +145,12 @@ resolve_stack_target <- function(board, target) {
       selected = character(),
       name = "",
       color = default_stack_color(),
-      stack_id = seed_stack_id(board),
-      subtitle = NULL
+      stack_id = seed_stack_id(board)
     ))
   }
 
   stack <- lookup_stack(board, target)
   selected <- as.character(blockr.core::stack_blocks(stack))
-  stack_nm <- blockr.core::stack_name(stack) %||% ""
-  display_name <- if (nzchar(stack_nm)) stack_nm else target
 
   list(
     mode = "edit",
@@ -160,13 +158,9 @@ resolve_stack_target <- function(board, target) {
     # deselect them; otherwise they'd be invisible (not in available).
     pool = union(pool, selected),
     selected = selected,
-    name = stack_nm,
+    name = blockr.core::stack_name(stack) %||% "",
     color = attr(stack, "color", exact = TRUE) %||% default_stack_color(),
-    stack_id = NULL,
-    subtitle = shiny::tags$p(
-      class = "blockr-stack-menu-context",
-      "Editing ", shiny::tags$strong(display_name)
-    )
+    stack_id = NULL
   )
 }
 
@@ -239,7 +233,10 @@ stack_menu_panel <- function(ns, metas, ctx) {
     id = ns("commit"),
     class = "blockr-stack-menu",
     `data-mode` = ctx$mode,
-    ctx$subtitle,
+    shiny::tags$h4(
+      class = "blockr-stack-menu-section-header",
+      "Stack blocks"
+    ),
     shiny::tags$input(
       type = "search",
       class = "blockr-block-browser-search",
@@ -330,15 +327,24 @@ stack_block_card <- function(meta) {
 # top-level in create mode - the sidebar has room for them and the
 # auto-seeded id is still useful chrome (users can rename it). Edit
 # mode omits the id input entirely (the id is immutable once a stack
-# is created).
+# is created). The form is preceded by a small uppercase section
+# header (matching the category labels above) and rendered inside a
+# subtly-tinted panel so the configuration block reads as distinct
+# from the picker.
 stack_menu_form <- function(ns, ctx, is_edit) {
-  shiny::tags$div(
-    class = "blockr-stack-menu-form",
-    text_field_tag(ns, "stack_name", "Stack name", ctx$name, "My stack"),
-    color_field_tag(ns, ctx$color),
-    if (!is_edit) {
-      text_field_tag(ns, "stack_id", "Stack id", ctx$stack_id, "stack_id")
-    }
+  shiny::tagList(
+    shiny::tags$h4(
+      class = "blockr-stack-menu-section-header",
+      "Stack settings"
+    ),
+    shiny::tags$div(
+      class = "blockr-stack-menu-form",
+      text_field_tag(ns, "stack_name", "Stack name", ctx$name, "My stack"),
+      color_field_tag(ns, ctx$color),
+      if (!is_edit) {
+        text_field_tag(ns, "stack_id", "Stack id", ctx$stack_id, "stack_id")
+      }
+    )
   )
 }
 

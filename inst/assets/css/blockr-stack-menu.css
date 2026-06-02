@@ -18,27 +18,28 @@
   color: #1f2937;
 }
 
-.blockr-stack-menu-context {
-  flex: 0 0 auto;
-  font-size: 12px;
-  color: #6b7280;
-  margin: 0;
-}
-
-.blockr-stack-menu-context strong {
-  color: #1f2937;
-  font-weight: 600;
-}
-
 /* The search bar piggy-backs on the block-browser style. */
 .blockr-stack-menu .blockr-block-browser-search {
   flex: 0 0 auto;
 }
 
-/* Scrollable cards area - matches the block browser. */
+/* Cards area. flex-grow: 0 keeps it tight to its content (no growing
+   into leftover space, which would dilute the picker). flex-shrink: 1
+   + min-height: 0 lets it yield if the total exceeds the panel; the
+   existing overflow-y: auto on .blockr-block-browser-categories then
+   scrolls when content is taller than the allowed height. */
 .blockr-stack-menu .blockr-block-browser-categories {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
+  max-height: max-content;
+}
+
+/* Edit mode: the cards container height is set dynamically by JS to
+   match the 4th card's bottom (see blockr-stack-menu.js / capToFour).
+   We only declare flex-shrink: 0 here so the form below cannot
+   squeeze the explicit height the JS sets. */
+.blockr-stack-menu[data-mode="edit"] .blockr-block-browser-categories {
+  flex: 0 0 auto;
 }
 
 /* Selection state. The card sits in a permanent "selected" look (ring +
@@ -70,15 +71,28 @@
   display: none;
 }
 
-/* Panel-level form: name (always), color + id (under Advanced in create,
-   visible top-level in edit). */
+/* Section headers (above the search bar and above the panel-level
+   form). Same uppercase / tracking treatment as the category labels
+   inside the card list, but a notch bigger and darker so the two
+   top-level sections out-rank the sub-category dividers. */
+.blockr-stack-menu-section-header {
+  flex: 0 0 auto;
+  margin: 4px 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+/* Panel-level form: name + colour + id. The "Stack settings" section
+   header above provides the visual break - no background tint, no
+   border-box; keep the chrome quiet. */
 .blockr-stack-menu-form {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .blockr-stack-menu-field {
@@ -233,12 +247,12 @@
   font-weight: 600;
 }
 
-/* Confirm button: pinned at the bottom of the panel. Visually mirrors
-   the block-browser's per-card add button so the family reads as one. */
+/* Confirm button. Pinned at the bottom of the sidebar via margin-top:
+   auto. */
 .blockr-stack-menu-confirm {
   flex: 0 0 auto;
   align-self: stretch;
-  margin-top: 4px;
+  margin-top: auto;
   padding: 8px 14px;
   border: none;
   border-radius: 4px;

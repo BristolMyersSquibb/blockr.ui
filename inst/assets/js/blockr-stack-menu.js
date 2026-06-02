@@ -165,6 +165,31 @@
     });
   }
 
+  // Edit mode caps the cards container so exactly four cards are
+  // visible; the rest scroll. Done in JS (not CSS) because card
+  // heights vary with the consuming app's font-size (the dock renders
+  // cards taller than plain Shiny), so a hard CSS height can't be
+  // calibrated for both at once. Measurement is deferred via two
+  // animation-frame ticks so the sidebar transition + initial layout
+  // are settled before we read bounding rects.
+  function capCardsToFour(root) {
+    if (root.getAttribute("data-mode") !== "edit") return;
+    var measure = function () {
+      var cats = root.querySelector(".blockr-block-browser-categories");
+      if (!cats) return;
+      var cards = cats.querySelectorAll(".blockr-block-browser-card");
+      if (cards.length <= 4) return;
+      var fourth = cards[3];
+      var catsTop = cats.getBoundingClientRect().top;
+      var fourthBottom = fourth.getBoundingClientRect().bottom;
+      // +4px so the 4th card isn't clipped by sub-pixel rounding.
+      var h = Math.ceil(fourthBottom - catsTop + 4);
+      cats.style.height = h + "px";
+      cats.style.maxHeight = h + "px";
+    };
+    requestAnimationFrame(function () { requestAnimationFrame(measure); });
+  }
+
   function initMenu(root) {
     if (root.dataset.blockrStackMenuInit === "1") return;
     root.dataset.blockrStackMenuInit = "1";
@@ -204,6 +229,7 @@
     }
 
     initColorPicker(root);
+    capCardsToFour(root);
   }
 
   var binding = new Shiny.InputBinding();
