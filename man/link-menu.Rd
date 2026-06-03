@@ -60,14 +60,17 @@ never has to know the orientation up front:
 \item \code{data-direction = "incoming"} -> \code{source = card},   \code{target = anchor}
 }
 
-The panel renders up to two category-grouped sections:
+The panel renders up to two category-grouped sections, labelled
+from the anchor's port-role perspective:
 \itemize{
-\item \strong{OUTGOING} (CONNECT TO): blocks the anchor can link to. Eligible
-= every other board block that has at least one free named input
-port or is variadic.
-\item \strong{INCOMING} (CONNECT FROM): blocks that can link into the anchor.
-Only rendered when the anchor itself has at least one free named
-input port or is variadic. Eligible = every other board block.
+\item \strong{OUTPUT TO} (anchor -> card): blocks the anchor can link to.
+Eligible = every other board block that has at least one free
+named input port or is variadic, excluding any that already
+reach the anchor (would close a cycle).
+\item \strong{INPUT FROM} (card -> anchor): blocks that can link into the
+anchor. Only rendered when the anchor itself has at least one
+free named input port or is variadic. Eligible = every other
+board block, excluding any that the anchor already reaches.
 }
 
 When both pools are empty the panel renders an in-place empty-state

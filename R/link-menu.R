@@ -147,15 +147,17 @@ link_eligible_pools <- function(board, anchor) {
   stopifnot(is.character(anchor), length(anchor) == 1L, nzchar(anchor))
   validate_anchor(board, anchor)
 
-  outgoing <- compute_outgoing_targets(board, anchor)
-  incoming <- compute_incoming_sources(board, anchor)
+  blocks <- blockr.core::board_blocks(board)
+  links_df <- as.data.frame(blockr.core::board_links(board))
+
+  outgoing <- compute_outgoing_targets(blocks, anchor, links_df)
+  incoming <- compute_incoming_sources(blocks, anchor, links_df)
+
   # Per-target free named inputs, keyed by target block id. OUTGOING
   # cards target the card itself; INCOMING cards all target the
   # anchor. The pool-update push reads this map to refresh each
   # visible card's block-input <select> options after a commit.
   targets <- unique(c(outgoing, if (length(incoming)) anchor))
-  links_df <- board_links_df(board)
-  blocks <- blockr.core::board_blocks(board)
   free <- stats::setNames(
     lapply(targets, function(id) free_named_inputs(blocks[[id]], id, links_df)),
     targets
@@ -187,13 +189,9 @@ validate_anchor <- function(board, anchor) {
 # arity, EXCLUDING candidates whose addition as `anchor -> candidate`
 # would close a cycle (candidate already reaches anchor through the
 # existing link graph). blockr.core has no exported eligibility
-# helper, so we reimplement it locally on top of `block_inputs()`,
-# `block_arity()`, and `board_links()` (same primitives
-# `block-browser.R::taken_inputs` already uses to filter the prepend
-# port picker).
-compute_outgoing_targets <- function(board, anchor) {
-  blocks <- blockr.core::board_blocks(board)
-  links_df <- board_links_df(board)
+# helper that fits, so we reimplement it locally on top of
+# `block_inputs()`, `block_arity()`, and the links data frame.
+compute_outgoing_targets <- function(blocks, anchor, links_df) {
   cycle_seed <- ancestors_of(anchor, links_df)
   ids <- setdiff(names(blocks), c(anchor, cycle_seed))
   keep <- vapply(
@@ -207,9 +205,7 @@ compute_outgoing_targets <- function(board, anchor) {
 # Every non-anchor block, but ONLY when the anchor itself has a free
 # input (or is variadic). EXCLUDES candidates that anchor already
 # reaches (adding `candidate -> anchor` would close a cycle).
-compute_incoming_sources <- function(board, anchor) {
-  blocks <- blockr.core::board_blocks(board)
-  links_df <- board_links_df(board)
+compute_incoming_sources <- function(blocks, anchor, links_df) {
   if (!has_input_capacity(blocks[[anchor]], anchor, links_df)) {
     return(character())
   }
@@ -264,22 +260,13 @@ has_input_capacity <- function(blk, blk_id, links_df) {
 free_named_inputs <- function(blk, blk_id, links_df) {
   if (is.null(blk)) return(character())
   if (is.na(blockr.core::block_arity(blk))) return(character())
-  setdiff(blockr.core::block_inputs(blk), taken_for(blk_id, links_df))
-}
-
-taken_for <- function(blk_id, links_df) {
-  if (is.null(links_df) || !nrow(links_df) ||
-        !all(c("to", "input") %in% names(links_df))) {
-    return(character())
+  used <- if (is.null(links_df) || !nrow(links_df) ||
+                !all(c("to", "input") %in% names(links_df))) {
+    character()
+  } else {
+    as.character(links_df$input[links_df$to == blk_id])
   }
-  as.character(links_df$input[links_df$to == blk_id])
-}
-
-board_links_df <- function(board) {
-  tryCatch(
-    as.data.frame(blockr.core::board_links(board)),
-    error = function(e) NULL
-  )
+  setdiff(blockr.core::block_inputs(blk), used)
 }
 
 # ---- panel assembly ----------------------------------------------------
@@ -315,13 +302,15 @@ link_menu_panel <- function(ns, board, anchor, pools) {
           if (length(pools$incoming) > 0L) {
             direction_section(
               ns, board, anchor, pools$incoming,
-              direction = "incoming", header = "Input from"
+              direction = "incoming", header = "Input from",
+              free_inputs = pools$free_inputs
             )
           },
           if (length(pools$outgoing) > 0L) {
             direction_section(
               ns, board, anchor, pools$outgoing,
-              direction = "outgoing", header = "Output to"
+              direction = "outgoing", header = "Output to",
+              free_inputs = pools$free_inputs
             )
           }
         ),
@@ -337,7 +326,8 @@ link_menu_panel <- function(ns, board, anchor, pools) {
   )
 }
 
-direction_section <- function(ns, board, anchor, pool, direction, header) {
+direction_section <- function(ns, board, anchor, pool, direction, header,
+                              free_inputs) {
   registry <- blockr.core::available_blocks()
   blocks <- blockr.core::board_blocks(board)
 
@@ -346,7 +336,6 @@ direction_section <- function(ns, board, anchor, pool, direction, header) {
     entry <- registry_entry_for(blk, registry)
     label <- blockr.core::block_name(blk) %||% blk_id
     target_id <- if (direction == "outgoing") blk_id else anchor
-    target_blk <- if (direction == "outgoing") blk else blocks[[anchor]]
     list(
       id = blk_id,
       name = if (nzchar(label)) label else blk_id,
@@ -355,7 +344,7 @@ direction_section <- function(ns, board, anchor, pool, direction, header) {
       package = entry_attr(entry, "package", "local"),
       description = entry_attr(entry, "description", ""),
       target_id = target_id,
-      target_inputs = free_inputs_for_card(target_blk, target_id, board)
+      target_inputs = free_inputs[[target_id]] %||% character()
     )
   })
 
@@ -460,50 +449,14 @@ link_card_advanced <- function(meta, ns, board) {
   )
 }
 
-field_text <- function(class_suffix, id, label, value, placeholder = NULL) {
-  shiny::tags$div(
-    class = paste0(
-      "blockr-block-browser-field blockr-block-browser-field-", class_suffix
-    ),
-    shiny::tags$label(`for` = id, label),
-    shiny::tags$input(
-      type = "text",
-      id = id,
-      value = value,
-      placeholder = placeholder
-    )
-  )
-}
-
-field_select <- function(class_suffix, id, label, options) {
-  shiny::tags$div(
-    class = paste0(
-      "blockr-block-browser-field blockr-block-browser-field-", class_suffix
-    ),
-    shiny::tags$label(`for` = id, label),
-    shiny::tags$select(
-      id = id,
-      lapply(options, function(opt) shiny::tags$option(value = opt, opt))
-    )
-  )
-}
-
 # ---- helpers -----------------------------------------------------------
 
-# Free input ports of `blk` (the target end of a card), filtering
-# against already-wired slots. Variadic returns character() (no slot
-# picker; consumer assigns a fresh slot). Same logic as
-# free_named_inputs() but takes a board (the call site has the board
-# already in scope).
-free_inputs_for_card <- function(blk, blk_id, board) {
-  free_named_inputs(blk, blk_id, board_links_df(board))
-}
+# `field_text()`, `field_select()`, and `chevron_icon()` are defined
+# in `block-browser.R` and reused here via package scope. The link
+# menu shares the `.blockr-block-browser-field-*` class space with
+# the block browser, so the markup is identical.
 
 seed_link_id <- function(board) {
-  existing <- tryCatch(
-    blockr.core::board_link_ids(board),
-    error = function(e) character()
-  )
-  out <- seed_ids(existing, 1L)
+  out <- seed_ids(blockr.core::board_link_ids(board), 1L)
   if (length(out) == 0L) "" else out
 }
