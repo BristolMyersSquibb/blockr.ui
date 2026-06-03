@@ -209,24 +209,14 @@ stack_menu_block_metas <- function(board, pool, selected) {
 
 registry_entry_for <- function(blk, registry) {
   if (is.null(blk) || length(registry) == 0L) return(NULL)
-  match <- intersect(class(blk), names(registry))
-  if (length(match)) registry[[match[[1L]]]] else NULL
+  uid <- blockr.core::registry_id_from_block(blk)
+  if (length(uid)) registry[[uid]] else NULL
 }
 
 # ---- panel assembly ---------------------------------------------------
 
 stack_menu_panel <- function(ns, metas, ctx) {
-  categories <- split(
-    metas,
-    vapply(metas, meta_category, character(1L))
-  )
-  cat_order <- unique(vapply(metas, meta_category, character(1L)))
-  uncat <- "Uncategorized" %in% cat_order
-  cat_order <- c(
-    setdiff(cat_order, "Uncategorized"),
-    if (uncat) "Uncategorized" else character()
-  )
-
+  groups <- category_groups(metas)
   is_edit <- identical(ctx$mode, "edit")
 
   shiny::tags$div(
@@ -245,8 +235,8 @@ stack_menu_panel <- function(ns, metas, ctx) {
     ),
     shiny::tags$div(
       class = "blockr-block-browser-categories",
-      lapply(cat_order, function(cat) {
-        stack_category_section(cat, categories[[cat]])
+      lapply(names(groups), function(cat) {
+        category_section(cat, groups[[cat]], stack_block_card)
       })
     ),
     shiny::tags$div(
@@ -258,18 +248,6 @@ stack_menu_panel <- function(ns, metas, ctx) {
       type = "button",
       class = "blockr-stack-menu-confirm",
       if (is_edit) "Update stack" else "Create stack"
-    )
-  )
-}
-
-stack_category_section <- function(category, entries) {
-  shiny::tags$div(
-    class = "blockr-block-browser-category",
-    `data-category` = category,
-    shiny::tags$h3(category),
-    shiny::tags$div(
-      class = "blockr-block-browser-cards",
-      lapply(entries, stack_block_card)
     )
   )
 }
@@ -410,25 +388,16 @@ default_stack_color <- function() {
 }
 
 seed_stack_id <- function(board) {
-  existing <- if (is.null(board)) {
-    character()
-  } else {
-    blockr.core::board_stack_ids(board)
-  }
-  seed_ids(existing, 1L)
+  seed_ids(safe_board_ids(board, blockr.core::board_stack_ids), 1L)
 }
 
 # Block ids on the board that are not currently a member of any stack.
-# Mirrors `blockr.dock::available_stack_blocks()` (renamed to avoid a
-# clash with `blockr.core::available_stack_blocks()`, which has
-# different semantics and operates over stack ids). Reimplemented in
-# terms of `blockr.core` primitives to keep the dependency direction
-# right.
+# `blockr.core::available_stack_blocks()` computes exactly this when seeded
+# with the board's block ids (its default seeds with stack ids instead).
 stack_eligible_blocks <- function(board) {
   if (is.null(board)) return(character())
-  stacked <- unlist(
-    lapply(blockr.core::board_stacks(board), blockr.core::stack_blocks),
-    use.names = FALSE
-  ) %||% character()
-  setdiff(blockr.core::board_block_ids(board), stacked)
+  blockr.core::available_stack_blocks(
+    board,
+    blocks = blockr.core::board_block_ids(board)
+  )
 }
