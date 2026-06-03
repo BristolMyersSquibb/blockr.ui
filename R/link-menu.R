@@ -348,13 +348,7 @@ direction_section <- function(ns, board, anchor, pool, direction, header,
     )
   })
 
-  cats <- split(metas, vapply(metas, meta_category, character(1L)))
-  cat_order <- unique(vapply(metas, meta_category, character(1L)))
-  uncat <- "Uncategorized" %in% cat_order
-  cat_order <- c(
-    setdiff(cat_order, "Uncategorized"),
-    if (uncat) "Uncategorized" else character()
-  )
+  groups <- category_groups(metas)
 
   shiny::tags$div(
     class = "blockr-link-menu-direction",
@@ -362,21 +356,12 @@ direction_section <- function(ns, board, anchor, pool, direction, header,
     shiny::tags$h4(class = "blockr-link-menu-section-header", header),
     shiny::tags$div(
       class = "blockr-block-browser-categories",
-      lapply(cat_order, function(cat) {
-        link_category_section(cat, cats[[cat]], ns, board, direction)
+      lapply(names(groups), function(cat) {
+        category_section(
+          cat, groups[[cat]],
+          function(m) link_block_card(m, ns, board, direction)
+        )
       })
-    )
-  )
-}
-
-link_category_section <- function(category, entries, ns, board, direction) {
-  shiny::tags$div(
-    class = "blockr-block-browser-category",
-    `data-category` = category,
-    shiny::tags$h3(category),
-    shiny::tags$div(
-      class = "blockr-block-browser-cards",
-      lapply(entries, function(m) link_block_card(m, ns, board, direction))
     )
   )
 }
