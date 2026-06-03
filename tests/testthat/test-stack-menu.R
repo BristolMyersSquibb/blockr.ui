@@ -97,6 +97,15 @@ test_that("create mode renders all three fields visibly top-level", {
   expect_false(grepl("blockr-stack-menu-advanced", html, fixed = TRUE))
 })
 
+test_that("create mode pre-fills a non-empty default stack name", {
+  panel <- stack_menu_ui("mod", two_block_board())
+  html <- as.character(htmltools::renderTags(panel)$html)
+
+  # The default is a random rand_names() value, so assert the input
+  # carries a non-empty value (>= 1 char) rather than a fixed string.
+  expect_match(html, "id=\"mod-stack_name\"[^>]*value=\"[^\"]+\"")
+})
+
 test_that("edit mode omits the stack_id input entirely", {
   panel <- stack_menu_ui("mod", board_with_stack("a"), target = "s1")
   html <- as.character(htmltools::renderTags(panel)$html)

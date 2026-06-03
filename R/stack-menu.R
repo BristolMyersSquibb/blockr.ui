@@ -143,7 +143,7 @@ resolve_stack_target <- function(board, target) {
       mode = "create",
       pool = pool,
       selected = character(),
-      name = "",
+      name = seed_stack_name(board),
       color = default_stack_color(),
       stack_id = seed_stack_id(board)
     ))
@@ -389,6 +389,24 @@ default_stack_color <- function() {
 
 seed_stack_id <- function(board) {
   seed_ids(safe_board_ids(board, blockr.core::board_stack_ids), 1L)
+}
+
+# A unique, human-readable default name for the create flow. Uses the
+# same `rand_names()` generator as the seeded id (adjective_animal, e.g.
+# "savoury_midge"), kept distinct from the board's existing stack names
+# so it reads as a real, submittable value out of the box.
+seed_stack_name <- function(board) {
+  existing <- if (is.null(board)) {
+    character()
+  } else {
+    vapply(
+      blockr.core::board_stacks(board),
+      function(s) blockr.core::stack_name(s) %||% "",
+      character(1L),
+      USE.NAMES = FALSE
+    )
+  }
+  seed_ids(existing, 1L)
 }
 
 # Block ids on the board that are not currently a member of any stack.
