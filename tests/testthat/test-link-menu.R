@@ -361,3 +361,62 @@ test_that("link_menu_server malformed id rejected", {
   expect_error(link_menu_server(""))
   expect_error(link_menu_server(c("a", "b")))
 })
+
+test_that("server validates the link id when a board is supplied", {
+  board <- blockr.core::new_board(
+    blockr.core::as_blocks(list(
+      a = blockr.core::new_dataset_block("iris"),
+      b = blockr.core::new_head_block()
+    )),
+    links = blockr.core::links(id = "ab", from = "a", to = "b")
+  )
+  shiny::testServer(
+    link_menu_server,
+    args = list(id = "mod", board = shiny::reactive(board), anchor = "a"),
+    {
+      fired <- 0L
+      observeEvent(session$returned(), fired <<- fired + 1L)
+
+      # Duplicate link id -> rejected (committed never fires).
+      session$setInputs(commit = list(
+        source = "a", target = "b", link_id = "ab", nonce = 1L
+      ))
+      session$flushReact()
+      expect_identical(fired, 0L)
+
+      # Fresh link id -> fires once.
+      session$setInputs(commit = list(
+        source = "a", target = "b", link_id = "fresh", nonce = 2L
+      ))
+      session$flushReact()
+      expect_identical(fired, 1L)
+      expect_identical(session$returned()$link_id, "fresh")
+    }
+  )
+})
+
+test_that("link_sync_payload tracks eligibility across a board change", {
+  ns <- shiny::NS("mod")
+  blocks <- blockr.core::as_blocks(list(
+    a = blockr.core::new_dataset_block("iris"),
+    b = blockr.core::new_head_block()
+  ))
+
+  # a -> b wired: b's only input is taken, so anchor `a` has no OUTGOING
+  # target (and a dataset has no input, so no INCOMING) -> no cards.
+  wired <- blockr.core::new_board(
+    blocks, links = blockr.core::links(id = "ab", from = "a", to = "b")
+  )
+  p1 <- link_sync_payload(wired, "a", ns)
+  expect_identical(p1$type, "menu:sync")
+  expect_false("b" %in% vapply(p1$cards, `[[`, character(1L), "id"))
+
+  # Remove the link: `b` frees up and reappears as an OUTGOING card,
+  # carrying its direction + rendered markup for client-side insertion.
+  free <- blockr.core::new_board(blocks)
+  p2 <- link_sync_payload(free, "a", ns)
+  card_b <- Filter(function(c) identical(c$id, "b"), p2$cards)
+  expect_length(card_b, 1L)
+  expect_identical(card_b[[1L]]$direction, "outgoing")
+  expect_true(nzchar(card_b[[1L]]$html))
+})

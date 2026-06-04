@@ -12,6 +12,13 @@
   re-rendering. `link_eligible_pools(board, anchor)` is exported so
   consumers recompute the post-commit pool against the same
   eligibility logic the menu uses for its initial render.
+  `link_menu_server()` gains `board` (reactive) and `anchor` arguments:
+  it owns link-id validation (via `blockr.core::notify()`) and, when
+  passed a board reactive, keeps an open menu in sync with the board via
+  a `menu:sync` diff that supersedes `pool-update` - it can now also
+  *add* a card that became eligible (e.g. after a link / block was
+  removed elsewhere), not just hide ones already rendered, all without
+  re-rendering.
 * New `stack_menu_ui()` / `stack_menu_server()` / `stack_menu_dep()`
   module: a multi-select card-list block picker for stacks, with an
   inline hue / lightness slider + hex colour picker and a panel-level

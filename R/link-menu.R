@@ -8,9 +8,16 @@
 #' block in the dock flow).
 #'
 #' The link menu is a Shiny module. `link_menu_ui(id, board, anchor)`
-#' renders the panel; `link_menu_server(id)` returns a reactive that
-#' fires once per commit with the link spec:
-#' `list(source, target, link_id, block_input)`. The JS binding
+#' renders the panel; `link_menu_server(id, board, anchor)` returns a
+#' reactive that fires once per commit with the link spec:
+#' `list(source, target, link_id, block_input)`. When `board` is passed
+#' to the server as a **reactive** (with the `anchor`), the module owns
+#' link-id validation (via [blockr.core::notify()]) and keeps an open
+#' menu in sync with the board: on every board change it pushes a
+#' `menu:sync` diff that adds newly-eligible cards, removes vanished
+#' ones, and refreshes ports - no re-render, so scroll, card-expansion,
+#' and in-progress inputs are preserved. `board = NULL` (default) keeps
+#' the static snapshot behaviour. The JS binding
 #' composes `source` / `target` from the clicked card's
 #' `data-direction` and the panel's `data-anchor`, so the consumer
 #' never has to know the orientation up front:
@@ -47,10 +54,15 @@
 #' @param id Module id. As usual for Shiny modules, pass `NS(id)("...")`
 #'   from the parent at the `*_ui()` call site and the bare id to
 #'   `*_server()`.
-#' @param board The current board state.
+#' @param board The current board state. In `link_menu_ui()` a plain
+#'   board value; in `link_menu_server()` it may be a **reactive**
+#'   returning the board (to opt into live sync + validation) or `NULL`
+#'   (default; static snapshot).
 #' @param anchor Block id the new link is anchored on (the
 #'   right-clicked block in the dock flow). A non-empty character
 #'   scalar; must be a member of [blockr.core::board_block_ids()].
+#'   `link_menu_server()` also accepts a reactive (needed to recompute
+#'   the eligible pools on each board change).
 #'
 #' @return
 #' * `link_menu_ui()` returns an [htmltools::tag] with
@@ -109,22 +121,112 @@ link_menu_ui <- function(id, board, anchor) {
 
 #' @rdname link-menu
 #' @export
-link_menu_server <- function(id) {
+link_menu_server <- function(id, board = NULL, anchor = NULL) {
   stopifnot(is.character(id), length(id) == 1L, nzchar(id))
+
+  board_fn <- as_arg_reactive(board)
+  anchor_fn <- as_arg_reactive(anchor)
+
   shiny::moduleServer(
     id,
     function(input, output, session) {
+      # Live board sync: when a board reactive is supplied, refresh the
+      # open menu in place on every board change by pushing a `menu:sync`
+      # diff to our own binding. Self-scoped (bare "commit" - the module
+      # session namespaces it), so it no-ops when the panel isn't mounted.
+      if (shiny::is.reactive(board)) {
+        shiny::observeEvent(
+          board_fn(),
+          {
+            anc <- anchor_fn()
+            brd <- board_fn()
+            # The anchor block may have been removed; nothing to sync to.
+            if (!is.null(anc) && nzchar(anc) &&
+                  anc %in% blockr.core::board_block_ids(brd)) {
+              session$sendInputMessage(
+                "commit", link_sync_payload(brd, anc, session$ns)
+              )
+            }
+          },
+          ignoreInit = TRUE
+        )
+      }
+
       shiny::eventReactive(
         input$commit,
         {
           spec <- input$commit
           spec[["nonce"]] <- NULL
+          # The menu owns validation when the consumer opts in with a
+          # board reactive: a duplicate / empty link id notifies and
+          # `req()`s out, so the committed reactive never fires invalid.
+          if (shiny::is.reactive(board)) {
+            validate_link_spec(spec, board_fn(), session)
+          }
           spec
         },
         ignoreNULL = TRUE
       )
     }
   )
+}
+
+# Reject an empty / duplicate link id, mirroring the stack menu's
+# self-validation. The eligible-pool logic already guarantees a valid
+# source / target pair, so only the id needs checking here.
+validate_link_spec <- function(spec, board, session) {
+  existing <- safe_ids(board, blockr.core::board_link_ids)
+  if (!is_new_id(spec$link_id, existing)) {
+    blockr.core::notify(
+      "Please choose a valid link ID.", type = "warning", session = session
+    )
+    shiny::req(FALSE)
+  }
+  invisible(TRUE)
+}
+
+# Build the `menu:sync` payload: the full set of cards that SHOULD exist
+# for the current board / anchor (both directions), each with its
+# rendered markup tagged by direction, plus the per-target free input
+# map and a fresh link-id seed. The client inserts / removes / retunes
+# cards in place. Card markup is produced by the same builder used for
+# the initial render.
+link_sync_payload <- function(board, anchor, ns) {
+  pools <- link_eligible_pools(board, anchor)
+  registry <- blockr.core::available_blocks()
+  blocks <- blockr.core::board_blocks(board)
+
+  cards <- c(
+    link_sync_cards(
+      blocks, registry, pools$incoming, anchor, "incoming",
+      pools$free_inputs, ns, board
+    ),
+    link_sync_cards(
+      blocks, registry, pools$outgoing, anchor, "outgoing",
+      pools$free_inputs, ns, board
+    )
+  )
+
+  list(
+    type = "menu:sync",
+    cards = cards,
+    free_inputs = pools$free_inputs,
+    link_id_seed = seed_link_id(board)
+  )
+}
+
+link_sync_cards <- function(blocks, registry, pool, anchor, direction,
+                            free_inputs, ns, board) {
+  lapply(pool, function(blk_id) {
+    meta <- link_card_meta(
+      blk_id, blocks, registry, anchor, direction, free_inputs
+    )
+    list(
+      id = blk_id,
+      direction = direction,
+      html = as.character(link_block_card(meta, ns, board, direction))
+    )
+  })
 }
 
 #' @rdname link-menu
@@ -326,26 +428,34 @@ link_menu_panel <- function(ns, board, anchor, pools) {
   )
 }
 
+# One card's metadata. Shared by the initial render (`direction_section`)
+# and the live `menu:sync` payload (`link_sync_cards`) so both produce
+# identical card markup.
+link_card_meta <- function(blk_id, blocks, registry, anchor, direction,
+                           free_inputs) {
+  blk <- blocks[[blk_id]]
+  entry <- registry_entry_for(blk, registry)
+  label <- blockr.core::block_name(blk) %||% blk_id
+  target_id <- if (direction == "outgoing") blk_id else anchor
+  list(
+    id = blk_id,
+    name = if (nzchar(label)) label else blk_id,
+    category = entry_attr(entry, "category", ""),
+    icon = entry_attr(entry, "icon", ""),
+    package = entry_attr(entry, "package", "local"),
+    description = entry_attr(entry, "description", ""),
+    target_id = target_id,
+    target_inputs = free_inputs[[target_id]] %||% character()
+  )
+}
+
 direction_section <- function(ns, board, anchor, pool, direction, header,
                               free_inputs) {
   registry <- blockr.core::available_blocks()
   blocks <- blockr.core::board_blocks(board)
 
   metas <- lapply(pool, function(blk_id) {
-    blk <- blocks[[blk_id]]
-    entry <- registry_entry_for(blk, registry)
-    label <- blockr.core::block_name(blk) %||% blk_id
-    target_id <- if (direction == "outgoing") blk_id else anchor
-    list(
-      id = blk_id,
-      name = if (nzchar(label)) label else blk_id,
-      category = entry_attr(entry, "category", ""),
-      icon = entry_attr(entry, "icon", ""),
-      package = entry_attr(entry, "package", "local"),
-      description = entry_attr(entry, "description", ""),
-      target_id = target_id,
-      target_inputs = free_inputs[[target_id]] %||% character()
-    )
+    link_card_meta(blk_id, blocks, registry, anchor, direction, free_inputs)
   })
 
   groups <- category_groups(metas)

@@ -18,6 +18,7 @@
   // link_menu_dep(), so the namespace is in scope by the time this
   // binding runs.
   var cardSearch = window.BlockrUI.cardSearch;
+  var cardSync = window.BlockrUI.cardSync;
 
   function getField(card, fieldClass) {
     return card.querySelector(
@@ -152,6 +153,76 @@
     });
   }
 
+  // `menu:sync` is the board-driven superset of `pool-update`: where
+  // pool-update only toggles cards already in the DOM, menu:sync can
+  // also ADD cards (a block that became eligible after a link / block
+  // was removed elsewhere) and REMOVE ones that vanished, then refresh
+  // ports + re-seed ids. The full desired card set (with server-rendered
+  // `html`) arrives in `payload.cards`, each tagged with its direction.
+  // Card markup is authored once in R; the JS only places it.
+  function ensureDirectionCats(wrap, dir, hasCards) {
+    var sec = wrap.querySelector(
+      '.blockr-link-menu-direction[data-direction="' + dir + '"]'
+    );
+    if (sec) return sec.querySelector(".blockr-block-browser-categories");
+    if (!hasCards) return null;
+    sec = document.createElement("div");
+    sec.className = "blockr-link-menu-direction";
+    sec.setAttribute("data-direction", dir);
+    var h = document.createElement("h4");
+    h.className = "blockr-link-menu-section-header";
+    h.textContent = dir === "incoming" ? "Input from" : "Output to";
+    var cats = document.createElement("div");
+    cats.className = "blockr-block-browser-categories";
+    sec.appendChild(h);
+    sec.appendChild(cats);
+    // INCOMING renders above OUTGOING (left-to-right data flow).
+    if (dir === "incoming") {
+      wrap.insertBefore(sec, wrap.firstChild);
+    } else {
+      wrap.appendChild(sec);
+    }
+    return cats;
+  }
+
+  function applyMenuSync(root, payload) {
+    var cards = asArray(payload.cards);
+    var wrap = root.querySelector(".blockr-link-menu-directions");
+    if (!wrap) return;
+
+    ["incoming", "outgoing"].forEach(function (dir) {
+      var dirCards = cards.filter(function (c) {
+        return c && c.direction === dir;
+      });
+      var cats = ensureDirectionCats(wrap, dir, dirCards.length > 0);
+      if (!cats) return;
+      cardSync(cats, dirCards);
+      // Drop the whole direction section once its last card is gone.
+      if (!cats.querySelector(".blockr-block-browser-card")) {
+        var sec = cats.closest(".blockr-link-menu-direction");
+        if (sec && sec.parentNode) sec.parentNode.removeChild(sec);
+      }
+    });
+
+    var freeInputs = payload.free_inputs || {};
+    var anchor = root.getAttribute("data-anchor");
+    cardSearch.getCards(root).forEach(function (card) {
+      var dir = card.getAttribute("data-direction");
+      var id = card.getAttribute("data-block-type");
+      var targetId = dir === "outgoing" ? id : anchor;
+      if (Object.prototype.hasOwnProperty.call(freeInputs, targetId)) {
+        refreshBlockInputSelect(card, asArray(freeInputs[targetId]));
+      }
+    });
+
+    if (payload.link_id_seed) {
+      reseedLinkIds(root, payload.link_id_seed);
+    }
+
+    var search = root.querySelector(".blockr-block-browser-search");
+    cardSearch.applySearch(root, search ? search.value : "");
+  }
+
   // Mark a link-id input as user-edited so subsequent pool-update
   // pushes leave it alone.
   function markEditedOnInput(root) {
@@ -229,7 +300,9 @@
     },
     receiveMessage: function (el, data) {
       if (!data) return;
-      if (data.type === "pool-update") {
+      if (data.type === "menu:sync") {
+        applyMenuSync(el, data);
+      } else if (data.type === "pool-update") {
         applyPoolUpdate(el, data);
       }
     }

@@ -10,7 +10,7 @@
 \usage{
 link_menu_ui(id, board, anchor)
 
-link_menu_server(id)
+link_menu_server(id, board = NULL, anchor = NULL)
 
 link_menu_dep()
 
@@ -21,11 +21,16 @@ link_eligible_pools(board, anchor)
 from the parent at the \verb{*_ui()} call site and the bare id to
 \verb{*_server()}.}
 
-\item{board}{The current board state.}
+\item{board}{The current board state. In \code{link_menu_ui()} a plain
+board value; in \code{link_menu_server()} it may be a \strong{reactive}
+returning the board (to opt into live sync + validation) or \code{NULL}
+(default; static snapshot).}
 
 \item{anchor}{Block id the new link is anchored on (the
 right-clicked block in the dock flow). A non-empty character
-scalar; must be a member of \code{\link[blockr.core:board_blocks]{blockr.core::board_block_ids()}}.}
+scalar; must be a member of \code{\link[blockr.core:board_blocks]{blockr.core::board_block_ids()}}.
+\code{link_menu_server()} also accepts a reactive (needed to recompute
+the eligible pools on each board change).}
 }
 \value{
 \itemize{
@@ -49,9 +54,16 @@ block in the dock flow).
 }
 \details{
 The link menu is a Shiny module. \code{link_menu_ui(id, board, anchor)}
-renders the panel; \code{link_menu_server(id)} returns a reactive that
-fires once per commit with the link spec:
-\code{list(source, target, link_id, block_input)}. The JS binding
+renders the panel; \code{link_menu_server(id, board, anchor)} returns a
+reactive that fires once per commit with the link spec:
+\code{list(source, target, link_id, block_input)}. When \code{board} is passed
+to the server as a \strong{reactive} (with the \code{anchor}), the module owns
+link-id validation (via \code{\link[blockr.core:get_session]{blockr.core::notify()}}) and keeps an open
+menu in sync with the board: on every board change it pushes a
+\code{menu:sync} diff that adds newly-eligible cards, removes vanished
+ones, and refreshes ports - no re-render, so scroll, card-expansion,
+and in-progress inputs are preserved. \code{board = NULL} (default) keeps
+the static snapshot behaviour. The JS binding
 composes \code{source} / \code{target} from the clicked card's
 \code{data-direction} and the panel's \code{data-anchor}, so the consumer
 never has to know the orientation up front:
