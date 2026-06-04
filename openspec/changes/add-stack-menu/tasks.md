@@ -41,21 +41,29 @@ Self-contained: no `blockr.dock` change. After this phase a non-dock Shiny app c
 
 ## 2. Phase 2 - `blockr.dock` adopts the stack menu (PR 2)
 
-- [ ] 2.1 In `add_stack_action()` and `edit_stack_action()`: mount `committed <- blockr.ui::stack_menu_server("menu")` once; replace the `stack_sidebar_body(...)` call (in `observeEvent(trigger(), ...)` and the `keep_or_hide_sidebar()` chain) with `blockr.ui::stack_menu_ui(session$ns("menu"), board$board, target)` where `target` is `NULL` (create) or `trigger()` (edit). Extract a small `menu_ui()` helper since the call appears twice in each handler.
-- [ ] 2.2 Replace the per-field observers (`stack_block_selection`, `stack_id`, `stack_name`, `stack_color`, `stack_confirm`, `edit_stack_blocks`, `edit_stack_color`, `edit_stack_name`, `edit_stack_confirm`) with a single `observeEvent(committed(), ...)` per handler:
+> Refined by the `reactive-board-menus` change (blockr.dock #172): the
+> handlers pass the board (+ `target` on edit) as **reactives**, so the
+> spec validation in 2.2 now lives in `blockr.ui` (the dock-side
+> `valid_stack_*` validators are gone) and a pinned menu stays in sync
+> with the board via a `menu:sync` diff. `dock_stack` colour checks reuse
+> the exported `blockr.ui::is_hex_color()`. The committed-spec shape is
+> unchanged; the dock still wraps it into a `dock_stack`.
+
+- [x] 2.1 In `add_stack_action()` and `edit_stack_action()`: mount `committed <- blockr.ui::stack_menu_server("menu")` once; replace the `stack_sidebar_body(...)` call (in `observeEvent(trigger(), ...)` and the `keep_or_hide_sidebar()` chain) with `blockr.ui::stack_menu_ui(session$ns("menu"), board$board, target)` where `target` is `NULL` (create) or `trigger()` (edit). Extract a small `menu_ui()` helper since the call appears twice in each handler.
+- [x] 2.2 Replace the per-field observers (`stack_block_selection`, `stack_id`, `stack_name`, `stack_color`, `stack_confirm`, `edit_stack_blocks`, `edit_stack_color`, `edit_stack_name`, `edit_stack_confirm`) with a single `observeEvent(committed(), ...)` per handler:
   - Validate `spec$id` (create) / look up the existing stack (edit), `spec$name`, `spec$color` (hex). Block ids are already pool members, but check membership defensively.
   - Build / update the stack: `new_dock_stack(blocks, name, color)` (create) or `stack_blocks<-` / `stack_name<-` / `stack_color<-` (edit), then `update(list(stacks = list(add = ...)))` or `... = list(mod = ...)`.
-- [ ] 2.3 Delete `stack_sidebar_body()` from `R/action-sidebar.R` (no in-tree callers remain; `link_sidebar_body()` stays).
-- [ ] 2.4 Update / replace `tests/testthat/test-action-stack.R` to drive `session$setInputs(\`menu-commit\` = list(blocks, name, color, id, nonce))` with the new spec. Cover create (valid), create with invalid id / invalid color / unknown block id, edit (valid), edit with invalid color / unknown block id.
+- [x] 2.3 Delete `stack_sidebar_body()` from `R/action-sidebar.R` (no in-tree callers remain; `link_sidebar_body()` stays).
+- [x] 2.4 Update / replace `tests/testthat/test-action-stack.R` to drive `session$setInputs(\`menu-commit\` = list(blocks, name, color, id, nonce))` with the new spec. Cover create (valid), create with invalid id / invalid color / unknown block id, edit (valid), edit with invalid color / unknown block id.
 - [ ] 2.5 Manual smoke test of the dock + dag example:
   - Right-click empty area / open stacks panel -> Create new stack -> pick 2-3 blocks via cards, type name, confirm -> stack appears on the board.
   - Right-click an existing stack -> Edit -> deselect a block / select another / change name + color -> Update -> board reflects the change.
-- [ ] 2.6 `devtools::check()` clean on `blockr.dock`; `lintr::lint_package()` clean under the CI config.
-- [ ] 2.7 NEWS in both packages: `blockr.ui` ("New `stack_menu_ui()` / `stack_menu_server()` module ..."); `blockr.dock` ("`add_stack_action` / `edit_stack_action` now mount the stack-menu module; per-field stack inputs and `stack_sidebar_body()` removed - use `blockr.ui::stack_menu_ui()` / `stack_menu_server()`.").
+- [x] 2.6 `devtools::check()` clean on `blockr.dock`; `lintr::lint_package()` clean under the CI config.
+- [x] 2.7 NEWS in both packages: `blockr.ui` ("New `stack_menu_ui()` / `stack_menu_server()` module ..."); `blockr.dock` ("`add_stack_action` / `edit_stack_action` now mount the stack-menu module; per-field stack inputs and `stack_sidebar_body()` removed - use `blockr.ui::stack_menu_ui()` / `stack_menu_server()`.").
 
 ## 3. Validation
 
-- [ ] 3.1 `openspec validate add-stack-menu --strict` - no spec / template / scenario errors.
+- [x] 3.1 `openspec validate add-stack-menu --strict` - no spec / template / scenario errors.
 - [ ] 3.2 `devtools::check(remote = TRUE, manual = TRUE)` on `blockr.ui` - 0 errors / 0 warnings / 0 notes (modulo timestamp).
-- [ ] 3.3 `devtools::check()` on `blockr.dock` after Phase 2 - same.
-- [ ] 3.4 `lintr::lint_package()` clean on both packages under the CI config.
+- [x] 3.3 `devtools::check()` on `blockr.dock` after Phase 2 - same.
+- [x] 3.4 `lintr::lint_package()` clean on both packages under the CI config.
