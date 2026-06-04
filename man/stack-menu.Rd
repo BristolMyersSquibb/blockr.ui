@@ -9,7 +9,7 @@
 \usage{
 stack_menu_ui(id, board, target = NULL)
 
-stack_menu_server(id)
+stack_menu_server(id, board = NULL, target = NULL)
 
 stack_menu_dep()
 }
@@ -20,12 +20,15 @@ from the parent at the \verb{*_ui()} call site and the bare id to
 
 \item{board}{The current board state. Used to resolve the eligible
 pool of board blocks and (in edit mode) to look the target stack
-up.}
+up. In \code{stack_menu_ui()} this is a plain board value; in
+\code{stack_menu_server()} it may be a \strong{reactive} returning the board
+(to opt into live sync + validation) or \code{NULL} (default; static
+snapshot, no validation).}
 
 \item{target}{Stack to edit. \code{NULL} (default) selects the \emph{create}
 flow; a non-empty character scalar selects the \emph{edit} flow and
-names the stack being edited. The parameter name mirrors
-\code{\link[=block_browser_ui]{block_browser_ui()}}.}
+names the stack being edited. \code{stack_menu_server()} also accepts a
+reactive. The parameter name mirrors \code{\link[=block_browser_ui]{block_browser_ui()}}.}
 }
 \value{
 \itemize{
@@ -47,11 +50,23 @@ parameters (name, color, id).
 }
 \details{
 The stack menu is a Shiny module. \code{stack_menu_ui(id, board, target)}
-renders the panel; \code{stack_menu_server(id)} returns a reactive that
-fires once per confirm with the committed spec:
+renders the panel; \code{stack_menu_server(id, board, target)} returns a
+reactive that fires once per confirm with the committed spec:
 \code{list(blocks, name, color, id)}. In edit mode (\code{target = "<stack_id>"})
 the spec carries the new selection / name / color and \code{id = NULL}
 (the stack id is immutable once a stack exists).
+
+The server owns \strong{validation} of the committed spec: it checks the
+stack id (create mode), name, and colour against the current board and
+surfaces failures via \code{\link[shiny:showNotification]{shiny::showNotification()}}, so the committed
+reactive only ever fires with a valid spec and the consumer needs no
+validators of its own. When \code{board} is passed to \code{stack_menu_server()}
+as a \strong{reactive}, the module also keeps an open menu in sync with the
+board: on every board change it pushes a \code{menu:sync} diff to its own
+binding that inserts newly-eligible cards, removes vanished ones, and
+leaves scroll / selection / in-progress inputs untouched - no
+re-render. Pass \code{board = NULL} (the default) for the static
+snapshot behaviour.
 
 The flow is selected by \code{target}: \code{NULL} (default) is the \emph{create}
 flow; a character scalar names the stack being edited. In edit mode

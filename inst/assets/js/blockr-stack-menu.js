@@ -17,6 +17,7 @@
   // `block_browser_dep()` before `stack_menu_dep()`, so the namespace
   // is in scope by the time this binding runs.
   var cardSearch = window.BlockrUI.cardSearch;
+  var cardSync = window.BlockrUI.cardSync;
 
   // The selection set lives on the root element. We keep it as an
   // ordered list of `data-block-type` strings (board block ids in this
@@ -57,6 +58,37 @@
       nonce: ++commitSeq
     };
     root.dispatchEvent(new CustomEvent(COMMIT_EVENT));
+  }
+
+  // Apply a `menu:sync` diff pushed from R when the board changes:
+  // structurally reconcile the cards (shared helper), then reconcile the
+  // selection (drop removed cards, adopt any newly-inserted card that
+  // arrives pre-selected, re-render selected classes from the
+  // authoritative list) and re-run the search so visibility +
+  // empty-state stay consistent. Scroll, expansion, and the panel-level
+  // name / colour / id inputs are deliberately left untouched.
+  function applyMenuSync(root, data) {
+    cardSync(root, data.cards);
+
+    var sel = getSelection(root);
+    for (var i = sel.length - 1; i >= 0; i--) {
+      if (!root.querySelector(
+        '[data-block-type="' + sel[i].replace(/["\\]/g, "\\$&") + '"]'
+      )) {
+        sel.splice(i, 1);
+      }
+    }
+    cardSearch.getCards(root).forEach(function (card) {
+      var id = card.getAttribute("data-block-type");
+      if (card.getAttribute("data-selected") === "true" &&
+          sel.indexOf(id) === -1) {
+        sel.push(id);
+      }
+      setCardSelected(card, sel.indexOf(id) !== -1);
+    });
+
+    var search = root.querySelector(".blockr-block-browser-search");
+    cardSearch.applySearch(root, search ? search.value : "");
   }
 
   // Inline colour picker: hue + lightness sliders + hex text input.
@@ -254,8 +286,12 @@
         el.removeEventListener(COMMIT_EVENT, el._blockrStackMenuHandler);
         el._blockrStackMenuHandler = null;
       }
+    },
+    receiveMessage: function (el, data) {
+      if (data && data.type === "menu:sync") {
+        applyMenuSync(el, data);
+      }
     }
-    // receiveMessage: reserved.
   });
 
   Shiny.inputBindings.register(binding, "blockr.ui.stackMenu");

@@ -51,6 +51,84 @@
     }
   };
 
+  // Shared structural reconciler for the instance-backed menus (stack,
+  // link). Given the full desired card set (`[{ id, html }, ...]`, each
+  // `html` the server-rendered markup for that card), it removes cards
+  // no longer desired, inserts desired cards not yet in the DOM into the
+  // matching category section (creating the section when absent), and
+  // drops emptied category sections. It does NOT touch eligibility /
+  // selection / search / empty-state - callers retune those after, so a
+  // board change never disturbs scroll, expansion, or in-progress input.
+  function cssEscapeAttr(s) {
+    return String(s).replace(/["\\]/g, "\\$&");
+  }
+  function cardById(root, id) {
+    return root.querySelector(
+      '.blockr-block-browser-card[data-block-type="' + cssEscapeAttr(id) + '"]'
+    );
+  }
+  function parseCardHtml(html) {
+    var tmp = document.createElement("div");
+    tmp.innerHTML = String(html).trim();
+    return tmp.firstElementChild;
+  }
+  function insertCardNode(cats, category, node) {
+    var sec = cats.querySelector(
+      '.blockr-block-browser-category[data-category="' +
+        cssEscapeAttr(category) + '"]'
+    );
+    if (sec) {
+      (sec.querySelector(".blockr-block-browser-cards") || sec)
+        .appendChild(node);
+      return;
+    }
+    sec = document.createElement("div");
+    sec.className = "blockr-block-browser-category";
+    sec.setAttribute("data-category", category);
+    var h = document.createElement("h3");
+    h.textContent = category;
+    var list = document.createElement("div");
+    list.className = "blockr-block-browser-cards";
+    list.appendChild(node);
+    sec.appendChild(h);
+    sec.appendChild(list);
+    cats.appendChild(sec);
+  }
+  BlockrUI.cardSync = BlockrUI.cardSync || function (root, cards) {
+    var cats = root.querySelector(".blockr-block-browser-categories");
+    if (!cats) return;
+    // `sendInputMessage` auto-unboxes a length-1 list to a scalar.
+    if (!cards) cards = [];
+    if (!Array.isArray(cards)) cards = [cards];
+
+    var desired = {};
+    cards.forEach(function (c) {
+      if (c && c.id != null) desired[c.id] = c;
+    });
+
+    BlockrUI.cardSearch.getCards(root).forEach(function (card) {
+      var id = card.getAttribute("data-block-type");
+      if (!Object.prototype.hasOwnProperty.call(desired, id)) {
+        if (card.parentNode) card.parentNode.removeChild(card);
+      }
+    });
+
+    cards.forEach(function (c) {
+      if (!c || c.id == null || !c.html) return;
+      if (cardById(root, c.id)) return;
+      var node = parseCardHtml(c.html);
+      if (node) insertCardNode(cats, node.getAttribute("data-category") || "", node);
+    });
+
+    Array.prototype.slice
+      .call(cats.querySelectorAll(".blockr-block-browser-category"))
+      .forEach(function (sec) {
+        if (!sec.querySelector(".blockr-block-browser-card")) {
+          if (sec.parentNode) sec.parentNode.removeChild(sec);
+        }
+      });
+  };
+
   function getField(card, fieldClass) {
     return card.querySelector(
       "." + fieldClass + " input, ." + fieldClass + " select"
