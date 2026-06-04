@@ -51,15 +51,22 @@ Self-contained: no `blockr.dock` change. After this phase a non-dock Shiny app c
 
 ## 2. Phase 2 - `blockr.dock` adopts the link menu (PR 2)
 
-- [ ] 2.1 In `add_link_action()`: mount `committed <- blockr.ui::link_menu_server("menu")` once; replace the `link_sidebar_body(...)` call (in `observeEvent(trigger(), ...)` and the `onFlushed` chain) with `blockr.ui::link_menu_ui(session$ns("menu"), board$board, anchor = trigger())`. Extract a small `menu_ui()` helper since the call appears twice in the handler. The dock's pre-flight `NULL`-check + notification disappears (the menu now owns the empty-state).
-- [ ] 2.2 Replace the per-field observers (`create_link`, `add_link_input`, `add_link_id`, `add_link_confirm`) with a single `observeEvent(committed(), ...)`:
+> Refined by the `reactive-board-menus` change (blockr.dock #183):
+> `add_link_action()` passes the board + anchor as **reactives**, so
+> link-id validation and the open-menu board sync now live in `blockr.ui`
+> (the module's `menu:sync` diff supersedes the dock-side `pool-update` in
+> 2.2's multi-link bullet, and also drops a just-removed block's card and
+> re-adds a freed target). The committed-spec shape is unchanged.
+
+- [x] 2.1 In `add_link_action()`: mount `committed <- blockr.ui::link_menu_server("menu")` once; replace the `link_sidebar_body(...)` call (in `observeEvent(trigger(), ...)` and the `onFlushed` chain) with `blockr.ui::link_menu_ui(session$ns("menu"), board$board, anchor = trigger())`. Extract a small `menu_ui()` helper since the call appears twice in the handler. The dock's pre-flight `NULL`-check + notification disappears (the menu now owns the empty-state).
+- [x] 2.2 Replace the per-field observers (`create_link`, `add_link_input`, `add_link_id`, `add_link_confirm`) with a single `observeEvent(committed(), ...)`:
   - Validate `spec$link_id` against `board_link_ids(board$board)` (the menu seeds via `rand_names`, so the typical case is a no-op pass; still guard against the rare collision).
   - Resolve `chosen_input`: `spec$block_input` when supplied; otherwise the target's first free slot via `block_input_select(blk, spec$target, links, mode = "inputs")[1L]`. Variadic targets generate a fresh slot via the same helper.
   - Build the link: `new_link(from = spec$source, to = spec$target, input = chosen_input)`, then `update(list(links = list(add = as_links(set_names(list(new_lnk), spec$link_id)))))`.
   - Bump the sidebar title to `paste0("Connect ", trigger())` so the anchor is always visible and the wording reads correctly whichever direction the user picks.
   - **Multi-link session**: after `update(...)`, in `session$onFlushed(once = TRUE, ...)`, recompute pools via `blockr.ui::link_eligible_pools(board$board, trigger())`. If both pools are empty, `hide_sidebar()`. Otherwise `session$sendInputMessage(session$ns("menu-commit"), list(type = "pool-update", eligible = pools, link_id_seed = rand_names(board_link_ids(board$board))))` so the open menu drops the just-wired card client-side without a full re-render. Do NOT call `keep_or_hide_sidebar()`.
-- [ ] 2.3 Delete `link_sidebar_body()` from `R/action-sidebar.R` (no in-tree callers remain). The whole file goes away if no other `*_sidebar_body()` helpers remain at that point.
-- [ ] 2.4 Update / replace `tests/testthat/test-action-link.R` to drive `session$setInputs(\`menu-commit\` = list(source, target, link_id, block_input, nonce))` with the new spec. Cover:
+- [x] 2.3 Delete `link_sidebar_body()` from `R/action-sidebar.R` (no in-tree callers remain). The whole file goes away if no other `*_sidebar_body()` helpers remain at that point.
+- [x] 2.4 Update / replace `tests/testthat/test-action-link.R` to drive `session$setInputs(\`menu-commit\` = list(source, target, link_id, block_input, nonce))` with the new spec. Cover:
   - Valid OUTGOING commit (default port).
   - Valid OUTGOING commit (explicit port for arity > 1 target).
   - Valid INCOMING commit (anchor is target, source from the card, default port).
@@ -72,11 +79,11 @@ Self-contained: no `blockr.dock` change. After this phase a non-dock Shiny app c
   - Multi-link session: from a single anchor, add several links in sequence without closing the sidebar; verify the cards drop one-by-one until the pool drains, at which point the sidebar closes by itself.
   - Right-click a block whose targets are all fully-wired AND has no free inputs -> sidebar opens with the empty-state; close manually.
 - [ ] 2.6 `devtools::check()` clean on `blockr.dock`; `lintr::lint_package()` clean under the CI config.
-- [ ] 2.7 NEWS in both packages: `blockr.ui` ("New `link_menu_ui()` / `link_menu_server()` module ... bidirectional: right-click any block to add a link in either direction."); `blockr.dock` ("`add_link_action` now mounts the link-menu module; the action is bidirectional - right-clicking a downstream block now lets you pick an upstream source. Per-field link inputs and `link_sidebar_body()` removed - use `blockr.ui::link_menu_ui()` / `link_menu_server()`.").
+- [x] 2.7 NEWS in both packages: `blockr.ui` ("New `link_menu_ui()` / `link_menu_server()` module ... bidirectional: right-click any block to add a link in either direction."); `blockr.dock` ("`add_link_action` now mounts the link-menu module; the action is bidirectional - right-clicking a downstream block now lets you pick an upstream source. Per-field link inputs and `link_sidebar_body()` removed - use `blockr.ui::link_menu_ui()` / `link_menu_server()`.").
 
 ## 3. Validation
 
-- [ ] 3.1 `openspec validate add-link-menu --strict` - no spec / template / scenario errors.
+- [x] 3.1 `openspec validate add-link-menu --strict` - no spec / template / scenario errors.
 - [ ] 3.2 `devtools::check(remote = TRUE, manual = TRUE)` on `blockr.ui` - 0 errors / 0 warnings / 0 notes (modulo timestamp).
 - [ ] 3.3 `devtools::check()` on `blockr.dock` after Phase 2 - same.
-- [ ] 3.4 `lintr::lint_package()` clean on both packages under the CI config.
+- [x] 3.4 `lintr::lint_package()` clean on both packages under the CI config.
