@@ -222,3 +222,74 @@ test_that("stack_menu_server malformed id rejected", {
   expect_error(stack_menu_server(""))
   expect_error(stack_menu_server(c("a", "b")))
 })
+
+test_that("stack_menu_server validates the commit when a board is supplied", {
+  board <- blockr.core::new_board(
+    blockr.core::as_blocks(list(a = blockr.core::new_dataset_block("iris"))),
+    stacks = blockr.core::stacks(s1 = "a")
+  )
+  shiny::testServer(
+    stack_menu_server,
+    args = list(id = "m", board = shiny::reactive(board)),
+    {
+      fired <- 0L
+      observeEvent(session$returned(), fired <<- fired + 1L)
+
+      # Duplicate id -> rejected (committed never fires).
+      session$setInputs(
+        "stack_name" = "S", "stack_color" = "#aabbcc", "stack_id" = "s1",
+        "commit" = list(blocks = c("a"), nonce = 1L)
+      )
+      session$flushReact()
+      expect_identical(fired, 0L)
+
+      # Empty name -> rejected.
+      session$setInputs(
+        "stack_name" = "", "stack_id" = "s2",
+        "commit" = list(blocks = c("a"), nonce = 2L)
+      )
+      session$flushReact()
+      expect_identical(fired, 0L)
+
+      # Bad colour -> rejected.
+      session$setInputs(
+        "stack_name" = "S", "stack_color" = "nope", "stack_id" = "s2",
+        "commit" = list(blocks = c("a"), nonce = 3L)
+      )
+      session$flushReact()
+      expect_identical(fired, 0L)
+
+      # All valid -> fires once with the spec.
+      session$setInputs(
+        "stack_name" = "S", "stack_color" = "#aabbcc", "stack_id" = "s2",
+        "commit" = list(blocks = c("a"), nonce = 4L)
+      )
+      session$flushReact()
+      expect_identical(fired, 1L)
+      expect_identical(session$returned()$id, "s2")
+    }
+  )
+})
+
+test_that("stack_sync_payload tracks the board's eligible blocks", {
+  board <- blockr.core::new_board(
+    blockr.core::as_blocks(list(
+      a = blockr.core::new_dataset_block("iris"),
+      b = blockr.core::new_head_block()
+    ))
+  )
+  payload <- stack_sync_payload(board, NULL)
+  expect_identical(payload$type, "menu:sync")
+  ids <- vapply(payload$cards, `[[`, character(1L), "id")
+  expect_setequal(ids, c("a", "b"))
+  # Each card carries rendered markup so the client can insert it.
+  expect_true(all(nzchar(vapply(payload$cards, `[[`, character(1L), "html"))))
+
+  # Remove a block -> its card drops out of the next payload.
+  board2 <- blockr.core::new_board(
+    blockr.core::as_blocks(list(a = blockr.core::new_dataset_block("iris")))
+  )
+  ids2 <- vapply(stack_sync_payload(board2, NULL)$cards, `[[`,
+                 character(1L), "id")
+  expect_identical(ids2, "a")
+})

@@ -9,11 +9,23 @@
 #' parameters (name, color, id).
 #'
 #' The stack menu is a Shiny module. `stack_menu_ui(id, board, target)`
-#' renders the panel; `stack_menu_server(id)` returns a reactive that
-#' fires once per confirm with the committed spec:
+#' renders the panel; `stack_menu_server(id, board, target)` returns a
+#' reactive that fires once per confirm with the committed spec:
 #' `list(blocks, name, color, id)`. In edit mode (`target = "<stack_id>"`)
 #' the spec carries the new selection / name / color and `id = NULL`
 #' (the stack id is immutable once a stack exists).
+#'
+#' The server owns **validation** of the committed spec: it checks the
+#' stack id (create mode), name, and colour against the current board and
+#' surfaces failures via [shiny::showNotification()], so the committed
+#' reactive only ever fires with a valid spec and the consumer needs no
+#' validators of its own. When `board` is passed to `stack_menu_server()`
+#' as a **reactive**, the module also keeps an open menu in sync with the
+#' board: on every board change it pushes a `menu:sync` diff to its own
+#' binding that inserts newly-eligible cards, removes vanished ones, and
+#' leaves scroll / selection / in-progress inputs untouched - no
+#' re-render. Pass `board = NULL` (the default) for the static
+#' snapshot behaviour.
 #'
 #' The flow is selected by `target`: `NULL` (default) is the *create*
 #' flow; a character scalar names the stack being edited. In edit mode
@@ -35,11 +47,14 @@
 #'   `*_server()`.
 #' @param board The current board state. Used to resolve the eligible
 #'   pool of board blocks and (in edit mode) to look the target stack
-#'   up.
+#'   up. In `stack_menu_ui()` this is a plain board value; in
+#'   `stack_menu_server()` it may be a **reactive** returning the board
+#'   (to opt into live sync + validation) or `NULL` (default; static
+#'   snapshot, no validation).
 #' @param target Stack to edit. `NULL` (default) selects the *create*
 #'   flow; a non-empty character scalar selects the *edit* flow and
-#'   names the stack being edited. The parameter name mirrors
-#'   [block_browser_ui()].
+#'   names the stack being edited. `stack_menu_server()` also accepts a
+#'   reactive. The parameter name mirrors [block_browser_ui()].
 #'
 #' @return
 #' * `stack_menu_ui()` returns an [htmltools::tag] with
@@ -93,24 +108,101 @@ stack_menu_ui <- function(id, board, target = NULL) {
 
 #' @rdname stack-menu
 #' @export
-stack_menu_server <- function(id) {
+stack_menu_server <- function(id, board = NULL, target = NULL) {
   stopifnot(is.character(id), length(id) == 1L, nzchar(id))
+
+  board_fn <- as_arg_reactive(board)
+  target_fn <- as_arg_reactive(target)
+
   shiny::moduleServer(
     id,
     function(input, output, session) {
+      # Live board sync: when a board reactive is supplied, refresh the
+      # open menu in place on every board change by pushing a `menu:sync`
+      # diff to our own binding. Self-scoped (addressed to this module's
+      # `commit` input), so it no-ops harmlessly when the panel isn't
+      # mounted - the consumer needs no ownership tracking. `ignoreInit`
+      # because the initial render is already current.
+      if (shiny::is.reactive(board)) {
+        shiny::observeEvent(
+          board_fn(),
+          # Bare "commit": the module session namespaces it to the panel
+          # root's id. (Passing session$ns("commit") would double-prefix.)
+          session$sendInputMessage(
+            "commit",
+            stack_sync_payload(board_fn(), target_fn())
+          ),
+          ignoreInit = TRUE
+        )
+      }
+
       shiny::eventReactive(
         input$commit,
         {
-          list(
+          spec <- list(
             blocks = input$commit$blocks %||% character(),
             name = input[["stack_name"]],
             color = input[["stack_color"]],
             id = input[["stack_id"]]
           )
+          # The menu owns validation when the consumer opts in by passing
+          # a board reactive: a rejected commit notifies and `req()`s out,
+          # so the committed reactive never fires with an invalid spec and
+          # the consumer needs no validators of its own. With `board =
+          # NULL` (snapshot mode) validation is skipped for backward
+          # compatibility.
+          if (shiny::is.reactive(board)) {
+            validate_stack_spec(spec, board_fn(), target_fn(), session)
+          }
+          spec
         },
         ignoreNULL = TRUE
       )
     }
+  )
+}
+
+# Validate the committed stack spec against the current board. In create
+# mode (`target` is NULL) the id must be a fresh, non-empty scalar; in
+# edit mode the id field is absent and immutable, so only name / colour
+# are checked. Each failure notifies and `req(FALSE)`s, which propagates
+# up through the enclosing `eventReactive` and stops it firing.
+validate_stack_spec <- function(spec, board, target, session) {
+  existing_ids <- safe_ids(board, blockr.core::board_stack_ids)
+  if (is.null(target) && !is_new_id(spec$id, existing_ids)) {
+    blockr.core::notify(
+      "Please choose a valid stack ID.", type = "warning", session = session
+    )
+    shiny::req(FALSE)
+  }
+  if (!(blockr.core::is_string(spec$name) && nzchar(spec$name))) {
+    blockr.core::notify(
+      "Please choose a valid stack name.", type = "warning", session = session
+    )
+    shiny::req(FALSE)
+  }
+  if (!is_hex_color(spec$color)) {
+    blockr.core::notify(
+      "Please choose a valid stack color.", type = "warning", session = session
+    )
+    shiny::req(FALSE)
+  }
+  invisible(TRUE)
+}
+
+# Build the `menu:sync` payload: the full set of cards that SHOULD exist
+# for the current board, each with its rendered markup so the client can
+# insert ones it doesn't yet have. The client removes cards no longer in
+# the set, inserts missing ones, and leaves surviving cards (and their
+# selected state) untouched.
+stack_sync_payload <- function(board, target) {
+  ctx <- resolve_stack_target(board, target)
+  metas <- stack_menu_block_metas(board, ctx$pool, ctx$selected)
+  list(
+    type = "menu:sync",
+    cards = lapply(metas, function(m) {
+      list(id = m$type, html = as.character(stack_block_card(m)))
+    })
   )
 }
 
