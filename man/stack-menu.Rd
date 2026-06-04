@@ -34,8 +34,9 @@ reactive. The parameter name mirrors \code{\link[=block_browser_ui]{block_browse
 \itemize{
 \item \code{stack_menu_ui()} returns an \link[htmltools:builder]{htmltools::tag} with
 \code{\link[=stack_menu_dep]{stack_menu_dep()}} attached.
-\item \code{stack_menu_server()} returns a \link[shiny:reactive]{shiny::reactive} of the
-committed stack spec (a list), firing once per confirm.
+\item \code{stack_menu_server()} returns a \link[shiny:reactive]{shiny::reactive} of the committed
+\link[blockr.core:new_stack]{blockr.core::stacks} object (one id-keyed stack), firing once per
+confirm.
 \item \code{stack_menu_dep()} returns an \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
 }
 }
@@ -51,10 +52,13 @@ parameters (name, color, id).
 \details{
 The stack menu is a Shiny module. \code{stack_menu_ui(id, board, target)}
 renders the panel; \code{stack_menu_server(id, board, target)} returns a
-reactive that fires once per confirm with the committed spec:
-\code{list(blocks, name, color, id)}. In edit mode (\code{target = "<stack_id>"})
-the spec carries the new selection / name / color and \code{id = NULL}
-(the stack id is immutable once a stack exists).
+reactive that fires once per confirm with a \link[blockr.core:new_stack]{blockr.core::stacks}
+object: a single stack built via \code{\link[blockr.core:new_stack]{blockr.core::new_stack()}} carrying
+the chosen name and (as an attribute) colour, keyed by its id - the
+typed id in create mode, the edited stack's id (\code{target}) in edit
+mode. Returning a core object (rather than a raw list) lets the
+consumer apply it without reshaping - e.g. re-class it to a
+\code{dock_stack} and add it to the board.
 
 The server owns \strong{validation} of the committed spec: it checks the
 stack id (create mode), name, and colour against the current board and

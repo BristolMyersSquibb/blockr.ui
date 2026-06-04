@@ -11,7 +11,10 @@
   (id / name / colour, via `blockr.core::notify()`) and, when passed a
   board reactive, keeps an open menu in sync with the board - cards are
   added / removed live via a `menu:sync` diff with no re-render, so
-  scroll, selection, and in-progress inputs are preserved.
+  scroll, selection, and in-progress inputs are preserved. The committed
+  reactive now returns a `blockr.core` `stacks` object (one id-keyed
+  stack built via `new_stack()`, colour carried as an attribute) rather
+  than a raw list, so a consumer applies it without reshaping.
 * New exported `is_hex_color()` helper (`#rgb` / `#rrggbb`) so
   consumers validate colours against the same rule the stack menu uses.
 * Initial package scaffold.

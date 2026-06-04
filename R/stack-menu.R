@@ -10,10 +10,13 @@
 #'
 #' The stack menu is a Shiny module. `stack_menu_ui(id, board, target)`
 #' renders the panel; `stack_menu_server(id, board, target)` returns a
-#' reactive that fires once per confirm with the committed spec:
-#' `list(blocks, name, color, id)`. In edit mode (`target = "<stack_id>"`)
-#' the spec carries the new selection / name / color and `id = NULL`
-#' (the stack id is immutable once a stack exists).
+#' reactive that fires once per confirm with a [blockr.core::stacks]
+#' object: a single stack built via [blockr.core::new_stack()] carrying
+#' the chosen name and (as an attribute) colour, keyed by its id - the
+#' typed id in create mode, the edited stack's id (`target`) in edit
+#' mode. Returning a core object (rather than a raw list) lets the
+#' consumer apply it without reshaping - e.g. re-class it to a
+#' `dock_stack` and add it to the board.
 #'
 #' The server owns **validation** of the committed spec: it checks the
 #' stack id (create mode), name, and colour against the current board and
@@ -59,8 +62,9 @@
 #' @return
 #' * `stack_menu_ui()` returns an [htmltools::tag] with
 #'   [stack_menu_dep()] attached.
-#' * `stack_menu_server()` returns a [shiny::reactive] of the
-#'   committed stack spec (a list), firing once per confirm.
+#' * `stack_menu_server()` returns a [shiny::reactive] of the committed
+#'   [blockr.core::stacks] object (one id-keyed stack), firing once per
+#'   confirm.
 #' * `stack_menu_dep()` returns an [htmltools::htmlDependency].
 #'
 #' @examples
@@ -126,12 +130,21 @@ stack_menu_server <- function(id, board = NULL, target = NULL) {
       if (shiny::is.reactive(board)) {
         shiny::observeEvent(
           board_fn(),
-          # Bare "commit": the module session namespaces it to the panel
-          # root's id. (Passing session$ns("commit") would double-prefix.)
-          session$sendInputMessage(
-            "commit",
-            stack_sync_payload(board_fn(), target_fn())
-          ),
+          {
+            brd <- board_fn()
+            tgt <- target_fn()
+            # In edit mode the stack being edited may have just been
+            # removed from the board; there's nothing left to sync to, so
+            # skip (the consumer decides whether to close the sidebar).
+            # Without this guard `stack_sync_payload()` -> `lookup_stack()`
+            # aborts. Bare "commit": the module session namespaces it to
+            # the panel root's id (passing `session$ns("commit")` would
+            # double-prefix).
+            if (is.null(tgt) ||
+                  tgt %in% blockr.core::board_stack_ids(brd)) {
+              session$sendInputMessage("commit", stack_sync_payload(brd, tgt))
+            }
+          },
           ignoreInit = TRUE
         )
       }
@@ -154,12 +167,28 @@ stack_menu_server <- function(id, board = NULL, target = NULL) {
           if (shiny::is.reactive(board)) {
             validate_stack_spec(spec, board_fn(), target_fn(), session)
           }
-          spec
+          stack_commit_value(spec, target_fn())
         },
         ignoreNULL = TRUE
       )
     }
   )
+}
+
+# Turn the validated spec into a `blockr.core` stacks object - one stack
+# carrying name + colour (colour rides as an attribute, exactly as
+# `dock_stack` stores it), keyed by its id (`spec$id` in create, the
+# edited stack's `target` id in edit). Returning a proper core object
+# (rather than a raw list) lets the consumer apply it without reshaping:
+# `as_dock_stacks()` re-classes it to `dock_stack` preserving the colour.
+stack_commit_value <- function(spec, target) {
+  id <- target %||% spec$id
+  stk <- blockr.core::new_stack(
+    as.character(spec$blocks %||% character()),
+    name = spec$name,
+    color = spec$color
+  )
+  blockr.core::as_stacks(stats::setNames(list(stk), id))
 }
 
 # Validate the committed stack spec against the current board. In create
