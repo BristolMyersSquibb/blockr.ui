@@ -178,7 +178,7 @@ test_that("rendered panel resolves both block-browser and stack-menu deps", {
   expect_true("blockr-stack-menu" %in% names)
 })
 
-test_that("stack_menu_server composes the spec from commit + panel inputs", {
+test_that("stack_menu_server returns an id-keyed core stacks object", {
   shiny::testServer(stack_menu_server, args = list(id = "m"), {
     session$setInputs(
       "stack_name" = "Imports",
@@ -187,11 +187,12 @@ test_that("stack_menu_server composes the spec from commit + panel inputs", {
       "commit" = list(blocks = c("a", "b"), nonce = 1L)
     )
     v <- session$returned()
-    expect_identical(v$blocks, c("a", "b"))
-    expect_identical(v$name, "Imports")
-    expect_identical(v$color, "#a8dcef")
-    expect_identical(v$id, "stk_x")
-    expect_null(v$nonce)
+    expect_true(blockr.core::is_stacks(v))
+    expect_named(v, "stk_x")
+    stk <- v[["stk_x"]]
+    expect_identical(blockr.core::stack_blocks(stk), c("a", "b"))
+    expect_identical(blockr.core::stack_name(stk), "Imports")
+    expect_identical(attr(stk, "color"), "#a8dcef")
   })
 })
 
@@ -266,7 +267,31 @@ test_that("stack_menu_server validates the commit when a board is supplied", {
       )
       session$flushReact()
       expect_identical(fired, 1L)
-      expect_identical(session$returned()$id, "s2")
+      v <- session$returned()
+      expect_true(blockr.core::is_stacks(v))
+      expect_named(v, "s2")
+    }
+  )
+})
+
+test_that("edit-mode board sync survives the edited stack being removed", {
+  rv <- shiny::reactiveValues(
+    board = blockr.core::new_board(
+      blockr.core::as_blocks(list(a = blockr.core::new_dataset_block("iris"))),
+      stacks = blockr.core::stacks(s1 = "a")
+    )
+  )
+  shiny::testServer(
+    stack_menu_server,
+    args = list(id = "m", board = shiny::reactive(rv$board), target = "s1"),
+    {
+      session$flushReact()
+      # Remove the edited stack: the board observer must not abort in
+      # `lookup_stack()` - it skips the sync instead.
+      rv$board <- blockr.core::new_board(
+        blockr.core::as_blocks(list(a = blockr.core::new_dataset_block("iris")))
+      )
+      expect_no_error(session$flushReact())
     }
   )
 })
