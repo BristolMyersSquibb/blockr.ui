@@ -79,7 +79,11 @@ server <- function(input, output, session) {
   output$commit <- renderPrint(last_commit())
   output$commit_blocks <- renderText({
     stk <- commit_stack()
-    if (is.null(stk)) "" else paste(blockr.core::stack_blocks(stk), collapse = ",")
+    if (is.null(stk)) {
+      ""
+    } else {
+      paste(blockr.core::stack_blocks(stk), collapse = ",")
+    }
   })
   output$commit_name <- renderText({
     stk <- commit_stack()
