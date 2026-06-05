@@ -42,9 +42,17 @@ server <- function(input, output, session) {
   last_commit <- reactiveVal(NULL)
   count <- reactiveVal(0L)
 
-  committed <- blockr.ui::stack_menu_server("menu")
+  # Track which stack (if any) the menu is currently editing, so the
+  # server keys its committed stacks object by the right id (the real
+  # dock passes `target = reactive(trigger())` the same way).
+  current_target <- reactiveVal(NULL)
+
+  committed <- blockr.ui::stack_menu_server(
+    "menu", target = reactive(current_target())
+  )
 
   open_menu <- function(title, target = NULL) {
+    current_target(target)
     show_sidebar(
       "panel",
       title = title,
@@ -61,14 +69,30 @@ server <- function(input, output, session) {
     count(count() + 1L)
   })
 
+  # `committed()` is a blockr.core `stacks` object (one id-keyed stack,
+  # colour carried as an attribute), so read its parts via the accessors.
+  commit_stack <- reactive({
+    sks <- last_commit()
+    if (is.null(sks) || length(sks) == 0L) NULL else sks[[1L]]
+  })
+
   output$commit <- renderPrint(last_commit())
   output$commit_blocks <- renderText({
-    spec <- last_commit()
-    if (is.null(spec)) "" else paste(spec$blocks, collapse = ",")
+    stk <- commit_stack()
+    if (is.null(stk)) "" else paste(blockr.core::stack_blocks(stk), collapse = ",")
   })
-  output$commit_name <- renderText(last_commit()$name %||% "")
-  output$commit_color <- renderText(last_commit()$color %||% "")
-  output$commit_id <- renderText(last_commit()$id %||% "")
+  output$commit_name <- renderText({
+    stk <- commit_stack()
+    if (is.null(stk)) "" else blockr.core::stack_name(stk)
+  })
+  output$commit_color <- renderText({
+    stk <- commit_stack()
+    if (is.null(stk)) "" else attr(stk, "color") %||% ""
+  })
+  output$commit_id <- renderText({
+    sks <- last_commit()
+    if (is.null(sks) || length(sks) == 0L) "" else names(sks)[[1L]]
+  })
   output$commit_count <- renderText(as.character(count()))
 }
 

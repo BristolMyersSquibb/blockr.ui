@@ -177,6 +177,6 @@ test_that("edit flow: pre-selects stack members and surfaces them", {
     app$get_value(output = "commit_blocks"), ",", fixed = TRUE
   )[[1]]
   expect_setequal(blocks, "e")
-  # Edit mode publishes no stack id.
-  expect_equal(app$get_value(output = "commit_id"), "")
+  # The committed stacks object is keyed by the edited stack's id.
+  expect_equal(app$get_value(output = "commit_id"), "s1")
 })
