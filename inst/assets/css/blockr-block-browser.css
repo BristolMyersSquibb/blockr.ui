@@ -146,8 +146,21 @@
 
 .blockr-block-browser-card-header {
   display: flex;
-  align-items: flex-start;
+  /* Icon centres against the whole card (title row + description). */
+  align-items: center;
   gap: var(--bb-gap);
+}
+
+/* Body column beside the icon: title row stacked over the description. */
+.blockr-block-browser-card-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.blockr-block-browser-card-titles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Colour-tinted icon tile. The tint comes from data-category below; the
@@ -209,7 +222,6 @@
 
 .blockr-block-browser-card-name {
   flex: 1 1 auto;
-  padding-top: 2px;
   font-size: 14px;
   font-weight: 500;
   color: var(--bb-grey-900);
@@ -223,7 +235,6 @@
    plain monospace text, which read as less polished). */
 .blockr-block-browser-card-package {
   flex: 0 0 auto;
-  margin-top: 1px;
   padding: 2px 8px;
   background: var(--bb-grey-100);
   color: var(--bb-grey-500);
@@ -264,14 +275,11 @@
   transform: rotate(180deg);
 }
 
-/* Description sits under the title, indented to clear the icon tile.
-   Clamped to two lines while collapsed; shown in full once expanded. */
+/* Description sits in the body column directly under the title row (no
+   indent needed - the column already starts beside the icon). Clamped to
+   two lines, then ellipsis. */
 .blockr-block-browser-card-description {
-  /* Pulled up beside the icon (it is indented clear of it) to tighten the
-     title->description gap ~40%; the icon-height header would otherwise
-     push it well below the title. */
-  margin-top: -6px;
-  margin-left: var(--bb-indent);
+  margin-top: 3px;
   font-size: 12px;
   color: var(--bb-grey-500);
   line-height: 1.4;
@@ -279,11 +287,6 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.blockr-block-browser-card.card-expanded .blockr-block-browser-card-description {
-  -webkit-line-clamp: unset;
-  overflow: visible;
 }
 
 .blockr-block-browser-card-description:empty {

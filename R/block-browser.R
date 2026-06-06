@@ -336,26 +336,35 @@ block_card <- function(meta, ns, mode, target_inputs) {
     `data-description` = meta$description,
     `data-package` = meta$package,
     `data-category` = meta_category(meta),
+    # Icon sits beside a single body column (title row + description) so it
+    # centres against the whole card, not just the title (layout proposal
+    # 02). The description is clamped to two lines via CSS.
     shiny::tags$div(
       class = "blockr-block-browser-card-header",
       shiny::tags$span(
         class = "blockr-block-browser-card-icon",
         if (nzchar(meta$icon)) htmltools::HTML(meta$icon) else NULL
       ),
-      shiny::tags$span(class = "blockr-block-browser-card-name", meta$name),
-      shiny::tags$span(
-        class = "blockr-block-browser-card-package", meta$package
-      ),
-      shiny::tags$button(
-        type = "button",
-        class = "blockr-block-browser-card-chevron",
-        `aria-label` = "Configure before adding",
-        chevron_icon()
+      shiny::tags$div(
+        class = "blockr-block-browser-card-body",
+        shiny::tags$div(
+          class = "blockr-block-browser-card-titles",
+          shiny::tags$span(class = "blockr-block-browser-card-name", meta$name),
+          shiny::tags$span(
+            class = "blockr-block-browser-card-package", meta$package
+          ),
+          shiny::tags$button(
+            type = "button",
+            class = "blockr-block-browser-card-chevron",
+            `aria-label` = "Configure before adding",
+            chevron_icon()
+          )
+        ),
+        shiny::tags$div(
+          class = "blockr-block-browser-card-description",
+          meta$description
+        )
       )
-    ),
-    shiny::tags$div(
-      class = "blockr-block-browser-card-description",
-      meta$description
     ),
     card_advanced(meta, ns, mode, target_inputs)
   )
