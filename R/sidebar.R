@@ -91,7 +91,7 @@ NULL
 #' @rdname sidebar
 #' @export
 sidebar_ui <- function(id, ui = NULL, title = NULL,
-                       side = c("right", "left"), width = "360px",
+                       side = c("right", "left"), width = "420px",
                        mode = c("overlay", "push")) {
   stopifnot(
     is.character(id), length(id) == 1L, nzchar(id),
