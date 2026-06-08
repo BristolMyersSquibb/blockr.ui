@@ -333,12 +333,19 @@ block_card <- function(meta, ns, mode, target_inputs) {
     class = "blockr-block-browser-card",
     `data-block-type` = meta$type,
     `data-name` = meta$name,
+    # `data-description` feeds the search index and seeds the `title`
+    # restore on collapse. The description's real home is the expanded
+    # card's band (keyboard/touch reachable, styled); `title` is only an
+    # additive mouse-hover preview while collapsed - the JS toggle drops
+    # it on expand so it never doubles up with the visible band.
     `data-description` = meta$description,
+    title = if (nzchar(meta$description)) meta$description else NULL,
     `data-package` = meta$package,
     `data-category` = meta_category(meta),
-    # Icon sits beside a single body column (title row + description) so it
-    # centres against the whole card, not just the title (layout proposal
-    # 02). The description is clamped to two lines via CSS.
+    # Compact row: the icon tile centres against a single title row
+    # (icon · name · package badge · chevron). The description band and
+    # form below stay hidden until the card is expanded, keeping the
+    # resting list dense (the finalized "compact" density of the spec).
     shiny::tags$div(
       class = "blockr-block-browser-card-header",
       shiny::tags$span(
@@ -359,13 +366,18 @@ block_card <- function(meta, ns, mode, target_inputs) {
             `aria-label` = "Configure before adding",
             chevron_icon()
           )
-        ),
-        shiny::tags$div(
-          class = "blockr-block-browser-card-description",
-          meta$description
         )
       )
     ),
+    # Description band: a full-width sibling of the header (not indented,
+    # per spec), revealed only when the card expands into its elevated
+    # panel. Dropped from the DOM when there is no description.
+    if (nzchar(meta$description)) {
+      shiny::tags$p(
+        class = "blockr-block-browser-card-descr-band",
+        meta$description
+      )
+    },
     card_advanced(meta, ns, mode, target_inputs)
   )
 }
@@ -429,6 +441,7 @@ card_advanced <- function(meta, ns, mode, target_inputs) {
     shiny::tags$button(
       type = "button",
       class = "blockr-block-browser-card-add",
+      plus_icon(),
       add_label
     )
   )
@@ -480,6 +493,23 @@ chevron_icon <- function() {
         " .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
       )
     )
+  )
+}
+
+# Plus glyph for the ghost-outline add button (spec: 13px stroked icon
+# left of the label). Stroked rather than filled to match the button's
+# light, outline weight.
+plus_icon <- function() {
+  shiny::tags$svg(
+    xmlns = "http://www.w3.org/2000/svg",
+    viewBox = "0 0 24 24",
+    fill = "none",
+    stroke = "currentColor",
+    `stroke-width` = "2",
+    `stroke-linecap` = "round",
+    `stroke-linejoin` = "round",
+    `aria-hidden` = "true",
+    shiny::tags$path(d = "M12 5v14M5 12h14")
   )
 }
 

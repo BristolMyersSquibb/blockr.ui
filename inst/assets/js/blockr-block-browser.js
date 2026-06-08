@@ -153,7 +153,17 @@
         if (!card || !root.contains(card)) return;
 
         if (event.target.closest(".blockr-block-browser-card-chevron")) {
-          card.classList.toggle("card-expanded");
+          var nowExpanded = card.classList.toggle("card-expanded");
+          // Collapsed rows carry the description as an additive native
+          // `title` hint; drop it while expanded (the description band
+          // shows it in full) and restore it on collapse from the
+          // data-description the card already carries.
+          if (nowExpanded) {
+            card.removeAttribute("title");
+          } else {
+            var desc = card.getAttribute("data-description");
+            if (desc) card.setAttribute("title", desc);
+          }
           event.preventDefault();
           return;
         }
