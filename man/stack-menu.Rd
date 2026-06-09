@@ -35,8 +35,8 @@ reactive. The parameter name mirrors \code{\link[=block_browser_ui]{block_browse
 \item \code{stack_menu_ui()} returns an \link[htmltools:builder]{htmltools::tag} with
 \code{\link[=stack_menu_dep]{stack_menu_dep()}} attached.
 \item \code{stack_menu_server()} returns a \link[shiny:reactive]{shiny::reactive} of the committed
-\link[blockr.core:new_stack]{blockr.core::stacks} object (one id-keyed stack), firing once per
-confirm.
+\link[blockr.core:new_stack]{blockr.core::stacks} object (one id-keyed \code{dock_stack}), firing
+once per confirm. Requires the suggested \code{blockr.dock} package.
 \item \code{stack_menu_dep()} returns an \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
 }
 }
@@ -53,12 +53,12 @@ parameters (name, color, id).
 The stack menu is a Shiny module. \code{stack_menu_ui(id, board, target)}
 renders the panel; \code{stack_menu_server(id, board, target)} returns a
 reactive that fires once per confirm with a \link[blockr.core:new_stack]{blockr.core::stacks}
-object: a single stack built via \code{\link[blockr.core:new_stack]{blockr.core::new_stack()}} carrying
-the chosen name and (as an attribute) colour, keyed by its id - the
-typed id in create mode, the edited stack's id (\code{target}) in edit
-mode. Returning a core object (rather than a raw list) lets the
-consumer apply it without reshaping - e.g. re-class it to a
-\code{dock_stack} and add it to the board.
+object whose single member is a \code{dock_stack} built via
+\code{blockr.dock::new_dock_stack()}, carrying the chosen name and colour
+and keyed by its id - the typed id in create mode, the edited stack's
+id (\code{target}) in edit mode. The consumer adds it to the board as-is,
+with no reshaping. Colour is a first-class \code{dock_stack} attribute, so
+the menu requires the suggested \code{blockr.dock} package.
 
 The server owns \strong{validation} of the committed spec: it checks the
 stack id (create mode), name, and colour against the current board and

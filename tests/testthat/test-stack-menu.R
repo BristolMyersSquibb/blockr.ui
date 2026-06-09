@@ -178,7 +178,8 @@ test_that("rendered panel resolves both block-browser and stack-menu deps", {
   expect_true("blockr-stack-menu" %in% names)
 })
 
-test_that("stack_menu_server returns an id-keyed core stacks object", {
+test_that("stack_menu_server returns an id-keyed dock_stacks object", {
+  skip_if_not_installed("blockr.dock")
   shiny::testServer(stack_menu_server, args = list(id = "m"), {
     session$setInputs(
       "stack_name" = "Imports",
@@ -197,6 +198,7 @@ test_that("stack_menu_server returns an id-keyed core stacks object", {
 })
 
 test_that("stack_menu_server re-fires on repeat commits (nonce advances)", {
+  skip_if_not_installed("blockr.dock")
   shiny::testServer(stack_menu_server, args = list(id = "m"), {
     fired <- 0L
     session$setInputs(

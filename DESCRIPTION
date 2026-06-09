@@ -7,8 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "david@cynkra.com")
 Description: User-interface primitives shared across the 'blockr'
-    ecosystem. Designed to sit between 'blockr.core' 
-    and renderers such as 'blockr.dock'.
+    ecosystem. Designed enhance 'blockr.dock'.
 URL: https://bristolmyerssquibb.github.io/blockr.ui/
 BugReports: https://github.com/BristolMyersSquibb/blockr.ui/issues
 License: GPL (>= 3)
@@ -21,12 +20,14 @@ Imports:
     rlang,
     shiny
 Suggests:
+    blockr.dock,
     knitr,
     rmarkdown,
     shinytest2,
     testthat (>= 3.0.0),
     withr
 Remotes:
-    BristolMyersSquibb/blockr.core
+    BristolMyersSquibb/blockr.core,
+    BristolMyersSquibb/blockr.dock@add-stack-menu-adoption
 Config/testthat/edition: 3
 VignetteBuilder: knitr
