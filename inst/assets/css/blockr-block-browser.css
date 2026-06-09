@@ -11,7 +11,14 @@
    and muted grey section headers. Palette below mirrors the prototype's
    Tailwind-style grey/blue scale. */
 
-.blockr-block-browser {
+/* Design tokens for the card visuals. The stack and link menus reuse the
+   .blockr-block-browser-card* classes outside the .blockr-block-browser
+   root, so the tokens are declared on all three roots (rather than on
+   .blockr-block-browser alone) to keep them resolvable there without
+   leaking into the global :root namespace. */
+.blockr-block-browser,
+.blockr-stack-menu,
+.blockr-link-menu {
   --bb-grey-50: #f9fafb;
   --bb-grey-100: #f3f4f6;
   --bb-grey-200: #e5e7eb;
@@ -29,7 +36,9 @@
      glyph filling more of it (16px -> 0.5 ratio vs the airier 40/18). */
   --bb-icon: 32px;
   --bb-gap: 12px;
+}
 
+.blockr-block-browser {
   display: flex;
   flex-direction: column;
   gap: 12px;
