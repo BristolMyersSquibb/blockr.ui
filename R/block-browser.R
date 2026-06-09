@@ -271,11 +271,7 @@ resolve_target <- function(board, target) {
 }
 
 browser_panel <- function(ns, metas, mode, tgt) {
-  categories <- split(metas, vapply(metas, meta_category, character(1L)))
-  cat_order <- unique(vapply(metas, meta_category, character(1L)))
-  uncat <- "Uncategorized" %in% cat_order
-  cat_order <- c(setdiff(cat_order, "Uncategorized"),
-                 if (uncat) "Uncategorized" else character())
+  groups <- category_groups(metas)
 
   # The root element IS the Shiny input: its `id` is the commit input id
   # the `blockr.ui.blockBrowser` InputBinding reports against, read by
@@ -303,8 +299,11 @@ browser_panel <- function(ns, metas, mode, tgt) {
         ),
         shiny::tags$div(
           class = "blockr-block-browser-categories",
-          lapply(cat_order, function(cat) {
-            category_section(cat, categories[[cat]], ns, mode, tgt$inputs)
+          lapply(names(groups), function(cat) {
+            category_section(
+              cat, groups[[cat]],
+              function(m) block_card(m, ns, mode, tgt$inputs)
+            )
           })
         ),
         shiny::tags$div(
@@ -316,14 +315,17 @@ browser_panel <- function(ns, metas, mode, tgt) {
   )
 }
 
-category_section <- function(category, entries, ns, mode, target_inputs) {
+# Shared category block for both panels: the wrapper chrome is identical;
+# only the per-entry card differs, so callers pass a `card_fn` that maps
+# one meta to its card tag.
+category_section <- function(category, entries, card_fn) {
   shiny::tags$div(
     class = "blockr-block-browser-category",
     `data-category` = category,
     shiny::tags$h3(category),
     shiny::tags$div(
       class = "blockr-block-browser-cards",
-      lapply(entries, function(m) block_card(m, ns, mode, target_inputs))
+      lapply(entries, card_fn)
     )
   )
 }
@@ -522,6 +524,19 @@ entry_attr <- function(entry, key, default) {
 
 meta_category <- function(m) {
   if (nzchar(m$category)) m$category else "Uncategorized"
+}
+
+# Split metas into category buckets in display order, "Uncategorized"
+# last. Returns a named list of meta groups, keyed and ordered by
+# category; both the block-browser and stack-menu panels render from it.
+category_groups <- function(metas) {
+  cats <- vapply(metas, meta_category, character(1L))
+  order <- unique(cats)
+  order <- c(
+    setdiff(order, "Uncategorized"),
+    if ("Uncategorized" %in% order) "Uncategorized" else character()
+  )
+  split(metas, cats)[order]
 }
 
 # n unique ids avoiding `existing` (and each other); empty for n == 0.

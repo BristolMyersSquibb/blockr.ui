@@ -67,6 +67,93 @@ app$stop()
 
 ![blockr.ui minimal sidebar example](man/figures/sidebar-minimal.png)
 
+### Block browser
+
+A card-list block picker (one card per row of
+`blockr.core::available_blocks()`) designed to mount inside the
+sidebar. See `vignette("block-browser", package = "blockr.ui")`.
+
+```{r block-browser-example, eval=FALSE, code=readLines("inst/examples/block-browser/app.R")}
+```
+
+```{r block-browser-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
+withr::local_envvar(NOT_CRAN = "true")
+app <- shinytest2::AppDriver$new(
+  system.file("examples", "block-browser", package = "blockr.ui"),
+  width = 1280,
+  height = 820
+)
+Sys.sleep(2)
+app$run_js("document.getElementById('open_add').click()")
+Sys.sleep(1)
+tmp <- tempfile(fileext = ".png")
+app$get_screenshot(tmp)
+file.copy(tmp, "man/figures/block-browser.png", overwrite = TRUE)
+app$stop()
+```
+
+![blockr.ui block browser example](man/figures/block-browser.png)
+
+### Stack menu
+
+A multi-select card-list block picker for stacks, with an inline
+hue / lightness colour picker and a panel-level form for the
+stack name / colour / id. See
+`vignette("stack-menu", package = "blockr.ui")`.
+
+```{r stack-menu-example, eval=FALSE, code=readLines("inst/examples/stack-menu/app.R")}
+```
+
+```{r stack-menu-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
+withr::local_envvar(NOT_CRAN = "true")
+app <- shinytest2::AppDriver$new(
+  system.file("examples", "stack-menu", package = "blockr.ui"),
+  width = 1280,
+  height = 820
+)
+Sys.sleep(2)
+app$run_js("document.getElementById('open_create').click()")
+Sys.sleep(1)
+tmp <- tempfile(fileext = ".png")
+app$get_screenshot(tmp)
+file.copy(tmp, "man/figures/stack-menu.png", overwrite = TRUE)
+app$stop()
+```
+
+![blockr.ui stack menu example](man/figures/stack-menu.png)
+
+### Link menu
+
+A bidirectional card-list link picker. Right-click any block to add a
+link in either direction - the menu shows up to two sections
+(`INPUT FROM` / `OUTPUT TO`) based on the anchor's free-input
+capacity. Single click commits one link; the panel stays open across
+commits via a live `pool-update` push. See
+`vignette("link-menu", package = "blockr.ui")`.
+
+```{r link-menu-example, eval=FALSE, code=readLines("inst/examples/link-menu/app.R")}
+```
+
+```{r link-menu-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
+withr::local_envvar(NOT_CRAN = "true")
+app <- shinytest2::AppDriver$new(
+  system.file("examples", "link-menu", package = "blockr.ui"),
+  width = 1280,
+  height = 820
+)
+Sys.sleep(2)
+# Anchor m: shows both OUTGOING and INCOMING sections (most
+# interesting layout case).
+app$run_js("document.getElementById('open_m').click()")
+Sys.sleep(1)
+tmp <- tempfile(fileext = ".png")
+app$get_screenshot(tmp)
+file.copy(tmp, "man/figures/link-menu.png", overwrite = TRUE)
+app$stop()
+```
+
+![blockr.ui link menu example](man/figures/link-menu.png)
+
 ## Code of Conduct
 
 Please note that the blockr.ui project is released with a
