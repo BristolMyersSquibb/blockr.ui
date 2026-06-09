@@ -52,20 +52,18 @@
   };
 
   // Shared structural reconciler for the instance-backed menus (stack,
-  // link). Given the full desired card set (`[{ id, html }, ...]`, each
-  // `html` the server-rendered markup for that card), it removes cards
-  // no longer desired, inserts desired cards not yet in the DOM into the
-  // matching category section (creating the section when absent), and
-  // drops emptied category sections. It does NOT touch eligibility /
-  // selection / search / empty-state - callers retune those after, so a
-  // board change never disturbs scroll, expansion, or in-progress input.
+  // link). Given a `.blockr-block-browser-categories` container and the
+  // full desired card set for it (`[{ id, html }, ...]`, each `html` the
+  // server-rendered markup), it removes cards no longer desired, inserts
+  // desired cards not yet in the DOM into the matching category section
+  // (creating the section when absent), and drops emptied category
+  // sections. It does NOT touch eligibility / selection / search /
+  // empty-state - callers retune those after, so a board change never
+  // disturbs scroll, expansion, or in-progress input. The link menu
+  // calls it once per direction container; the stack menu has a single
+  // container.
   function cssEscapeAttr(s) {
     return String(s).replace(/["\\]/g, "\\$&");
-  }
-  function cardById(root, id) {
-    return root.querySelector(
-      '.blockr-block-browser-card[data-block-type="' + cssEscapeAttr(id) + '"]'
-    );
   }
   function parseCardHtml(html) {
     var tmp = document.createElement("div");
@@ -94,8 +92,7 @@
     sec.appendChild(list);
     cats.appendChild(sec);
   }
-  BlockrUI.cardSync = BlockrUI.cardSync || function (root, cards) {
-    var cats = root.querySelector(".blockr-block-browser-categories");
+  BlockrUI.cardSync = BlockrUI.cardSync || function (cats, cards) {
     if (!cats) return;
     // `sendInputMessage` auto-unboxes a length-1 list to a scalar.
     if (!cards) cards = [];
@@ -106,18 +103,24 @@
       if (c && c.id != null) desired[c.id] = c;
     });
 
-    BlockrUI.cardSearch.getCards(root).forEach(function (card) {
-      var id = card.getAttribute("data-block-type");
-      if (!Object.prototype.hasOwnProperty.call(desired, id)) {
-        if (card.parentNode) card.parentNode.removeChild(card);
-      }
-    });
+    Array.prototype.slice
+      .call(cats.querySelectorAll(".blockr-block-browser-card"))
+      .forEach(function (card) {
+        var id = card.getAttribute("data-block-type");
+        if (!Object.prototype.hasOwnProperty.call(desired, id)) {
+          if (card.parentNode) card.parentNode.removeChild(card);
+        }
+      });
 
     cards.forEach(function (c) {
       if (!c || c.id == null || !c.html) return;
-      if (cardById(root, c.id)) return;
+      var sel = '.blockr-block-browser-card[data-block-type="' +
+        cssEscapeAttr(c.id) + '"]';
+      if (cats.querySelector(sel)) return;
       var node = parseCardHtml(c.html);
-      if (node) insertCardNode(cats, node.getAttribute("data-category") || "", node);
+      if (node) {
+        insertCardNode(cats, node.getAttribute("data-category") || "", node);
+      }
     });
 
     Array.prototype.slice

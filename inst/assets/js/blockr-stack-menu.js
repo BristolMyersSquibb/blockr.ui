@@ -68,7 +68,7 @@
   // empty-state stay consistent. Scroll, expansion, and the panel-level
   // name / colour / id inputs are deliberately left untouched.
   function applyMenuSync(root, data) {
-    cardSync(root, data.cards);
+    cardSync(root.querySelector(".blockr-block-browser-categories"), data.cards);
 
     var sel = getSelection(root);
     for (var i = sel.length - 1; i >= 0; i--) {
