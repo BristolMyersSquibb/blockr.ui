@@ -1,0 +1,100 @@
+# The stack menu
+
+[`blockr.ui::stack_menu_ui()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/stack-menu.md)
+is a multi-select card-list block picker for stacks. It lives inside the
+[sidebar
+primitive](https://bristolmyerssquibb.github.io/blockr.ui/articles/sidebar.md)
+and replaces the legacy selectize-style chooser used by `blockr.dock`’s
+add / edit stack flows. Each card represents a *board instance* (a block
+already on the board) and clicking a card toggles its membership in the
+new (or edited) stack. A small panel-level form below the cards carries
+the stack-level parameters (name, color, id).
+
+## Create vs edit
+
+The flow is selected by the `target` argument, mirroring
+[`block_browser_ui()`](https://bristolmyerssquibb.github.io/blockr.ui/articles/block-browser.md):
+
+- `target = NULL` (default) is the **create** flow. The eligible pool is
+  every board block that is not currently a member of a stack. No card
+  is pre-selected. The form exposes `Stack name` (always), `Stack color`
+  and `Stack id` (under an Advanced toggle).
+
+- `target = "<stack_id>"` is the **edit** flow. The function looks the
+  stack up via `blockr.core::board_stacks(board)[[target]]`, augments
+  the pool with the stack’s current blocks (so the user can deselect
+  them), pre-selects them, and pre-fills name / color. The stack id is
+  fixed and not rendered. An unknown id raises a clean error.
+
+## Commit contract
+
+The menu publishes the selection set through a Shiny input binding; the
+panel-level name / color / id fields are normal Shiny inputs. The server
+composes the full spec - `list(blocks, name, color, id)` - from both
+sources, strips the internal `nonce`, and hands the spec to
+[`observeEvent()`](https://rdrr.io/pkg/shiny/man/observeEvent.html).
+
+## Minimal example
+
+``` r
+
+library(shiny)
+library(blockr.ui)
+library(blockr.core)
+
+board <- new_board(
+  blocks = list(
+    a = new_dataset_block(),
+    b = new_head_block(),
+    c = new_subset_block()
+  )
+)
+
+ui <- fluidPage(
+  sidebar_ui("panel", side = "right", width = "420px"),
+  actionButton("open_create", "Create stack"),
+  actionButton("open_edit", "Edit stack s1"),
+  verbatimTextOutput("spec")
+)
+
+server <- function(input, output, session) {
+  committed <- stack_menu_server("menu")
+
+  observeEvent(input$open_create, {
+    show_sidebar(
+      "panel",
+      title = "Create stack",
+      ui = stack_menu_ui(session$ns("menu"), board)
+    )
+  })
+
+  observeEvent(input$open_edit, {
+    show_sidebar(
+      "panel",
+      title = "Edit stack s1",
+      ui = stack_menu_ui(session$ns("menu"), board, target = "s1")
+    )
+  })
+
+  output$spec <- renderPrint(committed())
+}
+
+shinyApp(ui, server)
+```
+
+A runnable copy is shipped at:
+
+``` r
+
+system.file("examples", "stack-menu", "app.R", package = "blockr.ui")
+```
+
+## Colour picker
+
+The stack colour widget is an inline hue / lightness slider + hex text
+input shipped by `blockr.ui` itself - no popover that escapes the
+sidebar, no extra dependency. Moving a slider recomputes `HSL -> hex`
+and writes the hex field; typing in the hex field parses back the other
+way and repositions the sliders. The hex `<input>` is a regular Shiny
+text input, so the colour reaches the server through Shiny’s built-in
+text-input binding without any custom JS path.

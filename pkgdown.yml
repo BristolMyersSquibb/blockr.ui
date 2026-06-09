@@ -4,7 +4,8 @@ pkgdown_sha: ~
 articles:
   block-browser: block-browser.html
   sidebar: sidebar.html
-last_built: 2026-06-01T11:44Z
+  stack-menu: stack-menu.html
+last_built: 2026-06-09T14:02Z
 urls:
   reference: https://bristolmyerssquibb.github.io/blockr.ui/reference
   article: https://bristolmyerssquibb.github.io/blockr.ui/articles

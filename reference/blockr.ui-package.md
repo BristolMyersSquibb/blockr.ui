@@ -1,7 +1,7 @@
 # blockr.ui: User Interface Components for the 'blockr' Ecosystem
 
 User-interface primitives shared across the 'blockr' ecosystem. Designed
-to sit between 'blockr.core' and renderers such as 'blockr.dock'.
+enhance 'blockr.dock'.
 
 ## See also
 

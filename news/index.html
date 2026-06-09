@@ -20,6 +20,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/block-browser.html">The block browser</a></li>
     <li><a class="dropdown-item" href="../articles/sidebar.html">Driving the sidebar primitive</a></li>
+    <li><a class="dropdown-item" href="../articles/stack-menu.html">The stack menu</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -45,7 +46,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="blockrui-0009000">blockr.ui 0.0.0.9000<a class="anchor" aria-label="anchor" href="#blockrui-0009000"></a></h2>
-<ul><li>Initial package scaffold.</li>
+<ul><li>New <code><a href="../reference/stack-menu.html">stack_menu_ui()</a></code> / <code><a href="../reference/stack-menu.html">stack_menu_server()</a></code> / <code><a href="../reference/stack-menu.html">stack_menu_dep()</a></code> module: a multi-select card-list block picker for stacks, with an inline hue / lightness slider + hex colour picker and a panel-level form for the stack name / color / id. <code>target = NULL</code> is the create flow; <code>target = "&lt;stack_id&gt;"</code> selects the edit flow. Mirrors <code><a href="../reference/block-browser.html">block_browser_ui()</a></code>’s <code>target</code> argument shape. <code><a href="../reference/stack-menu.html">stack_menu_server()</a></code> gains <code>board</code> (reactive) and <code>target</code> arguments: it now owns validation of the committed spec (id / name / colour, via <code><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/get_session.html" class="external-link">blockr.core::notify()</a></code>) and, when passed a board reactive, keeps an open menu in sync with the board - cards are added / removed live via a <code>menu:sync</code> diff with no re-render, so scroll, selection, and in-progress inputs are preserved. The committed reactive now returns a <code>blockr.core</code> <code>stacks</code> object (one id-keyed stack built via <code><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_stack.html" class="external-link">new_stack()</a></code>, colour carried as an attribute) rather than a raw list, so a consumer applies it without reshaping.</li>
+<li>New exported <code><a href="../reference/is_hex_color.html">is_hex_color()</a></code> helper (<code>#rgb</code> / <code>#rrggbb</code>) so consumers validate colours against the same rule the stack menu uses.</li>
+<li>Initial package scaffold.</li>
 </ul></div>
   </main></div>
 
