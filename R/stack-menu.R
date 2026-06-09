@@ -11,12 +11,12 @@
 #' The stack menu is a Shiny module. `stack_menu_ui(id, board, target)`
 #' renders the panel; `stack_menu_server(id, board, target)` returns a
 #' reactive that fires once per confirm with a [blockr.core::stacks]
-#' object: a single stack built via [blockr.core::new_stack()] carrying
-#' the chosen name and (as an attribute) colour, keyed by its id - the
-#' typed id in create mode, the edited stack's id (`target`) in edit
-#' mode. Returning a core object (rather than a raw list) lets the
-#' consumer apply it without reshaping - e.g. re-class it to a
-#' `dock_stack` and add it to the board.
+#' object whose single member is a `dock_stack` built via
+#' `blockr.dock::new_dock_stack()`, carrying the chosen name and colour
+#' and keyed by its id - the typed id in create mode, the edited stack's
+#' id (`target`) in edit mode. The consumer adds it to the board as-is,
+#' with no reshaping. Colour is a first-class `dock_stack` attribute, so
+#' the menu requires the suggested `blockr.dock` package.
 #'
 #' The server owns **validation** of the committed spec: it checks the
 #' stack id (create mode), name, and colour against the current board and
@@ -63,8 +63,8 @@
 #' * `stack_menu_ui()` returns an [htmltools::tag] with
 #'   [stack_menu_dep()] attached.
 #' * `stack_menu_server()` returns a [shiny::reactive] of the committed
-#'   [blockr.core::stacks] object (one id-keyed stack), firing once per
-#'   confirm.
+#'   [blockr.core::stacks] object (one id-keyed `dock_stack`), firing
+#'   once per confirm. Requires the suggested `blockr.dock` package.
 #' * `stack_menu_dep()` returns an [htmltools::htmlDependency].
 #'
 #' @examples
@@ -175,15 +175,22 @@ stack_menu_server <- function(id, board = NULL, target = NULL) {
   )
 }
 
-# Turn the validated spec into a `blockr.core` stacks object - one stack
-# carrying name + colour (colour rides as an attribute, exactly as
-# `dock_stack` stores it), keyed by its id (`spec$id` in create, the
-# edited stack's `target` id in edit). Returning a proper core object
-# (rather than a raw list) lets the consumer apply it without reshaping:
-# `as_dock_stacks()` re-classes it to `dock_stack` preserving the colour.
+# Turn the validated spec into a stacks object of `dock_stack` objects -
+# one stack carrying name + colour, keyed by its id (`spec$id` in create,
+# the edited stack's `target` id in edit). The colour is a first-class
+# attribute of `dock_stack` rather than something smuggled onto a bare
+# core `stack`, so the consumer applies the result without reshaping.
+# `dock_stack` lives in `blockr.dock`, which owns the colored-stack type;
+# the stack menu is only meaningful in that context, hence the gate.
 stack_commit_value <- function(spec, target) {
+  if (!blockr.core::pkg_avail("blockr.dock")) {
+    blockr.core::blockr_abort(
+      "The stack menu requires the 'blockr.dock' package.",
+      class = "blockr_dock_not_available"
+    )
+  }
   id <- target %||% spec$id
-  stk <- blockr.core::new_stack(
+  stk <- blockr.dock::new_dock_stack(
     as.character(spec$blocks %||% character()),
     name = spec$name,
     color = spec$color

@@ -6,7 +6,7 @@
 \alias{blockr.ui-package}
 \title{blockr.ui: User Interface Components for the 'blockr' Ecosystem}
 \description{
-User-interface primitives shared across the 'blockr' ecosystem. Designed to sit between 'blockr.core' and renderers such as 'blockr.dock'.
+User-interface primitives shared across the 'blockr' ecosystem. Designed enhance 'blockr.dock'.
 }
 \seealso{
 Useful links:
