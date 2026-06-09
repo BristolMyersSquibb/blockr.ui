@@ -68,7 +68,8 @@
 #' * `link_menu_ui()` returns an [htmltools::tag] with
 #'   [link_menu_dep()] attached.
 #' * `link_menu_server()` returns a [shiny::reactive] of the committed
-#'   link spec (a list), firing once per commit.
+#'   [blockr.core::links] object (one id-keyed link), firing once per
+#'   commit.
 #' * `link_menu_dep()` returns an [htmltools::htmlDependency].
 #' * `link_eligible_pools()` returns
 #'   `list(outgoing = <chr>, incoming = <chr>)` using the same
@@ -163,12 +164,55 @@ link_menu_server <- function(id, board = NULL, anchor = NULL) {
           if (shiny::is.reactive(board)) {
             validate_link_spec(spec, board_fn(), session)
           }
-          spec
+          link_commit_value(spec, board_fn())
         },
         ignoreNULL = TRUE
       )
     }
   )
+}
+
+# Turn the committed spec into a ready-to-apply `blockr.core` links
+# object: one link keyed by its id. The target input slot is resolved
+# here, since the menu only renders a port picker for finite-arity
+# targets with more than one free slot - so `block_input` arrives NULL
+# for arity-1 and variadic targets. The consumer adds the result as-is.
+link_commit_value <- function(spec, board) {
+  input <- spec$block_input
+  if (is.null(input) || !nzchar(input)) {
+    input <- resolve_free_input(
+      blockr.core::board_blocks(board)[[spec$target]],
+      spec$target,
+      blockr.core::board_links(board)
+    )
+  }
+  lnk <- blockr.core::new_link(
+    from = spec$source, to = spec$target, input = input
+  )
+  blockr.core::as_links(stats::setNames(list(lnk), spec$link_id))
+}
+
+# Pick the target's input slot for a new link, mirroring blockr.dock's
+# `block_input_select(mode = "inputs")` with only blockr.core primitives:
+# the first free named input, or - for a variadic target - a freshly
+# generated numeric slot.
+resolve_free_input <- function(block, block_id, links) {
+  curr <- links[links$to == block_id]$input
+  free <- setdiff(blockr.core::block_inputs(block), curr)
+
+  if (is.na(blockr.core::block_arity(block))) {
+    num <- suppressWarnings(as.integer(curr))
+    num <- num[!is.na(num)]
+    slot <- if (!length(num)) {
+      "1"
+    } else {
+      mis <- setdiff(seq_len(max(num)), num)
+      as.character(if (length(mis)) min(mis) else max(num) + 1L)
+    }
+    free <- c(free, slot)
+  }
+
+  free[1L]
 }
 
 # Reject an empty / duplicate link id, mirroring the stack menu's

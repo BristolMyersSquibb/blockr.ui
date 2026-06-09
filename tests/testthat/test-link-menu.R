@@ -320,7 +320,7 @@ test_that("rendered panel resolves both block-browser and link-menu deps", {
 
 # ---- link_menu_server() -----------------------------------------------
 
-test_that("server strips the nonce and exposes the spec", {
+test_that("server returns a ready-to-apply links object", {
   shiny::testServer(link_menu_server, args = list(id = "mod"), {
     session$setInputs(
       commit = list(
@@ -330,11 +330,11 @@ test_that("server strips the nonce and exposes the spec", {
       )
     )
     v <- session$returned()
-    expect_identical(v$source, "a")
-    expect_identical(v$target, "b")
-    expect_identical(v$link_id, "lk1")
-    expect_identical(v$block_input, "data")
-    expect_null(v$nonce)
+    expect_true(blockr.core::is_links(v))
+    expect_named(v, "lk1")
+    expect_identical(v$from, "a")
+    expect_identical(v$to, "b")
+    expect_identical(v$input, "data")
   })
 })
 
@@ -345,11 +345,17 @@ test_that("server re-fires on repeat commits (nonce advances)", {
       fired <<- fired + 1L
     })
     session$setInputs(
-      commit = list(source = "a", target = "b", link_id = "lk", nonce = 1L)
+      commit = list(
+        source = "a", target = "b", link_id = "lk",
+        block_input = "data", nonce = 1L
+      )
     )
     session$flushReact()
     session$setInputs(
-      commit = list(source = "a", target = "b", link_id = "lk", nonce = 2L)
+      commit = list(
+        source = "a", target = "b", link_id = "lk",
+        block_input = "data", nonce = 2L
+      )
     )
     session$flushReact()
     expect_gte(fired, 2L)
@@ -384,13 +390,50 @@ test_that("server validates the link id when a board is supplied", {
       session$flushReact()
       expect_identical(fired, 0L)
 
-      # Fresh link id -> fires once.
+      # Fresh link id -> fires once with a ready links object.
       session$setInputs(commit = list(
-        source = "a", target = "b", link_id = "fresh", nonce = 2L
+        source = "a", target = "b", link_id = "fresh",
+        block_input = "data", nonce = 2L
       ))
       session$flushReact()
       expect_identical(fired, 1L)
-      expect_identical(session$returned()$link_id, "fresh")
+      v <- session$returned()
+      expect_true(blockr.core::is_links(v))
+      expect_named(v, "fresh")
+    }
+  )
+})
+
+test_that("server resolves the first free named input when none is picked", {
+  board <- small_board()
+  shiny::testServer(
+    link_menu_server,
+    args = list(id = "mod", board = shiny::reactive(board), anchor = "a"),
+    {
+      # m is arity 2 (inputs x, y), nothing wired yet -> first free is x.
+      session$setInputs(commit = list(
+        source = "a", target = "m", link_id = "lk", nonce = 1L
+      ))
+      session$flushReact()
+      v <- session$returned()
+      expect_true(blockr.core::is_links(v))
+      expect_identical(v$to, "m")
+      expect_identical(v$input, "x")
+    }
+  )
+})
+
+test_that("server generates a numeric slot for a variadic target", {
+  board <- variadic_board()
+  shiny::testServer(
+    link_menu_server,
+    args = list(id = "mod", board = shiny::reactive(board), anchor = "a"),
+    {
+      session$setInputs(commit = list(
+        source = "a", target = "r", link_id = "lk", nonce = 1L
+      ))
+      session$flushReact()
+      expect_identical(session$returned()$input, "1")
     }
   )
 })

@@ -37,7 +37,8 @@ the eligible pools on each board change).}
 \item \code{link_menu_ui()} returns an \link[htmltools:builder]{htmltools::tag} with
 \code{\link[=link_menu_dep]{link_menu_dep()}} attached.
 \item \code{link_menu_server()} returns a \link[shiny:reactive]{shiny::reactive} of the committed
-link spec (a list), firing once per commit.
+\link[blockr.core:new_link]{blockr.core::links} object (one id-keyed link), firing once per
+commit.
 \item \code{link_menu_dep()} returns an \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
 \item \code{link_eligible_pools()} returns
 \verb{list(outgoing = <chr>, incoming = <chr>)} using the same
