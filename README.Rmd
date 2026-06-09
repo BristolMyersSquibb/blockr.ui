@@ -67,6 +67,61 @@ app$stop()
 
 ![blockr.ui minimal sidebar example](man/figures/sidebar-minimal.png)
 
+### Block browser
+
+A card-list block picker (one card per row of
+`blockr.core::available_blocks()`) designed to mount inside the
+sidebar. See `vignette("block-browser", package = "blockr.ui")`.
+
+```{r block-browser-example, eval=FALSE, code=readLines("inst/examples/block-browser/app.R")}
+```
+
+```{r block-browser-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
+withr::local_envvar(NOT_CRAN = "true")
+app <- shinytest2::AppDriver$new(
+  system.file("examples", "block-browser", package = "blockr.ui"),
+  width = 1280,
+  height = 820
+)
+Sys.sleep(2)
+app$run_js("document.getElementById('open_add').click()")
+Sys.sleep(1)
+tmp <- tempfile(fileext = ".png")
+app$get_screenshot(tmp)
+file.copy(tmp, "man/figures/block-browser.png", overwrite = TRUE)
+app$stop()
+```
+
+![blockr.ui block browser example](man/figures/block-browser.png)
+
+### Stack menu
+
+A multi-select card-list block picker for stacks, with an inline
+hue / lightness colour picker and a panel-level form for the
+stack name / colour / id. See
+`vignette("stack-menu", package = "blockr.ui")`.
+
+```{r stack-menu-example, eval=FALSE, code=readLines("inst/examples/stack-menu/app.R")}
+```
+
+```{r stack-menu-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
+withr::local_envvar(NOT_CRAN = "true")
+app <- shinytest2::AppDriver$new(
+  system.file("examples", "stack-menu", package = "blockr.ui"),
+  width = 1280,
+  height = 820
+)
+Sys.sleep(2)
+app$run_js("document.getElementById('open_create').click()")
+Sys.sleep(1)
+tmp <- tempfile(fileext = ".png")
+app$get_screenshot(tmp)
+file.copy(tmp, "man/figures/stack-menu.png", overwrite = TRUE)
+app$stop()
+```
+
+![blockr.ui stack menu example](man/figures/stack-menu.png)
+
 ## Code of Conduct
 
 Please note that the blockr.ui project is released with a

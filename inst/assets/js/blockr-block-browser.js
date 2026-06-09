@@ -11,11 +11,123 @@
   var COMMIT_EVENT = "blockr-block-browser:commit";
   var commitSeq = 0;
 
-  function getCards(root) {
-    return Array.prototype.slice.call(
-      root.querySelectorAll(".blockr-block-browser-card")
+  // Card-list helpers shared with the stack-menu binding. Both modules
+  // render the same `.blockr-block-browser-card` markup and the same
+  // `data-name` / `data-description` / `data-package` / `data-category`
+  // search contract, so the filter and the card-iteration helper live
+  // on a tiny `window.BlockrUI.cardSearch` namespace. The stack-menu
+  // module depends on `block_browser_dep()` being attached first
+  // (which it is wherever `stack_menu_ui()` is rendered) and just
+  // calls into this API. Keep the surface deliberately small.
+  var BlockrUI = window.BlockrUI = window.BlockrUI || {};
+  BlockrUI.cardSearch = BlockrUI.cardSearch || {
+    getCards: function (root) {
+      return Array.prototype.slice.call(
+        root.querySelectorAll(".blockr-block-browser-card")
+      );
+    },
+    applySearch: function (root, query) {
+      var q = (query || "").trim().toLowerCase();
+      var anyVisible = false;
+      BlockrUI.cardSearch.getCards(root).forEach(function (card) {
+        if (q.length === 0) {
+          card.classList.remove("hidden");
+          anyVisible = true;
+          return;
+        }
+        var haystack = [
+          card.getAttribute("data-name") || "",
+          card.getAttribute("data-description") || "",
+          card.getAttribute("data-package") || "",
+          card.getAttribute("data-category") || ""
+        ]
+          .join(" ")
+          .toLowerCase();
+        var hit = haystack.indexOf(q) !== -1;
+        card.classList.toggle("hidden", !hit);
+        if (hit) anyVisible = true;
+      });
+      root.classList.toggle("is-empty", !anyVisible);
+    }
+  };
+
+  // Shared structural reconciler for the instance-backed menus (stack,
+  // link). Given the full desired card set (`[{ id, html }, ...]`, each
+  // `html` the server-rendered markup for that card), it removes cards
+  // no longer desired, inserts desired cards not yet in the DOM into the
+  // matching category section (creating the section when absent), and
+  // drops emptied category sections. It does NOT touch eligibility /
+  // selection / search / empty-state - callers retune those after, so a
+  // board change never disturbs scroll, expansion, or in-progress input.
+  function cssEscapeAttr(s) {
+    return String(s).replace(/["\\]/g, "\\$&");
+  }
+  function cardById(root, id) {
+    return root.querySelector(
+      '.blockr-block-browser-card[data-block-type="' + cssEscapeAttr(id) + '"]'
     );
   }
+  function parseCardHtml(html) {
+    var tmp = document.createElement("div");
+    tmp.innerHTML = String(html).trim();
+    return tmp.firstElementChild;
+  }
+  function insertCardNode(cats, category, node) {
+    var sec = cats.querySelector(
+      '.blockr-block-browser-category[data-category="' +
+        cssEscapeAttr(category) + '"]'
+    );
+    if (sec) {
+      (sec.querySelector(".blockr-block-browser-cards") || sec)
+        .appendChild(node);
+      return;
+    }
+    sec = document.createElement("div");
+    sec.className = "blockr-block-browser-category";
+    sec.setAttribute("data-category", category);
+    var h = document.createElement("h3");
+    h.textContent = category;
+    var list = document.createElement("div");
+    list.className = "blockr-block-browser-cards";
+    list.appendChild(node);
+    sec.appendChild(h);
+    sec.appendChild(list);
+    cats.appendChild(sec);
+  }
+  BlockrUI.cardSync = BlockrUI.cardSync || function (root, cards) {
+    var cats = root.querySelector(".blockr-block-browser-categories");
+    if (!cats) return;
+    // `sendInputMessage` auto-unboxes a length-1 list to a scalar.
+    if (!cards) cards = [];
+    if (!Array.isArray(cards)) cards = [cards];
+
+    var desired = {};
+    cards.forEach(function (c) {
+      if (c && c.id != null) desired[c.id] = c;
+    });
+
+    BlockrUI.cardSearch.getCards(root).forEach(function (card) {
+      var id = card.getAttribute("data-block-type");
+      if (!Object.prototype.hasOwnProperty.call(desired, id)) {
+        if (card.parentNode) card.parentNode.removeChild(card);
+      }
+    });
+
+    cards.forEach(function (c) {
+      if (!c || c.id == null || !c.html) return;
+      if (cardById(root, c.id)) return;
+      var node = parseCardHtml(c.html);
+      if (node) insertCardNode(cats, node.getAttribute("data-category") || "", node);
+    });
+
+    Array.prototype.slice
+      .call(cats.querySelectorAll(".blockr-block-browser-category"))
+      .forEach(function (sec) {
+        if (!sec.querySelector(".blockr-block-browser-card")) {
+          if (sec.parentNode) sec.parentNode.removeChild(sec);
+        }
+      });
+  };
 
   function getField(card, fieldClass) {
     return card.querySelector(
@@ -56,32 +168,6 @@
     root.dispatchEvent(new CustomEvent(COMMIT_EVENT));
   }
 
-  // Search - hide non-matching cards via .hidden, collapse empty
-  // category sections via CSS, show the empty-state when nothing matches.
-  function applySearch(root, query) {
-    var q = (query || "").trim().toLowerCase();
-    var anyVisible = false;
-    getCards(root).forEach(function (card) {
-      if (q.length === 0) {
-        card.classList.remove("hidden");
-        anyVisible = true;
-        return;
-      }
-      var haystack = [
-        card.getAttribute("data-name") || "",
-        card.getAttribute("data-description") || "",
-        card.getAttribute("data-package") || "",
-        card.getAttribute("data-category") || ""
-      ]
-        .join(" ")
-        .toLowerCase();
-      var hit = haystack.indexOf(q) !== -1;
-      card.classList.toggle("hidden", !hit);
-      if (hit) anyVisible = true;
-    });
-    root.classList.toggle("is-empty", !anyVisible);
-  }
-
   // Wire the search box and the delegated card-area click handler.
   // Idempotent: safe to call from both initialize() and subscribe()
   // (Shiny may invoke either first).
@@ -92,7 +178,7 @@
     var search = root.querySelector(".blockr-block-browser-search");
     if (search) {
       search.addEventListener("input", function () {
-        applySearch(root, search.value);
+        BlockrUI.cardSearch.applySearch(root, search.value);
       });
     }
 
