@@ -28,6 +28,6 @@ Suggests:
     withr
 Remotes:
     BristolMyersSquibb/blockr.core,
-    BristolMyersSquibb/blockr.dock@add-stack-menu-adoption
+    BristolMyersSquibb/blockr.dock@add-link-menu-adoption
 Config/testthat/edition: 3
 VignetteBuilder: knitr
