@@ -45,14 +45,19 @@ test_that("the add button label matches the flow", {
     html <- as.character(htmltools::renderTags(ui)$html)
     flat <- gsub("\\s+", " ", html)
     sub(
-      ".*blockr-block-browser-card-add[^>]*> ?(?:<svg.*?</svg> ?)?([A-Za-z]+).*",
+      paste0(
+        ".*blockr-block-browser-card-add[^>]*> ?",
+        "(?:<svg.*?</svg> ?)?([A-Za-z]+).*"
+      ),
       "\\1", flat, perl = TRUE
     )
   }
   expect_equal(add_label(block_browser_ui("a", NULL)), "Add")
   m <- blockr.core::new_merge_block()
   board <- blockr.core::new_board(blocks = list(m = m))
-  expect_equal(add_label(block_browser_ui("a", board, append_to("m"))), "Append")
+  expect_equal(
+    add_label(block_browser_ui("a", board, append_to("m"))), "Append"
+  )
   expect_equal(
     add_label(block_browser_ui("a", board, prepend_to("m"))), "Prepend"
   )
