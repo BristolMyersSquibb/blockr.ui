@@ -16,6 +16,19 @@ test_that("each card carries metadata data-attributes", {
   expect_match(html, "data-category=", fixed = TRUE)
 })
 
+test_that("collapsed cards expose the description as a band and a title hint", {
+  panel <- block_browser_ui("mod_a", NULL)
+  html <- as.character(htmltools::renderTags(panel)$html)
+
+  # The full description lives in the expanded card's description band ...
+  expect_match(html, "blockr-block-browser-card-descr-band", fixed = TRUE)
+  # ... and a collapsed card root additionally carries it as a native
+  # `title` hint (the JS toggle removes this on expand).
+  expect_match(
+    html, "class=\"blockr-block-browser-card\"[^>]*title=\"", perl = TRUE
+  )
+})
+
 test_that("cards group under category sections with Uncategorized fallback", {
   panel <- block_browser_ui("mod_a", NULL)
   html <- as.character(htmltools::renderTags(panel)$html)
@@ -26,23 +39,27 @@ test_that("cards group under category sections with Uncategorized fallback", {
 })
 
 test_that("the add button label matches the flow", {
-  expect_match(
-    as.character(htmltools::renderTags(block_browser_ui("a", NULL))$html),
-    ">Add<", fixed = TRUE
-  )
+  # The button carries the leading plus glyph then the label, so match
+  # the add-button class followed (after the svg) by the verb.
+  add_label <- function(ui) {
+    html <- as.character(htmltools::renderTags(ui)$html)
+    flat <- gsub("\\s+", " ", html)
+    sub(
+      paste0(
+        ".*blockr-block-browser-card-add[^>]*> ?",
+        "(?:<svg.*?</svg> ?)?([A-Za-z]+).*"
+      ),
+      "\\1", flat, perl = TRUE
+    )
+  }
+  expect_equal(add_label(block_browser_ui("a", NULL)), "Add")
   m <- blockr.core::new_merge_block()
   board <- blockr.core::new_board(blocks = list(m = m))
-  expect_match(
-    as.character(htmltools::renderTags(
-      block_browser_ui("a", board, append_to("m"))
-    )$html),
-    ">Append<", fixed = TRUE
+  expect_equal(
+    add_label(block_browser_ui("a", board, append_to("m"))), "Append"
   )
-  expect_match(
-    as.character(htmltools::renderTags(
-      block_browser_ui("a", board, prepend_to("m"))
-    )$html),
-    ">Prepend<", fixed = TRUE
+  expect_equal(
+    add_label(block_browser_ui("a", board, prepend_to("m"))), "Prepend"
   )
 })
 

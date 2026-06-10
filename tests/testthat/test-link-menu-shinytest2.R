@@ -174,7 +174,7 @@ test_that("in-card Add link commits with edited values", {
   expect_equal(app$get_value(output = "commit_block_input"), "y")
 })
 
-test_that("live pool-update hides just-wired card without re-rendering", {
+test_that("live board sync drops the just-wired card without re-rendering", {
   app <- shinytest2::AppDriver$new(
     app_path, name = "link-menu-pool-update",
     load_timeout = 20 * 1000, timeout = 10 * 1000
@@ -191,16 +191,18 @@ test_that("live pool-update hides just-wired card without re-rendering", {
   click_js(app, card_sel("h", "outgoing"))
   expect_equal(app$get_value(output = "commit_count"), "1")
 
-  # The h card should now be hidden (its only port got wired).
+  # The board reactive drives a `menu:sync` that reconciles the card set
+  # in place: h had a single port, so once it is wired h leaves the
+  # outgoing pool and its card is dropped from the DOM (not just hidden).
   app$wait_for_idle(500)
   after <- n_visible(app)
   expect_lt(after, before)
 
-  h_hidden <- app$get_js(sprintf(
-    "document.querySelector('%s').classList.contains('hidden')",
+  h_present <- app$get_js(sprintf(
+    "document.querySelector('%s') !== null",
     card_sel("h", "outgoing")
   ))
-  expect_true(h_hidden)
+  expect_false(h_present)
 
   # The remaining cards (m, r) should still be visible and clickable.
   expect_gt(after, 0)

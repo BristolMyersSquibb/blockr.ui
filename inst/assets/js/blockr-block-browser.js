@@ -132,6 +132,23 @@
       });
   };
 
+  // Cards currently shown (not filtered out by search).
+  function visibleCards(root) {
+    return BlockrUI.cardSearch.getCards(root).filter(function (card) {
+      return !card.classList.contains("hidden");
+    });
+  }
+
+  // Move the keyboard-selection highlight to `card` (or clear it when
+  // null) and scroll it into view. Selection is a purely visual marker
+  // - `.card-selected` - distinct from the chevron's `.card-expanded`.
+  function selectCard(root, card) {
+    BlockrUI.cardSearch.getCards(root).forEach(function (c) {
+      c.classList.toggle("card-selected", c === card);
+    });
+    if (card) card.scrollIntoView({ block: "nearest" });
+  }
+
   function getField(card, fieldClass) {
     return card.querySelector(
       "." + fieldClass + " input, ." + fieldClass + " select"
@@ -182,6 +199,39 @@
     if (search) {
       search.addEventListener("input", function () {
         BlockrUI.cardSearch.applySearch(root, search.value);
+        // Keep a valid card highlighted so Enter adds the top hit; drop
+        // the highlight if the previously selected card was filtered out.
+        var current = root.querySelector(
+          ".blockr-block-browser-card.card-selected"
+        );
+        if (!current || current.classList.contains("hidden")) {
+          selectCard(root, visibleCards(root)[0] || null);
+        }
+      });
+
+      // Arrow keys move the highlight, Enter adds it. Gated to the search
+      // box so arrow keys still edit text inside an expanded card's form.
+      root.addEventListener("keydown", function (event) {
+        if (event.target !== search) return;
+
+        var cards = visibleCards(root);
+        if (cards.length === 0) return;
+
+        var current = root.querySelector(
+          ".blockr-block-browser-card.card-selected"
+        );
+        var idx = current ? cards.indexOf(current) : -1;
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          selectCard(root, cards[idx < cards.length - 1 ? idx + 1 : 0]);
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault();
+          selectCard(root, cards[idx > 0 ? idx - 1 : cards.length - 1]);
+        } else if (event.key === "Enter") {
+          event.preventDefault();
+          commitCard(root, current || cards[0]);
+        }
       });
     }
 
@@ -192,7 +242,17 @@
         if (!card || !root.contains(card)) return;
 
         if (event.target.closest(".blockr-block-browser-card-chevron")) {
-          card.classList.toggle("card-expanded");
+          var nowExpanded = card.classList.toggle("card-expanded");
+          // Collapsed rows carry the description as an additive native
+          // `title` hint; drop it while expanded (the description band
+          // shows it in full) and restore it on collapse from the
+          // data-description the card already carries.
+          if (nowExpanded) {
+            card.removeAttribute("title");
+          } else {
+            var desc = card.getAttribute("data-description");
+            if (desc) card.setAttribute("title", desc);
+          }
           event.preventDefault();
           return;
         }

@@ -42,13 +42,17 @@
   }
 
   function refreshBodyReflow() {
-    // Push-mode panels shift the page content aside via a class + CSS
-    // variable on `<html>` whenever they are open. We apply to `<html>`
-    // (rather than `<body>`) because bslib's page-fill layouts pin body
-    // to 100% of html and zero its padding inline - body-level padding /
-    // margin no longer constrains the visible viewport. Padding on html
-    // shrinks html's content area, and body (sized 100% of it) follows.
-    // Overlay-mode panels never reflow.
+    // A panel "docks" (shifts the page content aside via a class + CSS
+    // variable on `<html>`) when it is open AND either:
+    //   * it is a push-mode panel (`data-mode="push"`): always pushes
+    //     while open, regardless of pin; or
+    //   * it is pinned: an overlay-mode panel floats above the board by
+    //     default and only docks once the user pins it.
+    // So the rule is "open AND (mode=push OR pinned)". We apply to
+    // `<html>` (rather than `<body>`) because bslib's page-fill layouts
+    // pin body to 100% of html and zero its padding inline - body-level
+    // padding / margin no longer constrains the visible viewport. Padding
+    // on html shrinks html's content area, and body (sized 100%) follows.
     var root = document.documentElement;
     root.classList.remove(
       "blockr-html-pushed-left",
@@ -57,9 +61,11 @@
 
     // Both sides may be open simultaneously; track each width separately
     // so the page content is constrained between them rather than hidden
-    // under whichever sidebar was opened second.
+    // under whichever sidebar was opened second. The two-selector union
+    // is "(open AND push)" OR "(open AND pinned)".
     var pushedOpen = document.querySelectorAll(
-      ".blockr-sidebar.blockr-sidebar-open[data-mode=\"push\"]"
+      ".blockr-sidebar.blockr-sidebar-open[data-mode=\"push\"], " +
+        ".blockr-sidebar.blockr-sidebar-open.blockr-sidebar-pinned"
     );
     var widths = { left: 0, right: 0 };
     for (var i = 0; i < pushedOpen.length; i++) {
@@ -254,10 +260,12 @@
   }
 
   function togglePinned(panel) {
-    // Pin only affects dismissal (Esc / outside click). Body reflow is
-    // governed by the panel's `data-mode`, not by pin state, so no
-    // refreshBodyReflow() call here.
+    // Pin governs both dismissal (Esc / outside click) and reflow: a
+    // pinned push-capable panel docks beside the content, an unpinned one
+    // floats as an overlay. Refresh the reflow so toggling pin pushes /
+    // releases the board immediately.
     panel.classList.toggle("blockr-sidebar-pinned");
+    refreshBodyReflow();
     dispatchState(panel);
   }
 

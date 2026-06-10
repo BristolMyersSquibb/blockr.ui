@@ -15,7 +15,7 @@ sidebar_ui(
   ui = NULL,
   title = NULL,
   side = c("right", "left"),
-  width = "360px",
+  width = "420px",
   mode = c("overlay", "push")
 )
 
@@ -55,12 +55,14 @@ via \code{\link[htmltools:renderTags]{htmltools::renderTags()}} so dependencies 
 \code{--blockr-sidebar-panel-width}. The CSS bundle uses that variable for
 the panel's \code{width}.}
 
-\item{mode}{One of \code{"overlay"} (default) or \code{"push"}. In \code{"overlay"}
-mode the panel hovers above the page and the rest of the layout is
-untouched. In \code{"push"} mode the bundled CSS adds
-\verb{padding-<side>: var(--blockr-sidebar-width)} on \verb{<body>} whenever
-the panel is open, so the page content shifts aside instead of being
-covered. The choice is independent of pin state.}
+\item{mode}{One of \code{"overlay"} (default) or \code{"push"}, controlling when
+the panel "docks": the bundled CSS adds
+\verb{padding-<side>: var(--blockr-sidebar-width-<side>)} on \verb{<html>} so
+the page content shifts aside instead of being covered. In
+\code{"overlay"} mode the panel hovers above the page and only docks once
+the user pins it. In \code{"push"} mode the panel docks whenever it is
+open, regardless of pin state. Either way, pinning also keeps the
+panel open against Esc / outside clicks.}
 
 \item{session}{The Shiny session. Defaults to the calling reactive
 domain - same as \code{\link[shiny:showModal]{shiny::showModal()}}.}

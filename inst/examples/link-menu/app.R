@@ -47,7 +47,18 @@ server <- function(input, output, session) {
   count <- reactiveVal(0L)
   current_anchor <- reactiveVal(NULL)
 
-  committed <- blockr.ui::link_menu_server("menu")
+  # Pass the board + anchor as reactives (the same contract the dock's
+  # add_link_action uses): the menu then validates the committed link id,
+  # resolves the target input slot, and keeps the open panel in sync with
+  # the board on every change. `committed()` is therefore a ready-to-apply
+  # `blockr.core` links object (one id-keyed link, port already resolved),
+  # so this server is a thin adapter - no manual port resolution, no
+  # manual pool-update.
+  committed <- blockr.ui::link_menu_server(
+    "menu",
+    board = reactive(board_rv()),
+    anchor = reactive(current_anchor())
+  )
 
   open_menu <- function(anchor) {
     current_anchor(anchor)
@@ -65,95 +76,31 @@ server <- function(input, output, session) {
   observeEvent(input$open_m, open_menu("m"))
   observeEvent(input$open_r, open_menu("r"))
 
-  # Resolve which input slot the new link wires to. `spec$block_input`
-  # is set when the user picked one from the per-card form (target had
-  # arity > 1 free at render time). When NULL we fall back to:
-  #
-  # * variadic target: a fresh integer slot ("1", "2", ...), same
-  #   logic `blockr.dock::block_input_select()` applies on the dock
-  #   side.
-  # * non-variadic target: the first *free* named input port (filter
-  #   `block_inputs()` by already-wired ports). Never just
-  #   `block_inputs(blk)[[1L]]` because the first-registered port may
-  #   already be consumed; using it server-side trips
-  #   `validate_links: Block <id> has multiple identical inputs`.
-  resolve_input <- function(brd, target, requested) {
-    if (!is.null(requested) && nzchar(requested)) return(requested)
-    blk <- board_blocks(brd)[[target]]
-    links_df <- as.data.frame(board_links(brd))
-    used <- as.character(links_df$input[links_df$to == target])
-    if (is.na(block_arity(blk))) {
-      nums <- suppressWarnings(as.integer(used))
-      nums <- nums[!is.na(nums)]
-      if (length(nums) == 0L) return("1")
-      missing_slots <- setdiff(seq_len(max(nums)), nums)
-      if (length(missing_slots)) {
-        as.character(min(missing_slots))
-      } else {
-        as.character(max(nums) + 1L)
-      }
-    } else {
-      free <- setdiff(block_inputs(blk), used)
-      if (length(free) == 0L) {
-        stop("Target ", target, " has no free named input ports.")
-      }
-      free[[1L]]
-    }
-  }
-
   observeEvent(committed(), {
-    spec <- committed()
-    last_commit(spec)
+    links <- committed()
+    last_commit(links)
     count(count() + 1L)
 
-    # Apply the link to the board so the next pool-update push reflects
-    # the new state.
+    # Add the ready links object to the board. The menu's own board
+    # observer then drops the just-wired card in place (no re-render),
+    # so the panel can stay open for the next link.
     brd <- board_rv()
-    new_lnk <- new_link(
-      from = spec$source, to = spec$target,
-      input = resolve_input(brd, spec$target, spec$block_input)
-    )
-    new_lnks <- as_links(set_names(list(new_lnk), spec$link_id))
-    blockr.core::board_links(brd) <- c(
-      board_links(brd), new_lnks
-    )
+    board_links(brd) <- c(board_links(brd), links)
     board_rv(brd)
+  })
 
-    # Push live pool-update to the still-open menu. The `eligible`
-    # map drives card visibility; `free_inputs` drives the per-card
-    # block-input <select> options (refreshed so a port the user
-    # just consumed isn't offered again on the next commit).
-    session$onFlushed(once = TRUE, function() {
-      isolate({
-        anchor <- current_anchor()
-        if (is.null(anchor)) return()
-        pools <- blockr.ui::link_eligible_pools(board_rv(), anchor)
-        if (length(pools$outgoing) == 0L &&
-              length(pools$incoming) == 0L) {
-          hide_sidebar("panel")
-        } else {
-          session$sendInputMessage(
-            session$ns("menu-commit"),
-            list(
-              type = "pool-update",
-              eligible = list(
-                outgoing = pools$outgoing,
-                incoming = pools$incoming
-              ),
-              free_inputs = pools$free_inputs,
-              link_id_seed = rand_names(board_link_ids(board_rv()))
-            )
-          )
-        }
-      })
-    })
+  # `committed()` is a `links` object; read its single row's parts for
+  # the assertion outputs (id / from / to / input).
+  commit_row <- reactive({
+    lks <- last_commit()
+    if (is.null(lks) || length(lks) == 0L) NULL else as.data.frame(lks)
   })
 
   output$commit <- renderPrint(last_commit())
-  output$commit_source <- renderText(last_commit()$source %||% "")
-  output$commit_target <- renderText(last_commit()$target %||% "")
-  output$commit_link_id <- renderText(last_commit()$link_id %||% "")
-  output$commit_block_input <- renderText(last_commit()$block_input %||% "")
+  output$commit_source <- renderText(commit_row()$from %||% "")
+  output$commit_target <- renderText(commit_row()$to %||% "")
+  output$commit_link_id <- renderText(commit_row()$id %||% "")
+  output$commit_block_input <- renderText(commit_row()$input %||% "")
   output$commit_count <- renderText(as.character(count()))
 }
 
