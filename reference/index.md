@@ -10,6 +10,11 @@
   : Block browser
 - [`is_hex_color()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/is_hex_color.md)
   : Validate a hex colour string
+- [`link_menu_ui()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/link-menu.md)
+  [`link_menu_server()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/link-menu.md)
+  [`link_menu_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/link-menu.md)
+  [`link_eligible_pools()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/link-menu.md)
+  : Link menu
 - [`sidebar_ui()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
   [`sidebar_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)
   [`show_sidebar()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/sidebar.md)

@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>The stack menu • blockr.ui</title>
+<title>The link menu • blockr.ui</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The stack menu">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The link menu">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -67,50 +67,87 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>The stack menu</h1>
+      <h1>The link menu</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/BristolMyersSquibb/blockr.ui/blob/main/vignettes/stack-menu.Rmd" class="external-link"><code>vignettes/stack-menu.Rmd</code></a></small>
-      <div class="d-none name"><code>stack-menu.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/BristolMyersSquibb/blockr.ui/blob/main/vignettes/link-menu.Rmd" class="external-link"><code>vignettes/link-menu.Rmd</code></a></small>
+      <div class="d-none name"><code>link-menu.Rmd</code></div>
     </div>
 
     
     
-<p><code><a href="../reference/stack-menu.html">blockr.ui::stack_menu_ui()</a></code> is a multi-select card-list
-block picker for stacks. It lives inside the <a href="sidebar.html">sidebar primitive</a> and replaces the legacy
-selectize-style chooser used by <code>blockr.dock</code>’s add / edit
-stack flows. Each card represents a <em>board instance</em> (a block
-already on the board) and clicking a card toggles its membership in the
-new (or edited) stack. A small panel-level form below the cards carries
-the stack-level parameters (name, color, id).</p>
+<p><code><a href="../reference/link-menu.html">blockr.ui::link_menu_ui()</a></code> is a
+<strong>bidirectional</strong> card-list link picker. It lives inside
+the <a href="sidebar.html">sidebar primitive</a> and replaces the legacy
+selectize-style chooser used by <code>blockr.dock</code>’s add-link
+flow. Each card represents a board <em>instance</em> that the new link
+can attach to, and the menu computes eligibility against a fixed
+<em>anchor</em> block (the right-clicked block in the dock flow).</p>
 <div class="section level2">
-<h2 id="create-vs-edit">Create vs edit<a class="anchor" aria-label="anchor" href="#create-vs-edit"></a>
+<h2 id="two-directions-one-anchor">Two directions, one anchor<a class="anchor" aria-label="anchor" href="#two-directions-one-anchor"></a>
 </h2>
-<p>The flow is selected by the <code>target</code> argument, mirroring
-<a href="block-browser.html"><code>block_browser_ui()</code></a>:</p>
+<p><code>link_menu_ui(id, board, anchor)</code> renders up to two
+category-grouped sections relative to <code>anchor</code>. When both
+render, INPUT FROM appears above OUTPUT TO so the order matches the
+natural left-to-right data flow (sources feed the anchor; the anchor
+feeds targets):</p>
 <ul>
-<li><p><code>target = NULL</code> (default) is the
-<strong>create</strong> flow. The eligible pool is every board block
-that is not currently a member of a stack. No card is pre-selected. The
-form exposes <code>Stack name</code> (always), <code>Stack color</code>
-and <code>Stack id</code> (under an Advanced toggle).</p></li>
-<li><p><code>target = "&lt;stack_id&gt;"</code> is the
-<strong>edit</strong> flow. The function looks the stack up via
-<code>blockr.core::board_stacks(board)[[target]]</code>, augments the
-pool with the stack’s current blocks (so the user can deselect them),
-pre-selects them, and pre-fills name / color. The stack id is fixed and
-not rendered. An unknown id raises a clean error.</p></li>
+<li>
+<strong>INPUT FROM</strong> (INCOMING, card -&gt; anchor): blocks
+that can link <em>into</em> the anchor. Only rendered when the anchor
+itself has at least one free named input port or is variadic.
+Eligibility = every other board block, excluding any that the anchor
+already reaches (would close a cycle).</li>
+<li>
+<strong>OUTPUT TO</strong> (OUTGOING, anchor -&gt; card): blocks the
+anchor can link <em>to</em>. Eligibility = every other board block with
+at least one free named input port or variadic arity, excluding any that
+already reach the anchor (would close a cycle).</li>
 </ul>
+<p>If both pools are empty the panel renders an in-place empty-state
+instead of returning <code>NULL</code>. This means right-clicking a
+downstream block with free inputs no longer surfaces the legacy “No
+inputs are currently available” warning - the menu opens with its
+INCOMING section populated.</p>
 </div>
 <div class="section level2">
 <h2 id="commit-contract">Commit contract<a class="anchor" aria-label="anchor" href="#commit-contract"></a>
 </h2>
-<p>The menu publishes the selection set through a Shiny input binding;
-the panel-level name / color / id fields are normal Shiny inputs. The
-server composes the full spec -
-<code>list(blocks, name, color, id)</code> - from both sources, strips
-the internal <code>nonce</code>, and hands the spec to
-<code><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent()</a></code>.</p>
+<p>The JS binding publishes
+<code>list(source, target, link_id, block_input, nonce)</code> on
+<code>input$commit</code>. <code>source</code> / <code>target</code> are
+derived from the clicked card’s <code>data-direction</code> and the
+panel’s <code>data-anchor</code>:</p>
+<ul>
+<li>
+<code>data-direction = "outgoing"</code> -&gt;
+<code>source = anchor</code>, <code>target = card</code>
+</li>
+<li>
+<code>data-direction = "incoming"</code> -&gt;
+<code>source = card</code>, <code>target = anchor</code>
+</li>
+</ul>
+<p><code>link_menu_server(id)</code> strips the internal
+<code>nonce</code> and returns a <code>reactive</code> whose value is
+the spec. The consumer doesn’t have to know the orientation up front -
+the spec carries both ends explicitly.</p>
+</div>
+<div class="section level2">
+<h2 id="multi-link-sessions">Multi-link sessions<a class="anchor" aria-label="anchor" href="#multi-link-sessions"></a>
+</h2>
+<p>Single click commits one link, but the menu is designed for repeated
+adds: the consumer pushes a typed <code>pool-update</code> payload to
+the open panel via <code>session$sendInputMessage()</code> after each
+commit, and the binding’s <code>receiveMessage</code> handler hides the
+just-wired card client-side. Card-expansion state, scroll position, and
+the search filter value are preserved. If both pools drain to zero, the
+consumer calls <code><a href="../reference/sidebar.html">hide_sidebar()</a></code> and the panel closes
+itself.</p>
+<p><code>link_eligible_pools(board, anchor)</code> is exported so the
+consumer recomputes the post-commit pool against the same eligibility
+logic the menu uses for its initial render - one source of truth shared
+across both call sites.</p>
 </div>
 <div class="section level2">
 <h2 id="minimal-example">Minimal example<a class="anchor" aria-label="anchor" href="#minimal-example"></a>
@@ -121,36 +158,27 @@ the internal <code>nonce</code>, and hands the spec to
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bristolmyerssquibb.github.io/blockr.core/" class="external-link">blockr.core</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">board</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_board.html" class="external-link">new_board</a></span><span class="op">(</span></span>
-<span>  blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  blocks <span class="op">=</span> <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_block.html" class="external-link">as_blocks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    a <span class="op">=</span> <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_data_block.html" class="external-link">new_dataset_block</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>    b <span class="op">=</span> <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_transform_block.html" class="external-link">new_head_block</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>    c <span class="op">=</span> <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_transform_block.html" class="external-link">new_subset_block</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
+<span>    h <span class="op">=</span> <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_transform_block.html" class="external-link">new_head_block</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    m <span class="op">=</span> <span class="fu"><a href="https://bristolmyerssquibb.github.io/blockr.core/reference/new_transform_block.html" class="external-link">new_merge_block</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/sidebar.html">sidebar_ui</a></span><span class="op">(</span><span class="st">"panel"</span>, side <span class="op">=</span> <span class="st">"right"</span>, width <span class="op">=</span> <span class="st">"420px"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/actionButton.html" class="external-link">actionButton</a></span><span class="op">(</span><span class="st">"open_create"</span>, <span class="st">"Create stack"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/actionButton.html" class="external-link">actionButton</a></span><span class="op">(</span><span class="st">"open_edit"</span>, <span class="st">"Edit stack s1"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/actionButton.html" class="external-link">actionButton</a></span><span class="op">(</span><span class="st">"open"</span>, <span class="st">"Connect a"</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textOutput.html" class="external-link">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"spec"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">committed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/stack-menu.html">stack_menu_server</a></span><span class="op">(</span><span class="st">"menu"</span><span class="op">)</span></span>
+<span>  <span class="va">committed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/link-menu.html">link_menu_server</a></span><span class="op">(</span><span class="st">"menu"</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">open_create</span>, <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">open</span>, <span class="op">{</span></span>
 <span>    <span class="fu"><a href="../reference/sidebar.html">show_sidebar</a></span><span class="op">(</span></span>
 <span>      <span class="st">"panel"</span>,</span>
-<span>      title <span class="op">=</span> <span class="st">"Create stack"</span>,</span>
-<span>      ui <span class="op">=</span> <span class="fu"><a href="../reference/stack-menu.html">stack_menu_ui</a></span><span class="op">(</span><span class="va">session</span><span class="op">$</span><span class="fu">ns</span><span class="op">(</span><span class="st">"menu"</span><span class="op">)</span>, <span class="va">board</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">}</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">open_edit</span>, <span class="op">{</span></span>
-<span>    <span class="fu"><a href="../reference/sidebar.html">show_sidebar</a></span><span class="op">(</span></span>
-<span>      <span class="st">"panel"</span>,</span>
-<span>      title <span class="op">=</span> <span class="st">"Edit stack s1"</span>,</span>
-<span>      ui <span class="op">=</span> <span class="fu"><a href="../reference/stack-menu.html">stack_menu_ui</a></span><span class="op">(</span><span class="va">session</span><span class="op">$</span><span class="fu">ns</span><span class="op">(</span><span class="st">"menu"</span><span class="op">)</span>, <span class="va">board</span>, target <span class="op">=</span> <span class="st">"s1"</span><span class="op">)</span></span>
+<span>      title <span class="op">=</span> <span class="st">"Connect a"</span>,</span>
+<span>      ui <span class="op">=</span> <span class="fu"><a href="../reference/link-menu.html">link_menu_ui</a></span><span class="op">(</span><span class="va">session</span><span class="op">$</span><span class="fu">ns</span><span class="op">(</span><span class="st">"menu"</span><span class="op">)</span>, <span class="va">board</span>, anchor <span class="op">=</span> <span class="st">"a"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span></span>
@@ -160,19 +188,10 @@ the internal <code>nonce</code>, and hands the spec to
 <span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
 <p>A runnable copy is shipped at:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"stack-menu"</span>, <span class="st">"app.R"</span>, package <span class="op">=</span> <span class="st">"blockr.ui"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="colour-picker">Colour picker<a class="anchor" aria-label="anchor" href="#colour-picker"></a>
-</h2>
-<p>The stack colour widget is an inline hue / lightness slider + hex
-text input shipped by <code>blockr.ui</code> itself - no popover that
-escapes the sidebar, no extra dependency. Moving a slider recomputes
-<code>HSL -&gt; hex</code> and writes the hex field; typing in the hex
-field parses back the other way and repositions the sliders. The hex
-<code>&lt;input&gt;</code> is a regular Shiny text input, so the colour
-reaches the server through Shiny’s built-in text-input binding without
-any custom JS path.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"link-menu"</span>, <span class="st">"app.R"</span>, package <span class="op">=</span> <span class="st">"blockr.ui"</span><span class="op">)</span></span></code></pre></div>
+<p>The bundled example exercises all four anchor cases (source-only,
+arity-1 target, arity-N target, variadic) and demonstrates the live
+<code>pool-update</code> flow.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

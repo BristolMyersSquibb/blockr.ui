@@ -202,6 +202,56 @@ shinyApp(ui, server)
 
 blockr.ui stack menu example
 
+### Link menu
+
+A bidirectional card-list link picker. Right-click any block to add a
+link in either direction - the menu shows up to two sections
+(`INPUT FROM` / `OUTPUT TO`) based on the anchor’s free-input capacity.
+Single click commits one link; the panel stays open across commits via a
+live `pool-update` push. See
+[`vignette("link-menu", package = "blockr.ui")`](https://bristolmyerssquibb.github.io/blockr.ui/articles/link-menu.md).
+
+``` r
+
+library(shiny)
+library(blockr.ui)
+library(blockr.core)
+
+board <- new_board(
+  blocks = as_blocks(list(
+    a = new_dataset_block(),
+    h = new_head_block(),
+    m = new_merge_block()
+  ))
+)
+
+ui <- fluidPage(
+  sidebar_ui("panel", side = "right", width = "420px"),
+  actionButton("open", "Connect a"),
+  verbatimTextOutput("spec")
+)
+
+server <- function(input, output, session) {
+  committed <- link_menu_server("menu")
+
+  observeEvent(input$open, {
+    show_sidebar(
+      "panel",
+      title = "Connect a",
+      ui = link_menu_ui(session$ns("menu"), board, anchor = "a")
+    )
+  })
+
+  output$spec <- renderPrint(committed())
+}
+
+shinyApp(ui, server)
+```
+
+![blockr.ui link menu example](reference/figures/link-menu.png)
+
+blockr.ui link menu example
+
 ## Code of Conduct
 
 Please note that the blockr.ui project is released with a [Contributor

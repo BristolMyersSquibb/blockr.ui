@@ -13,7 +13,7 @@ from any moduleServer() body, exactly like a modal."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">blockr.ui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9007</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,6 +25,7 @@ from any moduleServer() body, exactly like a modal."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/block-browser.html">The block browser</a></li>
+    <li><a class="dropdown-item" href="../articles/link-menu.html">The link menu</a></li>
     <li><a class="dropdown-item" href="../articles/sidebar.html">Driving the sidebar primitive</a></li>
     <li><a class="dropdown-item" href="../articles/stack-menu.html">The stack menu</a></li>
   </ul></li>
@@ -65,7 +66,7 @@ from any <code><a href="https://rdrr.io/pkg/shiny/man/moduleServer.html" class="
 <span>  ui <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  side <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"right"</span>, <span class="st">"left"</span><span class="op">)</span>,</span>
-<span>  width <span class="op">=</span> <span class="st">"360px"</span>,</span>
+<span>  width <span class="op">=</span> <span class="st">"420px"</span>,</span>
 <span>  mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"overlay"</span>, <span class="st">"push"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -120,12 +121,14 @@ the panel's <code>width</code>.</p></dd>
 
 
 <dt id="arg-mode">mode<a class="anchor" aria-label="anchor" href="#arg-mode"></a></dt>
-<dd><p>One of <code>"overlay"</code> (default) or <code>"push"</code>. In <code>"overlay"</code>
-mode the panel hovers above the page and the rest of the layout is
-untouched. In <code>"push"</code> mode the bundled CSS adds
-<code>padding-&lt;side&gt;: var(--blockr-sidebar-width)</code> on <code>&lt;body&gt;</code> whenever
-the panel is open, so the page content shifts aside instead of being
-covered. The choice is independent of pin state.</p></dd>
+<dd><p>One of <code>"overlay"</code> (default) or <code>"push"</code>, controlling when
+the panel "docks": the bundled CSS adds
+<code>padding-&lt;side&gt;: var(--blockr-sidebar-width-&lt;side&gt;)</code> on <code>&lt;html&gt;</code> so
+the page content shifts aside instead of being covered. In
+<code>"overlay"</code> mode the panel hovers above the page and only docks once
+the user pins it. In <code>"push"</code> mode the panel docks whenever it is
+open, regardless of pin state. Either way, pinning also keeps the
+panel open against Esc / outside clicks.</p></dd>
 
 
 <dt id="arg-session">session<a class="anchor" aria-label="anchor" href="#arg-session"></a></dt>

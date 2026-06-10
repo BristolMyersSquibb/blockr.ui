@@ -16,7 +16,7 @@ sidebar_ui(
   ui = NULL,
   title = NULL,
   side = c("right", "left"),
-  width = "360px",
+  width = "420px",
   mode = c("overlay", "push")
 )
 
@@ -70,12 +70,14 @@ keep_or_hide_sidebar(
 
 - mode:
 
-  One of `"overlay"` (default) or `"push"`. In `"overlay"` mode the
-  panel hovers above the page and the rest of the layout is untouched.
-  In `"push"` mode the bundled CSS adds
-  `padding-<side>: var(--blockr-sidebar-width)` on `<body>` whenever the
-  panel is open, so the page content shifts aside instead of being
-  covered. The choice is independent of pin state.
+  One of `"overlay"` (default) or `"push"`, controlling when the panel
+  "docks": the bundled CSS adds
+  `padding-<side>: var(--blockr-sidebar-width-<side>)` on `<html>` so
+  the page content shifts aside instead of being covered. In `"overlay"`
+  mode the panel hovers above the page and only docks once the user pins
+  it. In `"push"` mode the panel docks whenever it is open, regardless
+  of pin state. Either way, pinning also keeps the panel open against
+  Esc / outside clicks.
 
 - session:
 
