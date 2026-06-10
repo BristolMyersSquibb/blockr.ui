@@ -42,16 +42,17 @@
   }
 
   function refreshBodyReflow() {
-    // A panel shifts the page content aside via a class + CSS variable on
-    // `<html>` only while it is open AND pinned. Unpinned panels float as
-    // an overlay above the board (the default); pinning a push-capable
-    // panel "docks" it, reflowing the content beside it. We apply to
+    // A panel "docks" (shifts the page content aside via a class + CSS
+    // variable on `<html>`) when it is open AND either:
+    //   * it is a push-mode panel (`data-mode="push"`): always pushes
+    //     while open, regardless of pin; or
+    //   * it is pinned: an overlay-mode panel floats above the board by
+    //     default and only docks once the user pins it.
+    // So the rule is "open AND (mode=push OR pinned)". We apply to
     // `<html>` (rather than `<body>`) because bslib's page-fill layouts
     // pin body to 100% of html and zero its padding inline - body-level
     // padding / margin no longer constrains the visible viewport. Padding
     // on html shrinks html's content area, and body (sized 100%) follows.
-    // `data-mode="push"` marks a panel as push-capable; overlay-mode
-    // panels never reflow even when pinned.
     var root = document.documentElement;
     root.classList.remove(
       "blockr-html-pushed-left",
@@ -60,9 +61,11 @@
 
     // Both sides may be open simultaneously; track each width separately
     // so the page content is constrained between them rather than hidden
-    // under whichever sidebar was opened second.
+    // under whichever sidebar was opened second. The two-selector union
+    // is "(open AND push)" OR "(open AND pinned)".
     var pushedOpen = document.querySelectorAll(
-      ".blockr-sidebar.blockr-sidebar-open.blockr-sidebar-pinned[data-mode=\"push\"]"
+      ".blockr-sidebar.blockr-sidebar-open[data-mode=\"push\"], " +
+        ".blockr-sidebar.blockr-sidebar-open.blockr-sidebar-pinned"
     );
     var widths = { left: 0, right: 0 };
     for (var i = 0; i < pushedOpen.length; i++) {

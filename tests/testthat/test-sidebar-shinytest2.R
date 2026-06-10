@@ -149,6 +149,45 @@ test_that("two push sidebars constrain body between them, not under one", {
   expect_equal(width_var("--blockr-sidebar-width-right"), "0px")
 })
 
+test_that("overlay panel docks only once pinned", {
+  # The minimal example uses the default overlay mode (side = right). An
+  # overlay panel floats on open and only pushes the board once pinned.
+  app <- shinytest2::AppDriver$new(
+    app_path,
+    name = "sidebar-overlay-pin",
+    load_timeout = 20 * 1000,
+    timeout = 10 * 1000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  width_right <- function() {
+    app$get_js(paste0(
+      "document.documentElement.style.",
+      "getPropertyValue('--blockr-sidebar-width-right')"
+    ))
+  }
+
+  # Open: overlay floats, no push.
+  app$click("open")
+  app$wait_for_idle(500)
+  html_open <- app$get_js("document.documentElement.className")
+  expect_false(grepl("blockr-html-pushed", html_open %||% ""))
+  expect_equal(width_right(), "0px")
+
+  # Pin: the overlay panel docks and pushes the board aside.
+  click_js(app, "#main_sidebar .blockr-sidebar-pin")
+  html_pinned <- app$get_js("document.documentElement.className")
+  expect_match(html_pinned, "blockr-html-pushed-right")
+  expect_match(width_right(), "[0-9]+px")
+  expect_false(width_right() == "0px")
+
+  # Unpin: releases the board again.
+  click_js(app, "#main_sidebar .blockr-sidebar-pin")
+  html_unpinned <- app$get_js("document.documentElement.className")
+  expect_false(grepl("blockr-html-pushed", html_unpinned %||% ""))
+  expect_equal(width_right(), "0px")
+})
+
 test_that("minimal example: pin / unpin / Esc / outside-click / X-button", {
   app <- shinytest2::AppDriver$new(
     app_path,
