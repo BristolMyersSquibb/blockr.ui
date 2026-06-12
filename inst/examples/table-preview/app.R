@@ -50,4 +50,4 @@ board <- new_dock_board(
   ))
 )
 
-shiny::runApp(serve(board, "table-preview"))
+serve(board, "table-preview")
