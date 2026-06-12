@@ -1,6 +1,6 @@
 Package: blockr.ui
 Title: User Interface Components for the 'blockr' Ecosystem
-Version: 0.0.0.9007
+Version: 0.0.0.9008
 Authors@R:
     person(given = "David",
            family = "Granjon",
@@ -16,13 +16,17 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports:
     blockr.core (>= 0.1.2),
+    dplyr,
     htmltools,
+    pillar,
     rlang,
     shiny
 Suggests:
     blockr.dock,
+    dbplyr,
     knitr,
     rmarkdown,
+    RSQLite,
     shinytest2,
     testthat (>= 3.0.0),
     withr
