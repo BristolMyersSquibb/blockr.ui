@@ -26,6 +26,7 @@ html_table_render <- function(result, session, page_size = 5L) {
   # hence recreates this closure) whenever the block result changes, so the
   # memoized sort index / row count never outlive their result.
   cache <- new.env(parent = emptyenv())
+  prev_sort <- NULL
 
   shiny::renderUI({
     out_name <- tryCatch(
@@ -47,6 +48,14 @@ html_table_render <- function(result, session, page_size = 5L) {
 
         page <- session$input[[page_id]]
         page <- if (is.null(page)) 1L else as.integer(page)
+
+        # Reset to page 1 when the sort changes. Server-side on purpose: the
+        # JS sets only the sort input, so one click stays one render (a
+        # second page-reset input would re-render the output twice).
+        if (!identical(current_sort, prev_sort)) {
+          prev_sort <<- current_sort
+          page <- 1L
+        }
 
         # Extract table label before paging strips it
         tbl_label <- attr(result, "label")
