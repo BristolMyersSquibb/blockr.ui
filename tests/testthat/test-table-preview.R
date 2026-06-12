@@ -95,7 +95,9 @@ test_that("pagination buttons disable at the bounds", {
 
 test_that("the table label shows in the footer", {
   df <- data.frame(x = 1)
-  html <- render_chr(build_html_table(df, 1L, table_label = "ADSL: Subject-Level"))
+  html <- render_chr(
+    build_html_table(df, 1L, table_label = "ADSL: Subject-Level")
+  )
   expect_match(html, "blockr-table-label")
   expect_match(html, "ADSL: Subject-Level")
 })

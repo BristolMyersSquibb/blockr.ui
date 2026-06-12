@@ -22,7 +22,7 @@ test_that("lazy count is correct and cached", {
   cache <- new.env(parent = emptyenv())
   pg <- table_page(fx$lazy, NULL, 1L, 5L, cache = cache)
   expect_equal(pg$total_rows, 200)
-  expect_equal(get("..count", envir = cache), 200)
+  expect_equal(get("total_count", envir = cache), 200)
 })
 
 test_that("lazy pages equal the local engine for every sort mode", {
@@ -47,8 +47,13 @@ test_that("only one page is fetched and the sort is pushed to SQL", {
   expect_equal(nrow(pg$dat), 5L)
   # proof of pushdown: the page query compiles to a ROW_NUMBER window
   k <- rlang::sym("a")
-  keyed <- dbplyr::window_order(dplyr::mutate(fx$lazy, ..na = is.na(!!k)), ..na, !!k)
-  q <- dplyr::filter(dplyr::mutate(keyed, ..rn = dplyr::row_number()), .data$..rn > 10, .data$..rn <= 15)
+  keyed <- dbplyr::window_order(
+    dplyr::mutate(fx$lazy, ..na = is.na(!!k)), ..na, !!k
+  )
+  q <- dplyr::filter(
+    dplyr::mutate(keyed, ..rn = dplyr::row_number()),
+    .data$..rn > 10, .data$..rn <= 15
+  )
   expect_match(as.character(dbplyr::sql_render(q)), "ROW_NUMBER")
 })
 

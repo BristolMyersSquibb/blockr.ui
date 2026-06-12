@@ -102,7 +102,10 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
             `data-page-input` = page_input_id,
             shiny::tags$div(
               class = "blockr-table-footer",
-              shiny::tags$span(class = "blockr-table-range", "Empty data frame (0 columns)")
+              shiny::tags$span(
+                class = "blockr-table-range",
+                "Empty data frame (0 columns)"
+              )
             )
           )
         ),
@@ -210,7 +213,10 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
 
   for (i in seq_len(n_showing)) {
     row_cells <- vector("list", n_cols + 1L)
-    row_cells[[1L]] <- shiny::tags$td(class = "blockr-row-number", start_row_num + i)
+    row_cells[[1L]] <- shiny::tags$td(
+      class = "blockr-row-number",
+      start_row_num + i
+    )
 
     for (j in seq_along(col_names)) {
       is_na <- col_na[[j]][i]
@@ -229,7 +235,11 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
       }
 
       cell_title <- if (!is_na) formatted[[j]][i] else NULL
-      row_cells[[j + 1L]] <- shiny::tags$td(class = cell_class, title = cell_title, content)
+      row_cells[[j + 1L]] <- shiny::tags$td(
+        class = cell_class,
+        title = cell_title,
+        content
+      )
     }
 
     body_rows[[i]] <- do.call(shiny::tags$tr, row_cells)
@@ -276,13 +286,13 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     shiny::tags$div(
       class = "blockr-table-nav",
       shiny::tags$button(
-        class = if (page == 1L) "blockr-nav-btn disabled" else "blockr-nav-btn",
+        class = paste0("blockr-nav-btn", if (page == 1L) " disabled"),
         disabled = if (page == 1L) "disabled" else NULL,
         `data-direction` = "prev",
         shiny::HTML("&#x2039;")
       ),
       shiny::tags$button(
-        class = if (page >= max_page) "blockr-nav-btn disabled" else "blockr-nav-btn",
+        class = paste0("blockr-nav-btn", if (page >= max_page) " disabled"),
         disabled = if (page >= max_page) "disabled" else NULL,
         `data-direction` = "next",
         shiny::HTML("&#x203A;")

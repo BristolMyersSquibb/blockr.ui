@@ -33,7 +33,11 @@ html_table_render <- function(result, session, page_size = 5L) {
       shiny::getCurrentOutputInfo(session)$name,
       error = function(e) NULL
     )
-    instance <- if (is.null(out_name) || !nzchar(out_name)) "result" else out_name
+    instance <- if (is.null(out_name) || !nzchar(out_name)) {
+      "result"
+    } else {
+      out_name
+    }
     sort_id <- paste0(instance, "_table_sort")
     page_id <- paste0(instance, "_table_page")
 

@@ -86,12 +86,12 @@ table_page_lazy <- function(result, col, dir, page, page_size, cache) {
     stop("Previewing lazy tables requires the 'dbplyr' package.")
   }
 
-  total <- get0("..count", envir = cache, inherits = FALSE)
+  total <- get0("total_count", envir = cache, inherits = FALSE)
   if (is.null(total)) {
     # One aggregate query; numeric (not integer) so counts beyond
     # .Machine$integer.max survive.
     total <- as.numeric(dplyr::pull(dplyr::count(dplyr::ungroup(result))))
-    assign("..count", total, envir = cache)
+    assign("total_count", total, envir = cache)
   }
 
   max_page <- max(1L, ceiling(total / page_size))

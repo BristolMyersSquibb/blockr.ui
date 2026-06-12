@@ -38,7 +38,9 @@ test_that("ties keep original row order (stable sort, like arrange)", {
 
 test_that("column labels survive sorting and paging", {
   df <- sortable_df()
-  pg <- table_page(df, list(col = "num", dir = "asc"), page = 2L, page_size = 3L)
+  pg <- table_page(
+    df, list(col = "num", dir = "asc"), page = 2L, page_size = 3L
+  )
   expect_identical(attr(pg$dat$num, "label"), "A numeric label")
 })
 
