@@ -8,3 +8,6 @@
 #' @importFrom shiny tags
 ## usethis namespace: end
 NULL
+
+# Columns created inside dbplyr-translated verbs (table_page_lazy)
+utils::globalVariables(c("..na", "..rn"))
