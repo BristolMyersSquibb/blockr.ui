@@ -262,7 +262,8 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
   # "'length = 2' in coercion to 'logical(1)'" error.
   if (length(table_label) > 1L) table_label <- table_label[[1L]]
   table_label_tag <- NULL
-  if (!is.null(table_label) && is.character(table_label) && nzchar(table_label)) {
+  if (!is.null(table_label) && is.character(table_label) &&
+      nzchar(table_label)) {
     is_truncated <- nchar(table_label) > 60
     display_text <- if (is_truncated) {
       paste0(substr(table_label, 1, 58), "\u2026")
