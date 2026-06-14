@@ -75,6 +75,11 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
 
   sort_col <- sort_state$col
   sort_dir <- sort_state$dir
+  # Normalise once so the per-column header logic below can rely on a clean
+  # scalar (a NA/NULL `sort_dir` would make `sort_dir != "none"` return NA and
+  # crash the `&&` with "missing value where TRUE/FALSE needed").
+  if (length(sort_dir) != 1L || is.na(sort_dir)) sort_dir <- "none"
+  if (length(sort_col) != 1L || is.na(sort_col)) sort_col <- NULL
 
   sort_input_id <- if (!is.null(sort_input)) {
     sort_input

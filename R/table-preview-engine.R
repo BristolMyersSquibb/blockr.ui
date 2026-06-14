@@ -36,8 +36,21 @@ table_page <- function(result, sort_state = NULL, page = 1L, page_size = 5L,
                        cache = new.env(parent = emptyenv())) {
   col <- sort_state$col
   dir <- sort_state$dir
-  if (is.null(dir)) dir <- "none"
-  if (is.null(col) || !col %in% colnames(result)) dir <- "none"
+  # `dir` must be one of the known sort states. Anything else -- NULL, NA, or a
+  # stray value from a stale / half-initialised input -- falls back to "none"
+  # so the `if (dir == "none")` branches below never receive NA (which would
+  # otherwise crash with "missing value where TRUE/FALSE needed").
+  if (length(dir) != 1L || is.na(dir) || !dir %in% c("asc", "desc", "na", "none")) {
+    dir <- "none"
+  }
+  if (length(col) != 1L || is.na(col) || !col %in% colnames(result)) {
+    col <- NULL
+    dir <- "none"
+  }
+  # Guard the page index too: a non-numeric / NA page must not propagate into
+  # the slice arithmetic (NA in `hi <= lo` -> if(NA) crash).
+  page <- suppressWarnings(as.integer(page))
+  if (length(page) != 1L || is.na(page)) page <- 1L
 
   if (inherits(result, "tbl_lazy")) {
     table_page_lazy(result, col, dir, page, page_size, cache)
