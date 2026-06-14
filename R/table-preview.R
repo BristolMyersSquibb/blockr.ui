@@ -336,7 +336,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
 #' table-preview CSS and JS; [build_html_table()] attaches it automatically.
 #' `table_preview_css()` returns the base CSS as an inline
 #' `shiny::tags$style` for hosts that layer delta CSS on top of it (e.g.
-#' blockr.bi's html table block); it reads the same file the dependency
+#' blockr.viz's html table block); it reads the same file the dependency
 #' serves, so there is a single source.
 #'
 #' @return An [htmltools::htmlDependency] or a `shiny::tags$style` element.
