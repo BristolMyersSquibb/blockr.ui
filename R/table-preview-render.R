@@ -61,8 +61,12 @@ html_table_render <- function(result, session, page_size = 5L) {
           page <- 1L
         }
 
-        # Extract table label before paging strips it
-        tbl_label <- attr(result, "label")
+        # Extract table label before paging strips it. exact = TRUE so we
+        # don't partial-match other attrs (e.g. groupedData's length-2
+        # `labels` list, as on datasets::CO2) — that would make the
+        # downstream nzchar() in build_html_table() trip the
+        # "'length = 2' in coercion to 'logical(1)'" error.
+        tbl_label <- attr(result, "label", exact = TRUE)
 
         pg <- table_page(result, current_sort, page, page_size, cache)
 

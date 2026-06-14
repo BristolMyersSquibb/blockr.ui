@@ -257,8 +257,12 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
   }
 
   # Build optional table label span (displayed in footer next to row range)
+  # Coerce to a single string first: a non-scalar label (e.g. a stray
+  # length-2 attr) would make the nzchar() below trip the
+  # "'length = 2' in coercion to 'logical(1)'" error.
+  if (length(table_label) > 1L) table_label <- table_label[[1L]]
   table_label_tag <- NULL
-  if (!is.null(table_label) && nzchar(table_label)) {
+  if (!is.null(table_label) && is.character(table_label) && nzchar(table_label)) {
     is_truncated <- nchar(table_label) > 60
     display_text <- if (is_truncated) {
       paste0(substr(table_label, 1, 58), "\u2026")
