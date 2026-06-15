@@ -408,6 +408,28 @@ test_that("a duplicate non-empty id is rejected (no fire) with a board", {
   )
 })
 
+test_that("source-less append_to() renders a pre-renderable append panel", {
+  # `append_to()` (no source) is the descriptor used to pre-render the
+  # append panel once: append-mode markup, no context subtitle, and the
+  # same linkable card set as a sourced `append_to(<id>)` (the filter is
+  # registry-based, not source-specific).
+  board <- blockr.core::new_board(
+    blocks = list(m = blockr.core::new_merge_block())
+  )
+  html_src  <- as.character(block_browser_ui("a", board, append_to("m")))
+  html_free <- as.character(block_browser_ui("a", target = append_to()))
+
+  expect_match(html_free, "data-mode=\"append\"", fixed = TRUE)
+  expect_match(html_free, "blockr-block-browser-field-link-id", fixed = TRUE)
+  # No "Append from X" context band in the source-less variant.
+  expect_false(grepl("blockr-block-browser-context", html_free))
+
+  cards <- function(h) {
+    regmatches(h, gregexpr("data-block-type=\"[a-z_]+\"", h))[[1L]]
+  }
+  expect_identical(cards(html_free), cards(html_src))
+})
+
 test_that("malformed inputs are rejected", {
   expect_error(block_browser_ui(character(0), NULL))
   expect_error(block_browser_ui(c("a", "b"), NULL))

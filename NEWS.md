@@ -8,8 +8,11 @@
   `link_menu_server()` / `stack_menu_server()`. `block_browser_ui()` no
   longer bakes board-seeded default ids into the markup, so the add-flow
   panel is independent of board state and can be pre-rendered once and
-  opened without re-rendering. (Breaking change for the committed-value
-  shape.)
+  opened without re-rendering. `append_to()` / `prepend_to()` now accept
+  a `NULL` block id (a source-less descriptor), so an append / prepend
+  panel can likewise be pre-rendered once with the source / target
+  supplied server-side at commit. (Breaking change for the
+  committed-value shape.)
 
 * New `link_menu_ui()` / `link_menu_server()` / `link_menu_dep()`
   module: a bidirectional card-list link picker. Cards represent both

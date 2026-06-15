@@ -11,9 +11,9 @@
 \usage{
 block_browser_ui(id, board = NULL, target = NULL)
 
-append_to(block_id)
+append_to(block_id = NULL)
 
-prepend_to(block_id)
+prepend_to(block_id = NULL)
 
 block_browser_server(id, board = NULL, target = NULL)
 
@@ -38,7 +38,11 @@ plain add; \code{\link[=append_to]{append_to()}} appends from a source block;
 also accepts a reactive selecting the flow.}
 
 \item{block_id}{Block id the new block attaches to: a source block
-for \code{\link[=append_to]{append_to()}}, a target block for \code{\link[=prepend_to]{prepend_to()}}.}
+for \code{\link[=append_to]{append_to()}}, a target block for \code{\link[=prepend_to]{prepend_to()}}. May be \code{NULL}
+(the default): a source-less descriptor that carries only the flow,
+for pre-rendering an append / prepend panel once and supplying the
+source / target server-side at commit (via \code{block_browser_server()}'s
+\code{target}).}
 }
 \value{
 \itemize{

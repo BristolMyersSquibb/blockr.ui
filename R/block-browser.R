@@ -51,7 +51,11 @@
 #'   [prepend_to()] prepends into a target block. `block_browser_server()`
 #'   also accepts a reactive selecting the flow.
 #' @param block_id Block id the new block attaches to: a source block
-#'   for [append_to()], a target block for [prepend_to()].
+#'   for [append_to()], a target block for [prepend_to()]. May be `NULL`
+#'   (the default): a source-less descriptor that carries only the flow,
+#'   for pre-rendering an append / prepend panel once and supplying the
+#'   source / target server-side at commit (via `block_browser_server()`'s
+#'   `target`).
 #'
 #' @return
 #' * `block_browser_ui()` returns an [htmltools::tag] with
@@ -112,13 +116,13 @@ block_browser_ui <- function(id, board = NULL, target = NULL) {
 
 #' @rdname block-browser
 #' @export
-append_to <- function(block_id) {
+append_to <- function(block_id = NULL) {
   new_bb_target("append", block_id)
 }
 
 #' @rdname block-browser
 #' @export
-prepend_to <- function(block_id) {
+prepend_to <- function(block_id = NULL) {
   new_bb_target("prepend", block_id)
 }
 
@@ -305,8 +309,11 @@ block_browser_dep <- function() {
 
 # ---- target descriptor -------------------------------------------------
 
-new_bb_target <- function(mode, block_id) {
-  stopifnot(is.character(block_id), length(block_id) == 1L, nzchar(block_id))
+new_bb_target <- function(mode, block_id = NULL) {
+  stopifnot(
+    is.null(block_id) ||
+      (is.character(block_id) && length(block_id) == 1L && nzchar(block_id))
+  )
   structure(
     list(mode = mode, id = block_id),
     class = c(paste0("bb_target_", mode), "bb_target")
@@ -378,7 +385,13 @@ browser_block_metas <- function(mode) {
 # place: the context subtitle, the target's input slot names, and the
 # `data-target-arity` attribute (prepend only).
 resolve_target <- function(board, target) {
-  if (is.null(target)) {
+  # `target = NULL` is the add flow; a target with a `NULL` id is a
+  # source-less append / prepend descriptor (the source is supplied
+  # server-side at commit), used to pre-render the panel once. Either
+  # way there is no concrete block to derive a subtitle / port picker
+  # from, so the panel is rendered context-free (the consumer supplies
+  # the "Append from X" context via the sidebar title).
+  if (is.null(target) || is.null(target$id)) {
     return(list(subtitle = NULL, inputs = character(), attrs = list()))
   }
 
