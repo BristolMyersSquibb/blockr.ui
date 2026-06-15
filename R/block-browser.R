@@ -15,13 +15,13 @@
 #'   and input port first, then click the in-card add button.
 #'
 #' The block browser is a Shiny module. `block_browser_ui(id, ...)`
-#' renders the panel; `block_browser_server(id)` returns a reactive that
-#' fires once per add with the block to create:
-#' `list(type, id, title, link_id, block_input, target_input)`. Fields
-#' not applicable to the current flow are `NULL`. Because the suggested
-#' ids are generated avoiding the board's existing block / link ids,
-#' clicking the same card repeatedly (with a pinned sidebar) yields
-#' distinct blocks.
+#' renders the panel; `block_browser_server(id, board, target)` returns a
+#' reactive that fires once per add with a ready-to-apply value: a
+#' [blockr.core::as_blocks] object (*add*), or `list(blocks, links)`
+#' (*append* / *prepend*) with the link's input port already resolved.
+#' The id is resolved at commit against the live board (an empty id field
+#' means "assign one for me"), so clicking the same card repeatedly (with
+#' a pinned sidebar) yields distinct, board-unique ids.
 #'
 #' The flow is selected by the `target` argument: `NULL` (default) adds
 #' a standalone block, [append_to()] appends from a source block, and
@@ -33,25 +33,34 @@
 #' `blockr.ui.blockBrowser` `Shiny.InputBinding` (the root element's
 #' `id` is `NS(id)("commit")`); the value carries an internal `nonce` so
 #' repeat adds re-fire as events. `block_browser_server()` strips the
-#' nonce and hands back the clean spec, so consumers never see it.
+#' nonce and builds the ready objects from the committed spec, so
+#' consumers never see either.
 #'
 #' @param id Module id. As usual for Shiny modules, pass `NS(id)("...")`
 #'   from the parent at the `*_ui()` call site and the bare id to
 #'   `*_server()`.
-#' @param board The current board state. Used to resolve the target
-#'   block's input arity (for prepend) and to seed unique default ids
-#'   avoiding the board's existing block / link ids.
+#' @param board The current board. In `block_browser_ui()` a plain board,
+#'   used only by the *prepend* port picker (the target block's free input
+#'   slots) and the *append* / *prepend* context subtitle; the *add*-flow
+#'   markup is independent of board state and `board` may be `NULL`. In
+#'   `block_browser_server()` it may be a **reactive** returning the board
+#'   (to validate ids, build the block, and resolve the link port) or
+#'   `NULL`.
 #' @param target Where the new block attaches. `NULL` (default) is a
 #'   plain add; [append_to()] appends from a source block;
-#'   [prepend_to()] prepends into a target block.
+#'   [prepend_to()] prepends into a target block. `block_browser_server()`
+#'   also accepts a reactive selecting the flow.
 #' @param block_id Block id the new block attaches to: a source block
 #'   for [append_to()], a target block for [prepend_to()].
 #'
 #' @return
 #' * `block_browser_ui()` returns an [htmltools::tag] with
 #'   [block_browser_dep()] attached.
-#' * `block_browser_server()` returns a [shiny::reactive] of the
-#'   committed block spec (a list), firing once per add.
+#' * `block_browser_server()` returns a [shiny::reactive] firing once per
+#'   add with a ready-to-apply value: a [blockr.core::as_blocks] object
+#'   for the *add* flow, or `list(blocks, links)` for *append* /
+#'   *prepend* (the link's input port already resolved). Applied as-is by
+#'   the consumer.
 #' * `append_to()` / `prepend_to()` return a `bb_target` descriptor.
 #' * `block_browser_dep()` returns an [htmltools::htmlDependency].
 #'
@@ -81,13 +90,18 @@ NULL
 
 #' @rdname block-browser
 #' @export
-block_browser_ui <- function(id, board, target = NULL) {
+block_browser_ui <- function(id, board = NULL, target = NULL) {
   stopifnot(is.character(id), length(id) == 1L, nzchar(id))
   stopifnot(is.null(target) || inherits(target, "bb_target"))
 
   ns <- shiny::NS(id)
   mode <- target_mode(target)
-  metas <- browser_block_metas(board, mode)
+  # The card list is a pure function of the registry: no board-seeded
+  # default ids are baked in (the server resolves a unique id at commit),
+  # so the add-flow markup is board-independent and can be rendered once.
+  # `board` is used only by resolve_target() for the prepend port picker
+  # and the append / prepend context subtitle.
+  metas <- browser_block_metas(mode)
   tgt <- resolve_target(board, target)
 
   htmltools::attachDependencies(
@@ -110,24 +124,168 @@ prepend_to <- function(block_id) {
 
 #' @rdname block-browser
 #' @export
-block_browser_server <- function(id) {
+block_browser_server <- function(id, board = NULL, target = NULL) {
   stopifnot(is.character(id), length(id) == 1L, nzchar(id))
+
+  board_fn <- as_arg_reactive(board)
+  target_fn <- as_arg_reactive(target)
+
   shiny::moduleServer(
     id,
     function(input, output, session) {
       # `input$commit` is the binding's value; the `nonce` it carries
       # makes every add a fresh event, so eventReactive fires once per
-      # add. Strip the nonce before handing the spec to the caller.
+      # add. When a `board` reactive is supplied the module validates the
+      # committed ids (a non-empty duplicate notifies and `req()`s out),
+      # then returns a ready-to-apply value: a `blocks` object for the add
+      # flow, or `list(blocks, links)` for append / prepend - parity with
+      # link_menu_server() / stack_menu_server().
       shiny::eventReactive(
         input$commit,
         {
           spec <- input$commit
           spec[["nonce"]] <- NULL
-          spec
+          brd <- board_fn()
+          tgt <- target_fn()
+          if (shiny::is.reactive(board)) {
+            validate_block_spec(spec, brd, tgt, session)
+          }
+          block_commit_value(spec, brd, tgt)
         },
         ignoreNULL = TRUE
       )
     }
+  )
+}
+
+# Turn the committed spec into a ready-to-apply value. The add flow
+# yields a `blocks` object (one id-keyed block); append / prepend yield
+# `list(blocks, links)` with the link's input port resolved. Block
+# construction and port resolution use blockr.core primitives only (no
+# blockr.dock dependency), mirroring link_menu's commit value and the
+# dock's former build_block_from_spec + block_input_select assembly.
+block_commit_value <- function(spec, board, target) {
+  blk <- build_browser_block(spec, board)
+  blk_id <- resolve_browser_id(spec$id, board, blockr.core::board_block_ids)
+  blocks <- blockr.core::as_blocks(stats::setNames(list(blk), blk_id))
+
+  if (target_mode(target) == "add") {
+    return(blocks)
+  }
+
+  list(
+    blocks = blocks,
+    links = block_commit_link(spec, board, target, blk, blk_id)
+  )
+}
+
+# Build the link that wires the new block to its target. Append: the new
+# block (blk_id) receives from the source (target$id), so the port is a
+# free slot on the NEW block. Prepend: the new block feeds INTO the
+# target, so the port is a free slot on the TARGET block.
+block_commit_link <- function(spec, board, target, blk, blk_id) {
+  links <- safe_board_links(board)
+  link_id <- resolve_browser_id(
+    spec$link_id, board, blockr.core::board_link_ids
+  )
+
+  if (target$mode == "append") {
+    input <- spec$block_input
+    if (is.null(input) || !nzchar(input)) {
+      input <- resolve_free_input(blk, blk_id, links)
+    }
+    lnk <- blockr.core::new_link(from = target$id, to = blk_id, input = input)
+  } else {
+    tgt_blk <- board_block(board, target$id)
+    input <- spec$target_input
+    if (is.null(input) || !nzchar(input)) {
+      input <- resolve_free_input(tgt_blk, target$id, links)
+    }
+    lnk <- blockr.core::new_link(from = blk_id, to = target$id, input = input)
+  }
+
+  blockr.core::as_links(stats::setNames(list(lnk), link_id))
+}
+
+# Construct the block instance, naming it uniquely against the board
+# (mirrors the dock's create_block_with_name) then overriding with the
+# user's title when supplied.
+build_browser_block <- function(spec, board) {
+  existing <- board_block_names(board)
+  blk <- blockr.core::create_block(
+    spec$type,
+    block_name = function(class) {
+      utils::tail(
+        make.unique(
+          c(existing, blockr.core::default_block_name(class)),
+          sep = " "
+        ),
+        1L
+      )
+    }
+  )
+  if (!is.null(spec$title) && nzchar(spec$title)) {
+    blockr.core::block_name(blk) <- spec$title
+  }
+  blk
+}
+
+# An explicit, board-unique id is kept as-is; otherwise (empty field, or
+# a collision) a fresh unique id is generated against the board.
+resolve_browser_id <- function(spec_id, board, getter) {
+  existing <- safe_board_ids(board, getter)
+  if (is_new_id(spec_id, existing)) {
+    spec_id
+  } else {
+    blockr.core::rand_names(old_names = existing, n = 1L)
+  }
+}
+
+# Reject a non-empty committed id that collides with the board (block id
+# always; link id for append / prepend). An empty id is valid - it means
+# "assign one for me", resolved in block_commit_value().
+validate_block_spec <- function(spec, board, target, session) {
+  reject_collision(
+    spec$id, safe_board_ids(board, blockr.core::board_block_ids),
+    "block", session
+  )
+  if (target_mode(target) %in% c("append", "prepend")) {
+    reject_collision(
+      spec$link_id, safe_board_ids(board, blockr.core::board_link_ids),
+      "link", session
+    )
+  }
+  invisible(TRUE)
+}
+
+reject_collision <- function(id, existing, what, session) {
+  if (!is.null(id) && nzchar(id) && id %in% existing) {
+    blockr.core::notify(
+      paste0("Please choose a valid ", what, " ID."),
+      type = "warning", session = session
+    )
+    shiny::req(FALSE)
+  }
+  invisible(TRUE)
+}
+
+# Display names of the board's blocks (empty for a NULL board), used to
+# generate a unique default block name.
+board_block_names <- function(board) {
+  if (is.null(board)) return(character())
+  blks <- tryCatch(
+    blockr.core::board_blocks(board), error = function(e) NULL
+  )
+  if (is.null(blks)) return(character())
+  vapply(blks, blockr.core::block_name, character(1L))
+}
+
+# The board's links, or an empty links object for a NULL board.
+safe_board_links <- function(board) {
+  if (is.null(board)) return(blockr.core::links())
+  tryCatch(
+    blockr.core::board_links(board),
+    error = function(e) blockr.core::links()
   )
 }
 
@@ -163,11 +321,14 @@ target_mode <- function(target) {
 
 # ---- panel assembly ----------------------------------------------------
 
-# Build the per-block metadata list: registry rows plus the seeded
-# unique default ids. Link ids and block-input slots are only computed
-# for the flows that render those fields (each `safe_block_inputs()`
-# instantiates a block, so we skip the work otherwise).
-browser_block_metas <- function(board, mode) {
+# Build the per-block metadata list from the registry. Independent of
+# board state: default block / link ids are no longer seeded here (the
+# server resolves a unique id at commit), so the rendered markup is a
+# pure function of the registry. Block-input slots are still computed
+# for the append flow (each `safe_block_inputs()` instantiates a block,
+# so we skip the work otherwise) to drive the linkable-block filter and
+# the in-card port picker.
+browser_block_metas <- function(mode) {
   registry <- blockr.core::available_blocks()
   metas <- lapply(seq_along(registry), function(i) {
     entry <- registry[[i]]
@@ -185,7 +346,6 @@ browser_block_metas <- function(board, mode) {
     )
   })
 
-  need_link <- mode %in% c("append", "prepend")
   need_inputs <- mode == "append"
 
   # For append, the new block has to receive a link from the source, so
@@ -193,7 +353,7 @@ browser_block_metas <- function(board, mode) {
   # which accepts arbitrary fresh slots. Source-only blocks (arity 0,
   # e.g. dataset_block) can't be appended and are filtered out.
   # Variadic blocks (e.g. rbind_block) return character(0) from
-  # block_inputs() but DO accept links - the dock generates a fresh
+  # block_inputs() but DO accept links - the server generates a fresh
   # slot name. Prepend / add are unfiltered.
   if (need_inputs) {
     for (i in seq_along(metas)) {
@@ -209,21 +369,6 @@ browser_block_metas <- function(board, mode) {
       metas[[i]]$inputs <- character()
       metas[[i]]$variadic <- FALSE
     }
-  }
-
-  n <- length(metas)
-  id_defaults <- seed_ids(
-    safe_board_ids(board, blockr.core::board_block_ids), n
-  )
-  link_defaults <- if (need_link) {
-    seed_ids(safe_board_ids(board, blockr.core::board_link_ids), n)
-  } else {
-    rep("", n)
-  }
-
-  for (i in seq_along(metas)) {
-    metas[[i]]$id_default <- id_defaults[[i]]
-    metas[[i]]$link_default <- link_defaults[[i]]
   }
 
   metas
@@ -403,11 +548,14 @@ card_advanced <- function(meta, ns, mode, target_inputs) {
 
   shiny::tags$div(
     class = "blockr-block-browser-card-advanced",
+    # Empty default: the server resolves a unique id at commit (avoiding
+    # the board's ids). An explicit value here overrides that.
     field_text(
       class_suffix = "id",
       id = field_id("id"),
       label = "Block ID",
-      value = meta$id_default
+      value = "",
+      placeholder = "auto"
     ),
     field_text(
       class_suffix = "title",
@@ -421,7 +569,8 @@ card_advanced <- function(meta, ns, mode, target_inputs) {
         class_suffix = "link-id",
         id = field_id("link_id"),
         label = "Link ID",
-        value = meta$link_default
+        value = "",
+        placeholder = "auto"
       )
     },
     if (show_block_input) {

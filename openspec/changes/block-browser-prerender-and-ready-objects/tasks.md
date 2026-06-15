@@ -1,43 +1,43 @@
 ## 1. `blockr.ui`: board-independent UI + ready-object server
 
-- [ ] 1.1 In `R/block-browser.R`, stop seeding board-derived default block /
+- [x] 1.1 In `R/block-browser.R`, stop seeding board-derived default block /
   link ids into the per-card markup (`browser_block_metas()` /
   `card_advanced()`). The card's id field ships with a client-side or empty
   default; the server resolves the real unique id at commit. Make
   `block_browser_ui(id, board = NULL, target = NULL)` so the *add* call site
   needs no board.
-- [ ] 1.2 Add an internal `resolve_free_input()`-equivalent (or lift /
+- [x] 1.2 Add an internal `resolve_free_input()`-equivalent (or lift /
   share the one in `R/link-menu.R`) so the block browser resolves the link
   port from the live board with `blockr.core` primitives only: explicit
   pick, else first free named slot, else a fresh integer slot for variadic
   targets.
-- [ ] 1.3 Add an internal block builder: `create_block(spec$type)` named
+- [x] 1.3 Add an internal block builder: `create_block(spec$type)` named
   from `spec$title`, with a board-unique id (`rand_names()` seeded from the
   live board's block ids when the committed id is empty / colliding).
-- [ ] 1.4 Rework `block_browser_server(id, board = NULL, target = NULL)` to
+- [x] 1.4 Rework `block_browser_server(id, board = NULL, target = NULL)` to
   return ready objects: a `blocks` object for *add*; `list(blocks, links)`
   for *append* / *prepend* with the resolved port. Strip the `nonce`; keep
   the `input$commit` event drive.
-- [ ] 1.5 When `board` is a reactive, validate the committed block id (and
+- [x] 1.5 When `board` is a reactive, validate the committed block id (and
   link id for append / prepend): notify + `req(FALSE)` on empty / duplicate,
   mirroring `validate_link_spec()` / the stack-menu validator.
-- [ ] 1.6 Update roxygen (`@param board`, `@param target`, `@return`) for
+- [x] 1.6 Update roxygen (`@param board`, `@param target`, `@return`) for
   both functions; regenerate `man/`.
 
 ## 2. `blockr.ui`: tests + examples
 
-- [ ] 2.1 Update `tests/testthat/test-block-browser.R`: the server now
+- [x] 2.1 Update `tests/testthat/test-block-browser.R`: the server now
   returns `blocks` / `list(blocks, links)`. Cover add (blocks object),
   append (blocks + link, resolved port, explicit port), prepend (arity-1
   implicit slot, arity-2 explicit `target_input`), and duplicate-id
   rejection with a board reactive.
-- [ ] 2.2 Add a test asserting the *add* markup is identical across two
+- [x] 2.2 Add a test asserting the *add* markup is identical across two
   boards (board-independence), and that two commits against a pinned panel
   yield distinct board-unique ids.
-- [ ] 2.3 Update `inst/examples/block-browser/app.R` to the new contract
+- [x] 2.3 Update `inst/examples/block-browser/app.R` to the new contract
   (pass a `board` reactive; consume ready objects) and pre-render the add
   browser once via `sidebar_ui(ui = block_browser_ui(...))`.
-- [ ] 2.4 Update the block-browser shinytest2 suite for the pre-rendered
+- [x] 2.4 Update the block-browser shinytest2 suite for the pre-rendered
   open path (open / close / reopen with no re-render) where it asserts on
   the rendered panel.
 

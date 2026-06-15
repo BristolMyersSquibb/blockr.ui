@@ -9,13 +9,13 @@
 \alias{block_browser_dep}
 \title{Block browser}
 \usage{
-block_browser_ui(id, board, target = NULL)
+block_browser_ui(id, board = NULL, target = NULL)
 
 append_to(block_id)
 
 prepend_to(block_id)
 
-block_browser_server(id)
+block_browser_server(id, board = NULL, target = NULL)
 
 block_browser_dep()
 }
@@ -24,13 +24,18 @@ block_browser_dep()
 from the parent at the \verb{*_ui()} call site and the bare id to
 \verb{*_server()}.}
 
-\item{board}{The current board state. Used to resolve the target
-block's input arity (for prepend) and to seed unique default ids
-avoiding the board's existing block / link ids.}
+\item{board}{The current board. In \code{block_browser_ui()} a plain board,
+used only by the \emph{prepend} port picker (the target block's free input
+slots) and the \emph{append} / \emph{prepend} context subtitle; the \emph{add}-flow
+markup is independent of board state and \code{board} may be \code{NULL}. In
+\code{block_browser_server()} it may be a \strong{reactive} returning the board
+(to validate ids, build the block, and resolve the link port) or
+\code{NULL}.}
 
 \item{target}{Where the new block attaches. \code{NULL} (default) is a
 plain add; \code{\link[=append_to]{append_to()}} appends from a source block;
-\code{\link[=prepend_to]{prepend_to()}} prepends into a target block.}
+\code{\link[=prepend_to]{prepend_to()}} prepends into a target block. \code{block_browser_server()}
+also accepts a reactive selecting the flow.}
 
 \item{block_id}{Block id the new block attaches to: a source block
 for \code{\link[=append_to]{append_to()}}, a target block for \code{\link[=prepend_to]{prepend_to()}}.}
@@ -39,8 +44,11 @@ for \code{\link[=append_to]{append_to()}}, a target block for \code{\link[=prepe
 \itemize{
 \item \code{block_browser_ui()} returns an \link[htmltools:builder]{htmltools::tag} with
 \code{\link[=block_browser_dep]{block_browser_dep()}} attached.
-\item \code{block_browser_server()} returns a \link[shiny:reactive]{shiny::reactive} of the
-committed block spec (a list), firing once per add.
+\item \code{block_browser_server()} returns a \link[shiny:reactive]{shiny::reactive} firing once per
+add with a ready-to-apply value: a \link[blockr.core:new_block]{blockr.core::as_blocks} object
+for the \emph{add} flow, or \code{list(blocks, links)} for \emph{append} /
+\emph{prepend} (the link's input port already resolved). Applied as-is by
+the consumer.
 \item \code{append_to()} / \code{prepend_to()} return a \code{bb_target} descriptor.
 \item \code{block_browser_dep()} returns an \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
 }
@@ -63,13 +71,13 @@ and input port first, then click the in-card add button.
 }
 
 The block browser is a Shiny module. \code{block_browser_ui(id, ...)}
-renders the panel; \code{block_browser_server(id)} returns a reactive that
-fires once per add with the block to create:
-\code{list(type, id, title, link_id, block_input, target_input)}. Fields
-not applicable to the current flow are \code{NULL}. Because the suggested
-ids are generated avoiding the board's existing block / link ids,
-clicking the same card repeatedly (with a pinned sidebar) yields
-distinct blocks.
+renders the panel; \code{block_browser_server(id, board, target)} returns a
+reactive that fires once per add with a ready-to-apply value: a
+\link[blockr.core:new_block]{blockr.core::as_blocks} object (\emph{add}), or \code{list(blocks, links)}
+(\emph{append} / \emph{prepend}) with the link's input port already resolved.
+The id is resolved at commit against the live board (an empty id field
+means "assign one for me"), so clicking the same card repeatedly (with
+a pinned sidebar) yields distinct, board-unique ids.
 
 The flow is selected by the \code{target} argument: \code{NULL} (default) adds
 a standalone block, \code{\link[=append_to]{append_to()}} appends from a source block, and
@@ -81,7 +89,8 @@ Internally the panel publishes its value through the
 \code{blockr.ui.blockBrowser} \code{Shiny.InputBinding} (the root element's
 \code{id} is \code{NS(id)("commit")}); the value carries an internal \code{nonce} so
 repeat adds re-fire as events. \code{block_browser_server()} strips the
-nonce and hands back the clean spec, so consumers never see it.
+nonce and builds the ready objects from the committed spec, so
+consumers never see either.
 }
 \examples{
 if (interactive()) {

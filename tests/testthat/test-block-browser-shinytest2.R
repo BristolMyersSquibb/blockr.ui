@@ -141,3 +141,33 @@ test_that("clicking inside the form does not add the block", {
   ))
   expect_equal(app$get_value(output = "commit_type"), "")
 })
+
+test_that("the pre-rendered add browser is not rebuilt across opens", {
+  # The add browser's body is pre-rendered once into #add_panel and the
+  # button only toggles the panel. Tagging the live DOM node and finding
+  # the tag intact after a close / reopen proves it was not re-rendered.
+  app <- shinytest2::AppDriver$new(
+    app_path, name = "block-browser-prerender",
+    load_timeout = 20 * 1000, timeout = 10 * 1000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  add_browser <- "#add_panel .blockr-block-browser"
+
+  app$click("open_add")
+  app$wait_for_idle(500)
+  app$run_js(sprintf(
+    "document.querySelector('%s').dataset.persist = 'yes'", add_browser
+  ))
+
+  click_js(app, "#add_panel .blockr-sidebar-close")
+  app$click("open_add")
+  app$wait_for_idle(500)
+
+  expect_equal(
+    app$get_js(sprintf(
+      "document.querySelector('%s').dataset.persist", add_browser
+    )),
+    "yes"
+  )
+})
