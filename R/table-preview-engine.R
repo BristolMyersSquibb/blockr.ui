@@ -90,7 +90,8 @@ table_page_local <- function(result, col, dir, page, page_size, cache) {
   list(
     dat = as.data.frame(dplyr::slice(result, rows)),
     total_rows = total,
-    page = page
+    page = page,
+    has_more = page < max_page
   )
 }
 
@@ -99,26 +100,24 @@ table_page_lazy <- function(result, col, dir, page, page_size, cache) {
     stop("Previewing lazy tables requires the 'dbplyr' package.")
   }
 
-  total <- get0("total_count", envir = cache, inherits = FALSE)
-  if (is.null(total)) {
-    # One aggregate query; numeric (not integer) so counts beyond
-    # .Machine$integer.max survive.
-    total <- as.numeric(dplyr::pull(dplyr::count(dplyr::ungroup(result))))
-    assign("total_count", total, envir = cache)
-  }
-
-  max_page <- max(1L, ceiling(total / page_size))
-  page <- min(max(1L, as.integer(page)), max_page)
+  # No COUNT(*) on remote tables: counting a lazy query executes its whole
+  # plan and is the one genuinely expensive part of the preview (cheap on a
+  # bare parquet scan, but it grows with filters/joins and is costly on
+  # Postgres / BigQuery). Instead fetch ONE row past the page as a look-ahead:
+  # if it comes back there is a next page. The total stays unknown (`NA`), the
+  # same choice dbplyr's own print() makes. Cost is a single `page_size + 1`
+  # LIMIT regardless of table size.
+  page <- max(1L, as.integer(page))
   lo <- (page - 1L) * page_size
-  hi <- min(page * page_size, total)
+  probe <- lo + page_size + 1L
 
-  dat <- if (total <= 0 || hi <= lo) {
-    dplyr::collect(utils::head(result, 0L))
-  } else if (dir == "none") {
-    # No sort, hence no window order: native LIMIT, keep the last page_size
-    # rows. Collects at most page * page_size rows (prev/next navigation is
-    # shallow).
-    utils::tail(dplyr::collect(utils::head(result, hi)), hi - lo)
+  fetched <- if (dir == "none") {
+    # native LIMIT to one-past-the-page, then slice by absolute offset. (Can't
+    # use tail(): when the table has fewer than `probe` rows it would take the
+    # wrong window for an out-of-range page.)
+    coll <- dplyr::collect(utils::head(result, probe))
+    n <- nrow(coll)
+    if (lo >= n) coll[0, , drop = FALSE] else coll[(lo + 1L):n, , drop = FALSE]
   } else {
     # NB: bare desc() / row_number() / is.na() on purpose - dbplyr translates
     # calls by name and cannot translate namespaced `dplyr::` ASTs.
@@ -134,7 +133,7 @@ table_page_lazy <- function(result, col, dir, page, page_size, cache) {
       dplyr::arrange(
         dplyr::filter(
           dplyr::mutate(keyed, ..rn = row_number()),
-          .data$..rn > lo, .data$..rn <= hi
+          .data$..rn > lo, .data$..rn <= probe
         ),
         .data$..rn
       ),
@@ -143,10 +142,20 @@ table_page_lazy <- function(result, col, dir, page, page_size, cache) {
     dplyr::collect(page_q)
   }
 
+  has_more <- nrow(fetched) > page_size
+  dat <- utils::head(fetched, page_size)
+
+  # Page ran past the end (e.g. a stale page index after the data shrank):
+  # fall back to the first page rather than showing an empty trailing page.
+  if (nrow(dat) == 0L && page > 1L) {
+    return(table_page_lazy(result, col, dir, 1L, page_size, cache))
+  }
+
   list(
     dat = as.data.frame(dat),
-    total_rows = total,
-    page = page
+    total_rows = NA_real_,   # unknown on purpose - never counted
+    page = page,
+    has_more = isTRUE(has_more)
   )
 }
 

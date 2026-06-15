@@ -69,7 +69,8 @@ format_column_inner <- function(x, max_chars = 50) {
 #' @export
 build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
                              page = 1L, page_size = 5L, table_label = NULL,
-                             sort_input = NULL, page_input = NULL) {
+                             sort_input = NULL, page_input = NULL,
+                             has_more = NULL) {
   n_showing <- nrow(dat)
   n_cols <- ncol(dat)
 
@@ -250,15 +251,38 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     body_rows[[i]] <- do.call(shiny::tags$tr, row_cells)
   }
 
-  # Build pagination info
-  max_page <- max(1L, ceiling(total_rows / page_size))
+  # Build pagination info. `total_rows` is NA for remote/lazy tables (counting
+  # them is deliberately avoided); then the range omits the total and the next
+  # button is driven by a look-ahead (`has_more`) instead of a known max page.
+  unknown_total <- length(total_rows) != 1L || is.na(total_rows)
   start_row <- (page - 1L) * page_size + 1L
-  end_row <- min(page * page_size, total_rows)
 
-  range_text <- if (total_rows == 0) {
-    "No rows"
+  if (unknown_total) {
+    n_shown <- nrow(dat)
+    end_row <- start_row + n_shown - 1L
+    next_disabled <- !isTRUE(has_more)
+    # data-max-page only needs to let the JS step to the next page when there
+    # is one; the server re-evaluates `has_more` on arrival.
+    max_page <- if (isTRUE(has_more)) page + 1L else page
+    range_text <- if (n_shown == 0L) {
+      "No rows"
+    } else if (isTRUE(has_more)) {
+      # total unknown (never counted) but we know more rows exist
+      sprintf("%d\u2013%d of many", start_row, end_row)
+    } else {
+      # last page: no further rows, so end_row IS the true total - shown for
+      # free, without ever running a COUNT(*).
+      sprintf("%d\u2013%d of %d", start_row, end_row, end_row)
+    }
   } else {
-    sprintf("%d\u2013%d of %d", start_row, end_row, total_rows)
+    max_page <- max(1L, ceiling(total_rows / page_size))
+    end_row <- min(page * page_size, total_rows)
+    next_disabled <- page >= max_page
+    range_text <- if (total_rows == 0) {
+      "No rows"
+    } else {
+      sprintf("%d\u2013%d of %d", start_row, end_row, total_rows)
+    }
   }
 
   # Build optional table label span (displayed in footer next to row range)
@@ -302,8 +326,8 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         shiny::HTML("&#x2039;")
       ),
       shiny::tags$button(
-        class = paste0("blockr-nav-btn", if (page >= max_page) " disabled"),
-        disabled = if (page >= max_page) "disabled" else NULL,
+        class = paste0("blockr-nav-btn", if (next_disabled) " disabled"),
+        disabled = if (next_disabled) "disabled" else NULL,
         `data-direction` = "next",
         shiny::HTML("&#x203A;")
       )

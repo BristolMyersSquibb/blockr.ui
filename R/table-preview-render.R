@@ -78,7 +78,8 @@ html_table_render <- function(result, session, page_size = 5L) {
           page_size = page_size,
           table_label = tbl_label,
           sort_input = ns(sort_id),
-          page_input = ns(page_id)
+          page_input = ns(page_id),
+          has_more = pg$has_more
         )
       },
       error = function(e) {

@@ -1,5 +1,6 @@
-# Lazy (dbplyr) page engine: count + page fetch pushed to the database,
-# parity with the local engine, never collecting the full table.
+# Lazy (dbplyr) page engine: page fetch pushed to the database via a
+# `page_size + 1` look-ahead (never COUNT(*), never the full table), parity
+# with the local engine on the rows actually shown.
 
 skip_if_not_installed("dbplyr")
 skip_if_not_installed("RSQLite")
@@ -17,12 +18,16 @@ lazy_fixture <- function(env = parent.frame()) {
   list(local = df, lazy = dplyr::tbl(con, "t"))
 }
 
-test_that("lazy count is correct and cached", {
+test_that("lazy total is never counted; has_more look-ahead drives paging", {
   fx <- lazy_fixture()
-  cache <- new.env(parent = emptyenv())
-  pg <- table_page(fx$lazy, NULL, 1L, 5L, cache = cache)
-  expect_equal(pg$total_rows, 200)
-  expect_equal(get("total_count", envir = cache), 200)
+  pg <- table_page(fx$lazy, NULL, 1L, 5L)
+  expect_true(is.na(pg$total_rows))   # unknown on purpose - no COUNT(*)
+  expect_true(pg$has_more)            # 200 rows, page 1 of 5 -> more exist
+  expect_equal(nrow(pg$dat), 5L)
+
+  last <- table_page(fx$lazy, NULL, 40L, 5L)  # rows 196-200, the final page
+  expect_equal(nrow(last$dat), 5L)
+  expect_false(last$has_more)         # no row 201 -> next disabled
 })
 
 test_that("lazy pages equal the local engine for every sort mode", {
@@ -36,7 +41,7 @@ test_that("lazy pages equal the local engine for every sort mode", {
         info = paste(dir, "page", page)
       )
       expect_equal(lazy_pg$page, local_pg$page)
-      expect_equal(lazy_pg$total_rows, 200)
+      expect_true(is.na(lazy_pg$total_rows))
     }
   }
 })
@@ -65,9 +70,12 @@ test_that("unsorted lazy pagination works without a window order", {
   expect_equal(pg2$dat$a, fx$local$a[6:10])
 })
 
-test_that("lazy page clamping and empty results work", {
+test_that("an out-of-range page falls back to the first page", {
   fx <- lazy_fixture()
+  # Without a count there is no known last page; a stale page index past the
+  # end yields no rows, so the engine falls back to page 1 rather than showing
+  # an empty trailing page.
   hi <- table_page(fx$lazy, NULL, 999L, 5L)
-  expect_equal(hi$page, 40L)
+  expect_equal(hi$page, 1L)
   expect_equal(nrow(hi$dat), 5L)
 })
