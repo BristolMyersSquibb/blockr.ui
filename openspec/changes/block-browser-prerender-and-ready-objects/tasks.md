@@ -43,40 +43,40 @@
 
 ## 3. `blockr.dock`: pre-render mount + thin handlers
 
-- [ ] 3.1 In `R/board-ui.R`, add a dedicated `sidebar_ui(NS(id,
+- [x] 3.1 In `R/board-ui.R`, add a dedicated `sidebar_ui(NS(id,
   "add_block_sidebar"), ui = blockr.ui::block_browser_ui(NS(id, "add_browser")))`
   mount (rendered once); wire its open trigger via `data-blockr-sidebar-target`
   or `show_sidebar(id)`.
-- [ ] 3.2 Rewrite `add_block_action()` in `R/action-block.R` as a thin
+- [x] 3.2 Rewrite `add_block_action()` in `R/action-block.R` as a thin
   adapter: mount `block_browser_server(m, board = reactive(board$board))`
   once, and on commit `update(list(blocks = committed()))`. No
   `show_sidebar(ui = ...)`, no `build_block_from_spec()`.
-- [ ] 3.3 Rewrite `append_block_action()` / `prepend_block_action()` as thin
+- [x] 3.3 Rewrite `append_block_action()` / `prepend_block_action()` as thin
   adapters consuming `list(blocks, links)` from
   `block_browser_server(m, board = reactive(board$board), target =
   reactive(append_to/prepend_to(trigger())))`, applying both via `update()`.
   Remove the dock-side `block_input_select()` + `new_link()` assembly and the
   `valid_block_id()` / `valid_link_id()` pre-flight from these handlers.
-- [ ] 3.4 Remove now-dead dock helpers (`build_block_from_spec()`, and the
+- [x] 3.4 Remove now-dead dock helpers (`build_block_from_spec()`, and the
   block-flow uses of `block_input_select()`) if nothing else references
   them; keep helpers still used by link / stack flows.
-- [ ] 3.5 Update the dock action `testServer` suites
+- [x] 3.5 Update the dock action `testServer` suites
   (`test-action-block.R`) to drive `input$commit` and assert the ready
   objects flow through `update()` unchanged.
 
 ## 4. Reconcile + validate
 
-- [ ] 4.1 Reconcile `refactor-dock-action-handlers`: the block handlers now
+- [x] 4.1 Reconcile `refactor-dock-action-handlers`: the block handlers now
   receive ready objects, so its `resolve_input_port()` and the block-flow
   scaffold shrink; update that change's design / tasks to match (or note the
   overlap is absorbed here).
-- [ ] 4.2 NEWS in both packages: `blockr.ui` (`block_browser_server()` now
+- [x] 4.2 NEWS in both packages: `blockr.ui` (`block_browser_server()` now
   returns ready `blocks` / `links` objects and takes `board` / `target`;
   `block_browser_ui()` add-flow markup is board-independent and
   pre-renderable); `blockr.dock` (add browser pre-rendered once; add /
   append / prepend handlers are thin adapters).
-- [ ] 4.3 `devtools::check()` + `lintr::lint_package()` clean on `blockr.ui`.
-- [ ] 4.4 `devtools::check()` + `lintr::lint_package()` clean on
+- [x] 4.3 `devtools::check()` + `lintr::lint_package()` clean on `blockr.ui`.
+- [x] 4.4 `devtools::check()` + `lintr::lint_package()` clean on
   `blockr.dock` after the handler rewrite.
 - [ ] 4.5 Manual smoke test of the dock + dag example: open add browser
   (pre-rendered, no re-render on reopen), add a block; right-click → append
