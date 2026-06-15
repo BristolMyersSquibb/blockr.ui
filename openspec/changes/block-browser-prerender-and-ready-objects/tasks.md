@@ -78,7 +78,7 @@
 - [x] 4.3 `devtools::check()` + `lintr::lint_package()` clean on `blockr.ui`.
 - [x] 4.4 `devtools::check()` + `lintr::lint_package()` clean on
   `blockr.dock` after the handler rewrite.
-- [ ] 4.5 Manual smoke test of the dock + dag example: open add browser
+- [x] 4.5 Manual smoke test of the dock + dag example: open add browser
   (pre-rendered, no re-render on reopen), add a block; right-click → append
   / prepend, add with default and edited port; repeated pinned adds yield
   distinct ids.
