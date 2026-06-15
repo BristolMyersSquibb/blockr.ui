@@ -40,7 +40,8 @@ table_page <- function(result, sort_state = NULL, page = 1L, page_size = 5L,
   # stray value from a stale / half-initialised input -- falls back to "none"
   # so the `if (dir == "none")` branches below never receive NA (which would
   # otherwise crash with "missing value where TRUE/FALSE needed").
-  if (length(dir) != 1L || is.na(dir) || !dir %in% c("asc", "desc", "na", "none")) {
+  valid_dirs <- c("asc", "desc", "na", "none")
+  if (length(dir) != 1L || is.na(dir) || !dir %in% valid_dirs) {
     dir <- "none"
   }
   if (length(col) != 1L || is.na(col) || !col %in% colnames(result)) {

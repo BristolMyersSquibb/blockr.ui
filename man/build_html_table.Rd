@@ -13,7 +13,8 @@ build_html_table(
   page_size = 5L,
   table_label = NULL,
   sort_input = NULL,
-  page_input = NULL
+  page_input = NULL,
+  has_more = NULL
 )
 }
 \arguments{
@@ -39,6 +40,11 @@ ids when \code{sort_input} / \code{page_input} are not supplied.}
 inputs receiving sort and page events. Supply per-instance ids when a
 session shows more than one preview; when \code{NULL} the legacy shared
 names \code{blockr_table_sort} / \code{blockr_table_page} are used.}
+
+\item{has_more}{Look-ahead flag used when \code{total_rows} is \code{NA} (remote /
+lazy tables that are never counted): \code{TRUE} signals that rows exist
+beyond the current page, which keeps the next button enabled and shows
+the "of many" row-range text instead of a known total.}
 }
 \value{
 A \code{\link[shiny:reexports]{shiny::tagList()}} with the table preview, carrying the

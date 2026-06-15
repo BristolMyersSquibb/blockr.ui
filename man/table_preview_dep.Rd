@@ -17,6 +17,6 @@ An \link[htmltools:htmlDependency]{htmltools::htmlDependency} or a \code{shiny::
 table-preview CSS and JS; \code{\link[=build_html_table]{build_html_table()}} attaches it automatically.
 \code{table_preview_css()} returns the base CSS as an inline
 \code{shiny::tags$style} for hosts that layer delta CSS on top of it (e.g.
-blockr.bi's html table block); it reads the same file the dependency
+blockr.viz's html table block); it reads the same file the dependency
 serves, so there is a single source.
 }

@@ -63,6 +63,10 @@ format_column_inner <- function(x, max_chars = 50) {
 #'   inputs receiving sort and page events. Supply per-instance ids when a
 #'   session shows more than one preview; when `NULL` the legacy shared
 #'   names `blockr_table_sort` / `blockr_table_page` are used.
+#' @param has_more Look-ahead flag used when `total_rows` is `NA` (remote /
+#'   lazy tables that are never counted): `TRUE` signals that rows exist
+#'   beyond the current page, which keeps the next button enabled and shows
+#'   the "of many" row-range text instead of a known total.
 #'
 #' @return A [shiny::tagList()] with the table preview, carrying the
 #'   [table_preview_dep()] html dependency.
@@ -292,7 +296,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
   if (length(table_label) > 1L) table_label <- table_label[[1L]]
   table_label_tag <- NULL
   if (!is.null(table_label) && is.character(table_label) &&
-      nzchar(table_label)) {
+        nzchar(table_label)) {
     is_truncated <- nchar(table_label) > 60
     display_text <- if (is_truncated) {
       paste0(substr(table_label, 1, 58), "\u2026")
