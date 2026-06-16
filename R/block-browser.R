@@ -169,7 +169,7 @@ block_browser_server <- function(id, board = NULL, target = NULL) {
 # blockr.dock dependency), mirroring link_menu's commit value and the
 # dock's former build_block_from_spec + block_input_select assembly.
 block_commit_value <- function(spec, board, target) {
-  blk <- build_browser_block(spec, board)
+  blk <- build_browser_block(spec)
   blk_id <- resolve_browser_id(spec$id, board, blockr.core::board_block_ids)
   blocks <- blockr.core::as_blocks(stats::setNames(list(blk), blk_id))
 
@@ -211,27 +211,16 @@ block_commit_link <- function(spec, board, target, blk, blk_id) {
   blockr.core::as_links(stats::setNames(list(lnk), link_id))
 }
 
-# Construct the block instance, naming it uniquely against the board
-# (mirrors the dock's create_block_with_name) then overriding with the
-# user's title when supplied.
-build_browser_block <- function(spec, board) {
-  existing <- board_block_names(board)
-  blk <- blockr.core::create_block(
-    spec$type,
-    block_name = function(class) {
-      utils::tail(
-        make.unique(
-          c(existing, blockr.core::default_block_name(class)),
-          sep = " "
-        ),
-        1L
-      )
-    }
-  )
+# Construct the block instance. The user's title (when supplied) is the
+# block name; otherwise we let blockr.core derive the default name. The
+# id - not the name - is what must be board-unique, and that is handled
+# separately by resolve_browser_id().
+build_browser_block <- function(spec) {
   if (!is.null(spec$title) && nzchar(spec$title)) {
-    blockr.core::block_name(blk) <- spec$title
+    blockr.core::create_block(spec$type, block_name = spec$title)
+  } else {
+    blockr.core::create_block(spec$type)
   }
-  blk
 }
 
 # An explicit, board-unique id is kept as-is; otherwise (empty field, or
@@ -271,17 +260,6 @@ reject_collision <- function(id, existing, what, session) {
     shiny::req(FALSE)
   }
   invisible(TRUE)
-}
-
-# Display names of the board's blocks (empty for a NULL board), used to
-# generate a unique default block name.
-board_block_names <- function(board) {
-  if (is.null(board)) return(character())
-  blks <- tryCatch(
-    blockr.core::board_blocks(board), error = function(e) NULL
-  )
-  if (is.null(blks)) return(character())
-  vapply(blks, blockr.core::block_name, character(1L))
 }
 
 # The board's links, or an empty links object for a NULL board.
