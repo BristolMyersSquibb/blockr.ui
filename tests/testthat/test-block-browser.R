@@ -239,26 +239,29 @@ test_that("per-card form field ids are namespaced by id + block type", {
   expect_match(html, "id=\"mod_a-dataset_block_title\"", fixed = TRUE)
 })
 
-test_that("default block ids are unique and avoid the board's existing ids", {
-  existing <- c("aaa", "bbb")
-  board <- blockr.core::new_board(
+test_that("add-flow markup is independent of board state", {
+  # No board-seeded default id is baked into the markup, so the add-flow
+  # panel is a pure function of the registry. The server resolves a
+  # unique id at commit instead (see the server tests below).
+  b1 <- blockr.core::new_board(
+    blocks = list(aaa = blockr.core::new_dataset_block())
+  )
+  b2 <- blockr.core::new_board(
     blocks = stats::setNames(
-      list(blockr.core::new_dataset_block(),
-           blockr.core::new_dataset_block()),
-      existing
+      list(blockr.core::new_dataset_block(), blockr.core::new_head_block()),
+      c("bbb", "ccc")
     )
   )
-  panel <- block_browser_ui("mod_a", board)
-  html <- as.character(htmltools::renderTags(panel)$html)
 
-  vals <- regmatches(
-    html,
-    gregexpr("id=\"mod_a-[a-z_]+_id\" value=\"([^\"]+)\"", html)
-  )[[1]]
-  ids <- sub(".*value=\"([^\"]+)\"$", "\\1", vals)
-  expect_true(length(ids) >= 1)
-  expect_equal(length(ids), length(unique(ids)))
-  expect_false(any(ids %in% existing))
+  m0 <- as.character(block_browser_ui("mod_a", NULL))
+  m1 <- as.character(block_browser_ui("mod_a", b1))
+  m2 <- as.character(block_browser_ui("mod_a", b2))
+
+  expect_identical(m1, m0)
+  expect_identical(m2, m0)
+  # The id field ships empty; no board id leaks into the static markup.
+  expect_match(m0, "id=\"mod_a-dataset_block_id\" value=\"\"", fixed = TRUE)
+  expect_false(any(grepl("value=\"aaa\"|value=\"bbb\"", m1)))
 })
 
 test_that("per-card forms never register Shiny-bound inputs", {
@@ -294,22 +297,137 @@ test_that("block_browser_ui attaches the dependency", {
   expect_true("blockr-block-browser" %in% dep_names)
 })
 
-test_that("block_browser_server returns the committed spec without nonce", {
+test_that("add commit returns a ready blocks object", {
+  board <- blockr.core::new_board(
+    blocks = list(src = blockr.core::new_dataset_block())
+  )
   shiny::testServer(
     block_browser_server,
-    args = list(id = "browser"),
+    args = list(id = "browser", board = shiny::reactive(board)),
     {
       session$setInputs(
-        commit = list(type = "dataset_block", id = "foo",
-                      title = NULL, link_id = NULL, block_input = NULL,
-                      target_input = NULL, nonce = 1)
+        commit = list(type = "dataset_block", id = "foo", title = "",
+                      nonce = 1)
       )
       out <- session$returned()
-      expect_equal(out$type, "dataset_block")
-      expect_equal(out$id, "foo")
-      expect_null(out$nonce)
+      expect_true(blockr.core::is_blocks(out))
+      expect_named(out, "foo")
+      expect_s3_class(out[[1]], "dataset_block")
     }
   )
+})
+
+test_that("empty id is resolved to a unique board-avoiding id at commit", {
+  # `brd` (not `board`): inside testServer `board` is the module's
+  # reactive argument, so the board object is referenced under its own
+  # name to read the existing ids.
+  brd <- blockr.core::new_board(
+    blocks = list(src = blockr.core::new_dataset_block())
+  )
+  shiny::testServer(
+    block_browser_server,
+    args = list(id = "browser", board = shiny::reactive(brd)),
+    {
+      session$setInputs(
+        commit = list(type = "dataset_block", id = NULL, title = "",
+                      nonce = 1)
+      )
+      out <- session$returned()
+      expect_true(blockr.core::is_blocks(out))
+      expect_true(nzchar(names(out)))
+      expect_false(names(out) %in% blockr.core::board_block_ids(brd))
+    }
+  )
+})
+
+test_that("append commit returns blocks + links with a resolved port", {
+  board <- blockr.core::new_board(
+    blocks = list(src = blockr.core::new_dataset_block())
+  )
+  shiny::testServer(
+    block_browser_server,
+    args = list(
+      id = "browser", board = shiny::reactive(board),
+      target = append_to("src")
+    ),
+    {
+      session$setInputs(
+        commit = list(type = "merge_block", id = "m1", title = "",
+                      link_id = "lk1", block_input = NULL, nonce = 1)
+      )
+      out <- session$returned()
+      expect_true(blockr.core::is_blocks(out$blocks))
+      expect_true(blockr.core::is_links(out$links))
+      df <- as.data.frame(out$links)
+      expect_identical(df$id, "lk1")
+      expect_identical(df$from, "src")
+      expect_identical(df$to, "m1")
+      expect_true(nzchar(df$input))   # first free port on the new block
+    }
+  )
+})
+
+test_that("explicit block_input is honoured on append", {
+  board <- blockr.core::new_board(
+    blocks = list(src = blockr.core::new_dataset_block())
+  )
+  shiny::testServer(
+    block_browser_server,
+    args = list(
+      id = "browser", board = shiny::reactive(board),
+      target = append_to("src")
+    ),
+    {
+      session$setInputs(
+        commit = list(type = "merge_block", id = "m1", title = "",
+                      link_id = "lk1", block_input = "y", nonce = 1)
+      )
+      out <- session$returned()
+      expect_identical(as.data.frame(out$links)$input, "y")
+    }
+  )
+})
+
+test_that("a duplicate non-empty id is rejected (no fire) with a board", {
+  board <- blockr.core::new_board(
+    blocks = list(src = blockr.core::new_dataset_block())
+  )
+  shiny::testServer(
+    block_browser_server,
+    args = list(id = "browser", board = shiny::reactive(board)),
+    {
+      fired <- 0L
+      observeEvent(session$returned(), fired <<- fired + 1L)
+      session$setInputs(
+        commit = list(type = "dataset_block", id = "src", title = "",
+                      nonce = 1)
+      )
+      session$flushReact()
+      expect_identical(fired, 0L)
+    }
+  )
+})
+
+test_that("source-less append_to() renders a pre-renderable append panel", {
+  # `append_to()` (no source) is the descriptor used to pre-render the
+  # append panel once: append-mode markup, no context subtitle, and the
+  # same linkable card set as a sourced `append_to(<id>)` (the filter is
+  # registry-based, not source-specific).
+  board <- blockr.core::new_board(
+    blocks = list(m = blockr.core::new_merge_block())
+  )
+  html_src  <- as.character(block_browser_ui("a", board, append_to("m")))
+  html_free <- as.character(block_browser_ui("a", target = append_to()))
+
+  expect_match(html_free, "data-mode=\"append\"", fixed = TRUE)
+  expect_match(html_free, "blockr-block-browser-field-link-id", fixed = TRUE)
+  # No "Append from X" context band in the source-less variant.
+  expect_false(grepl("blockr-block-browser-context", html_free))
+
+  cards <- function(h) {
+    regmatches(h, gregexpr("data-block-type=\"[a-z_]+\"", h))[[1L]]
+  }
+  expect_identical(cards(html_free), cards(html_src))
 })
 
 test_that("malformed inputs are rejected", {

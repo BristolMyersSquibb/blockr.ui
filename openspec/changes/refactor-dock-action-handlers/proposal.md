@@ -1,3 +1,15 @@
+> **Reconcile note (block-browser-prerender-and-ready-objects).** That
+> change already rewrote `add_block_action` / `append_block_action` /
+> `prepend_block_action` as thin adapters over a `block_browser_server()`
+> that returns ready `blocks` / `links` objects, and removed
+> `build_block_from_spec()`, `valid_block_id()` and `valid_link_id()`. So
+> the block-flow parts of this proposal (the `resolve_input_port()` helper
+> and the per-block-handler `update()` assembly in tasks 1.5 / 2.1-2.3 /
+> 2.5) are largely moot for the block handlers. This refactor should now
+> scope to the link / stack handlers and the shared scaffold around them;
+> `resolve_input_port()` survives only if a non-block-browser caller still
+> needs it.
+
 ## Why
 
 After `add-block-browser` (#5), `add-stack-menu` (#7), and `add-link-menu`
