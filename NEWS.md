@@ -1,5 +1,11 @@
 # blockr.ui 0.0.0.9000
 
+* `sidebar_ui()` panels now re-bind their body inputs/outputs on open
+  (`Shiny.bindAll`). `hidePanel` unbinds on close, so a pre-rendered
+  panel opened via `show_sidebar(id)` with no `ui` (no body swap) stayed
+  unbound after its first close and silently stopped emitting. This broke
+  the add / append block browser, which could only commit once.
+
 * `block_browser_server(id, board, target)` now returns a ready-to-apply
   value instead of a raw spec: a `blockr.core` `blocks` object for the
   add flow, or `list(blocks, links)` for append / prepend with the link's

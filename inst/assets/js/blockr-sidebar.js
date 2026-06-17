@@ -154,6 +154,16 @@
     var body = getBody(panel);
     if (!body) return;
 
+    // Re-bind the body's inputs/outputs on open. `hidePanel` unbinds on
+    // close so a hidden panel doesn't hold stale bindings, but a
+    // pre-rendered panel opened via `show_sidebar(id)` with no `ui` never
+    // swaps its body (the only other place that re-binds), so after its
+    // first close its bindings would stay dead and it would silently stop
+    // emitting (e.g. the add / append block browser committing only once).
+    // `bindAll` skips already-bound nodes, so this is a no-op on the first
+    // open and right after a body-swap show.
+    Shiny.bindAll(body);
+
     // Remember previously-focused element so close can restore it.
     panel._blockrSidebarPreviousActive = document.activeElement;
 
