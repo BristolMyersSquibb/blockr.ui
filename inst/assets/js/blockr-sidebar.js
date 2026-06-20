@@ -154,6 +154,21 @@
     var body = getBody(panel);
     if (!body) return;
 
+    // One sidebar per side at a time: opening this one closes any other open
+    // sidebar on the same side. Same-side panels share the slot and z-index,
+    // so a second would otherwise stack invisibly behind — e.g. opening the
+    // append / add browser while a pinned navigator is open. A pinned panel
+    // is closed too: the user gets the panel they just asked for.
+    var side = panel.getAttribute("data-side");
+    Array.prototype.forEach.call(
+      document.querySelectorAll(".blockr-sidebar.blockr-sidebar-open"),
+      function (other) {
+        if (other !== panel && other.getAttribute("data-side") === side) {
+          hidePanel(other);
+        }
+      }
+    );
+
     // Re-bind the body's inputs/outputs on open. `hidePanel` unbinds on
     // close so a hidden panel doesn't hold stale bindings, but a
     // pre-rendered panel opened via `show_sidebar(id)` with no `ui` never
