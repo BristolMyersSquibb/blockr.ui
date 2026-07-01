@@ -13,6 +13,14 @@
       border-collapse: collapse;
       width: 100%;
       font-size: var(--blockr-font-size-base, 0.875rem);
+      /* The preview shows a fixed 5 rows per page. In a fill layout (e.g. a
+         maximised dock panel) the block output hands the table a tall
+         fill-height, and a <table> distributes any surplus height across its
+         rows — so 5 rows balloon to a "double-spaced" look. Pin the table to
+         its content height so rows keep their natural height; the wrapper's
+         max-height + scroll still handles long tables. !important so it wins
+         over the inline fill-height bslib applies to fill items. */
+      height: auto !important;
     }
 
     .blockr-table thead {
