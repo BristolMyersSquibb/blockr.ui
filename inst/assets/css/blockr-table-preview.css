@@ -13,6 +13,19 @@
       border-collapse: collapse;
       width: 100%;
       font-size: var(--blockr-font-size-base, 0.875rem);
+      /* The preview shows a fixed 5 rows per page. In a fill layout (e.g. a
+         maximised dock panel) the block output hands the table a tall
+         fill-height, and a <table> distributes any surplus height across its
+         rows — so 5 rows balloon to a "double-spaced" look. Pin the table to
+         its content height so rows keep their natural height; the wrapper's
+         max-height + scroll still handles long tables. !important so it wins
+         over the inline fill-height bslib applies to fill items. flex covers
+         the second stretch path: height:auto cannot defeat flex-grow when a
+         fill container makes the table itself a flex item. (No align-self
+         override — in a column flex container that would shrink the table's
+         width to its content.) */
+      height: auto !important;
+      flex: 0 0 auto !important;
     }
 
     .blockr-table thead {
@@ -106,7 +119,12 @@
       max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: pre;
+      /* nowrap, NOT pre: rows must stay one line high no matter what the
+         cell holds. pre rendered embedded newlines (free-text values, or
+         any stray markup whitespace) as extra lines, so rows containing
+         such cells grew 2-3x - the "rows too high" bug. The full value
+         stays available via the cell's title tooltip. */
+      white-space: nowrap;
     }
 
     .blockr-table .blockr-row-number {
