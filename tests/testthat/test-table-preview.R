@@ -123,7 +123,9 @@ test_that("columns carry fixed-layout widths from the first render", {
 })
 
 test_that("widths grow with content and clamp at the bounds", {
-  wide <- column_widths_px("x", "", "<chr>", list(strrep("a", 100)), list(FALSE))
+  wide <- column_widths_px(
+    "x", "", "<chr>", list(strrep("a", 100)), list(FALSE)
+  )
   narrow <- column_widths_px("x", "", "<chr>", list("a"), list(FALSE))
   expect_equal(wide, 320)    # upper clamp
   expect_gte(narrow, 60)     # lower clamp
@@ -156,7 +158,9 @@ test_that("a cache pins widths across pages of the same columns", {
 
 test_that("the width cache resets when the columns change", {
   cache <- new.env(parent = emptyenv())
-  render_chr(build_html_table(data.frame(x = strrep("a", 30)), 1L, cache = cache))
+  render_chr(
+    build_html_table(data.frame(x = strrep("a", 30)), 1L, cache = cache)
+  )
   html <- render_chr(build_html_table(data.frame(y = "b"), 1L, cache = cache))
   expect_match(html, "data-column=\"y\"")
   w <- as.numeric(sub("width: ([0-9]+)px.*", "\\1",
