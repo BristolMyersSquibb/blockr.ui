@@ -30,13 +30,9 @@ board <- new_dock_board(
   blocks = c(
     data = new_static_block(adsl),
     cols = new_select_block(
-      state = list(
-        columns = list(
-          "USUBJID", "SITEID", "TRT01P", "AGE", "SEX",
-          "BMIBL", "WEIGHTBL", "HEIGHTBL"
-        ),
-        exclude = FALSE,
-        distinct = FALSE
+      columns = list(
+        "USUBJID", "SITEID", "TRT01P", "AGE", "SEX",
+        "BMIBL", "WEIGHTBL", "HEIGHTBL"
       )
     ),
     sorted = new_arrange_block()
