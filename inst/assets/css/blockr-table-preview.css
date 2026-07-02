@@ -119,7 +119,12 @@
       max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: pre;
+      /* nowrap, NOT pre: rows must stay one line high no matter what the
+         cell holds. pre rendered embedded newlines (free-text values, or
+         any stray markup whitespace) as extra lines, so rows containing
+         such cells grew 2-3x - the "rows too high" bug. The full value
+         stays available via the cell's title tooltip. */
+      white-space: nowrap;
     }
 
     .blockr-table .blockr-row-number {

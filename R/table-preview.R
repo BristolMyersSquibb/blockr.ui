@@ -291,7 +291,11 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
       }
 
       content <- if (is_na) {
-        shiny::tags$span(class = "blockr-na", "NA")
+        # .noWS: htmltools pretty-prints nested tags with newline + indent,
+        # and those literal characters render under the cell's white-space
+        # rule - every NA cell became three lines tall, ballooning its
+        # whole row.
+        shiny::tags$span(class = "blockr-na", "NA", .noWS = "outside")
       } else {
         formatted[[j]][i]
       }

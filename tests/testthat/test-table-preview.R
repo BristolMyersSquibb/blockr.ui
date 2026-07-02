@@ -163,3 +163,13 @@ test_that("the width cache resets when the columns change", {
                       regmatches(html, regexpr("width: [0-9]+px", html))))
   expect_lt(w, 100)
 })
+
+test_that("NA cells render without pretty-printing whitespace", {
+  # htmltools indents nested tags; under the cell's white-space rule those
+  # literal newlines rendered NA cells three lines tall (rows ballooned on
+  # any row containing an NA).
+  df <- data.frame(x = c(NA_integer_, 1L))
+  html <- render_chr(build_html_table(df, 2L))
+  expect_match(html, "<td[^>]*><span class=\"blockr-na\">NA</span></td>")
+  expect_no_match(html, ">\\s+<span class=\"blockr-na\"")
+})
