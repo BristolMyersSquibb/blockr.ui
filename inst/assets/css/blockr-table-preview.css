@@ -19,8 +19,13 @@
          rows — so 5 rows balloon to a "double-spaced" look. Pin the table to
          its content height so rows keep their natural height; the wrapper's
          max-height + scroll still handles long tables. !important so it wins
-         over the inline fill-height bslib applies to fill items. */
+         over the inline fill-height bslib applies to fill items. flex covers
+         the second stretch path: height:auto cannot defeat flex-grow when a
+         fill container makes the table itself a flex item. (No align-self
+         override — in a column flex container that would shrink the table's
+         width to its content.) */
       height: auto !important;
+      flex: 0 0 auto !important;
     }
 
     .blockr-table thead {
