@@ -23,6 +23,7 @@ Imports:
     shiny
 Suggests:
     blockr.dock,
+    chromote,
     DBI,
     dbplyr,
     knitr,
