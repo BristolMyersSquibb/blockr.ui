@@ -28,6 +28,34 @@ col_type_label <- function(x) {
   }
 }
 
+# Per-column width in px, from the header parts and the formatted cell
+# strings. Deliberately px, not font-relative units: `ch` tracks the width
+# of the digit 0, which in some font stacks runs 40% narrower than average
+# text, so ch-sized columns clip hard exactly where fonts differ. 8px/char
+# at the 14px table font (the constant the header min-width heuristic used
+# for years) over-estimates almost every UI font, so the estimate degrades
+# to slightly roomy columns - or, at worst, mild ellipsis with the title
+# tooltip - never to crushed ones.
+#' @keywords internal
+column_widths_px <- function(col_names, col_labels, col_types, formatted,
+                             col_na) {
+  n <- length(col_names)
+  content_chars <- vapply(seq_len(n), function(j) {
+    vals <- formatted[[j]][!col_na[[j]]]
+    w <- max(nchar(vals, type = "width"), 0L, na.rm = TRUE)
+    max(w, if (any(col_na[[j]])) 2L else 0L)
+  }, numeric(1))
+  name_px <- nchar(col_names, type = "width") * 8
+  # Labels render at 11px under a 120px CSS cap, truncated to 18 chars +
+  # ellipsis; type tags at 11px next to the sort-icon slot.
+  label_px <- pmin(nchar(col_labels, type = "width"), 19L) * 6
+  type_px <- nchar(col_types, type = "width") * 6 + 16
+  content_px <- content_chars * 8
+  # 32 = the two 16px cell paddings; clamp to the old 60px floor and a cap
+  # a bit above the old 250px header bound.
+  round(pmin(pmax(pmax(name_px, label_px, type_px, content_px) + 32, 60), 320))
+}
+
 # pillar (not format()) on purpose: column-aware alignment, tabular nums and
 # sensible truncation; comes for free as a direct Import of dplyr.
 #' @keywords internal
@@ -67,6 +95,11 @@ format_column_inner <- function(x, max_chars = 50) {
 #'   lazy tables that are never counted): `TRUE` signals that rows exist
 #'   beyond the current page, which keeps the next button enabled and shows
 #'   the "of many" row-range text instead of a known total.
+#' @param cache Optional environment memoizing the column widths across
+#'   renders of the same result (keyed on the column names). Pass the same
+#'   per-result cache used for [table_page()] so sorting and paging emit
+#'   identical widths and the columns never reflow. When `NULL`, widths are
+#'   recomputed from the current page on every render.
 #'
 #' @return A [shiny::tagList()] with the table preview, carrying the
 #'   [table_preview_dep()] html dependency.
@@ -74,7 +107,7 @@ format_column_inner <- function(x, max_chars = 50) {
 build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
                              page = 1L, page_size = 5L, table_label = NULL,
                              sort_input = NULL, page_input = NULL,
-                             has_more = NULL) {
+                             has_more = NULL, cache = NULL) {
   n_showing <- nrow(dat)
   n_cols <- ncol(dat)
 
@@ -149,6 +182,32 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     if (is_num) !is.na(vec) & vec < 0 else rep(FALSE, length(vec))
   }, dat, col_is_numeric)
 
+  # Column widths are computed server-side from the formatted strings and
+  # emitted as `table-layout: fixed` widths from the first render, so the
+  # layout never depends on measuring the DOM (a measurement taken while a
+  # dock panel is hidden or mid-relayout reads 0 and used to crush the
+  # columns for the whole session). With the per-result `cache`, sorting
+  # and paging emit identical widths, so the columns never reflow - by
+  # construction, not via client-side locking.
+  col_widths_px <- NULL
+  if (!is.null(cache)) {
+    stored <- get0(".col_widths", envir = cache, inherits = FALSE)
+    if (!is.null(stored) && identical(stored$cols, col_names)) {
+      col_widths_px <- stored$widths
+    }
+  }
+  if (is.null(col_widths_px)) {
+    col_widths_px <- column_widths_px(col_names, col_labels, col_types,
+                                      formatted, col_na)
+    if (!is.null(cache)) {
+      assign(
+        ".col_widths",
+        list(cols = col_names, widths = col_widths_px),
+        envir = cache
+      )
+    }
+  }
+
   # Build header row
   header_cells <- vector("list", n_cols + 1L)
   header_cells[[1L]] <- shiny::tags$th(class = "blockr-row-number", "")
@@ -194,14 +253,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
       do.call(shiny::tags$span, label_args)
     }
 
-    name_width <- nchar(col_name) * 8 + 32
-    label_width <- if (has_labels && nzchar(col_labels[j])) {
-      min(nchar(col_labels[j]), 20) * 7 + 32
-    } else {
-      0
-    }
-    min_width <- min(max(name_width, label_width, 60), 250)
-    th_style <- sprintf("min-width: %dpx;", min_width)
+    th_style <- sprintf("width: %dpx;", col_widths_px[j])
 
     header_cells[[j + 1L]] <- shiny::tags$th(
       class = header_class,
@@ -350,6 +402,12 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
           class = "blockr-table-wrapper",
           shiny::tags$table(
             class = "blockr-table",
+            # Fixed layout from the FIRST paint: the ths carry explicit
+            # widths, so content changes (sort, page) cannot reflow the
+            # columns. Width stays 100% via the class: per CSS, a fixed
+            # table's used width is max(100%, sum of columns), so narrow
+            # tables still fill the panel and wide ones overflow-scroll.
+            style = "table-layout: fixed;",
             shiny::tags$thead(
               do.call(shiny::tags$tr, header_cells)
             ),

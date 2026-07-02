@@ -79,7 +79,10 @@ html_table_render <- function(result, session, page_size = 5L) {
           table_label = tbl_label,
           sort_input = ns(sort_id),
           page_input = ns(page_id),
-          has_more = pg$has_more
+          has_more = pg$has_more,
+          # Same per-result cache as table_page(): widths are memoized for
+          # the result's lifetime, so sort/page renders never reflow.
+          cache = cache
         )
       },
       error = function(e) {
