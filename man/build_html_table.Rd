@@ -14,7 +14,8 @@ build_html_table(
   table_label = NULL,
   sort_input = NULL,
   page_input = NULL,
-  has_more = NULL
+  has_more = NULL,
+  cache = NULL
 )
 }
 \arguments{
@@ -45,6 +46,12 @@ names \code{blockr_table_sort} / \code{blockr_table_page} are used.}
 lazy tables that are never counted): \code{TRUE} signals that rows exist
 beyond the current page, which keeps the next button enabled and shows
 the "of many" row-range text instead of a known total.}
+
+\item{cache}{Optional environment memoizing the column widths across
+renders of the same result (keyed on the column names). Pass the same
+per-result cache used for \code{\link[=table_page]{table_page()}} so sorting and paging emit
+identical widths and the columns never reflow. When \code{NULL}, widths are
+recomputed from the current page on every render.}
 }
 \value{
 A \code{\link[shiny:reexports]{shiny::tagList()}} with the table preview, carrying the
