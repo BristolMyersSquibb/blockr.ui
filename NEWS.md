@@ -1,5 +1,12 @@
 # blockr.ui 0.0.0.9000
 
+* `link_menu_server()` and the block browser now resolve a variadic
+  target's new-link input to an empty (positional) slot rather than a
+  generated integer name (`"1"`, `"2"`, ...). This aligns with
+  blockr.core's name-or-position variadic input model, where an integer
+  input is a *named* argument - so the old convention quietly named what
+  should be positional.
+
 * `sidebar_ui()` panels now re-bind their body inputs/outputs on open
   (`Shiny.bindAll`). `hidePanel` unbinds on close, so a pre-rendered
   panel opened via `show_sidebar(id)` with no `ui` (no body swap) stayed

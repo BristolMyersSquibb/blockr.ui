@@ -423,7 +423,7 @@ test_that("server resolves the first free named input when none is picked", {
   )
 })
 
-test_that("server generates a numeric slot for a variadic target", {
+test_that("server resolves a variadic target to a positional slot", {
   board <- variadic_board()
   shiny::testServer(
     link_menu_server,
@@ -433,9 +433,23 @@ test_that("server generates a numeric slot for a variadic target", {
         source = "a", target = "r", link_id = "lk", nonce = 1L
       ))
       session$flushReact()
-      expect_identical(session$returned()$input, "1")
+      expect_identical(session$returned()$input, "")
     }
   )
+})
+
+test_that("resolve_free_input gives a variadic target a positional slot", {
+  blocks <- blockr.core::board_blocks(variadic_board())
+
+  expect_identical(
+    resolve_free_input(blocks[["r"]], "r", blockr.core::links()),
+    ""
+  )
+
+  # A variadic target that already carries a positional link resolves to
+  # another positional slot, never a generated integer name.
+  wired <- blockr.core::links(id = "ar", from = "a", to = "r", input = "1")
+  expect_identical(resolve_free_input(blocks[["r"]], "r", wired), "")
 })
 
 test_that("link_sync_payload tracks eligibility across a board change", {
