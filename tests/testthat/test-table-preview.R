@@ -173,3 +173,12 @@ test_that("NA cells render without pretty-printing whitespace", {
   expect_match(html, "<td[^>]*><span class=\"blockr-na\">NA</span></td>")
   expect_no_match(html, ">\\s+<span class=\"blockr-na\"")
 })
+
+test_that("factor values render unquoted, like character", {
+  # pillar's factor shaft quotes the levels ('"NORMAL"', empty as '""'),
+  # which reads as if the data contained quote characters.
+  df <- data.frame(f = factor(c("NORMAL", "", "HIGH")))
+  html <- render_chr(build_html_table(df, 3L))
+  expect_true(grepl(">NORMAL</td>", html, fixed = TRUE))
+  expect_false(grepl("&quot;", html, fixed = TRUE))
+})

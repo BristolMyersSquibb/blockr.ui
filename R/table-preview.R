@@ -84,10 +84,15 @@ column_widths_px <- function(col_names,
 
 # pillar (not format()) on purpose: column-aware alignment, tabular nums and
 # sensible truncation; comes for free as a direct Import of dplyr.
+# Factors bypass pillar like character does: pillar's factor shaft QUOTES
+# the levels ("NORMAL", and an empty level as ""), which read as if the
+# data itself contained quote characters.
 #' @keywords internal
 format_column_inner <- function(x, max_chars = 50) {
   if (is.character(x)) {
     x
+  } else if (is.factor(x)) {
+    as.character(x)
   } else {
     shaft <- pillar::pillar_shaft(x)
     trimws(format(shaft, width = max_chars))
