@@ -83,6 +83,18 @@ test_that("empty frames work", {
   expect_equal(names(pg$dat), "x")
 })
 
+test_that("a NULL result yields an empty page, not a crash", {
+  # A source block with nothing selected yet (e.g. an empty read block)
+  # evaluates to NULL. That must render as the ordinary empty state, not
+  # crash the preview with "missing value where TRUE/FALSE needed".
+  pg <- expect_no_error(
+    table_page(NULL, list(col = NULL, dir = "none"), 1L, 5L)
+  )
+  expect_equal(pg$total_rows, 0L)
+  expect_equal(nrow(pg$dat), 0L)
+  expect_false(pg$has_more)
+})
+
 test_that("the sort index is cached per (col, dir)", {
   df <- data.frame(x = sample(1e4))
   cache <- new.env(parent = emptyenv())
