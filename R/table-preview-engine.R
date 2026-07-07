@@ -34,6 +34,17 @@
 #' @export
 table_page <- function(result, sort_state = NULL, page = 1L, page_size = 5L,
                        cache = new.env(parent = emptyenv())) {
+  # A NULL result -- a source block with nothing selected yet (e.g. an empty
+  # read block) evaluates its expression to NULL -- has no rows to page.
+  # Return an empty page so nrow(NULL) / colnames(NULL) never propagate a
+  # zero-length/NA value into the slice arithmetic below (which would crash
+  # the whole preview with "missing value where TRUE/FALSE needed"); the
+  # downstream builder renders it as the ordinary "No rows" empty state.
+  if (is.null(result)) {
+    return(list(dat = data.frame(), total_rows = 0L, page = 1L,
+                has_more = FALSE))
+  }
+
   col <- sort_state$col
   dir <- sort_state$dir
   # `dir` must be one of the known sort states. Anything else -- NULL, NA, or a

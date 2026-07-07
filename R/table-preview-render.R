@@ -29,6 +29,13 @@ html_table_render <- function(result, session, page_size = 5L) {
   prev_sort <- NULL
 
   shiny::renderUI({
+    # A NULL result means the block is not configured yet (e.g. an empty read
+    # block). Render nothing so the preview area is simply blank -- the block's
+    # own inputs (e.g. a required-empty field) carry the "needs input" cue.
+    if (is.null(result)) {
+      return(NULL)
+    }
+
     out_name <- tryCatch(
       shiny::getCurrentOutputInfo(session)$name,
       error = function(e) NULL
