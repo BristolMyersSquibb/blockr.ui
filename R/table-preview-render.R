@@ -154,5 +154,5 @@ tabular_trigger.html_table_display <- function(x, session) {
 
 #' @export
 tabular_options.html_table_display <- function(x, ...) {
-  blockr.core::combine_board_options(blockr.core::new_page_size_option(...))
+  blockr.core::new_page_size_option(...)
 }

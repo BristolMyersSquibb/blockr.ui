@@ -89,9 +89,8 @@ test_that("html_table_display declares the tabular_display seam", {
   expect_match(as.character(ui), "id=\"preview\"")
   expect_match(as.character(ui), "shiny-html-output")
 
-  opts <- blockr.core::tabular_options(html_table_display)
-  expect_s3_class(opts, "board_options")
-  expect_identical(names(opts), "page_size")
+  opt <- blockr.core::tabular_options(html_table_display)
+  expect_s3_class(opt, "page_size_option")
 })
 
 test_that("the blockr.tabular_display option selects html_table_display", {
