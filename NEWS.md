@@ -1,5 +1,13 @@
 # blockr.ui 0.0.0.9000
 
+* `html_table_display` wires the HTML table preview into blockr.core's
+  `tabular_display` seam (blockr.core >= 0.1.4). Apps opt in with
+  `options(blockr.tabular_display = blockr.ui::html_table_display)` to
+  preview data, parser and transform block results through the
+  paginated, sortable HTML table rather than the default minimal
+  preview. This supersedes the never-read `blockr.html_table_preview`
+  option.
+
 * `link_menu_server()` and the block browser now resolve a variadic
   target's new-link input to an empty (positional) slot rather than a
   generated integer name (`"1"`, `"2"`, ...). This aligns with

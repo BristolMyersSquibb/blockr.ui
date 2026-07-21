@@ -80,3 +80,39 @@ test_that("the table-level label is rendered from attr(result, 'label')", {
     expect_match(html, "My Table")
   })
 })
+
+test_that("html_table_display declares the tabular_display seam", {
+  expect_true(blockr.core::is_tabular_display(html_table_display))
+  expect_identical(class(html_table_display)[1L], "html_table_display")
+
+  ui <- blockr.core::tabular_ui(html_table_display, "preview")
+  expect_match(as.character(ui), "id=\"preview\"")
+  expect_match(as.character(ui), "shiny-html-output")
+
+  opts <- blockr.core::tabular_options(html_table_display)
+  expect_s3_class(opts, "board_options")
+  expect_identical(names(opts), "page_size")
+})
+
+test_that("the blockr.tabular_display option selects html_table_display", {
+  withr::local_options(blockr.tabular_display = html_table_display)
+  expect_identical(
+    class(blockr.core::tabular_display())[1L],
+    "html_table_display"
+  )
+})
+
+test_that("tabular_output renders the result through the HTML table", {
+  df <- data.frame(x = 1:3)
+
+  server <- function(input, output, session) {
+    output$result <- blockr.core::tabular_output(
+      html_table_display, df, block = NULL, session
+    )
+  }
+
+  shiny::testServer(server, {
+    html <- as.character(htmltools::as.tags(output$result$html))
+    expect_match(html, "blockr-table-container")
+  })
+})

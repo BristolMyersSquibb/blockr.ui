@@ -3,8 +3,9 @@
 # A blockr.dock board (with the blockr.dag extension) where every data /
 # transform block previews through the shared HTML table preview that lives
 # in blockr.ui (build_html_table / table_page / html_table_render). The
-# preview is opted in via blockr.extra's `blockr.html_table_preview` option,
-# which swaps it in for DT on data and transform blocks.
+# preview is opted in via core's `blockr.tabular_display` option, set to
+# blockr.ui::html_table_display, which selects it over the default minimal
+# preview for data, parser and transform blocks.
 #
 #   [data: ADSL] --> [select cols] --> [arrange]
 #
@@ -13,7 +14,7 @@
 # ADaM labels under the column names. Every block preview sorts and pages
 # independently.
 
-options(blockr.html_table_preview = TRUE)
+options(blockr.tabular_display = blockr.ui::html_table_display)
 
 library(shiny)
 library(blockr.core)
@@ -21,7 +22,6 @@ library(blockr.ui)
 library(blockr.dplyr)
 library(blockr.dock)
 library(blockr.dag)
-library(blockr.extra)
 
 stopifnot(requireNamespace("safetyData", quietly = TRUE))
 adsl <- safetyData::adam_adsl
