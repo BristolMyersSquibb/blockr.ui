@@ -16,9 +16,7 @@
 
 options(blockr.tabular_display = blockr.ui::html_table_display)
 
-library(shiny)
 library(blockr.core)
-library(blockr.ui)
 library(blockr.dplyr)
 library(blockr.dock)
 library(blockr.dag)

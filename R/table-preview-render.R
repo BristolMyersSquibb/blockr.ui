@@ -126,20 +126,22 @@ html_table_result <- function(result, block, session) {
 
 #' @rdname html_table_render
 #' @format NULL
+#' @importFrom blockr.core tabular_ui tabular_output
+#' @importFrom blockr.core tabular_trigger tabular_options
 #' @export
 html_table_display <- blockr.core::new_tabular_display("html_table_display")
 
-#' @exportS3Method blockr.core::tabular_ui
+#' @export
 tabular_ui.html_table_display <- function(x, id) {
   shiny::uiOutput(id)
 }
 
-#' @exportS3Method blockr.core::tabular_output
+#' @export
 tabular_output.html_table_display <- function(x, result, block, session) {
   html_table_result(result, block, session)
 }
 
-#' @exportS3Method blockr.core::tabular_trigger
+#' @export
 tabular_trigger.html_table_display <- function(x, session) {
   invisible(
     blockr.core::get_board_option_values(
@@ -150,7 +152,7 @@ tabular_trigger.html_table_display <- function(x, session) {
   )
 }
 
-#' @exportS3Method blockr.core::tabular_options
+#' @export
 tabular_options.html_table_display <- function(x, ...) {
   blockr.core::combine_board_options(blockr.core::new_page_size_option(...))
 }
