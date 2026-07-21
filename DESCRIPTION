@@ -34,6 +34,6 @@ Suggests:
     withr
 Remotes:
     BristolMyersSquibb/blockr.core@129-tabular-display,
-    BristolMyersSquibb/blockr.dock
+    BristolMyersSquibb/blockr.dock@core-129-tabular-display-pin
 Config/testthat/edition: 3
 VignetteBuilder: knitr
