@@ -3,16 +3,21 @@
 # default implementation is a no-op, so we must override on the instance to
 # observe what `show_sidebar()` / `hide_sidebar()` actually emit.
 mock_session_with_capture <- function() {
+
   sess <- shiny::MockShinySession$new()
-  captured <- list()
+
+  captured <- new.env(parent = emptyenv())
+  captured$messages <- list()
+
   sess$sendInputMessage <- function(input_id, message) {
-    captured[[length(captured) + 1L]] <<- list(
+    captured$messages[[length(captured$messages) + 1L]] <- list(
       id = input_id,
       message = message
     )
   }
+
   list(
     session = sess,
-    messages = function() captured
+    messages = function() captured$messages
   )
 }

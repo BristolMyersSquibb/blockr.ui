@@ -6,6 +6,12 @@
 #' as the paginated, sortable table preview. `html_table_result()` is the
 #' block-flavored wrapper that reads the `page_size` board option first.
 #'
+#' `html_table_display` is the [blockr.core::tabular_display] that wires this
+#' preview into data, parser and transform blocks. Opt in per app with
+#' `options(blockr.tabular_display = blockr.ui::html_table_display)`; the
+#' display declares and triggers on a single board option, `page_size`, which
+#' the HTML table reads to paginate.
+#'
 #' Sort and page state live in the browser and arrive via Shiny inputs whose
 #' ids are derived from the output name (via [shiny::getCurrentOutputInfo()]),
 #' so several previews in one module session stay independent. Sorting and
@@ -116,4 +122,37 @@ html_table_result <- function(result, block, session) {
   )
 
   html_table_render(result, session, page_size)
+}
+
+#' @rdname html_table_render
+#' @format NULL
+#' @importFrom blockr.core tabular_ui tabular_output
+#' @importFrom blockr.core tabular_trigger tabular_options
+#' @export
+html_table_display <- blockr.core::new_tabular_display("html_table_display")
+
+#' @export
+tabular_ui.html_table_display <- function(x, id) {
+  shiny::uiOutput(id)
+}
+
+#' @export
+tabular_output.html_table_display <- function(x, result, block, session) {
+  html_table_result(result, block, session)
+}
+
+#' @export
+tabular_trigger.html_table_display <- function(x, session) {
+  invisible(
+    blockr.core::get_board_option_values(
+      "page_size",
+      if_not_found = "null",
+      session = session
+    )
+  )
+}
+
+#' @export
+tabular_options.html_table_display <- function(x, ...) {
+  blockr.core::new_page_size_option(...)
 }
