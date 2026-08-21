@@ -186,3 +186,33 @@ test_that("factor values render unquoted, like character", {
   expect_true(grepl(">NORMAL</td>", html, fixed = TRUE))
   expect_false(grepl("&quot;", html, fixed = TRUE))
 })
+
+test_that("wrap_names measures a header by its longest word", {
+  # A header is free to wrap; it simply never has to when the estimate buys
+  # it a full line, so a long title sets the column width outright. Measured
+  # by longest word, the column takes the narrowest width that still never
+  # breaks a word.
+  long <- "Investigational Product 54 mg Once Daily"
+  cells <- list("75.7 (8.3)")
+  expect_equal(column_widths_px(long, formatted = cells), 320)          # capped
+  expect_equal(column_widths_px(long, formatted = cells,
+                                wrap_names = TRUE), 152)                # "Investigational"
+})
+
+test_that("wrap_names never goes below what the cells need", {
+  # The longest word is a floor on the HEADER only -- content still wins when
+  # it is wider, or a wrapped title would crush its own column's data.
+  w <- column_widths_px("Age", formatted = list("1234567890123456"),
+                        wrap_names = TRUE)
+  expect_equal(w, 16 * 8 + 32)
+})
+
+test_that("wrap_names leaves single-word and empty headers alone", {
+  for (nm in c("Placebo", "Total")) {
+    expect_equal(column_widths_px(nm, formatted = list("53 (61.6%)")),
+                 column_widths_px(nm, formatted = list("53 (61.6%)"),
+                                  wrap_names = TRUE))
+  }
+  expect_equal(column_widths_px("", formatted = list("x"), wrap_names = TRUE),
+               60)  # clamped to the floor, no NA/-Inf from an empty split
+})

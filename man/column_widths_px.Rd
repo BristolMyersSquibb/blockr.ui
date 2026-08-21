@@ -9,7 +9,8 @@ column_widths_px(
   col_labels = character(length(col_names)),
   col_types = character(length(col_names)),
   formatted = rep(list(character(0)), length(col_names)),
-  col_na = lapply(formatted, is.na)
+  col_na = lapply(formatted, is.na),
+  wrap_names = FALSE
 )
 }
 \arguments{
@@ -27,6 +28,14 @@ each column's cells (only the rows being rendered).}
 
 \item{col_na}{List of logical vectors flagging cells rendered as the
 \code{NA} marker instead of their display string.}
+
+\item{wrap_names}{Measure each header by its longest \emph{word} rather than
+its full length. A header is free to wrap (nothing pins it to one
+line), it simply never has to when the estimate buys it a full line -
+so a long title sets the column width outright and the table sprawls.
+Measuring the longest word instead gives the narrowest column that
+still never breaks a word, and the header wraps into it by itself.
+\code{FALSE} (the default) keeps the historical one-line estimate.}
 }
 \value{
 Integer vector of pixel widths, one per column, including the

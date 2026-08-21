@@ -55,6 +55,13 @@ col_type_label <- function(x) {
 #'   each column's cells (only the rows being rendered).
 #' @param col_na List of logical vectors flagging cells rendered as the
 #'   `NA` marker instead of their display string.
+#' @param wrap_names Measure each header by its longest *word* rather than
+#'   its full length. A header is free to wrap (nothing pins it to one
+#'   line), it simply never has to when the estimate buys it a full line -
+#'   so a long title sets the column width outright and the table sprawls.
+#'   Measuring the longest word instead gives the narrowest column that
+#'   still never breaks a word, and the header wraps into it by itself.
+#'   `FALSE` (the default) keeps the historical one-line estimate.
 #'
 #' @return Integer vector of pixel widths, one per column, including the
 #'   two 16px cell paddings, clamped to \[60, 320\].
@@ -64,14 +71,25 @@ column_widths_px <- function(col_names,
                              col_types = character(length(col_names)),
                              formatted = rep(list(character(0)),
                                              length(col_names)),
-                             col_na = lapply(formatted, is.na)) {
+                             col_na = lapply(formatted, is.na),
+                             wrap_names = FALSE) {
   n <- length(col_names)
   content_chars <- vapply(seq_len(n), function(j) {
     vals <- formatted[[j]][!col_na[[j]]]
     w <- max(nchar(vals, type = "width"), 0L, na.rm = TRUE)
     max(w, if (any(col_na[[j]])) 2L else 0L)
   }, numeric(1))
-  name_px <- nchar(col_names, type = "width") * 8
+  # A wrapping header only needs room for its longest word; without wrap it
+  # must fit end to end on one line.
+  name_chars <- if (isTRUE(wrap_names)) {
+    vapply(strsplit(col_names, "[[:space:]]+"), function(w) {
+      if (!length(w)) return(0)
+      max(nchar(w, type = "width"))
+    }, numeric(1))
+  } else {
+    nchar(col_names, type = "width")
+  }
+  name_px <- name_chars * 8
   # Labels render at 11px under a 120px CSS cap, truncated to 18 chars +
   # ellipsis; type tags at 11px next to the sort-icon slot.
   label_px <- pmin(nchar(col_labels, type = "width"), 19L) * 6
