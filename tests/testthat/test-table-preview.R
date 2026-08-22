@@ -194,9 +194,12 @@ test_that("wrap_names measures a header by its longest word", {
   # breaks a word.
   long <- "Investigational Product 54 mg Once Daily"
   cells <- list("75.7 (8.3)")
-  expect_equal(column_widths_px(long, formatted = cells), 320)          # capped
-  expect_equal(column_widths_px(long, formatted = cells,
-                                wrap_names = TRUE), 152)                # "Investigational"
+  expect_equal(column_widths_px(long, formatted = cells), 320)  # capped
+  # 152 px is the width of "Investigational", the longest word in the title.
+  expect_equal(
+    column_widths_px(long, formatted = cells, wrap_names = TRUE),
+    152
+  )
 })
 
 test_that("wrap_names never goes below what the cells need", {
