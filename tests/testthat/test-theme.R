@@ -43,6 +43,16 @@ test_that("the token block defines every name the theme layer reads", {
   expect_identical(setdiff(referenced, defined), character())
 })
 
+test_that("the token block's own derivations resolve within it", {
+
+  tokens <- css_source("blockr-tokens.css")
+
+  expect_identical(
+    setdiff(css_references(tokens), css_defines(tokens)),
+    character()
+  )
+})
+
 test_that("component stylesheets read only defined tokens", {
 
   assets <- system.file("assets", "css", package = "blockr.ui")
@@ -55,7 +65,9 @@ test_that("component stylesheets read only defined tokens", {
   referenced <- css_references(
     paste(vapply(components, css_source, character(1)), collapse = "\n")
   )
-  set_at_runtime <- grep("^--blockr-sidebar-", referenced, value = TRUE)
+  set_at_runtime <- grep(
+    "^--blockr-(sidebar-|spinner-delay$)", referenced, value = TRUE
+  )
 
   expect_gt(length(components), 0L)
   expect_identical(setdiff(referenced, c(defined, set_at_runtime)), character())
