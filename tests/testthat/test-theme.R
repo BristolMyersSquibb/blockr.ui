@@ -27,6 +27,14 @@ css_bare_references <- function(css) {
   )
 }
 
+css_hidden_selectors <- function(css) {
+  rules <- css_matches(
+    gsub("(?s)/\\*.*?\\*/", "", css, perl = TRUE),
+    "[^{}]*\\{[^{}]*display:\\s*none[^{}]*\\}"
+  )
+  trimws(unlist(strsplit(sub("\\{.*", "", rules), ",")))
+}
+
 test_that("theme_dep ships the token and theme stylesheets", {
 
   dep <- theme_dep()
@@ -72,4 +80,12 @@ test_that("every token read without a fallback is defined", {
 
   expect_gt(length(shipped), 0L)
   expect_identical(setdiff(bare, defined), character())
+})
+
+test_that("the theme layer hides only chrome the host cannot reach", {
+
+  expect_identical(
+    css_hidden_selectors(css_source("blockr-theme.css")),
+    ".popover .btn-close"
+  )
 })

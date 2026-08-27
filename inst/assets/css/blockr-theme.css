@@ -248,7 +248,9 @@ label:has(input[type="file"]) {
   padding: 12px 14px;
 }
 
-.popover-header,
+/* The bslib package injects a close button into any popover whose trigger
+   does not include "focus" -- that button is built on the client, so it can
+   only be dropped from here. */
 .popover .btn-close {
   display: none;
 }
