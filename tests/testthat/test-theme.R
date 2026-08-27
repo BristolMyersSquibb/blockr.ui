@@ -20,6 +20,13 @@ css_references <- function(css) {
   sub("^var\\(\\s*", "", css_matches(css, "var\\(\\s*--blockr-[a-z0-9-]+"))
 }
 
+css_bare_references <- function(css) {
+  gsub(
+    "^var\\(\\s*|\\s*\\)$", "",
+    css_matches(css, "var\\(\\s*--blockr-[a-z0-9-]+\\s*\\)")
+  )
+}
+
 test_that("theme_dep ships the token and theme stylesheets", {
 
   dep <- theme_dep()
@@ -53,22 +60,16 @@ test_that("the token block's own derivations resolve within it", {
   )
 })
 
-test_that("component stylesheets read only defined tokens", {
+test_that("every token read without a fallback is defined", {
 
   assets <- system.file("assets", "css", package = "blockr.ui")
-  components <- setdiff(
-    list.files(assets, pattern = "\\.css$"),
-    c("blockr-tokens.css", "blockr-theme.css")
-  )
+  shipped <- list.files(assets, pattern = "\\.css$")
 
   defined <- css_defines(css_source("blockr-tokens.css"))
-  referenced <- css_references(
-    paste(vapply(components, css_source, character(1)), collapse = "\n")
-  )
-  set_at_runtime <- grep(
-    "^--blockr-(sidebar-|spinner-delay$)", referenced, value = TRUE
+  bare <- css_bare_references(
+    paste(vapply(shipped, css_source, character(1)), collapse = "\n")
   )
 
-  expect_gt(length(components), 0L)
-  expect_identical(setdiff(referenced, c(defined, set_at_runtime)), character())
+  expect_gt(length(shipped), 0L)
+  expect_identical(setdiff(bare, defined), character())
 })

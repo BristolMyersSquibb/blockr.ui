@@ -26,7 +26,6 @@
   /* Shadow - elevated dropdowns */
   --blockr-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  --blockr-shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.08);
 
   /* Data marks - bars, boxes, lanes */
   /* Cosmetic ONLY. This radius carries no information: it exists so a mark
@@ -48,16 +47,12 @@
      analysis output. Marks that are the content stay at full weight. */
   --blockr-mark-weight-supporting: 0.6;
 
-  /* Font Family */
-  --blockr-font-mono: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
-
   /* Font Sizes */
   --blockr-font-size-base: 0.875rem;      /* 14px - base for body/inputs */
   --blockr-font-size-sm: 0.8125rem;       /* 13px - helper text */
   --blockr-font-size-xs: 0.75rem;         /* 12px - meta, toggles, subtitle */
   --blockr-font-size-title: 1.25rem;      /* 20px - block title */
   --blockr-font-size-section: 1rem;       /* 16px - section headers */
-  --blockr-font-size-md: 0.9375rem;       /* 15px - card and chart titles */
 
   /* Font Weights */
   --blockr-font-weight-normal: 400;
@@ -82,32 +77,4 @@
   --blockr-color-primary-bg: var(--blockr-blue-50);
   --blockr-color-error: #dc2626;
   --blockr-color-success: #16a34a;
-  /* Colors - Status */
-  --blockr-color-danger: var(--blockr-color-error);
-  --blockr-color-negative: #f43f5e;
-  --blockr-color-warning: #f59e0b;
-  --blockr-color-warning-bg: #fffbeb;
-  --blockr-color-warning-text: #b45309;
-
-  /* Colors - Surfaces */
-  --blockr-color-bg: #ffffff;
-  --blockr-color-surface-2: var(--blockr-grey-100);
-  --blockr-color-primary-subtle: rgba(37, 99, 235, 0.09);
-
-  /* Focus */
-  --blockr-color-focus: rgba(37, 99, 235, 0.45);
-  --blockr-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.12);
-
-  /* Radii */
-  --blockr-radius-sm: 4px;
-  --blockr-radius-md: 6px;
-  --blockr-radius-lg: 8px;
-
-  /* Control heights - inputs and the buttons sitting beside them */
-  --blockr-control-h: 42px;
-  --blockr-control-h-sm: 30px;
-  --blockr-control-h-xs: 26px;
-
-  /* Motion */
-  --blockr-transition: 0.15s ease;
 }

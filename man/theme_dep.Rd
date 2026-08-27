@@ -13,9 +13,9 @@ An \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
 The \verb{--blockr-*} design tokens and the Bootstrap theme layer that the
 blockr packages style themselves from, carried as two stylesheets:
 \code{blockr-tokens.css} defines the vocabulary in a \verb{:root} block - the
-grey and blue ramps, font sizes and weights, radii, control heights,
-shadows and the semantic colours derived from them - and
-\code{blockr-theme.css} applies it to the host app.
+grey and blue ramps, font sizes and weights, shadows, and the semantic
+text and surface colours derived from them - and \code{blockr-theme.css}
+applies it to the host app.
 }
 \details{
 Attach it once, from the app's UI. The theme layer is deliberately
