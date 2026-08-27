@@ -1,0 +1,320 @@
+/* ============================================
+   Theme layer. Every rule below is unscoped and
+   restyles the whole host app, not one component.
+   ============================================ */
+
+/* ============================================
+   Bootstrap Base Overrides
+   ============================================ */
+
+/* --- Typography --- */
+body {
+  font-size: var(--blockr-font-size-base);
+}
+
+h4, .h4 {
+  font-size: var(--blockr-font-size-section);
+  font-weight: var(--blockr-font-weight-medium);
+  font-variant-caps: all-small-caps;
+  color: var(--blockr-color-text-secondary);
+  letter-spacing: 0.5px;
+}
+
+h5, .h5 {
+  font-size: var(--blockr-font-size-section);
+  font-weight: var(--blockr-font-weight-medium);
+}
+
+h6, .h6 {
+  font-size: var(--blockr-font-size-base);
+  font-weight: var(--blockr-font-weight-medium);
+}
+
+small, .small {
+  font-size: var(--blockr-font-size-sm);
+}
+
+/* --- Labels --- */
+label,
+.form-label,
+.shiny-input-container .control-label {
+  font-size: var(--blockr-font-size-xs);
+  color: var(--blockr-color-text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+label:has(input[type="file"]) {
+  margin-bottom: 0;
+}
+
+/* --- Form Controls (Figma-aligned) --- */
+.form-control,
+.form-select {
+  font-size: var(--blockr-font-size-base);
+  background-color: var(--blockr-color-bg-input);
+  border: 1px solid var(--blockr-color-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--blockr-color-text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: #ffffff;
+  border-color: var(--blockr-color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: var(--blockr-grey-400);
+}
+
+.input-group-sm > .form-control,
+.input-group-sm > .form-select,
+.input-group-sm > .input-group-text,
+.input-group-sm > .btn {
+  font-size: var(--blockr-font-size-sm);
+  padding: 6px 10px;
+}
+
+/* Selectize - Figma-aligned */
+.selectize-control,
+.selectize-input,
+.selectize-dropdown {
+  font-size: var(--blockr-font-size-base);
+}
+
+.selectize-input {
+  background-color: var(--blockr-color-bg-input) !important;
+  border: 1px solid var(--blockr-color-border) !important;
+  border-radius: 8px !important;
+  padding: 0 12px !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.selectize-input.focus {
+  background-color: #ffffff !important;
+  border-color: var(--blockr-color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+.selectize-dropdown {
+  border: 1px solid var(--blockr-color-border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--blockr-shadow-lg) !important;
+  margin-top: 4px !important;
+}
+
+.selectize-dropdown-content .option {
+  padding: 10px 14px !important;
+  color: var(--blockr-color-text-primary);
+}
+
+.selectize-dropdown-content .option.active {
+  background-color: var(--blockr-color-bg-hover) !important;
+  color: var(--blockr-color-text-primary) !important;
+}
+
+/* --- Buttons (Figma-aligned) --- */
+.btn {
+  font-size: var(--blockr-font-size-base);
+  font-weight: var(--blockr-font-weight-medium);
+  border-radius: 6px;
+  padding: 8px 16px;
+  transition: all 0.15s ease;
+}
+
+.btn-sm {
+  font-size: var(--blockr-font-size-sm);
+  padding: 6px 12px;
+}
+
+/* File input: stretch button to match form-control height */
+.input-group .input-group-btn {
+  display: flex;
+}
+
+/* Primary button - blue */
+.btn-primary {
+  background-color: var(--blockr-color-primary);
+  border-color: var(--blockr-color-primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--blockr-color-primary-hover);
+  border-color: var(--blockr-color-primary-hover);
+  color: #ffffff;
+}
+
+/* Secondary/Outline button - gray */
+.btn-secondary,
+.btn-outline-secondary,
+.btn-light {
+  background-color: var(--blockr-grey-100);
+  border: 1px solid var(--blockr-color-border);
+  color: var(--blockr-color-text-primary);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus,
+.btn-light:hover,
+.btn-light:focus {
+  background-color: var(--blockr-color-border);
+  border-color: var(--blockr-color-border-hover);
+  color: var(--blockr-color-text-primary);
+}
+
+/* Default/outline button */
+.btn-default,
+.btn-outline-default {
+  background-color: var(--blockr-grey-100);
+  border: 1px solid var(--blockr-color-border);
+  color: var(--blockr-color-text-primary);
+}
+
+.btn-default:hover,
+.btn-default:focus,
+.btn-outline-default:hover,
+.btn-outline-default:focus {
+  background-color: var(--blockr-color-border);
+  border-color: var(--blockr-color-border-hover);
+}
+
+/* Icon-only action buttons (remove row, etc.) */
+.btn-link.text-muted {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: var(--blockr-grey-400) !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.btn-link.text-muted:hover,
+.btn-link.text-muted:focus {
+  background-color: var(--blockr-grey-100) !important;
+  color: var(--blockr-grey-600) !important;
+  text-decoration: none !important;
+}
+
+/* ============================================
+   Tooltip & Popover Styling (Figma-aligned)
+   ============================================ */
+.tooltip {
+  --bs-tooltip-bg: white;
+  --bs-tooltip-color: var(--blockr-color-text-secondary);
+  --bs-tooltip-opacity: 1;
+}
+
+.tooltip-inner {
+  font-size: var(--blockr-font-size-sm);
+  font-weight: var(--blockr-font-weight-normal);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: var(--blockr-shadow-lg);
+  border: 1px solid var(--blockr-color-border);
+  max-width: 250px;
+  text-align: left;
+}
+
+.tooltip-arrow::before {
+  border-top-color: white !important;
+  border-bottom-color: white !important;
+}
+
+/* Popover - light style matching tooltips */
+.popover {
+  --bs-popover-bg: white;
+  --bs-popover-border-color: var(--blockr-color-border);
+  --bs-popover-body-color: var(--blockr-color-text-secondary);
+  border-radius: 12px;
+  box-shadow: var(--blockr-shadow-lg);
+  border: 1px solid var(--blockr-color-border);
+  max-width: 280px;
+}
+
+.popover-body {
+  font-size: var(--blockr-font-size-sm);
+  padding: 12px 14px;
+}
+
+.popover-header,
+.popover .btn-close {
+  display: none;
+}
+
+.popover-arrow::before {
+  border-top-color: var(--blockr-color-border) !important;
+  border-bottom-color: var(--blockr-color-border) !important;
+}
+
+.popover-arrow::after {
+  border-top-color: white !important;
+  border-bottom-color: white !important;
+}
+
+/* ============================================
+   DataTables Styling (Figma-aligned)
+   ============================================ */
+
+/* Grey stripes */
+.table-striped {
+  --bs-table-striped-bg: var(--blockr-color-bg-subtle);
+}
+
+.table {
+  border-color: var(--blockr-color-border);
+}
+
+.table > thead {
+  background: var(--blockr-color-bg-subtle);
+}
+
+.table > thead > tr > th {
+  font-weight: var(--blockr-font-weight-medium);
+  color: var(--blockr-color-text-secondary);
+  border-bottom: 2px solid var(--blockr-color-border);
+  padding: 12px 16px;
+}
+
+.table > tbody > tr > td {
+  color: var(--blockr-color-text-primary);
+  border-bottom: 1px solid var(--blockr-grey-100);
+  padding: 12px 16px;
+}
+
+.table > tbody > tr:hover {
+  background-color: var(--blockr-color-bg-subtle);
+}
+
+/* Info text - small and muted */
+.dataTables_wrapper .dataTables_info {
+  font-size: var(--blockr-font-size-sm) !important;
+  color: var(--blockr-color-text-muted) !important;
+  padding-top: 0.5rem;
+}
+
+/* Smaller paginator */
+.dataTables_wrapper .dataTables_paginate .page-link {
+  padding: 0.2rem 0.5rem;
+  font-size: var(--blockr-font-size-xs);
+  border-radius: 6px;
+}
+
+/* ============================================
+   G6 Graph Toolbar Override
+   ============================================ */
+.g6-toolbar {
+  box-shadow: none !important;
+}
+

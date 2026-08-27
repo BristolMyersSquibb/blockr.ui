@@ -14,6 +14,14 @@
 * The `Suggests` on blockr.dock goes with them, removing the last
   non-CRAN entry from `Remotes:` and simplifying a CRAN release.
 
+* The `theme_dep()` dependency carries the shared blockr stylesheet: the
+  `--blockr-*` design tokens in a `:root` block, and the unscoped
+  Bootstrap theme layer - typography, labels, form controls, selectize,
+  buttons, tooltips, popovers and the DataTables chrome - that blockr
+  apps have so far picked up from `blockr.dock`. A host attaches it once
+  from its own UI. Nothing in this package attaches it for you, and the
+  token block on its own styles nothing.
+
 * `html_table_display` wires the HTML table preview into blockr.core's
   `tabular_display` seam (blockr.core >= 0.1.4). Apps opt in with
   `options(blockr.tabular_display = blockr.ui::html_table_display)` to
