@@ -7,7 +7,9 @@ Authors@R:
            role = c("aut", "cre"),
            email = "david@cynkra.com")
 Description: User-interface primitives shared across the 'blockr'
-    ecosystem. Designed enhance 'blockr.dock'.
+    ecosystem, currently a paginated, sortable HTML table display for
+    block results that plugs into the tabular display extension point
+    of 'blockr.core'.
 URL: https://bristolmyerssquibb.github.io/blockr.ui/
 BugReports: https://github.com/BristolMyersSquibb/blockr.ui/issues
 License: GPL (>= 3)
@@ -22,18 +24,11 @@ Imports:
     rlang,
     shiny
 Suggests:
-    blockr.dock,
-    chromote,
     DBI,
     dbplyr,
-    knitr,
-    rmarkdown,
     RSQLite,
-    shinytest2,
     testthat (>= 3.0.0),
     withr
 Remotes:
-    BristolMyersSquibb/blockr.core,
-    BristolMyersSquibb/blockr.dock
+    BristolMyersSquibb/blockr.core
 Config/testthat/edition: 3
-VignetteBuilder: knitr

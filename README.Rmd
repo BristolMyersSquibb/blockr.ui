@@ -22,9 +22,7 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/blockr.ui)](https://CRAN.R-project.org/package=blockr.ui)
 <!-- badges: end -->
 
-User-interface primitives shared across the
-[blockr](https://blockr.site/) ecosystem. Designed to sit between
-`blockr.core` and renderers such as `blockr.dock`.
+User-interface primitives shared across the [blockr](https://blockr.site/) ecosystem. The package currently provides one: a paginated, sortable HTML table display for block results, which any board can opt into and any package can build its own preview on top of.
 
 ## Installation
 
@@ -36,123 +34,38 @@ You can install the development version of blockr.ui from
 pak::pak("BristolMyersSquibb/blockr.ui")
 ```
 
-## Example
+## The table display
 
-### Minimal sidebar
+Package blockr.core renders a block's result through whatever object the `blockr.tabular_display` option names, so opting a whole board into the HTML table is one line before the app starts:
 
-A slide-in panel that hosts arbitrary Shiny content. See
-`vignette("sidebar", package = "blockr.ui")` for the full API.
-
-```{r minimal-example, eval=FALSE, code=readLines("inst/examples/minimal/app.R")}
+``` r
+options(blockr.tabular_display = blockr.ui::html_table_display)
 ```
 
-```{r minimal-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
-# Drive an "open sidebar" click via shinytest2 so the screenshot
-# captures the panel in its open state. Mirrors blockr.dock's README
-# convention (NOT_CRAN unblocks shinytest2's CRAN guard during build).
-withr::local_envvar(NOT_CRAN = "true")
-app <- shinytest2::AppDriver$new(
-  system.file("examples", "minimal", package = "blockr.ui"),
-  width = 1200,
-  height = 700
+Data, parser and transform blocks then preview through a table that sorts and pages on the client, keeps its scroll position across a re-render, and shows column types (plus ADaM-style labels where the data carries them) under each header. Each block's preview sorts and pages independently.
+
+A worked board is in `inst/examples/table-preview`:
+
+``` r
+shiny::runApp(
+  system.file("examples", "table-preview", package = "blockr.ui")
 )
-Sys.sleep(2)
-app$run_js("document.getElementById('open').click()")
-Sys.sleep(0.8)
-tmp <- tempfile(fileext = ".png")
-app$get_screenshot(tmp)
-file.copy(tmp, "man/figures/sidebar-minimal.png", overwrite = TRUE)
-app$stop()
 ```
 
-![blockr.ui minimal sidebar example](man/figures/sidebar-minimal.png)
+For a lazy (dbplyr) result the page fetch is pushed to the database rather than collected up front, so paging a large table stays cheap.
 
-### Block browser
+## Building your own preview
 
-A card-list block picker (one card per row of
-`blockr.core::available_blocks()`) designed to mount inside the
-sidebar. See `vignette("block-browser", package = "blockr.ui")`.
+The pieces behind the display are exported, so a package that wants a different chrome around the same table need not re-derive any of it:
 
-```{r block-browser-example, eval=FALSE, code=readLines("inst/examples/block-browser/app.R")}
-```
-
-```{r block-browser-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
-withr::local_envvar(NOT_CRAN = "true")
-app <- shinytest2::AppDriver$new(
-  system.file("examples", "block-browser", package = "blockr.ui"),
-  width = 1280,
-  height = 820
-)
-Sys.sleep(2)
-app$run_js("document.getElementById('open_add').click()")
-Sys.sleep(1)
-tmp <- tempfile(fileext = ".png")
-app$get_screenshot(tmp)
-file.copy(tmp, "man/figures/block-browser.png", overwrite = TRUE)
-app$stop()
-```
-
-![blockr.ui block browser example](man/figures/block-browser.png)
-
-### Stack menu
-
-A multi-select card-list block picker for stacks, with an inline
-hue / lightness colour picker and a panel-level form for the
-stack name / colour / id. See
-`vignette("stack-menu", package = "blockr.ui")`.
-
-```{r stack-menu-example, eval=FALSE, code=readLines("inst/examples/stack-menu/app.R")}
-```
-
-```{r stack-menu-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
-withr::local_envvar(NOT_CRAN = "true")
-app <- shinytest2::AppDriver$new(
-  system.file("examples", "stack-menu", package = "blockr.ui"),
-  width = 1280,
-  height = 820
-)
-Sys.sleep(2)
-app$run_js("document.getElementById('open_create').click()")
-Sys.sleep(1)
-tmp <- tempfile(fileext = ".png")
-app$get_screenshot(tmp)
-file.copy(tmp, "man/figures/stack-menu.png", overwrite = TRUE)
-app$stop()
-```
-
-![blockr.ui stack menu example](man/figures/stack-menu.png)
-
-### Link menu
-
-A bidirectional card-list link picker. Right-click any block to add a
-link in either direction - the menu shows up to two sections
-(`INPUT FROM` / `OUTPUT TO`) based on the anchor's free-input
-capacity. Single click commits one link; the panel stays open across
-commits via a live `pool-update` push. See
-`vignette("link-menu", package = "blockr.ui")`.
-
-```{r link-menu-example, eval=FALSE, code=readLines("inst/examples/link-menu/app.R")}
-```
-
-```{r link-menu-screenshot, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
-withr::local_envvar(NOT_CRAN = "true")
-app <- shinytest2::AppDriver$new(
-  system.file("examples", "link-menu", package = "blockr.ui"),
-  width = 1280,
-  height = 820
-)
-Sys.sleep(2)
-# Anchor m: shows both OUTGOING and INCOMING sections (most
-# interesting layout case).
-app$run_js("document.getElementById('open_m').click()")
-Sys.sleep(1)
-tmp <- tempfile(fileext = ".png")
-app$get_screenshot(tmp)
-file.copy(tmp, "man/figures/link-menu.png", overwrite = TRUE)
-app$stop()
-```
-
-![blockr.ui link menu example](man/figures/link-menu.png)
+| Function | Does |
+|---|---|
+| `table_page()` | fetches one page of a result, sorted — local or lazy |
+| `build_html_table()` | renders a page as an HTML table with headers and type labels |
+| `column_widths_px()` | measures column widths so headers and cells line up |
+| `apply_table_sort()` | applies a sort spec to a data frame |
+| `html_table_render()` | wires the above into a Shiny output |
+| `table_preview_dep()` | the stylesheet and script the table needs |
 
 ## Code of Conduct
 
