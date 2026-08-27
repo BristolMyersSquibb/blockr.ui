@@ -1,5 +1,19 @@
 # blockr.ui 0.0.0.9000
 
+* The block browser, sidebar, link menu and stack menu are gone, along
+  with `is_hex_color()` -- 19 of the 28 exports. Package blockr.dock
+  vendored a copy of all four in July 2025 and has developed on them
+  since (a link edit form, a native colour input, reworked panel
+  ownership, and a fifth `sidebar-inputs` member that never existed
+  here), while these copies had not been touched since June. Nothing
+  outside this package used them, and both copies styled the same class
+  names, so whichever stylesheet loaded last decided the result.
+  Coverage of the surviving copy's client behaviour was extended first,
+  in BristolMyersSquibb/blockr.dock#440.
+
+* The `Suggests` on blockr.dock goes with them, removing the last
+  non-CRAN entry from `Remotes:` and simplifying a CRAN release.
+
 * `html_table_display` wires the HTML table preview into blockr.core's
   `tabular_display` seam (blockr.core >= 0.1.4). Apps opt in with
   `options(blockr.tabular_display = blockr.ui::html_table_display)` to

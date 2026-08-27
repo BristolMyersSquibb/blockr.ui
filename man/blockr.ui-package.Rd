@@ -6,7 +6,7 @@
 \alias{blockr.ui-package}
 \title{blockr.ui: User Interface Components for the 'blockr' Ecosystem}
 \description{
-User-interface primitives shared across the 'blockr' ecosystem. Designed enhance 'blockr.dock'.
+User-interface primitives shared across the 'blockr' ecosystem, currently a paginated, sortable HTML table display for block results that plugs into the tabular display extension point of 'blockr.core'.
 }
 \seealso{
 Useful links:
