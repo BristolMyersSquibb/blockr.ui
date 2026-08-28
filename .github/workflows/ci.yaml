@@ -12,7 +12,6 @@ jobs:
       BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}
 
   revdep:
-    if: github.event_name == 'merge_group'
     uses: BristolMyersSquibb/blockr.ci/.github/workflows/revdep.yaml@main
     with:
       revdep-packages: |
