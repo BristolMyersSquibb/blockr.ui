@@ -1,0 +1,91 @@
+# blockr.ui
+
+User-interface primitives shared across the
+[blockr](https://blockr.site/) ecosystem. The package currently provides
+one: a paginated, sortable HTML table display for block results, which
+any board can opt into and any package can build its own preview on top
+of.
+
+## Installation
+
+You can install the development version of blockr.ui from
+[GitHub](https://github.com/BristolMyersSquibb/blockr.ui) with:
+
+``` r
+
+# install.packages("pak")
+pak::pak("BristolMyersSquibb/blockr.ui")
+```
+
+## The table display
+
+Package blockr.core renders a block’s result through whatever object the
+`blockr.tabular_display` option names, so opting a whole board into the
+HTML table is one line before the app starts:
+
+``` r
+
+options(blockr.tabular_display = blockr.ui::html_table_display)
+```
+
+Data, parser and transform blocks then preview through a table that
+sorts and pages on the client, keeps its scroll position across a
+re-render, and shows column types (plus ADaM-style labels where the data
+carries them) under each header. Each block’s preview sorts and pages
+independently.
+
+A worked board is in `inst/examples/table-preview`:
+
+``` r
+
+shiny::runApp(
+  system.file("examples", "table-preview", package = "blockr.ui")
+)
+```
+
+For a lazy (dbplyr) result the page fetch is pushed to the database
+rather than collected up front, so paging a large table stays cheap.
+
+## Building your own preview
+
+The pieces behind the display are exported, so a package that wants a
+different chrome around the same table need not re-derive any of it:
+
+| Function | Does |
+|----|----|
+| [`table_page()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/table_page.md) | fetches one page of a result, sorted — local or lazy |
+| [`build_html_table()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/build_html_table.md) | renders a page as an HTML table with headers and type labels |
+| [`column_widths_px()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/column_widths_px.md) | measures column widths so headers and cells line up |
+| [`apply_table_sort()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/apply_table_sort.md) | applies a sort spec to a data frame |
+| [`html_table_render()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md) | wires the above into a Shiny output |
+| [`table_preview_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/table_preview_dep.md) | the stylesheet and script the table needs |
+
+## Code of Conduct
+
+Please note that the blockr.ui project is released with a [Contributor
+Code of
+Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
+
+# Package index
+
+## All functions
+
+- [`apply_table_sort()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/apply_table_sort.md)
+  : Sort a data frame for the table preview
+- [`build_html_table()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/build_html_table.md)
+  : Build the HTML table preview for one page
+- [`column_widths_px()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/column_widths_px.md)
+  : Estimate fixed-layout column widths
+- [`html_table_render()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md)
+  [`html_table_result()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md)
+  [`html_table_display`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md)
+  : Render a result as the HTML table preview
+- [`table_page()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/table_page.md)
+  : Fetch one page of a tabular result
+- [`table_preview_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/table_preview_dep.md)
+  [`table_preview_css()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/table_preview_dep.md)
+  : Table-preview assets
+- [`theme_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/theme_dep.md)
+  : Shared blockr stylesheet
+
