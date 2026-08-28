@@ -16,5 +16,7 @@ jobs:
     with:
       revdep-packages: |
         BristolMyersSquibb/blockr.dock
+      revdep-test-upstream: true
+      revdep-test-filter: tokens-revdep
     secrets:
       BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}

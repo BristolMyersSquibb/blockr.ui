@@ -359,6 +359,26 @@ consumer_css <- function(..., envir = parent.frame()) {
   root
 }
 
+# Resolved rather than called as `shinytest2::`, which would oblige this
+# package to declare it: chromote's SystemRequirements is chromium, so every
+# check would install a browser for one that is launched only in a revdep
+# leg, out of the downstream's own Suggests.
+app_driver <- function(...) {
+  getExportedValue("shinytest2", "AppDriver")$new(...)
+}
+
+revdep_consumer <- function() {
+
+  consumer <- basename(Sys.getenv("REVDEP_PKG"))
+
+  testthat::skip_if(
+    !nzchar(consumer),
+    "not running against a reverse dependency"
+  )
+
+  consumer
+}
+
 stub_driver <- function(unresolved) {
   list(get_js = function(script) as.list(unresolved))
 }
