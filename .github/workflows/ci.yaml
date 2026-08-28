@@ -1,8 +1,5 @@
 on:
-  push:
-    branches: main
   pull_request:
-    branches: main
   merge_group:
 
 name: ci
@@ -10,6 +7,15 @@ name: ci
 jobs:
   ci:
     uses: BristolMyersSquibb/blockr.ci/.github/workflows/ci.yaml@main
-    secrets: inherit
-    permissions:
-      contents: write
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}
+
+  revdep:
+    if: github.event_name == 'merge_group'
+    uses: BristolMyersSquibb/blockr.ci/.github/workflows/revdep.yaml@main
+    with:
+      revdep-packages: |
+        BristolMyersSquibb/blockr.dm
+    secrets:
+      BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}
