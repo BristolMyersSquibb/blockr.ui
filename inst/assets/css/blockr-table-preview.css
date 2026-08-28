@@ -100,7 +100,7 @@
     .blockr-type-label {
       font-size: 11px;
       font-weight: var(--blockr-font-weight-normal, 400);
-      color: var(--blockr-color-text-subtle, #b0b7c3);
+      color: var(--blockr-color-text-subtle, #9ca3af);
     }
 
     .blockr-table tbody tr {

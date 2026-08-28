@@ -12,21 +12,6 @@ css_matches <- function(css, pattern) {
   unique(regmatches(css, gregexpr(pattern, css))[[1]])
 }
 
-css_defines <- function(css) {
-  sub("\\s*:$", "", css_matches(css, "--blockr-[a-z0-9-]+\\s*:"))
-}
-
-css_references <- function(css) {
-  sub("^var\\(\\s*", "", css_matches(css, "var\\(\\s*--blockr-[a-z0-9-]+"))
-}
-
-css_bare_references <- function(css) {
-  gsub(
-    "^var\\(\\s*|\\s*\\)$", "",
-    css_matches(css, "var\\(\\s*--blockr-[a-z0-9-]+\\s*\\)")
-  )
-}
-
 css_hidden_selectors <- function(css) {
   rules <- css_matches(
     gsub("(?s)/\\*.*?\\*/", "", css, perl = TRUE),
@@ -50,36 +35,24 @@ test_that("theme_dep ships the token and theme stylesheets", {
   expect_true(all(file.exists(file.path(assets, dep$stylesheet))))
 })
 
-test_that("the token block defines every name the theme layer reads", {
+test_that("the shared stylesheet reads only names this package claims", {
 
-  defined <- css_defines(css_source("blockr-tokens.css"))
-  referenced <- css_references(css_source("blockr-theme.css"))
+  sites <- token_references("blockr.ui")
+  shared <- sites[
+    basename(sites$file) %in% c("blockr-tokens.css", "blockr-theme.css"),
+  ]
 
-  expect_identical(setdiff(referenced, defined), character())
-})
-
-test_that("the token block's own derivations resolve within it", {
-
-  tokens <- css_source("blockr-tokens.css")
-
-  expect_identical(
-    setdiff(css_references(tokens), css_defines(tokens)),
-    character()
-  )
+  expect_gt(nrow(shared), 0L)
+  expect_identical(unique(shared$token[is.na(shared$value)]), character())
 })
 
 test_that("every token read without a fallback is defined", {
 
-  assets <- system.file("assets", "css", package = "blockr.ui")
-  shipped <- list.files(assets, pattern = "\\.css$")
+  sites <- token_references("blockr.ui")
+  bare <- sites[is.na(sites$fallback), ]
 
-  defined <- css_defines(css_source("blockr-tokens.css"))
-  bare <- css_bare_references(
-    paste(vapply(shipped, css_source, character(1)), collapse = "\n")
-  )
-
-  expect_gt(length(shipped), 0L)
-  expect_identical(setdiff(bare, defined), character())
+  expect_gt(nrow(bare), 0L)
+  expect_identical(unique(bare$token[is.na(bare$value)]), character())
 })
 
 test_that("the theme layer hides only chrome the host cannot reach", {

@@ -1,5 +1,11 @@
 # blockr.ui 0.0.0.9000
 
+* One `var()` fallback had drifted from the token it backs: the
+  `.blockr-type-label` rule wrote `#b0b7c3` where
+  `--blockr-color-text-subtle` resolves to `#9ca3af`, which the two other
+  readers of that token in the same file already spelled correctly. It
+  rendered the wrong grey in any host that does not attach `theme_dep()`.
+
 * The block browser, sidebar, link menu and stack menu are gone, along
   with `is_hex_color()` -- 19 of the 28 exports. Package blockr.dock
   vendored a copy of all four in July 2025 and has developed on them
