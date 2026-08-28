@@ -16,6 +16,5 @@ jobs:
     with:
       revdep-packages: |
         BristolMyersSquibb/blockr.dock
-        BristolMyersSquibb/blockr.dm
     secrets:
       BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}
