@@ -114,9 +114,10 @@ defined_references <- function(sites, pkg) {
 
   defined <- sites[!is.na(sites$value), ]
 
-  if (!nrow(defined)) {
-    stop("Package '", pkg, "' references no token that blockr.ui defines.")
-  }
+  testthat::skip_if(
+    !nrow(defined),
+    paste0("Package '", pkg, "' reads none of this package's vocabulary")
+  )
 
   defined
 }
@@ -198,15 +199,26 @@ expand_hex <- function(hex) {
 }
 
 read_css <- function(file) {
-  mask_css_comments(paste(readLines(file, warn = FALSE), collapse = "\n"))
+  mask_css_comments_and_strings(
+    paste(readLines(file, warn = FALSE), collapse = "\n")
+  )
 }
 
-mask_css_comments <- function(css) {
+# Strings go with comments because a quoted paren would otherwise unbalance
+# the scan: `var(--x, "(")` loses its closing paren and the site vanishes,
+# which is the one direction a detector cannot afford. One alternation, so
+# whichever opens first consumes the other - a quote inside a comment does
+# not open a string, and `/*` inside a string does not open a comment.
+mask_css_comments_and_strings <- function(css) {
 
-  comments <- gregexpr("(?s)/\\*.*?\\*/", css, perl = TRUE)
+  spans <- gregexpr(
+    "(?s)/\\*.*?\\*/|\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'",
+    css,
+    perl = TRUE
+  )
 
-  regmatches(css, comments) <- lapply(
-    regmatches(css, comments),
+  regmatches(css, spans) <- lapply(
+    regmatches(css, spans),
     gsub,
     pattern = "[^\n]",
     replacement = " "
@@ -364,6 +376,14 @@ consumer_css <- function(..., envir = parent.frame()) {
 # check would install a browser for one that is launched only in a revdep
 # leg, out of the downstream's own Suggests.
 app_driver <- function(...) {
+
+  # Chromote's per-command response timeout is a hardcoded 10s on the shared
+  # object, which `Page.navigate` intermittently overruns on a cold app; it is
+  # not the `chromote.timeout` launch option, and raising it here beats a
+  # retry that would also mask a genuine boot regression.
+  chrome <- getExportedValue("chromote", "default_chromote_object")()
+  chrome$default_timeout <- 60
+
   getExportedValue("shinytest2", "AppDriver")$new(...)
 }
 

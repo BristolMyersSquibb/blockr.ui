@@ -50,6 +50,26 @@ test_that("commented-out CSS is neither read nor counted", {
   expect_identical(css_lines(css, var_sites(css)$start), 3L)
 })
 
+test_that("a quoted string is masked alongside comments", {
+
+  css <- read_css(
+    withr::local_tempfile(
+      lines = c(
+        '.a { color: var(--blockr-open, "("); }',
+        '.b { content: "var(--blockr-phantom, #000)"; }',
+        "/* an apostrophe: don't swallow what follows */",
+        ".c { color: var(--blockr-real, #fff); }"
+      )
+    )
+  )
+
+  sites <- var_sites(css)
+
+  expect_identical(sites$token, c("--blockr-open", "--blockr-real"))
+  expect_identical(css_lines(css, sites$start), c(1L, 4L))
+  expect_identical(sites$fallback, c("", "#fff"))
+})
+
 test_that("a reference resolves through the chain, a cycle does not", {
 
   definitions <- css_definitions(

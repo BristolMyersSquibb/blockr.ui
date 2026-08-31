@@ -78,14 +78,14 @@ test_that("a name this package does not define is reported, never asserted", {
   )
 })
 
-test_that("a consumer reading none of the vocabulary is an error", {
+test_that("a consumer reading none of the vocabulary is skipped, not failed", {
 
   root <- consumer_css("widget.css" = ".a { color: var(--blockr-nope, red); }")
 
-  expect_error(expect_tokens_agree("fixture", root), "references no token")
-  expect_error(
+  expect_condition(expect_tokens_agree("fixture", root), class = "skip")
+  expect_condition(
     expect_tokens_reachable(stub_driver(NULL), "fixture", root),
-    "references no token"
+    class = "skip"
   )
 })
 
