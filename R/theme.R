@@ -38,3 +38,46 @@ theme_dep <- function() {
     all_files = FALSE
   )
 }
+
+#' Drop Shiny's `:has(> *)` pass-through rules
+#'
+#' Shiny 1.8.1 styles `uiOutput()` and `conditionalPanel()` containers
+#' `display: contents` so their children lay out as direct children of the
+#' parent (rstudio/shiny#3957). It guards that on the container being
+#' non-empty, and writes the guard as `:has(> *)`. That argument is the
+#' universal selector, so any element appearing or disappearing anywhere in
+#' the document could flip some ancestor's match. Chrome cannot narrow it
+#' into an invalidation set and restyles the whole document on every DOM
+#' mutation.
+#'
+#' On the CEDX board (17.5k elements, 6.4k CSS rules) that is 36ms of style
+#' recalculation for a single appended `div`, against 4ms with the two rules
+#' gone. It is paid by every block re-render, every keystroke in a picker and
+#' every streamed chat token, and it grows with the board because the recalc
+#' spans the document, including the panels that are not on screen.
+#'
+#' Attach it once, at the page level. It is a separate dependency from
+#' [theme_dep()] so a host gets the fix whether or not it opts into blockr
+#' styling, and because Shiny de-duplicates dependencies by name, attaching
+#' it from more than one place is harmless.
+#'
+#' Deleting the rules is the fix. Overriding `display` on
+#' `.shiny-html-output`, which is Shiny's documented escape hatch, leaves the
+#' selector in the sheet and keeps the cost.
+#'
+#' @return An [htmltools::htmlDependency].
+#'
+#' @examples
+#' shiny::fluidPage(shiny_has_perf_dep())
+#'
+#' @export
+shiny_has_perf_dep <- function() {
+  htmltools::htmlDependency(
+    name = "blockr-shiny-has-perf",
+    version = utils::packageVersion("blockr.ui"),
+    package = "blockr.ui",
+    src = "assets",
+    script = "js/shiny-has-perf.js",
+    all_files = FALSE
+  )
+}
