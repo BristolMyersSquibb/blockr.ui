@@ -2,7 +2,7 @@
 % Please edit documentation in R/theme.R
 \name{shiny_has_perf_dep}
 \alias{shiny_has_perf_dep}
-\title{Drop Shiny's \verb{:has(> *)} pass-through rules}
+\title{Strip a redundant \verb{:has(> *)} guard from Shiny's recalculating fade}
 \usage{
 shiny_has_perf_dep()
 }
@@ -11,29 +11,39 @@ An \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
 }
 \description{
 Shiny 1.8.1 styles \code{uiOutput()} and \code{conditionalPanel()} containers
-\code{display: contents} so their children lay out as direct children of the
-parent (rstudio/shiny#3957). It guards that on the container being
-non-empty, and writes the guard as \verb{:has(> *)}. That argument is the
-universal selector, so any element appearing or disappearing anywhere in
-the document could flip some ancestor's match. Chrome cannot narrow it
-into an invalidation set and restyles the whole document on every DOM
-mutation.
+\code{display: contents} once they hold children, so those children lay out as
+direct children of the parent (rstudio/shiny#3957). A pass-through
+container generates no box and can no longer carry the \code{.recalculating}
+fade, so Shiny pushes the opacity down to the children with a companion
+rule, \verb{div:where(.shiny-html-output):has(> *).recalculating > *}.
 }
 \details{
-On the CEDX board (17.5k elements, 6.4k CSS rules) that is 36ms of style
-recalculation for a single appended \code{div}, against 4ms with the two rules
-gone. It is paid by every block re-render, every keystroke in a picker and
-every streamed chat token, and it grows with the board because the recalc
-spans the document, including the panels that are not on screen.
+The companion rule is the one that costs. Its \verb{:has()} sits in non-subject
+position with a universal subject, and Chrome answers that by restyling the
+whole document on every DOM insertion. On a 40-block dock board (6.4k
+elements, 5.5k CSS rules) that is 107ms of style recalculation for a single
+appended \code{div}, against 3ms once the guard is gone, and it grows linearly
+with element count -- including the panels that are not on screen. It is
+paid by every block re-render, every keystroke in a picker and every
+streamed chat token. The \code{display: contents} rule beside it, whose \verb{:has()}
+is in subject position, measures free and is left alone.
+
+The guard is redundant on the companion. A selector shaped
+\verb{X:has(> *)... > *} picks a descendant of \code{X}, so \code{X} necessarily has an
+element child wherever the subject exists. Removing it preserves both the
+pass-through layout and the fade.
 
 Attach it once, at the page level. It is a separate dependency from
 \code{\link[=theme_dep]{theme_dep()}} so a host gets the fix whether or not it opts into blockr
 styling, and because Shiny de-duplicates dependencies by name, attaching
 it from more than one place is harmless.
 
-Deleting the rules is the fix. Overriding \code{display} on
-\code{.shiny-html-output}, which is Shiny's documented escape hatch, leaves the
-selector in the sheet and keeps the cost.
+Editing the CSSOM is the only route. The cost is bound to the selector
+being present in the active index, which Chrome consults before the cascade
+runs, so a rule stripped of every declaration, or aimed at a class present
+nowhere in the document, still costs full price. Shiny's documented escape
+hatch, overriding \code{display} on \code{.shiny-html-output}, addresses layout and
+leaves the cost untouched.
 }
 \examples{
 shiny::fluidPage(shiny_has_perf_dep())
