@@ -1,4 +1,4 @@
-# blockr.ui 0.0.0.9000
+# blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
   out of the rule Shiny uses to fade a pass-through `uiOutput()` while it
