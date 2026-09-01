@@ -1,4 +1,15 @@
-# blockr.ui 0.0.0.9000
+# blockr.ui 0.0.1
+
+* The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
+  out of the rule Shiny uses to fade a pass-through `uiOutput()` while it
+  recalculates. That guard sits in non-subject position with a universal
+  subject, which makes Chrome restyle the whole document on every DOM
+  insertion: 107ms per insertion on a 40-block dock board against 3ms
+  without it, growing linearly with element count, and paid by every block
+  re-render and every keystroke in a picker. Removing it is provably
+  behaviour-neutral, since reaching the subject already proves the guarded
+  container has an element child, so both the `display: contents`
+  pass-through and the fade survive. Attach it once at the page level.
 
 * One `var()` fallback had drifted from the token it backs: the
   `.blockr-type-label` rule wrote `#b0b7c3` where
