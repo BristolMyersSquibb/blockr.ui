@@ -1,27 +1,44 @@
-# The guard pattern is read out of the shipped script rather than repeated
-# here, so the table below tests what actually runs in the browser. The
-# surrounding split-and-strip is mirrored from `stripGuard()`; keep the two in
-# step when either changes.
-guard_pattern <- function() {
+# The patterns are read out of the shipped script rather than repeated here,
+# so the tables below test what actually runs in the browser. The surrounding
+# split-and-strip mirrors `stripGuard()`; keep the two in step when either
+# changes.
+js_regex <- function(name) {
 
   js <- readLines(
     system.file("assets", "js", "shiny-has-perf.js", package = "blockr.ui"),
     warn = FALSE
   )
 
-  line <- grep("var REDUNDANT_GUARD", js, value = TRUE, fixed = TRUE)
+  line <- grep(paste0("var ", name, " = /"), js, value = TRUE, fixed = TRUE)
   stopifnot(length(line) == 1L)
 
-  sub("^[^/]*/(.*)/;\\s*$", "\\1", line)
+  sub("^[^/]*/(.*)/[a-z]*;\\s*$", "\\1", line)
 }
 
-strip_guard <- function(selector, pattern = guard_pattern()) {
+strip_guard <- function(selector) {
+
   parts <- trimws(strsplit(selector, ",", fixed = TRUE)[[1]])
+
   shiny_owned <- grepl("shiny-html-output", parts, fixed = TRUE) |
     grepl("shiny-conditional--shown", parts, fixed = TRUE)
-  redundant <- grepl(pattern, parts, perl = TRUE) & shiny_owned
-  parts[redundant] <- gsub(":has(> *)", "", parts[redundant], fixed = TRUE)
+  redundant <- grepl(js_regex("REWRITABLE"), parts, perl = TRUE) & shiny_owned
+
+  parts[redundant] <- gsub(
+    js_regex("GUARD"), "", parts[redundant],
+    perl = TRUE
+  )
+
   paste(parts, collapse = ", ")
+}
+
+is_non_subject <- function(selector) {
+  any(
+    grepl(
+      js_regex("NON_SUBJECT"),
+      trimws(strsplit(selector, ",", fixed = TRUE)[[1]]),
+      perl = TRUE
+    )
+  )
 }
 
 test_that("shiny_has_perf_dep ships the script it documents", {
@@ -51,6 +68,16 @@ test_that("the guard is stripped from Shiny's recalculating fade", {
       "div:where(.shiny-html-output).recalculating > *",
       sep = ", "
     )
+  )
+})
+
+test_that("the guard is matched however Shiny spaces it", {
+
+  # Chrome does not normalise the inside of `:has()`, and Shiny already ships
+  # both spellings across its own stylesheets.
+  expect_identical(
+    strip_guard("div:where(.shiny-html-output):has(>*).recalculating>*"),
+    "div:where(.shiny-html-output).recalculating>*"
   )
 })
 
@@ -94,6 +121,34 @@ test_that("only provably redundant guards are stripped", {
   }
 })
 
+test_that("the costly shape is detected without keying on Shiny's classes", {
+
+  # What the runtime scan warns about. Keyed on selector shape alone, so a
+  # class rename upstream surfaces in the console instead of silently
+  # handing back the 30x.
+  costly <- c(
+    "div:where(.shiny-html-output):has(> *).recalculating > *",
+    "div:where(.shiny-html-output):has(>*).recalculating>*",
+    "div:where(.shiny-html-output):has(> *) ~ .foo > *",
+    ".anything-at-all:has(> *) .deep > *"
+  )
+
+  free <- c(
+    "div:where(.shiny-html-output):has(> *)",
+    "[data-shiny-busy-spinners] .recalculating:has(>*)",
+    ".dv-resize-container:has(> .dv-groupview)",
+    ".dv-tab:has(:focus-visible)"
+  )
+
+  for (selector in costly) {
+    expect_true(is_non_subject(selector), info = selector)
+  }
+
+  for (selector in free) {
+    expect_false(is_non_subject(selector), info = selector)
+  }
+})
+
 test_that("Shiny still nests the fade inside the guard we target", {
 
   skip_if_not_installed("shiny")
@@ -107,7 +162,8 @@ test_that("Shiny still nests the fade inside the guard we target", {
   src <- paste(readLines(scss, warn = FALSE), collapse = "\n")
 
   # An upstream fix, or a restructuring of this block, makes the shipped
-  # script a silent no-op. Fail here rather than in a profiler.
+  # script a no-op. Fail here rather than in a profiler; the runtime scan is
+  # the backstop for a Shiny newer than the one CI resolved.
   expect_match(
     src,
     "&:has\\(> \\*\\)\\s*\\{[^}]*&\\.recalculating > \\*",
