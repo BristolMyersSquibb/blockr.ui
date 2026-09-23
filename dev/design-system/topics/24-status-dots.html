@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Topic 24: telling "waiting" from "unset"</title>
+<link rel="stylesheet" href="../fonts/open-sans.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens-dark.css">
+<link rel="stylesheet" href="../ds-page.css">
+<style>
+h3.q { font-size: 15px; font-weight: 600; margin: 36px 0 4px; }
+.card { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 10px; padding: 6px 14px; }
+.st { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--blockr-color-border-default); }
+.st:last-child { border-bottom: 0; }
+.mkw { position: relative; flex: none; }
+.mk { width: 28px; height: 28px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--c) 18%, var(--blockr-color-bg-surface)); color: var(--c); }
+.dot { position: absolute; right: -3px; bottom: -3px; width: 8px; height: 8px; border-radius: 50%; box-sizing: content-box; border: 2px solid var(--blockr-color-bg-surface); }
+.hollow { background: var(--blockr-color-bg-surface); box-shadow: inset 0 0 0 1.5px var(--ring); }
+.tt { font-size: 14px; font-weight: 600; }
+.why { font-size: 12px; color: var(--blockr-color-text-muted); }
+.stale  { background: var(--blockr-color-text-muted); }
+.failed { background: var(--blockr-color-border-danger); }
+.amber  { background: var(--blockr-color-border-warning); }
+.hg { --ring: var(--blockr-color-text-muted); }
+.ha { --ring: var(--blockr-color-border-warning); }
+.cap { font-size: 12px; color: var(--blockr-color-text-muted); margin: 8px 0 0; }
+.cap.sep { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--blockr-color-border-strong); }
+.st + .cap.sep { border-top: 0; }
+.legend { display: flex; gap: 18px; margin-top: 10px; font-size: 12px; color: var(--blockr-color-text-muted); }
+</style>
+</head>
+<body data-topic="24-status-dots">
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-chart" viewBox="0 0 16 16"><path d="M2.5 13.5h11M4.5 11V8M8 11V4.5M11.5 11V6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 16 16"><path d="M2.5 3.5h11L9.5 8.5v4l-3-1.5v-2.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="i-file" viewBox="0 0 16 16"><path d="M4 2h5l3 3v9H4z M9 2v3h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="i-join" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="8" r="4"/><circle cx="10" cy="8" r="4"/></g></symbol>
+</svg>
+<div class="wrap">
+<div class="row1"><h1>Topic 24: telling "waiting" from "unset"</h1>
+<div class="switch"><button data-scheme="light" aria-pressed="true">Light</button> <button data-scheme="dark" aria-pressed="false">Dark</button></div></div>
+<p class="lede">blockr.dock puts an 8px dot on a block's mark for four states (<code>block_status_style()</code>). Two of
+them were already two near-identical ambers, <code>#f59e0b</code> and <code>#eab308</code>; the consistency pass made both
+<code>border-warning</code>, so today they are the same dot.</p>
+<p class="note">They ask for different things. <b>Unset</b> ("Set this block's inputs") means this block needs you: a
+required field is empty, and that field carries the same amber cue. <b>Waiting</b> ("Waiting for a data input") means
+one of its inputs is not ready: nothing is linked in, or the block upstream is itself unset, waiting or failed
+(blockr.core, <code>block_eval_status()</code>). There is nothing to do on this block. The label is the dot's tooltip and the block's status line.</p>
+
+<h3 class="q"><span class="qtag">Q1</span>How does "waiting" differ from "unset"?</h3>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. Both amber</p><p class="d">Today. Shape and colour are the same; only the tooltip tells them apart.</p>
+    <div class="card">
+      <p class="cap">A chain whose read block is empty</p>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#0072B2"><svg width="15" height="15"><use href="#i-file"/></svg></span><span class="dot amber"></span></span><div><div class="tt">Read data</div><div class="why">Set this block's inputs</div></div></div>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#009E73"><svg width="15" height="15"><use href="#i-filter"/></svg></span><span class="dot amber"></span></span><div><div class="tt">Filter rows</div><div class="why">Waiting for a data input</div></div></div>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#E69F00"><svg width="15" height="15"><use href="#i-chart"/></svg></span><span class="dot amber"></span></span><div><div class="tt">Ozone by month</div><div class="why">Waiting for a data input</div></div></div>
+      <p class="cap sep">Elsewhere on the board</p>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#56B4E9"><svg width="15" height="15"><use href="#i-join"/></svg></span><span class="dot failed"></span></span><div><div class="tt">Join</div><div class="why">Evaluation failed</div></div></div>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#009E73"><svg width="15" height="15"><use href="#i-filter"/></svg></span><span class="dot stale"></span></span><div><div class="tt">Summarise</div><div class="why">Inputs changed since this block last ran</div></div></div>
+    </div></div>
+  <div class="opt"><p class="t">B. Waiting is a hollow grey ring</p><p class="d">Grey says "nothing to do here"; hollow says "nothing has arrived yet". Amber stays for the block that needs you.</p>
+    <div class="card">
+      <p class="cap">A chain whose read block is empty</p>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#0072B2"><svg width="15" height="15"><use href="#i-file"/></svg></span><span class="dot amber"></span></span><div><div class="tt">Read data</div><div class="why">Set this block's inputs</div></div></div>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#009E73"><svg width="15" height="15"><use href="#i-filter"/></svg></span><span class="dot hollow hg"></span></span><div><div class="tt">Filter rows</div><div class="why">Waiting for a data input</div></div></div>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#E69F00"><svg width="15" height="15"><use href="#i-chart"/></svg></span><span class="dot hollow hg"></span></span><div><div class="tt">Ozone by month</div><div class="why">Waiting for a data input</div></div></div>
+      <p class="cap sep">Elsewhere on the board</p>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#56B4E9"><svg width="15" height="15"><use href="#i-join"/></svg></span><span class="dot failed"></span></span><div><div class="tt">Join</div><div class="why">Evaluation failed</div></div></div>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#009E73"><svg width="15" height="15"><use href="#i-filter"/></svg></span><span class="dot stale"></span></span><div><div class="tt">Summarise</div><div class="why">Inputs changed since this block last ran</div></div></div>
+    </div></div>
+  <div class="opt"><p class="t">C. Waiting is a hollow amber ring</p><p class="d">Both stay in the warning family; the shape tells them apart.</p>
+    <div class="card">
+      <p class="cap">A chain whose read block is empty</p>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#0072B2"><svg width="15" height="15"><use href="#i-file"/></svg></span><span class="dot amber"></span></span><div><div class="tt">Read data</div><div class="why">Set this block's inputs</div></div></div>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#009E73"><svg width="15" height="15"><use href="#i-filter"/></svg></span><span class="dot hollow ha"></span></span><div><div class="tt">Filter rows</div><div class="why">Waiting for a data input</div></div></div>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#E69F00"><svg width="15" height="15"><use href="#i-chart"/></svg></span><span class="dot hollow ha"></span></span><div><div class="tt">Ozone by month</div><div class="why">Waiting for a data input</div></div></div>
+      <p class="cap sep">Elsewhere on the board</p>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#56B4E9"><svg width="15" height="15"><use href="#i-join"/></svg></span><span class="dot failed"></span></span><div><div class="tt">Join</div><div class="why">Evaluation failed</div></div></div>
+      <div class="st"><span class="mkw"><span class="mk" style="--c:#009E73"><svg width="15" height="15"><use href="#i-filter"/></svg></span><span class="dot stale"></span></span><div><div class="tt">Summarise</div><div class="why">Inputs changed since this block last ran</div></div></div>
+    </div></div>
+</div>
+<div class="rec">Proposal: <b>B, waiting is a hollow grey ring.</b> Waiting passes down the chain: an empty read block
+makes every block below it wait, so today the whole chain is amber and the one block that needs you is lost among
+blocks that only wait for it. Below a failed block the same holds, with one red dot above a column of amber ones. With B, amber marks
+only that one block, and the blocks below it wait in grey. Stale stays a solid grey dot: it has run, just not since the
+last change. The token is <code>--blockr-dock-status-waiting</code>, pointing at <code>text-muted</code>, drawn as a ring.
+Runner-up: C.</div>
+</div>
+<script>
+document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => {
+  document.documentElement.setAttribute('data-bs-theme', b.dataset.scheme);
+  document.querySelectorAll('.switch button').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+</script>
+<script src="../answers.js"></script>
+</body>
+</html>

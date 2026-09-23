@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Topic 21: hover and selected look the same</title>
+<link rel="stylesheet" href="../fonts/open-sans.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens-dark.css">
+<link rel="stylesheet" href="../ds-page.css">
+<style>
+h3.q { font-size: 15px; font-weight: 600; margin: 36px 0 4px; }
+.card { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 10px; padding: 14px; }
+.cap { font-size: 12px; color: var(--blockr-color-text-muted); margin: 0 0 8px; }
+
+/* a list of blocks, as in the outline or a picker */
+.list { display: flex; flex-direction: column; gap: 1px; }
+.li { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border-radius: var(--blockr-radius-sm); font-size: 14px; cursor: default; }
+.li .m { margin-left: auto; font-size: 13px; color: var(--blockr-color-text-muted); }
+.li:hover, .li.h { background: var(--blockr-color-bg-hover); }
+.li:hover .m, .li.h .m, .li.s .m { color: var(--blockr-color-text-default); }
+.li.s, .li.s:hover { background: var(--sel); }
+.mk { width: 16px; height: 16px; border-radius: 4px; flex: none; background: color-mix(in srgb, var(--c) 18%, var(--blockr-color-bg-surface)); }
+
+/* a dock tab strip */
+.tabs { display: flex; gap: 4px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--blockr-color-border-default); }
+.tab { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; border-radius: 6px; font-size: 13px; color: var(--blockr-color-text-muted); cursor: default; }
+.tab:hover, .tab.h { background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-default); }
+.tab.s, .tab.s:hover { background: var(--sel); color: var(--blockr-color-text-default); }
+
+.key { display: flex; gap: 14px; margin-top: 12px; font-size: 12px; color: var(--blockr-color-text-muted); }
+.key span { display: inline-flex; align-items: center; gap: 6px; }
+.key i { width: 28px; height: 16px; border-radius: 4px; border: 1px solid var(--blockr-color-border-default); }
+
+.oA { --sel: var(--blockr-color-bg-selected); }
+.oB { --sel: color-mix(in srgb, var(--blockr-color-text-default) 10%, transparent); }
+.oC { --sel: var(--blockr-color-bg-accent-subtle); }
+.oC .li.s, .oC .tab.s { color: var(--blockr-color-text-accent); }
+.oC .li.s .m { color: var(--blockr-color-text-accent); }
+</style>
+</head>
+<body data-topic="21-hover-and-selected">
+<div class="wrap">
+<div class="row1"><h1>Topic 21: hover and selected look the same</h1>
+<div class="switch"><button data-scheme="light" aria-pressed="true">Light</button> <button data-scheme="dark" aria-pressed="false">Dark</button></div></div>
+<p class="lede">In light, <code>bg-hover</code> (a 6% wash of the text colour) lands at <code>#f0f1f2</code> and
+<code>bg-selected</code> is grey-100, <code>#f3f4f6</code>. A hovered row or tab looks like the selected one. Dark does
+not have the problem: there, selected is a 10% wash and sits a step above hover.</p>
+<p class="note">Where <code>bg-selected</code> is used: the front dock tab and a selected row in a list (outline, views
+list, a table row). Menus are not affected: their current pick is weight 600 with no fill, and selected segments, pressed
+tools and the open gear use the accent tint. In each drawing below, "Filter rows" is selected and "Summarise" is held in
+hover; hover the others too.</p>
+
+<h3 class="q"><span class="qtag">Q1</span>What does a selected row or tab look like?</h3>
+<div class="cols c3">
+  <div class="opt oA"><p class="t">A. Keep grey-100</p><p class="d">Today. Selected and hover are about 2% apart in light.</p>
+    <div class="card"><p class="cap">Blocks</p><div class="list">
+      <div class="li"><span class="mk" style="--c:#0072B2"></span>Read data<span class="m">read</span></div>
+      <div class="li s"><span class="mk" style="--c:#009E73"></span>Filter rows<span class="m">filter</span></div>
+      <div class="li h"><span class="mk" style="--c:#009E73"></span>Summarise<span class="m">summarize</span></div>
+      <div class="li"><span class="mk" style="--c:#E69F00"></span>Ozone by month<span class="m">chart</span></div>
+    </div>
+    <div class="tabs"><span class="tab s">Filter rows</span><span class="tab h">Summarise</span><span class="tab">Ozone by month</span></div>
+    <div class="key"><span><i style="background:var(--sel)"></i>selected</span><span><i style="background:var(--blockr-color-bg-hover)"></i>hover</span></div></div></div>
+  <div class="opt oB"><p class="t">B. A 10% wash, as in dark</p><p class="d">Selected is the text colour at 10%: near grey-200 in light, one step above hover. One definition for both schemes.</p>
+    <div class="card"><p class="cap">Blocks</p><div class="list">
+      <div class="li"><span class="mk" style="--c:#0072B2"></span>Read data<span class="m">read</span></div>
+      <div class="li s"><span class="mk" style="--c:#009E73"></span>Filter rows<span class="m">filter</span></div>
+      <div class="li h"><span class="mk" style="--c:#009E73"></span>Summarise<span class="m">summarize</span></div>
+      <div class="li"><span class="mk" style="--c:#E69F00"></span>Ozone by month<span class="m">chart</span></div>
+    </div>
+    <div class="tabs"><span class="tab s">Filter rows</span><span class="tab h">Summarise</span><span class="tab">Ozone by month</span></div>
+    <div class="key"><span><i style="background:var(--sel)"></i>selected</span><span><i style="background:var(--blockr-color-bg-hover)"></i>hover</span></div></div></div>
+  <div class="opt oC"><p class="t">C. The accent tint</p><p class="d">Selected takes the tint every other "chosen" state uses: accent text on the 7% accent fill.</p>
+    <div class="card"><p class="cap">Blocks</p><div class="list">
+      <div class="li"><span class="mk" style="--c:#0072B2"></span>Read data<span class="m">read</span></div>
+      <div class="li s"><span class="mk" style="--c:#009E73"></span>Filter rows<span class="m">filter</span></div>
+      <div class="li h"><span class="mk" style="--c:#009E73"></span>Summarise<span class="m">summarize</span></div>
+      <div class="li"><span class="mk" style="--c:#E69F00"></span>Ozone by month<span class="m">chart</span></div>
+    </div>
+    <div class="tabs"><span class="tab s">Filter rows</span><span class="tab h">Summarise</span><span class="tab">Ozone by month</span></div>
+    <div class="key"><span><i style="background:var(--sel)"></i>selected</span><span><i style="background:var(--blockr-color-bg-hover)"></i>hover</span></div></div></div>
+</div>
+<div class="rec">Proposal: <b>B, a 10% wash in both schemes.</b> Selected becomes one step above hover in light as it
+already is in dark, and <code>bg-selected</code> gets one definition, so the dark file stops restating it. The row's meta
+text turns default when selected, as it does on hover (muted on this fill is 3.9:1). C would make a front tab blue on
+every board, and blue already means "on" and "the main action". Runner-up: C, for lists only.</div>
+</div>
+<script>
+document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => {
+  document.documentElement.setAttribute('data-bs-theme', b.dataset.scheme);
+  document.querySelectorAll('.switch button').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+</script>
+<script src="../answers.js"></script>
+</body>
+</html>
