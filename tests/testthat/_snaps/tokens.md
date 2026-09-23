@@ -50,7 +50,8 @@
       --blockr-color-bg-subtle: #f9fafb
       --blockr-color-bg-field: #f9fafb
       --blockr-color-bg-hover: color-mix(in srgb, #111827 6%, transparent)
-      --blockr-color-bg-selected: #f3f4f6
+      --blockr-color-bg-selected: color-mix(in srgb, #2563eb 7%, transparent)
+      --blockr-color-bg-selected-inactive: color-mix(in srgb, #111827 10%, transparent)
       --blockr-color-bg-accent: #2563eb
       --blockr-color-bg-accent-hover: #1d4ed8
       --blockr-color-bg-danger: #fef2f2
@@ -69,6 +70,8 @@
       --blockr-color-border-warning-subtle: color-mix(in srgb, #f59e0b 45%, transparent)
       --blockr-color-border-success-subtle: color-mix(in srgb, #16a34a 35%, transparent)
       --blockr-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.12)
+      --blockr-focus-outline: 2px solid #2563eb
+      --blockr-focus-offset: 2px
       --blockr-font-size-xs: 0.75rem
       --blockr-font-size-sm: 0.8125rem
       --blockr-font-size-base: 0.875rem

@@ -7,7 +7,7 @@
                                          tokens only, never by components
      meaning   --blockr-color-<property>-<role>[-<state>], --blockr-font-*,
                --blockr-radius-*, --blockr-control-*, --blockr-shadow-*,
-               --blockr-focus-ring, --blockr-transition, --blockr-mark-*
+               --blockr-focus-*, --blockr-transition, --blockr-mark-*
      local     --blockr-<owner>-*        one component's or package's own
                                          setting, read only in its own sheet
 
@@ -98,7 +98,12 @@
      one step lighter than whatever it sits on in the dark scheme too (on
      surface or on raised); in light it lands where grey-100 was. */
   --blockr-color-bg-hover: color-mix(in srgb, var(--blockr-color-text-default) 6%, transparent);
-  --blockr-color-bg-selected: var(--blockr-grey-100);
+  /* The chosen thing takes the accent tint, like every other selected
+     state: a selected row, the front tab of the active dock group. Front
+     tabs of the other groups are selected too, but not where you work, so
+     they get a grey wash, one step above hover. */
+  --blockr-color-bg-selected: var(--blockr-color-bg-accent-subtle);
+  --blockr-color-bg-selected-inactive: color-mix(in srgb, var(--blockr-color-text-default) 10%, transparent);
   --blockr-color-bg-accent: var(--blockr-accent-600);
   --blockr-color-bg-accent-hover: var(--blockr-accent-700);
   --blockr-color-bg-danger: var(--blockr-red-50);
@@ -131,10 +136,15 @@
 
   /* ------------------------------------------------------------ focus */
 
-  /* One ring for everything focusable. Written as a literal so it matches
-     the fallback every consumer already carries; a theme that changes the
-     accent overrides this too. */
+  /* Two focus styles. A field (text, number, select, code) turns its border
+     accent and adds the soft ring, on any focus. Everything else (buttons,
+     tools, segments, checkboxes, tabs) gets the outline on :focus-visible
+     only; the ring alone is 1.2:1 on white and does not show on a frameless
+     tool. The ring is a literal so it matches the fallback every consumer
+     already carries; a theme that changes the accent overrides it too. */
   --blockr-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  --blockr-focus-outline: 2px solid var(--blockr-color-border-accent);
+  --blockr-focus-offset: 2px;
 
   /* ------------------------------------------------------------- type */
 

@@ -63,7 +63,7 @@ ul.rules li::marker { color: var(--blockr-color-text-muted); }
 @media (max-width: 1100px) { .c3, .c4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ============================================================ icons, tools */
-:where(button, [tabindex]):focus-visible { outline: none; box-shadow: var(--blockr-focus-ring); }
+:where(button, [tabindex]):focus-visible { outline: var(--blockr-focus-outline); outline-offset: var(--blockr-focus-offset); }
 .tool, .gear, .ib {
   display: inline-flex; align-items: center; justify-content: center; flex: none;
   padding: 0; cursor: pointer; background: transparent; color: var(--blockr-color-text-muted);
@@ -181,7 +181,7 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .ck:hover .box { border-color: var(--blockr-color-text-muted); }
 .ck input:checked + .box { background: var(--blockr-color-bg-accent); border-color: var(--blockr-color-bg-accent); }
 .ck input:checked + .box svg { opacity: 1; }
-.ck input:focus-visible + .box { box-shadow: var(--blockr-focus-ring); }
+.ck input:focus-visible + .box { outline: var(--blockr-focus-outline); outline-offset: var(--blockr-focus-offset); }
 .ck.dis { color: var(--blockr-color-text-disabled); cursor: default; }
 .ck.dis .box { opacity: .5; }
 
@@ -472,7 +472,9 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
 .z-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
 .z-card { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 12px; overflow: hidden; position: relative; }
 .z-hd { display: flex; align-items: center; gap: 10px; padding: 10px 14px 10px 18px; border-bottom: 1px solid var(--blockr-color-border-default); }
-.z-hd .z-t { font-size: 16px; font-weight: 600; }
+.z-hd .z-t { font-size: var(--blockr-font-size-base); font-weight: 600; }
+.z-states { display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 4px 0 16px; font-size: 13px; }
+.z-st { display: inline-flex; align-items: center; gap: 10px; }
 .z-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; right: -2px; top: -2px; box-shadow: 0 0 0 2px var(--blockr-color-bg-surface); }
 .z-mkw { position: relative; display: inline-flex; }
 .z-body { padding: 12px 18px 14px; }
@@ -484,7 +486,7 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
 .z-busy .z-bars { opacity: .45; }
 .z-clock { font-size: 12px; color: var(--blockr-color-text-muted); min-height: 18px; margin-top: 6px; }
 .z-tabs { display: flex; align-items: center; gap: 6px; padding: 8px 10px 0; }
-.z-tab { display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 9px; border-radius: 6px; font-size: 13px; background: var(--blockr-color-bg-hover); }
+.z-tab { display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 9px; border-radius: 6px; font-size: 13px; background: var(--blockr-color-bg-selected); color: var(--blockr-color-text-accent); }
 .z-tab .z-x { font-size: 11px; color: var(--blockr-color-text-muted); }
 /* renaming in place */
 .z-ed { display: inline-block; font: inherit; border-radius: 6px; padding: 4px 8px; margin: -4px -8px; border: 1px solid transparent; cursor: default; outline: none; }
@@ -839,7 +841,7 @@ green ramps for status. No UI colour outside the palette.</p>
 <div class="card"><div id="palette"></div></div>
 
 <h3 class="sh">Three text levels</h3>
-<p class="note">The level follows the job the text does. Muted text does not sit on the hover or selected background; on a hovered row it turns default.</p>
+<p class="note">The level follows the job the text does. Muted text does not sit on the hover or selected background: on a hovered row it turns default, on a selected row accent.</p>
 <div class="levels">
   <div class="card"><div class="big">Default</div><code class="val">text-default</code>
     <ul><li>values, body text, menu rows, tooltip text</li><li>headings: block title, output title, table column names</li><li>hover state of a muted icon</li></ul></div>
@@ -852,7 +854,7 @@ green ramps for status. No UI colour outside the palette.</p>
 <h3 class="sh">Surfaces, borders, status, focus</h3>
 <p class="note">Layers sit on each other: the board canvas (<code>bg-page</code>), a panel (<code>bg-surface</code>), anything
 floating (<code>bg-raised</code>). Inside a layer: a quiet fill (<code>bg-subtle</code>), a field (<code>bg-field</code>),
-hover and selected. Borders are soft (<code>border-default</code>); focus is the accent border plus the one focus ring.</p>
+hover and selected. Borders are soft (<code>border-default</code>). A field's focus is the accent border plus the soft ring; everything else takes a 2px accent outline on keyboard focus (Tab through this page).</p>
 <div class="layers"><div class="lay-page"><span class="cap">bg-page</span>
   <div class="lay-surf">
     <div style="background:var(--blockr-color-bg-surface)">bg-surface</div>
@@ -1068,7 +1070,9 @@ way an output block's argument reaches its face.</p>
 <h3 class="z-h">Block status, messages, computing</h3>
 <p class="z-note">A block that cannot run yet shows an amber dot on its mark and says so in its status line. An error or a
 warning for the whole block is a message above the output. Past 300ms of computing any block dims its output and runs a clock
-under it. Press Run.</p>
+under it. Press Run. The block that needs you has a solid amber dot; the blocks below it, waiting for it, have amber
+rings.</p>
+<div class="z-states"><span class="z-st"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#0072B2"><svg width="15" height="15"><use href="#z-file"/></svg></span><span class="z-dot" style="background:var(--blockr-color-border-warning)"></span></span>Unset: set this block's inputs</span><span class="z-st"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#009E73"><svg width="15" height="15"><use href="#z-filter"/></svg></span><span class="z-dot" style="background:var(--blockr-color-bg-surface);box-shadow:inset 0 0 0 1.5px var(--blockr-color-border-warning),0 0 0 2px var(--blockr-color-bg-surface)"></span></span>Waiting for a data input</span><span class="z-st"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#E69F00"><svg width="15" height="15"><use href="#z-chart"/></svg></span><span class="z-dot" style="background:var(--blockr-color-text-muted)"></span></span>Stale: inputs changed</span><span class="z-st"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#56B4E9"><svg width="15" height="15"><use href="#z-join"/></svg></span><span class="z-dot" style="background:var(--blockr-color-border-danger)"></span></span>Failed</span></div>
 <div class="z-grid2">
   <div class="z-card"><div class="z-hd"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#0072B2" data-tip="read block · blockr.io"><svg width="15" height="15"><use href="#z-file"/></svg></span><span class="z-dot" style="background:var(--blockr-color-border-warning)"></span></span><span class="z-t">Read data</span></div>
     <div class="z-body"><div class="z-msg"><b>Error.</b> Column "Ozone2" not found in the data.</div><div class="z-status">Set this block's inputs</div></div></div>

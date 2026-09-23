@@ -67,7 +67,7 @@ The second word of a token's name says what kind it is.
 | Meaning | `--blockr-color-<property>-<role>[-<state>]` | `--blockr-color-text-muted` | components |
 | | `--blockr-font-<aspect>-<step>` | `--blockr-font-size-sm` | |
 | | `--blockr-radius-<step>`, `--blockr-control-h[-<step>]`, `--blockr-shadow-<step>` | `--blockr-radius-lg` | |
-| | `--blockr-focus-ring`, `--blockr-transition`, `--blockr-mark-<aspect>` | `--blockr-mark-radius` | |
+| | `--blockr-focus-<aspect>`, `--blockr-transition`, `--blockr-mark-<aspect>` | `--blockr-focus-outline` | |
 | Local | `--blockr-<owner>-<thing>` | `--blockr-dock-spinner-delay` | its owner's stylesheet only |
 
 A global token's second word is one of `color`, `font`, `radius`, `control`,
@@ -102,8 +102,9 @@ disabled.
 | `--blockr-color-text-danger` / `-warning` / `-success` | red-700 / amber-700 / green-700 | status text |
 
 Muted is 4.8:1 on white, 4.6:1 on grey-50 and 4.4:1 on grey-100. Muted text
-therefore never sits on a hover or selected background; on a hovered row, meta
-text and icons turn default. Grey-400 is 2.5:1 and serves disabled controls
+therefore never sits on a hover or selected background: on a hovered row, meta
+text and icons turn default; on a selected row, they turn `text-accent` with
+the rest of the row. Grey-400 is 2.5:1 and serves disabled controls
 only.
 
 ### Surfaces
@@ -119,7 +120,8 @@ layer takes that layer's field and border tokens.
 | `--blockr-color-bg-subtle` | grey-50 | a quiet fill inside a surface; the gear tray |
 | `--blockr-color-bg-field` | grey-50 | an input field |
 | `--blockr-color-bg-hover` | `color-mix(in srgb, var(--blockr-color-text-default) 6%, transparent)` | hover and the keyboard row |
-| `--blockr-color-bg-selected` | grey-100 | the chosen thing: front tab, selected row |
+| `--blockr-color-bg-selected` | `bg-accent-subtle` | the chosen thing: a selected row, the front tab of the active dock group; its text is `text-accent`, and it has no edge |
+| `--blockr-color-bg-selected-inactive` | `color-mix(in srgb, var(--blockr-color-text-default) 10%, transparent)` | the front tab of every other dock group: selected, but not where you work; one step above hover |
 | `--blockr-color-bg-accent` | accent-600 | solid accent fill (checked checkbox) |
 | `--blockr-color-bg-accent-hover` | accent-700 | its hover |
 | `--blockr-color-bg-accent-subtle` | `color-mix(in srgb, var(--blockr-color-border-accent) 7%, transparent)` | the accent tint (below) |
@@ -150,7 +152,8 @@ field.
 `border-accent`. It is the main button's look, and every selected or "on"
 state borrows it: a selected segment, an icon tile, a pressed icon button, the
 open gear, a tag that is cutting rows, an "on" badge, the "+N" overflow, the
-Enter button.
+Enter button, a selected row and the active group's front tab (these two
+without the edge). Hovering a selected thing keeps its look.
 
 ### Status
 
@@ -162,10 +165,19 @@ blockr.theme.
 
 ### Focus
 
-`--blockr-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.12)` is the one focus
-style, on every focusable element, shown on `:focus-visible`. It is written as
-a literal, so a theme that changes the accent overrides it as well. The 0.45
-ring in blockr.viz and blockr.ggplot (`--blockr-color-focus`) goes.
+Two styles:
+
+| Element | Focus | Shown on |
+|---|---|---|
+| a field: text, number, select, code editor, a name being renamed | `border-accent` and `--blockr-focus-ring` (`0 0 0 3px rgba(37, 99, 235, 0.12)`) | `:focus`, mouse included, because it also means "you are typing here" |
+| everything else: buttons, tools, the gear, segments, checkboxes, tabs, pills, legend items | `outline: var(--blockr-focus-outline)` (2px solid `border-accent`), `outline-offset: var(--blockr-focus-offset)` (2px) | `:focus-visible` only, so a mouse click shows nothing |
+
+The ring alone is 1.2:1 on white and does not show on a frameless tool; the
+outline is 5.2:1. The 2px offset keeps it off the gear's frame and a selected
+segment's tint. The keyboard row in a menu is not focus (focus stays in the
+filter box) and keeps the hover look. The ring is written as a literal, so a
+theme that changes the accent restates it. The 0.45 ring in blockr.viz and
+blockr.ggplot (`--blockr-color-focus`) goes.
 
 ### Dark scheme
 
@@ -179,7 +191,7 @@ tokens directly.
 |---|---|
 | `bg-page` / `bg-surface` / `bg-raised` | `#0e1219` / `#161b23` / `#1e242e` |
 | `bg-hover` | the same 6% text wash, lighter than what it sits on |
-| `bg-selected` | `color-mix(in srgb, var(--blockr-color-text-default) 10%, transparent)`, above `bg-raised` |
+| `bg-selected`, `bg-selected-inactive` | follow the accent tint and the text colour; not restated |
 | `text-on-accent` | `#0e1219` (the accent fill is lighter in dark) |
 | `text-accent` | accent-500 |
 | `text-accent-strong` | `text-accent` |
@@ -214,9 +226,9 @@ takes its face from the body.
 |---|---|---|
 | `--blockr-font-size-xs` | 12px (0.75rem) | field labels, section titles, captions, status lines, tooltips, offers |
 | `--blockr-font-size-sm` | 13px (0.8125rem) | output subtitle and sentence, code, menu meta text, tags |
-| `--blockr-font-size-base` | 14px (0.875rem) | body, field values, menu rows, buttons at 42px |
-| `--blockr-font-size-lg` | 16px (1rem) | output title |
-| `--blockr-font-size-xl` | 20px (1.25rem) | page titles outside the board (the block title is 16px, `lg`) |
+| `--blockr-font-size-base` | 14px (0.875rem) | body, field values, menu rows, buttons at 42px, the block title |
+| `--blockr-font-size-lg` | 16px (1rem) | output title, the one heading on an output block |
+| `--blockr-font-size-xl` | 20px (1.25rem) | page titles outside the board (the block title is 14px, `base`) |
 
 There is no `md` step. Two sizes sit off the scale on purpose: badges and
 counts at 11px, and text on a chart canvas at `--blockr-mark-font-size` (11px).
@@ -305,8 +317,8 @@ Drawn in index.html#foundations
 ### Anatomy, top to bottom
 
 1. **Dock header (compact).** One row: the block's mark (a 28px tinted square
-   in its category colour, carrying the status dot), the block title at 16px
-   weight 600, the actions (controls, preview, "…") on the right. No subtitle:
+   in its category colour, carrying the status dot), the block title at 14px
+   (`font-size-base`) weight 600 `text-default`, the actions (controls, preview, "…") on the right. No subtitle:
    the block type and package are the mark's tooltip ("filter block ·
    blockr.dplyr"). About 52px.
 2. **Header row.** Output blocks put the output title and the sentence on the
@@ -511,13 +523,14 @@ Drawn in index.html#layout
 Not used: switches, radio buttons, click-to-cycle pills, toggle-pill groups,
 rows of checkboxes for a fixed set, shinyWidgets and unstyled Bootstrap
 inputs. The selected state of every choice control is the accent tint: a
-selected segment, an icon tile, a pressed icon button, the open gear.
+selected segment, an icon tile, a pressed icon button, the open gear, a
+selected row, the active group's front tab.
 
 ### Text and number fields
 
 - 42px, `bg-field`, 1px `border-default`, radius 8 (`radius-lg`), 12px side
   padding, 14px `text-default`. Placeholder `text-muted`.
-- Focus: `border-accent` and `--blockr-focus-ring`.
+- Focus: `border-accent` and `--blockr-focus-ring`, on any focus.
 - Disabled: `text-disabled`.
 - Required and empty: `border-warning` (amber-500, `#f59e0b`), `bg-warning`
   fill, and a `*` after the label. The cue clears when the field has a value.
@@ -562,8 +575,8 @@ in the board options. Core's `bslib::input_switch` calls, Shiny's
 - Checked: `bg-accent` fill and border, the check in `text-on-accent`.
 - Label after the box, 9px gap, 14px `text-default`. The label names the "on"
   state.
-- A native input underneath; Space toggles; focus shows the focus ring on the
-  box.
+- A native input underneath; Space toggles; keyboard focus puts the focus
+  outline around the box.
 - Disabled: box at 50% opacity, label `text-disabled`.
 - In the grid: the box and its words, with no field shell and no empty label
   row. It sits on the bottom line of its grid row (the controls' line) and
@@ -635,7 +648,7 @@ Drawn in index.html#controls
 
 ### Buttons
 
-Four kinds. All are weight 500 and show the focus ring on `:focus-visible`.
+Four kinds. All are weight 500 and show the focus outline on `:focus-visible`.
 
 | Kind | Rest | Hover | Use |
 |---|---|---|---|
@@ -875,10 +888,12 @@ blockr.dock, each pointing at a meaning token:
 | Token | Points at | State |
 |---|---|---|
 | `--blockr-dock-status-stale` | `text-muted` | stale |
-| `--blockr-dock-status-waiting` | `border-warning` | waiting |
+| `--blockr-dock-status-waiting` | `border-warning`, drawn as a hollow ring (1.5px, `bg-surface` inside) | an input is not ready: nothing linked in, or the block upstream is unset, waiting or failed |
 | `--blockr-dock-status-failed` | `border-danger` | failed |
 | `--blockr-dock-status-unset` | `border-warning` | a required input is empty; the same amber as the empty field's cue |
 
+Unset and waiting share the amber and differ by shape: the block that needs
+you has the solid dot, and the blocks below it, which wait for it, have rings.
 `-unset` replaces the off-palette `#eab308` in blockr.dock
 `block_status_style()`.
 
@@ -931,7 +946,7 @@ Drawn in index.html#labels
   option is a follow-up.
 - **Facet strip:** the section-title style (12px, 600, uppercase, 0.05em,
   `text-muted`).
-- **Legend band:** HTML. Its focus uses `--blockr-focus-ring`. The 25 x 14px
+- **Legend band:** HTML. Its items take the focus outline. The 25 x 14px
   swatch stays.
 - **Data tooltip:** the raised card (`bg-raised`, `border-default`, radius 8,
   `shadow-md`). Headline 13px weight 600 with the series swatch, which carries
@@ -1022,6 +1037,8 @@ Drawn in index.html#special
       routine. No popovers. Tooltips on icon-only buttons and cut-off labels
       only, using the light card; no native `title`.
 - [ ] Badges are capsules and neutral unless they state status or "on".
+- [ ] Focus: a field takes the accent border and the ring; everything else
+      takes the focus outline, on `:focus-visible` only.
 - [ ] Check the block in the dark scheme.
 
 Drawn in index.html#authors
@@ -1081,6 +1098,13 @@ blockr.theme). Local names move under their owner: dock's `spinner-delay`,
 `sidebar-*`, `stack-height` and header settings to `--blockr-dock-*`; viz's
 `rank-*` to `--blockr-viz-rank-*`. blockr.outline drops its own `--md-*`
 variables and reads the blockr tokens.
+
+### Not specified yet
+
+Tables (header, row height, number alignment, selected row, sort cue),
+dialogs (surface, width, title, button order), dock tabs beyond their selected
+state, the DAG view, notifications (Shiny's `showNotification`), and the icon
+set with its sizes.
 
 ### Decision record
 
