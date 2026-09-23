@@ -35,8 +35,10 @@ values come from `inst/assets/css/blockr-tokens.css` and
 - No UI colour outside the palette, and no grey that is not a ramp step. Data
   colours and block category colours are the two exceptions, each with its own
   source (see [Foundations](#foundations)).
-- Tints are computed from tokens with `color-mix()`, never written as rgba
-  literals, so they follow a theme and the dark scheme.
+- Tints are computed from meaning tokens with `color-mix()`, never from a
+  palette token and never written as rgba literals, so they follow a theme
+  and the dark scheme. The ones used in many places are tokens themselves
+  (see [Borders](#foundations)).
 - Three text levels: default, muted, disabled.
 - Every configurable option is in the gear. A block with no options has no
   gear. Simplified mode removes the gear button and nothing else.
@@ -99,6 +101,7 @@ disabled.
 | `--blockr-color-text-disabled` | grey-400 | disabled controls only |
 | `--blockr-color-text-on-accent` | `#ffffff` | text on a solid accent fill |
 | `--blockr-color-text-accent` | accent-600 | accent text |
+| `--blockr-color-text-accent-strong` | accent-700 | accent text on an accent tint (a count on the main button, the avatar initial), where accent-600 is 3.9:1 |
 | `--blockr-color-text-danger` / `-warning` / `-success` | red-700 / amber-700 / green-700 | status text |
 
 Muted is 4.8:1 on white, 4.6:1 on grey-50 and 4.4:1 on grey-100. Muted text
@@ -122,7 +125,8 @@ layer takes that layer's field and border tokens.
 | `--blockr-color-bg-selected` | grey-100 | the chosen thing: front tab, selected row |
 | `--blockr-color-bg-accent` | accent-600 | solid accent fill (checked checkbox) |
 | `--blockr-color-bg-accent-hover` | accent-700 | its hover |
-| `--blockr-color-bg-accent-subtle` | accent-50 | light accent tint |
+| `--blockr-color-bg-accent-subtle` | `color-mix(in srgb, var(--blockr-color-border-accent) 7%, transparent)` | the accent tint (below) |
+| `--blockr-color-bg-accent-subtle-hover` | the same at 13% | its hover |
 | `--blockr-color-bg-danger` / `-warning` / `-success` | red-50 / amber-50 / green-50 | status fills |
 
 `bg-hover` is a wash of the text colour, so a hovered row is one step away
@@ -137,9 +141,19 @@ lands on grey-100.
 | `--blockr-color-border-strong` | grey-300 | hovered borders, stronger lines, a border drawn with a text colour |
 | `--blockr-color-border-accent` | accent-600 | focus, full-strength accent edge |
 | `--blockr-color-border-danger` / `-warning` / `-success` | red-600 / amber-500 / green-600 | status edges |
+| `--blockr-color-border-accent-subtle` | `color-mix(in srgb, var(--blockr-color-border-accent) 35%, transparent)` | the accent tint's edge |
+| `--blockr-color-border-danger-subtle` / `-success-subtle` | the status border at 35% | the edge of a status badge, a message, the destructive button |
+| `--blockr-color-border-warning-subtle` | the warning border at 45% | the same; amber is paler, so its edge is stronger |
 
 Input borders stay soft (`border-default`). The focus state marks the active
 field.
+
+**The accent tint** is `text-accent` on `bg-accent-subtle` with a
+`border-accent-subtle` edge; its hover is `bg-accent-subtle-hover` with
+`border-accent`. It is the main button's look, and every selected or "on"
+state borrows it: a selected segment, an icon tile, a pressed icon button, the
+open gear, a tag that is cutting rows, an "on" badge, the "+N" overflow, the
+Enter button.
 
 ### Status
 
@@ -171,6 +185,7 @@ tokens directly.
 | `bg-selected` | `color-mix(in srgb, var(--blockr-color-text-default) 10%, transparent)`, above `bg-raised` |
 | `text-on-accent` | `#0e1219` (the accent fill is lighter in dark) |
 | `text-accent` | accent-500 |
+| `text-accent-strong` | `text-accent` |
 | `text-` / `border-danger`, `-warning`, `-success` | `#f87171`, `#fbbf24`, `#4ade80` |
 | `bg-danger`, `-warning`, `-success` | the same hues at 12% |
 | `focus-ring` | `0 0 0 3px rgb(96 165 250 / 0.28)` |
@@ -194,8 +209,9 @@ blockr.theme's palettes, not from these tokens.
 ### Type
 
 The body face is Open Sans, as bslib's Shiny preset ships it, set in one place:
-`--bs-body-font-family`. blockr.ui declares no `--blockr-font-sans`; a theme
-that ships a face sets it. The chart canvas takes its face from the body.
+`--bs-body-font-family`. A theme that ships a face sets
+`--bs-body-font-family`. There is no `--blockr-font-sans`. The chart canvas
+takes its face from the body.
 
 | Token | Size | Use |
 |---|---|---|
@@ -222,8 +238,8 @@ monospace`. Code is 13px on every code surface.
 | Token | Value | Use |
 |---|---|---|
 | `--blockr-radius-sm` | 4px | 26px buttons and tools, the gear, tags, pills, checkbox, menu rows, offers |
-| `--blockr-radius-md` | 6px | 30px buttons, segments inside a segmented control, tooltips |
-| `--blockr-radius-lg` | 8px | fields, 42px buttons, rows, menus, the gear tray, chart tooltips |
+| `--blockr-radius-md` | 6px | 30px buttons, segments inside a segmented control, messages |
+| `--blockr-radius-lg` | 8px | fields, 42px buttons, rows, menus, the gear tray, tooltips (the light card and the chart's) |
 | `--blockr-radius-xl` | 12px | block panels |
 | `--blockr-radius-pill` | 999px | badges, counts |
 
@@ -233,8 +249,9 @@ monospace`. Code is 13px on every code surface.
 | `--blockr-control-h-sm` | 30px | buttons in toolbars and dialogs, the crossfilter card search |
 | `--blockr-control-h-xs` | 26px | header tools, the gear, buttons in a header strip, the builder/code switch, segmented controls inside a row |
 
-No control is smaller than 26px, except the 24px pill and tag that sit inside
-a 42px row or field.
+No control is smaller than 26px, except what sits inside a 42px row or field
+(the 24px pill, tag and Enter button) and the 16px checkbox box, whose label is
+part of its target.
 
 ### Elevation
 
@@ -358,9 +375,10 @@ There is no 16px section heading inside a block.
   block or on a menu inside the tray leaves it open.
 - The open state lasts for the session (a re-render does not close it) and is
   not saved with the board. Several trays may be open at once.
-- Changes apply as they are made. Text fields commit on Enter or blur; code
-  commits on Run (code and function blocks) or the Apply chip (chart prepare
-  script). No tray has an Apply button.
+- Changes apply as they are made. Text fields commit on Enter or blur. No
+  tray has an Apply button for its fields; code is the one exception and
+  commits on its own button (Run in the code and function blocks, Apply on the
+  chart's prepare script).
 - The crossfilter's settings and the patient profile's gear panel use the same
   tray.
 
@@ -388,7 +406,7 @@ name stays in the gear.
   text. The cut is 3 (`TITLE_MAX_VALUES`).
 - **Offers** ("+ name", for a setting that is unset) sit on their own line
   under the sentence, three at most. Past three, the last one reads "More
-  settings" and opens the gear. An offer is a dashed chip: 12px `text-muted`,
+  settings" and opens the gear. An offer is a small dashed button: 12px `text-muted`,
   1px dashed `border-strong`, radius 4, 6px side padding; on hover the border
   and text turn accent. It disappears once its setting is set. Offers are not
   part of the printed sentence.
@@ -495,8 +513,8 @@ Drawn in index.html#layout
 
 Not used: switches, radio buttons, click-to-cycle pills, toggle-pill groups,
 rows of checkboxes for a fixed set, shinyWidgets and unstyled Bootstrap
-inputs. The selected state of every choice control is the main button's tint:
-a selected segment, an icon tile, a pressed icon button, the open gear.
+inputs. The selected state of every choice control is the accent tint: a
+selected segment, an icon tile, a pressed icon button, the open gear.
 
 ### Text and number fields
 
@@ -506,8 +524,8 @@ a selected segment, an icon tile, a pressed icon button, the open gear.
 - Disabled: `text-disabled`.
 - Required and empty: `border-warning` (amber-500, `#f59e0b`), `bg-warning`
   fill, and a `*` after the label. The cue clears when the field has a value.
-- Commit on Enter or blur. The "Enter ↵" chip (24px, 11px weight 500, the
-  main button's tint) is armed while the field is dirty. Escape reverts.
+- Commit on Enter or blur. The "Enter ↵" button (24px, 11px weight 500, the
+  accent tint) is armed while the field is dirty. Escape reverts.
 - Numbers use the same field. The input keeps `type=number` for the keyboard,
   hides the spinner arrows, and commits like text; arrow keys still step. A
   Bootstrap override brings Shiny's `numericInput` to the same look.
@@ -567,8 +585,7 @@ pick is readable without a click.
 - In the grid: 42px, `bg-field`, 1px `border-default`, radius 8, 3px inner
   padding and gap. Segments share the width, radius 6, 14px `text-muted`;
   hover `text-default` on `bg-hover`.
-- Selected segment: the main tint (`text-accent`, accent at 7% fill, 35%
-  border), weight 500.
+- Selected segment: the accent tint, weight 500.
 - It takes two columns, like a select. Three segments need about 240px.
 - Inside a row: 26px, 2px padding and gap, radius 6, segments 12px at radius 4.
 - Four or more values, labels too long for the cell, or values from the data go
@@ -592,8 +609,8 @@ operator, viz's `.dd-func-btn` (n, N, %, Σ).
 
 ### Builder or code switch
 
-A pressed icon button, 26px, the tool look (like the gear). Pressed: the main
-tint. It sets `aria-pressed`. Its tooltip names the other state ("Edit as
+A pressed icon button, 26px, the tool look (like the gear). Pressed: the
+accent tint. It sets `aria-pressed`. Its tooltip names the other state ("Edit as
 formula text", "Back to the builder"). It stays out of the field grid.
 
 ### Renaming in place
@@ -625,10 +642,10 @@ Four kinds. All are weight 500 and show the focus ring on `:focus-visible`.
 
 | Kind | Rest | Hover | Use |
 |---|---|---|---|
-| Main | `text-accent`, accent-600 at 7% fill, 35% border | 13% fill, `border-accent` | at most one per view |
+| Main | the accent tint: `text-accent`, `bg-accent-subtle`, `border-accent-subtle` | `bg-accent-subtle-hover`, `border-accent` | at most one per view |
 | Secondary | `bg-surface`, `border-default`, `text-default` | `bg-hover`, `border-strong` | everything else with a frame |
 | Quiet | text only, `text-muted`, 8px side padding | `bg-hover`, `text-default` | low-weight actions; replaces the grey-400 text links |
-| Destructive | `text-danger`, red-600 at 6% fill, 35% border | | only to confirm a removal |
+| Destructive | `text-danger`, `border-danger` at 6% fill, `border-danger-subtle` | `border-danger` at 12% fill, `border-danger` | only to confirm a removal |
 | Disabled | `text-disabled`, transparent, `border-default` | none | |
 
 There is no solid accent button. Bootstrap's `btn-primary`, `btn-danger` and
@@ -640,8 +657,8 @@ There is no solid accent button. Bootstrap's `btn-primary`, `btn-danger` and
 | s | 30px | 13px | 11px | 6px | toolbars, dialogs |
 | xs | 26px | 12px | 9px | 4px | a header strip, next to the gear |
 
-The crossfilter reset, the patient-profile drill reset and dplyr's commit chip
-are instances of the main style and take these numbers.
+The crossfilter reset, the patient-profile drill reset and dplyr's Enter
+button are instances of the main style and take these numbers.
 
 ### Icon buttons (tools)
 
@@ -654,7 +671,7 @@ icon-only button has a tooltip. Tools do not shrink with the panel.
 - 26px, radius 4, 1px `border-default`, the one framed square in the header
   row. Icon: Bootstrap `gear-fill` at 14px, `text-muted`.
 - Hover: `text-default`, `border-strong`, `bg-hover`.
-- While the tray is open: the main tint (`text-accent`, accent at 7% fill, 35% border).
+- While the tray is open: the accent tint.
 - One class, `.blockr-gear-btn`, on every gear and on nothing else. Tooltip
   "Settings".
 - No gear when a block has no options, including per mode.
@@ -680,7 +697,8 @@ it, every control 30px, tokens only.
   never monospace. There is no separate title.
 - Right: the view menu as a quiet button (current view marked by weight 600,
   no fill), the board options gear, and the account avatar last: a 28px circle
-  in the main tint (accent at 14%, accent-700 initial).
+  with the count's accent fill (`border-accent` at 14%) and a
+  `text-accent-strong` initial.
 - Hover on every navbar control is `bg-hover`. The spinner's label is the
   light tooltip.
 
@@ -758,7 +776,8 @@ the tooltip on its mark.
 ### Tooltips
 
 One style for every name shown on hover: a small light card. `bg-raised`, 1px
-`border-default`, `shadow-md`, radius 6, 12px `text-default`, padding 5px 9px.
+`border-default`, `shadow-md`, radius 8 (`radius-lg`, as the chart's data
+tooltip), 12px `text-default`, padding 5px 9px.
 It shows on hover and on keyboard focus, and leaves with the pointer or focus;
 Escape hides it.
 
@@ -770,6 +789,18 @@ Escape hides it.
   blockr has one floating style.
 - It shows after the pointer rests 800ms, above the element; it flips below
   only where there is no room above.
+
+### Picking a block
+
+- **Adding a block** is one menu at the "+", everywhere: the outline, a
+  block's append, the board's Add block. Search on top, category titles, one
+  row per block type with its 24px mark, its name and the package as a badge.
+  Rows carry no description. The block's ID is generated, and its title is
+  renamed on the block after it is added. The dock's block browser sidebar and
+  its "configure before adding" step go.
+- **Picking a block already on the board** (add a panel, link to, add to a
+  stack) uses the same menu, listing the board's blocks: mark, title, and the
+  block type as meta text. The Bootstrap modal with selectize goes.
 
 Drawn in index.html#floating
 
@@ -795,23 +826,22 @@ you act on, keep 4px corners.
 - 18px capsule (`radius-pill`), 11px weight 500, 7px side padding, `bg-subtle`
   fill, 1px `border-default`, `text-muted`.
 - Neutral unless it states a status or that something is on:
-  - **on, added, cutting rows:** `bg-accent-subtle`, border accent-600 at 30%,
-    `text-accent`;
-  - **danger, warning, success:** `bg-<status>`, border in the status hue at
-    30%, `text-<status>`.
+  - **on, added, cutting rows:** the accent tint (`bg-accent-subtle`,
+    `border-accent-subtle`, `text-accent`);
+  - **danger, warning, success:** `bg-<status>`, `border-<status>-subtle`,
+    `text-<status>`.
 - Types, packages and significance levels are neutral; the type icon beside a
   name already carries the type. io's blue "info" badge becomes neutral.
-- Data colours (the arm chip in the cohort list, the tile's colour-by pill)
+- Data colours (the arm label in the cohort list, the tile's colour-by pill)
   come from the board's scale and are outside this rule.
 - A count with a unit ("4 blocks") is a badge.
 
 ### Tags
 
 24px, radius 4, 1px `border-default`, `bg-surface`, 13px `text-default`, 8px
-side padding. The × follows [Controls](#controls). An accent tint on a tag (the
-main button's 7% fill and 35% border, `text-accent`) means the value is
-cutting rows. The crossfilter's "Filter by" pills are tags by this rule, and
-read-only receipt chips are tags without ×.
+side padding. The × follows [Controls](#controls). The accent tint on a tag
+means the value is cutting rows. The crossfilter's "Filter by" pills are tags
+by this rule, and the read-only items in a drill receipt are tags without ×.
 
 ### Pills
 
@@ -822,12 +852,12 @@ Specified under "A pill that opens a menu" in [Controls](#controls).
 - 16px capsule, at least 16px wide, 4px side padding, 11px weight 600,
   tabular figures.
 - Fill: the host control's colour at 14%. On an accent host that is
-  `color-mix(in srgb, var(--blockr-accent-600) 14%, transparent)` with
-  accent-700 text (accent-600 on the tint is 3.9:1); in dark the text is
-  `text-accent`.
+  `color-mix(in srgb, var(--blockr-color-border-accent) 14%, transparent)`
+  with `text-accent-strong` text.
 - Shown only when the number is above zero.
 - On a secondary or destructive button the count takes that button's colour:
-  `text-default` on a `bg-hover` fill, or red-700 on a 14% red tint. A count
+  `text-default` on a `bg-hover` fill, or `text-danger` on `border-danger` at
+  14%. A count
   never brings a second colour into a button.
 
 ### Showing that a block filters
@@ -841,11 +871,19 @@ Specified under "A pill that opens a menu" in [Controls](#controls).
 
 ### Block status
 
-An 8px dot on the block icon with a 2px ring, one spec for dock and the DAG
-(`block_status_style()`). Stale `text-muted`, waiting `border-warning`, failed
-`border-danger`, the ring `bg-surface`. Unset (a required input is empty)
-`amber-500`, matching the amber cue on the empty field; it replaces the
-off-palette `#eab308` in blockr.dock `block_status_style()`.
+An 8px dot on the block's mark with a 2px `bg-surface` ring, one spec for dock
+and the DAG (`block_status_style()`). Its fills are local tokens owned by
+blockr.dock, each pointing at a meaning token:
+
+| Token | Points at | State |
+|---|---|---|
+| `--blockr-dock-status-stale` | `text-muted` | stale |
+| `--blockr-dock-status-waiting` | `border-warning` | waiting |
+| `--blockr-dock-status-failed` | `border-danger` | failed |
+| `--blockr-dock-status-unset` | `border-warning` | a required input is empty; the same amber as the empty field's cue |
+
+`-unset` replaces the off-palette `#eab308` in blockr.dock
+`block_status_style()`.
 
 ### Status line and plain text
 
@@ -861,8 +899,8 @@ filter trail printed in captions, the Big N at the end of a column header.
 - Syntax and validation text: `text-danger`.
 - Empty and loading states in lists: centred, italic, `text-muted`.
 - A block-level error or warning (a failed expression, dropped rows) uses the
-  message style, above the output: the status text colour, its `bg-` fill and
-  its edge at 35%, 13px, radius 6. Danger for errors, the amber set for
+  message style, above the output: `text-<status>` on `bg-<status>` with a
+  `border-<status>-subtle` edge, 13px, radius 6. Danger for errors, the amber set for
   warnings.
 
 Drawn in index.html#labels
@@ -938,7 +976,7 @@ The code, function and composer blocks share one CodeMirror editor.
   | `--blockr-code-comment` | `text-muted` |
 
 - Line numbers `text-muted`; the active line `bg-hover`; the input-line band is
-  mixed from the accent.
+  mixed from `border-accent`.
 - Footer: Run and Accept all are 26px main buttons; Reject all is a 26px
   secondary button. The syntax message is `text-danger`.
 - Code is 13px on every code surface; dplyr's expression input moves from
@@ -963,7 +1001,8 @@ Drawn in index.html#special
 
 - [ ] Read meaning tokens only. No `--blockr-grey-*`, `--blockr-blue-*` or hex
       in a component.
-- [ ] Tints via `color-mix()` from a token, never rgba literals.
+- [ ] Tints via the tint tokens or `color-mix()` from a meaning token, never
+      from a palette token or an rgba literal.
 - [ ] Local settings are named `--blockr-<package>-*` and read only in that
       package's stylesheet.
 - [ ] Text in one of three levels: default, muted, disabled (disabled only for
@@ -1004,9 +1043,13 @@ from blockr.extra), `Blockr.Select` and its placement routine,
 rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
 `crossfilter-block.css`), and the gear button. blockr.dock owns the dock
 header, the "…" menu, the block status dot, the category colours
-(`blk_color()`) and the rule that hides the gear in simplified mode.
-blockr.theme owns data colours. blockr.ui's token tests enforce the grammar
-and warn on every read of a legacy alias.
+(`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
+rule that hides the gear in simplified mode. blockr.theme owns data colours.
+
+To do: blockr.ui's token tests check that the vocabulary changes only
+deliberately and that consumers' fallbacks agree with it. Two tests are still
+to write: one that enforces the grammar, and one that warns on every read of a
+legacy alias.
 
 ### Legacy token aliases
 
@@ -1025,7 +1068,7 @@ it.
 | `--blockr-color-bg-input` | `color-bg-field` |
 | `--blockr-color-primary` | `color-bg-accent` |
 | `--blockr-color-primary-hover` | `color-bg-accent-hover` |
-| `--blockr-color-primary-bg` | `color-bg-accent-subtle` |
+| `--blockr-color-primary-bg` | accent-50 (keeps its old value; the accent tint `color-bg-accent-subtle` is a 7% mix, nearly the same colour) |
 | `--blockr-color-error`, `--blockr-color-danger` | `color-border-danger` |
 | `--blockr-color-success` | `color-border-success` |
 | `--blockr-color-warning` | `color-border-warning` |
@@ -1039,7 +1082,8 @@ it.
 Removed from the UI tokens: `--blockr-color-negative` (data colour, belongs in
 blockr.theme). Local names move under their owner: dock's `spinner-delay`,
 `sidebar-*`, `stack-height` and header settings to `--blockr-dock-*`; viz's
-`rank-*` to `--blockr-viz-rank-*`.
+`rank-*` to `--blockr-viz-rank-*`. blockr.outline drops its own `--md-*`
+variables and reads the blockr tokens.
 
 ### Decision record
 

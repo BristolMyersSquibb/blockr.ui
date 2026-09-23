@@ -76,6 +76,9 @@
   --blockr-color-text-disabled: var(--blockr-grey-400);
   --blockr-color-text-on-accent: #ffffff;
   --blockr-color-text-accent: var(--blockr-accent-600);
+  /* Accent text on an accent tint (a count on the main button): accent-600
+     there is 3.9:1. */
+  --blockr-color-text-accent-strong: var(--blockr-accent-700);
   --blockr-color-text-danger: var(--blockr-red-700);
   --blockr-color-text-warning: var(--blockr-amber-700);
   --blockr-color-text-success: var(--blockr-green-700);
@@ -98,7 +101,6 @@
   --blockr-color-bg-selected: var(--blockr-grey-100);
   --blockr-color-bg-accent: var(--blockr-accent-600);
   --blockr-color-bg-accent-hover: var(--blockr-accent-700);
-  --blockr-color-bg-accent-subtle: var(--blockr-accent-50);
   --blockr-color-bg-danger: var(--blockr-red-50);
   --blockr-color-bg-warning: var(--blockr-amber-50);
   --blockr-color-bg-success: var(--blockr-green-50);
@@ -111,6 +113,21 @@
   --blockr-color-border-danger: var(--blockr-red-600);
   --blockr-color-border-warning: var(--blockr-amber-500);
   --blockr-color-border-success: var(--blockr-green-600);
+
+  /* ------------------------------------------------------------ tints */
+
+  /* Mixed from the meaning tokens above, so a theme's accent and the dark
+     scheme carry through. The accent tint is the main button's look, and
+     every "selected" or "on" state borrows it: a selected segment, a
+     pressed tool, the open gear, a tag that is cutting rows, an "on" badge.
+     The status edges frame badges, messages and the destructive button;
+     amber is paler than the other hues, so its edge is stronger. */
+  --blockr-color-bg-accent-subtle: color-mix(in srgb, var(--blockr-color-border-accent) 7%, transparent);
+  --blockr-color-bg-accent-subtle-hover: color-mix(in srgb, var(--blockr-color-border-accent) 13%, transparent);
+  --blockr-color-border-accent-subtle: color-mix(in srgb, var(--blockr-color-border-accent) 35%, transparent);
+  --blockr-color-border-danger-subtle: color-mix(in srgb, var(--blockr-color-border-danger) 35%, transparent);
+  --blockr-color-border-warning-subtle: color-mix(in srgb, var(--blockr-color-border-warning) 45%, transparent);
+  --blockr-color-border-success-subtle: color-mix(in srgb, var(--blockr-color-border-success) 35%, transparent);
 
   /* ------------------------------------------------------------ focus */
 
@@ -133,10 +150,11 @@
 
   --blockr-font-mono: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
 
-  /* No sans face is declared here, on purpose: blockr does not impose one,
-     and a theme that ships a face sets --blockr-font-sans itself. Declaring
-     it as `inherit` does not mean "no opinion"; at :root that makes the
-     property invalid and every reader falls back anyway. */
+  /* No sans face is declared here, on purpose. The body face is set in one
+     place, Bootstrap's --bs-body-font-family (Open Sans in bslib's Shiny
+     preset), and a theme that ships a face sets that. Declaring a
+     --blockr-font-sans as `inherit` would not mean "no opinion"; at :root
+     that makes the property invalid and every reader falls back anyway. */
 
   /* ---------------------------------------------------- shape and size */
 
@@ -178,13 +196,14 @@
   /* ------------------------------------------------- legacy (aliases) */
 
   /* Old names, kept so nothing changes and nothing breaks. Each points at
-     its replacement where the value is identical. Two keep their own old
+     its replacement where the value is identical. Three keep their own old
      value because the replacement is deliberately different, and switching
      them is a separate, visible step, done per use by the job it does:
        text-secondary  grey-700; labels and status lines become text-muted,
                        headings, content and hover states text-default
        text-subtle     grey-400; placeholders, meta and icons become
-                       text-muted, disabled controls text-disabled */
+                       text-muted, disabled controls text-disabled
+       primary-bg      accent-50; the accent tint is now bg-accent-subtle */
   --blockr-color-text-primary: var(--blockr-color-text-default);
   --blockr-color-text-secondary: var(--blockr-grey-700);
   --blockr-color-text-subtle: var(--blockr-grey-400);
@@ -194,7 +213,7 @@
   --blockr-color-bg-input: var(--blockr-color-bg-field);
   --blockr-color-primary: var(--blockr-color-bg-accent);
   --blockr-color-primary-hover: var(--blockr-color-bg-accent-hover);
-  --blockr-color-primary-bg: var(--blockr-color-bg-accent-subtle);
+  --blockr-color-primary-bg: var(--blockr-accent-50);
   --blockr-color-error: var(--blockr-color-border-danger);
   --blockr-color-danger: var(--blockr-color-border-danger);
   --blockr-color-success: var(--blockr-color-border-success);

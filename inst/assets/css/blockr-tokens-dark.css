@@ -49,6 +49,7 @@
   /* The accent fill is lighter in dark, so text on it turns dark. */
   --blockr-color-text-on-accent: #0e1219;
   --blockr-color-text-accent: var(--blockr-accent-500);
+  --blockr-color-text-accent-strong: var(--blockr-color-text-accent);
 
   --blockr-color-text-danger: #f87171;
   --blockr-color-text-warning: #fbbf24;

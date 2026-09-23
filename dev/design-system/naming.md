@@ -407,6 +407,47 @@ that point at text-accent, text-success, text-warning and text-muted. Those are 
 and follow a theme's accent. Line numbers muted, active line bg-hover, the input-line band mixed from the accent. Code is
 13px (sm) on every code surface, so dplyr's expression input moves from 14px.
 
+### Consistency pass (2026-09-23)
+
+A review of design-system.md against this record, the token files and
+index.html. These close contradictions; none reopens a decision.
+
+- **Tooltips are radius 8.** The tooltip rule says it matches the chart's
+  data tooltip, which is radius 8; the light card said 6. `radius-md` now
+  serves 30px buttons, segments and messages.
+- **The accent tint is a set of tokens.** The main button's look (7% fill,
+  35% edge, 13% on hover) was written out by hand in nine places, mixed from
+  the palette's `accent-600`. It is now `bg-accent-subtle`,
+  `bg-accent-subtle-hover` and `border-accent-subtle`, mixed from
+  `border-accent`. `bg-accent-subtle` was accent-50, nearly the same colour;
+  the legacy `primary-bg` keeps accent-50. An "on" badge takes the same tint,
+  so its edge goes from 30% to 35%.
+- **Status edges are tokens:** `border-danger-subtle` and
+  `border-success-subtle` at 35%, `border-warning-subtle` at 45%. Badges said
+  30% and messages 35%; the drawings used 40 and 45% for amber, which is
+  paler than the other hues. The destructive button's edge takes
+  `border-danger-subtle`; its fill mixes from `border-danger` (6%, 12% on
+  hover). Its hover was drawn but missing from the spec.
+- **`text-accent-strong`** (accent-700, `text-accent` in dark) replaces the
+  palette read for a count on an accent host and the avatar's initial.
+- **The status dot reads local tokens,** `--blockr-dock-status-stale`,
+  `-waiting`, `-failed`, `-unset`, each pointing at a meaning token.
+  `-unset` points at `border-warning`, the same amber as the empty field's
+  cue (amber-500 in light, as decided under "Five details").
+- **The word "chip" is gone from the spec.** The Enter chip is the Enter
+  button, an offer is a small dashed button, receipt chips are tags without
+  ×, the arm chip is a data-coloured label. The chart prepare script's Apply
+  is stated as the one exception to "no Apply button", with Run.
+- **The 26px floor** names every exception: the 24px pill, tag and Enter
+  button inside a 42px row or field, and the 16px checkbox box.
+- **The body face** is set through `--bs-body-font-family`, by blockr and by
+  a theme. There is no `--blockr-font-sans`; the token file said a theme
+  sets it.
+- **Picking a block** and **blockr.outline's move off `--md-*`** are now in
+  the spec.
+- **Token tests:** the spec claimed tests enforce the grammar and warn on
+  legacy names. They do not exist yet; the spec lists them as to do.
+
 ### Renaming and the navbar (decided 2026-09-23)
 
 (`topics/20-editable-text-and-navbar.html`.)
