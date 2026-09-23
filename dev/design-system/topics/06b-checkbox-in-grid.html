@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Topic 6b: a checkbox in the field grid</title>
+<link rel="stylesheet" href="../fonts/open-sans.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens-dark.css">
+<link rel="stylesheet" href="../ds-page.css">
+<style>
+.widths { display: flex; gap: 6px; align-items: center; margin: 14px 0 6px; font-size: 13px; color: var(--blockr-color-text-muted); }
+.widths button { font: inherit; font-size: 13px; padding: 4px 12px; border-radius: 6px; border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); color: var(--blockr-color-text-default); cursor: pointer; }
+.widths button[aria-pressed="true"] { color: var(--blockr-color-text-accent); border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); }
+.opt-row { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; padding: 22px 0; border-top: 1px solid var(--blockr-color-border-default); }
+.opt-row .t { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.opt-row .d { font-size: 13px; color: var(--blockr-color-text-muted); margin: 0; }
+.stage { max-width: 100%; }
+.ctrl { padding: 14px 18px 18px; }
+
+/* the one grid from topic 6, option B */
+.gu { container-type: inline-size; }
+.gB { display: grid; gap: 16px 12px; grid-template-columns: repeat(var(--u), minmax(0, 1fr)); --u: 1; --s2: 1; }
+@container (min-width: 290px)  { .gB { --u: 2; --s2: 2; } }
+@container (min-width: 560px)  { .gB { --u: 4; --s2: 2; } }
+@container (min-width: 840px)  { .gB { --u: 6; --s2: 2; } }
+@container (min-width: 1110px) { .gB { --u: 8; --s2: 2; } }
+.gB > .s1 { grid-column: span 1; }
+.gB > .s2 { grid-column: span var(--s2); }
+.gB > .sf { grid-column: 1 / -1; }
+
+.ck { display: flex; align-items: center; gap: 9px; font-size: 14px; cursor: pointer; }
+.ck:hover .box { border-color: var(--blockr-color-text-muted); }
+.box.on:hover { border-color: var(--blockr-color-bg-accent); }
+
+/* A: today, a checkbox inside a 42px field shell, empty label row above */
+.A .ck { height: 42px; box-sizing: border-box; padding: 0 12px; border: 1px solid var(--blockr-color-border-default); border-radius: 8px; background: var(--blockr-color-bg-field); }
+/* B: bare checkbox, level with the controls (empty label row kept) */
+.B .ck { height: 42px; padding: 0 2px; }
+/* C: bare checkbox, no label row: sits on the label line when first in a row */
+.C .fld.flagf .lbl { display: none; }
+.C .fld.flagf { align-self: end; }
+.C .ck { height: 42px; padding: 0 2px; }
+/* D: flags gathered into one row of their own, under a label */
+.D .flags { display: flex; flex-wrap: wrap; gap: 6px 22px; min-height: 42px; align-items: center; }
+.D .ck { height: 28px; padding: 0 2px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-check" viewBox="0 0 12 12"><path d="M2.5 6.5l2.3 2.3L9.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+<div class="row1"><h1>Topic 6b: a checkbox in the field grid</h1>
+<div class="switch"><button data-scheme="light" aria-pressed="true">Light</button> <button data-scheme="dark" aria-pressed="false">Dark</button></div></div>
+<p class="lede">Your point: a checkbox drawn inside a field box is too much ink. There is a second problem in today's
+version: the checkbox keeps an empty label row so it lines up with its neighbours, and when it wraps to a new row that
+empty row leaves a gap. Four ways, all in the one grid from topic 6 (a checkbox takes one column). Try the widths.</p>
+
+<div class="widths">Panel width
+  <button data-w="1150">Full dock (1150)</button><button data-w="760" aria-pressed="true">Half (760)</button><button data-w="520">Third (520)</button><button data-w="340">Side panel (340)</button>
+</div>
+
+<div id="opts"></div>
+
+<div class="rec">Proposal: <b>C, a bare checkbox with no label row.</b> The box and its words, no field shell: the
+checkbox is already a control with its own edge, so the shell only adds a second frame. Without the empty label row it
+still lines up with the inputs beside it, because it sits on the bottom line of the row, and when it wraps to a row of
+its own it leaves no blank line (compare B at 520px). Runner-up: <b>D</b>, when a section has several on/off options and
+they read better gathered in one row under a label.</div>
+</div>
+
+<template id="tpl">
+  <div class="opt-row">
+    <div><p class="t"></p><p class="d"></p></div>
+    <div class="stage panel"><div class="ctrl">
+      <div class="sec">Presentation</div>
+      <div class="gu"><div class="gB">
+        <div class="fld s1"><span class="lbl">Bins</span><div class="ctl"><span class="v">30</span></div></div>
+        <div class="fld s1"><span class="lbl">Height</span><div class="ctl"><span class="v">400</span></div></div>
+        <div class="fld s1 flagf"><span class="lbl spacer">.</span><label class="ck"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</label></div>
+        <div class="fld s1 flagf"><span class="lbl spacer">.</span><label class="ck"><span class="box"></span>Legend</label></div>
+        <div class="fld s2"><span class="lbl">Palette</span><div class="ctl"><span class="v">Okabe-Ito</span><span class="car"></span></div></div>
+      </div></div>
+      <div class="sec" style="margin-top:24px">Values</div>
+      <div class="gu"><div class="gB">
+        <div class="fld s2"><span class="lbl">Names to</span><div class="ctl"><span class="v">name</span></div></div>
+        <div class="fld s2"><span class="lbl">Values to</span><div class="ctl"><span class="v">value</span></div></div>
+        <div class="fld s2 flagf"><span class="lbl spacer">.</span><label class="ck"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Drop rows with NA</label></div>
+      </div></div>
+    </div></div>
+  </div>
+</template>
+
+<template id="tplD">
+  <div class="opt-row D">
+    <div><p class="t">D. Flags in a row of their own</p><p class="d">A section's on/off options sit together in one wrapping row under a label ("Show"), bare, below the fields. A lone flag is drawn as in C.</p></div>
+    <div class="stage panel"><div class="ctrl">
+      <div class="sec">Presentation</div>
+      <div class="gu"><div class="gB">
+        <div class="fld s1"><span class="lbl">Bins</span><div class="ctl"><span class="v">30</span></div></div>
+        <div class="fld s1"><span class="lbl">Height</span><div class="ctl"><span class="v">400</span></div></div>
+        <div class="fld s2"><span class="lbl">Palette</span><div class="ctl"><span class="v">Okabe-Ito</span><span class="car"></span></div></div>
+        <div class="fld sf"><span class="lbl">Show</span><div class="flags"><label class="ck"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</label><label class="ck"><span class="box"></span>Legend</label></div></div>
+      </div></div>
+      <div class="sec" style="margin-top:24px">Values</div>
+      <div class="gu"><div class="gB">
+        <div class="fld s2"><span class="lbl">Names to</span><div class="ctl"><span class="v">name</span></div></div>
+        <div class="fld s2"><span class="lbl">Values to</span><div class="ctl"><span class="v">value</span></div></div>
+        <div class="fld s2 flagf" style="align-self:end"><label class="ck" style="height:42px"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Drop rows with NA</label></div>
+      </div></div>
+    </div></div>
+  </div>
+</template>
+
+<script>
+const opts = [
+  ['A', 'A. Today: in a field box', 'The checkbox inside a 42px shell with the field fill and border, an empty label row above it.'],
+  ['B', 'B. Bare, level with the controls', 'The box and its words only, on the controls’ line; the empty label row stays.'],
+  ['C', 'C. Bare, no label row', 'No empty label row. Beside other fields it sits on the bottom line of the row, which is the controls\u2019 line; on a row of its own it takes only its own height, so no blank line.'],
+];
+const out = document.getElementById('opts');
+for (const [k, t, d] of opts) {
+  const n = document.getElementById('tpl').content.cloneNode(true);
+  const row = n.querySelector('.opt-row'); row.classList.add(k);
+  row.querySelector('.t').textContent = t; row.querySelector('.d').textContent = d;
+  out.appendChild(n);
+}
+out.appendChild(document.getElementById('tplD').content.cloneNode(true));
+function setW(w) {
+  document.querySelectorAll('.stage').forEach(s => s.style.width = w + 'px');
+  document.querySelectorAll('.widths button').forEach(b => b.setAttribute('aria-pressed', b.dataset.w == w));
+}
+document.querySelectorAll('.widths button').forEach(b => b.addEventListener('click', () => setW(b.dataset.w)));
+setW(760);
+document.querySelectorAll('.ck').forEach(l => l.addEventListener('click', () => {
+  const b = l.querySelector('.box'); b.classList.toggle('on');
+  b.innerHTML = b.classList.contains('on') ? '<svg width="10" height="10"><use href="#i-check"/></svg>' : '';
+}));
+document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => {
+  document.documentElement.setAttribute('data-bs-theme', b.dataset.scheme);
+  document.querySelectorAll('.switch button').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+</script>
+</body>
+</html>

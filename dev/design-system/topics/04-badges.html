@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Topic 4: badges, tags and buttons, told apart</title>
+<link rel="stylesheet" href="../fonts/open-sans.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens-dark.css">
+<link rel="stylesheet" href="../ds-page.css">
+<style>
+h3.q { font-size: 15px; font-weight: 600; margin: 34px 0 4px; }
+.opt-row { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; padding: 22px 0; border-top: 1px solid var(--blockr-color-border-default); }
+.opt-row .t { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.opt-row .d { font-size: 13px; color: var(--blockr-color-text-muted); margin: 0; }
+.strip { display: grid; grid-template-columns: 1.1fr 1fr; gap: 14px; }
+.card { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 10px; padding: 12px 14px; }
+.cap { font-size: 11px; color: var(--blockr-color-text-muted); margin: 0 0 6px; }
+.line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 30px; font-size: 14px; }
+.line + .line { margin-top: 8px; }
+.sp { flex: 1; }
+.lst .li { display: flex; align-items: center; gap: 8px; min-height: 34px; border-bottom: 1px solid var(--blockr-color-border-default); font-size: 14px; }
+.lst .li:last-child { border-bottom: 0; }
+.ico { width: 18px; color: var(--blockr-color-text-muted); font-size: 11px; font-family: var(--blockr-font-mono); }
+.ctl .tagx { margin-right: 4px; }
+.row42 { display: flex; align-items: center; gap: 10px; min-height: 42px; box-sizing: border-box; padding: 5px 10px; border: 1px solid var(--blockr-color-border-default); border-radius: 8px; background: var(--blockr-color-bg-field); font-size: 14px; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--blockr-color-text-muted); margin-top: 10px; }
+.legend span b { font-weight: 600; color: var(--blockr-color-text-default); }
+
+/* the kinds; each option restyles them */
+.badge, .tag, .pill, .cnt { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; box-sizing: border-box; }
+.badge { height: 18px; padding: 0 7px; font-size: 11px; font-weight: 500; }
+.tag { height: 24px; padding: 0 8px; font-size: 13px; }
+.tag .x { color: var(--blockr-color-text-muted); font-size: 12px; margin-left: 2px; cursor: pointer; }
+.tag .x:hover { color: var(--blockr-color-text-danger); }
+.pill { height: 24px; min-width: 28px; justify-content: center; padding: 0 8px; font-size: 12px; font-weight: 500; cursor: pointer; }
+.pill .cv { font-size: 9px; color: var(--blockr-color-text-muted); }
+.cnt { justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; font-size: 11px; font-weight: 600; color: var(--blockr-accent-700); background: color-mix(in srgb, var(--blockr-accent-600) 14%, transparent); }
+[data-bs-theme="dark"] .cnt { color: var(--blockr-color-text-accent); }
+
+/* status tints for badges (B4: status and "on" only) */
+.badge.on { color: var(--blockr-color-text-accent); }
+.badge.danger { color: var(--blockr-color-text-danger); }
+
+/* A: one chip, square, bordered everywhere; colour tells apart */
+.A .badge, .A .tag, .A .pill { border-radius: 4px; border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-subtle); color: var(--blockr-color-text-muted); }
+.A .tag { color: var(--blockr-color-text-default); }
+.A .badge.on { background: var(--blockr-color-bg-accent-subtle); border-color: color-mix(in srgb, var(--blockr-accent-600) 30%, transparent); color: var(--blockr-color-text-accent); }
+.A .badge.danger { background: var(--blockr-color-bg-danger); border-color: color-mix(in srgb, var(--blockr-red-600) 30%, transparent); color: var(--blockr-color-text-danger); }
+/* B: shape tells: capsule = read, square = act */
+.B .badge { border-radius: 999px; border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-subtle); color: var(--blockr-color-text-muted); }
+.B .badge.on { background: var(--blockr-color-bg-accent-subtle); border-color: color-mix(in srgb, var(--blockr-accent-600) 30%, transparent); }
+.B .badge.danger { background: var(--blockr-color-bg-danger); border-color: color-mix(in srgb, var(--blockr-red-600) 30%, transparent); }
+.B .tag, .B .pill { border-radius: 4px; border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); }
+.B .pill { color: var(--blockr-color-text-muted); }
+/* C: border tells: square everywhere; a border means you can click it */
+.C .badge { border-radius: 4px; border: 0; background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-muted); }
+.C .badge.on { background: var(--blockr-color-bg-accent-subtle); }
+.C .badge.danger { background: var(--blockr-color-bg-danger); }
+.C .tag { border-radius: 4px; border: 0; background: var(--blockr-color-bg-hover); }
+.C .pill { border-radius: 4px; border: 1px solid var(--blockr-color-border-strong); background: var(--blockr-color-bg-surface); color: var(--blockr-color-text-default); }
+.C .pill:hover { border-color: var(--blockr-color-text-muted); }
+.A .pill:hover, .B .pill:hover { border-color: var(--blockr-color-border-strong); color: var(--blockr-color-text-default); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-reset" viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.5-3.5M3 3v2.5h2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 16 16"><path fill="currentColor" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></symbol>
+</svg>
+<div class="wrap">
+<div class="row1"><h1>Topic 4: badges, tags and buttons, told apart</h1>
+<div class="switch"><button data-scheme="light" aria-pressed="true">Light</button> <button data-scheme="dark" aria-pressed="false">Dark</button></div></div>
+<p class="lede">Your notes on B1 and B2: the idea behind the four kinds was unclear, you found "one chip" prettier, and you
+like square badges but worry they look like buttons. The idea, in one line: a <b>badge</b> is something you only read
+("Categorical", "blockr.dplyr", "Added"), a <b>tag</b> is a value you picked (a column in a select, with ×), a <b>pill</b>
+changes a setting when clicked (the <code>&gt;=</code> operator), and a <b>count</b> is a number on a button. The real
+question is what tells a reader "you can click this": shape, border, or nothing but colour. Three systems, each on the same
+strip of blockr. Buttons are the decided ones in every option.</p>
+
+<h3 class="q"><span class="qtag">Q1</span>What tells a badge from something you can click</h3>
+<div id="q1"></div>
+<div class="rec">Proposal: <b>C, square everywhere, and a border means you can click it.</b> You keep the square badges you
+like, and they still cannot be mistaken for a button, because buttons and pills have an edge and badges and tags are only
+a fill. It is also the quietest of the three: the many read-only labels in a column list or a block browser lose their
+outline. Tags need no border because they sit inside a field that is itself the control; their × is the click. The
+names stay (badge, tag, pill, count) because the code needs one class per job, even where two of them look alike. Runner-up:
+<b>B</b>, where round ends mark what you only read.</div>
+
+<h3 class="q" style="font-weight:500">Recorded as they are</h3>
+<ul class="note" style="line-height:1.7">
+<li>Colour on a badge only for status (danger, warning, success) and for "on" (accent); types and packages are neutral (B4).</li>
+<li>A count is a 16px capsule in the tint of its button (B3); the reset button carries the filter state (B5).</li>
+<li>A tag's × shows on the hovered tag only (B6).</li>
+<li>Badges are 18px with 11px text; tags and pills 24px.</li>
+</ul>
+</div>
+
+<template id="tpl">
+  <div class="strip">
+    <div>
+      <p class="cap">Crossfilter header and a condition row</p>
+      <div class="card">
+        <div class="line"><span class="sec" style="margin:0">Filter by</span><span class="tag">Month</span><span class="tag">Ozone</span><span class="tag">Wind</span><span class="sp"></span>
+          <button class="b xs main"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="cnt">2</span></button>
+          <span class="gearb"><svg width="13" height="13"><use href="#i-gear"/></svg></span></div>
+        <div class="line"><div class="row42" style="flex:1"><span>Ozone</span><span class="pill">&gt;= <span class="cv">▾</span></span><span>40</span></div></div>
+        <div class="line"><div class="fld" style="flex:1"><span class="lbl">Keep columns</span><div class="ctl"><span class="tag tagx">Ozone <span class="x">×</span></span><span class="tag tagx">Month <span class="x">×</span></span><span class="car"></span></div></div></div>
+      </div>
+    </div>
+    <div>
+      <p class="cap">Column list and block browser</p>
+      <div class="card lst">
+        <div class="li"><span class="ico">#</span>Ozone<span class="sp"></span><span class="badge on">Added</span></div>
+        <div class="li"><span class="ico">Aa</span>Month<span class="sp"></span><span class="badge">Categorical</span></div>
+        <div class="li"><span class="ico">#</span>Solar.R<span class="sp"></span><span class="badge">Numeric</span></div>
+        <div class="li">Filter rows<span class="sp"></span><span class="badge">blockr.dplyr</span></div>
+        <div class="li"><span style="font-family:var(--blockr-font-mono);font-size:13px">data/adae.csv</span><span class="sp"></span><span class="badge danger">Not found</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="legend"><span><b>badge</b> Added, Categorical, blockr.dplyr, Not found</span><span><b>tag</b> Month, Ozone (in the select and the header)</span><span><b>pill</b> &gt;=</span><span><b>count</b> 2</span><span><b>button</b> Reset</span></div>
+</template>
+
+<script>
+const opts = [
+  ['A', 'A. One chip, square', 'Everything small is the same 4px rectangle with a border and a grey fill; only colour differs. What the packages drift towards today.'],
+  ['B', 'B. Shape tells', 'Round ends for badges you only read; 4px corners for tags, pills and buttons you act on.'],
+  ['C', 'C. Border tells, square everywhere', 'All 4px corners. Badges and tags are a fill with no border; pills and buttons have a border, so an edge means "click me".'],
+];
+const host = document.getElementById('q1');
+const tpl = document.getElementById('tpl').innerHTML;
+for (const [k, t, d] of opts) {
+  const r = document.createElement('div'); r.className = 'opt-row ' + k;
+  r.innerHTML = `<div><p class="t">${t}</p><p class="d">${d}</p></div><div>${tpl}</div>`;
+  host.appendChild(r);
+}
+document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => {
+  document.documentElement.setAttribute('data-bs-theme', b.dataset.scheme);
+  document.querySelectorAll('.switch button').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+</script>
+<script src="../answers.js"></script>
+</body>
+</html>

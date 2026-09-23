@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Topic 3: checkbox or switch</title>
+<link rel="stylesheet" href="../fonts/open-sans.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens-dark.css">
+<link rel="stylesheet" href="../ds-page.css">
+<style>
+h3.q { font-size: 15px; font-weight: 600; margin: 34px 0 4px; }
+.opt-row { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 20px; align-items: start; padding: 22px 0; border-top: 1px solid var(--blockr-color-border-default); }
+.opt-row .t { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.opt-row .d { font-size: 13px; color: var(--blockr-color-text-muted); margin: 0; }
+.ctx { display: grid; grid-template-columns: 1.35fr 1fr 0.9fr; gap: 14px; align-items: start; }
+.cap { font-size: 11px; color: var(--blockr-color-text-muted); margin: 0 0 6px; }
+.card { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 10px; padding: 12px 14px; }
+.tray { background: var(--blockr-color-bg-subtle); border-radius: 8px; padding: 12px 12px 14px; }
+[data-bs-theme="dark"] .tray { background: var(--blockr-color-bg-page); }
+.tray .ctl { background: var(--blockr-color-bg-surface); }
+.g2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
+.g2 .cell { align-self: end; }
+.list { display: flex; flex-direction: column; }
+.list .li { display: flex; align-items: center; min-height: 36px; border-bottom: 1px solid var(--blockr-color-border-default); font-size: 14px; }
+.list .li:last-child { border-bottom: 0; }
+
+/* the two controls */
+.bool { display: inline-flex; align-items: center; gap: 9px; min-height: 42px; font-size: 14px; cursor: pointer; user-select: none; color: var(--blockr-color-text-default); }
+.bool input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.bool.dis { color: var(--blockr-color-text-disabled); cursor: default; }
+/* checkbox */
+.cb { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--blockr-color-border-strong); background: var(--blockr-color-bg-surface); display: inline-flex; align-items: center; justify-content: center; flex: none; transition: all .15s ease; color: var(--blockr-color-text-on-accent); }
+.cb svg { opacity: 0; }
+.bool:hover .cb { border-color: var(--blockr-color-text-muted); }
+.bool input:checked + .cb { background: var(--blockr-color-bg-accent); border-color: var(--blockr-color-bg-accent); }
+.bool input:checked + .cb svg { opacity: 1; }
+.bool input:focus-visible + .cb, .bool input:focus-visible + .sw { box-shadow: var(--blockr-focus-ring); }
+/* switch */
+.sw { position: relative; width: 28px; height: 16px; border-radius: 999px; background: var(--blockr-color-border-strong); flex: none; transition: background .15s ease; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--blockr-color-bg-surface); box-shadow: 0 1px 2px rgb(0 0 0 / .2); transition: transform .15s ease; }
+.bool:hover .sw { background: var(--blockr-color-text-disabled); }
+.bool input:checked + .sw { background: var(--blockr-color-bg-accent); }
+.bool input:checked + .sw::after { transform: translateX(12px); }
+.bool.dis .sw, .bool.dis .cb { opacity: .5; }
+/* C: label first, switch at the end of the cell */
+.C .bool { display: flex; width: 100%; flex-direction: row-reverse; justify-content: space-between; }
+.C .list .bool { min-height: 36px; }
+.A .list .bool, .B .list .bool, .D .list .bool { min-height: 36px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-check" viewBox="0 0 12 12"><path d="M2.5 6.5l2.3 2.3L9.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+<div class="row1"><h1>Topic 3: checkbox or switch</h1>
+<div class="switch"><button data-scheme="light" aria-pressed="true">Light</button> <button data-scheme="dark" aria-pressed="false">Dark</button></div></div>
+<p class="lede">Your note on C1: next to inputs the switch looked better than a checkbox in its grey box, and the switch is nicer
+but maybe a little pretentious. Since then the grey box is gone (topic 6b: a bare checkbox, no shell), so the comparison here
+is bare against bare. One argument that did not come up: in blockr every setting takes effect the moment you change it, with
+no Apply button, and that is the job common design systems give the switch (a checkbox is ticked in a form and sent later).
+Each option in three places: the gear tray, a transform block's face, and the board options. <b>Click them.</b></p>
+
+<h3 class="q"><span class="qtag">Q1</span>The control for on/off</h3>
+<div id="q1"></div>
+<div class="rec">Proposal: <b>B, a switch everywhere, label after it.</b> A setting in blockr applies at once, and a switch says
+exactly that; next to 42px inputs it reads as a control where a 16px box reads as a form field. Label after the switch keeps
+it the same shape as the checkbox it replaces, so the grid, the rows and a lone "Drop rows with NA" do not change layout.
+One control means Blockr.checkbox becomes Blockr.switch and Shiny's <code>checkboxInput</code> is drawn as a switch by the
+same stylesheet. Runner-up: <b>A</b>, if the switch still feels too much once it is everywhere.</div>
+
+<h3 class="q" style="font-weight:500">Recorded as they are</h3>
+<ul class="note" style="line-height:1.7">
+<li>Whichever control wins, it is bare (no field shell), sits on the bottom line of its grid row, and takes one column (topic 6b).</li>
+<li>On is the accent colour; off is the strong border grey; disabled is half opacity with disabled text.</li>
+<li>Keyboard: Space toggles; focus shows the focus ring.</li>
+<li>Several choices from a list are tags (C4), never a column of checkboxes or switches.</li>
+</ul>
+</div>
+
+<template id="tpl">
+  <div class="ctx">
+    <div><p class="cap">Gear tray</p><div class="card"><div class="tray"><div class="sec">Presentation</div><div class="g2">
+      <div class="fld"><span class="lbl">Height</span><div class="ctl"><span class="v">400</span></div></div>
+      <div class="cell">{{on:Labels}}</div>
+      <div class="cell">{{off:Legend}}</div>
+      <div class="cell">{{dis:Stack bars}}</div>
+    </div></div></div></div>
+    <div><p class="cap">Transform block</p><div class="card">
+      <div class="fld"><span class="lbl">Values to</span><div class="ctl"><span class="v">value</span></div></div>
+      <div>{{on:Drop rows with NA}}</div>
+    </div></div>
+    <div><p class="cap">Board options</p><div class="card"><div class="list">
+      <div class="li">{{off:Dark mode}}</div><div class="li">{{on:Preview search}}</div><div class="li">{{off:Thematic}}</div>
+    </div></div></div>
+  </div>
+</template>
+
+<script>
+const kinds = { A: 'cb', B: 'sw', C: 'sw', D: null };
+const opts = [
+  ['A', 'A. Checkbox everywhere', 'The bare 16px box with its label. The earlier proposal.'],
+  ['B', 'B. Switch everywhere', 'A 28px switch with its label after it, in the same place the box was.'],
+  ['C', 'C. Switch, label first', 'The label on the left and the switch at the end of the cell, as in phone settings.'],
+  ['D', 'D. Checkbox in blocks, switch for the board', 'Checkboxes inside blocks; switches only for app and board options (dark mode, search).'],
+];
+function ctrl(kind, state, label) {
+  const inner = kind === 'cb' ? '<span class="cb"><svg width="10" height="10"><use href="#i-check"/></svg></span>' : '<span class="sw"></span>';
+  return `<label class="bool${state === 'dis' ? ' dis' : ''}"><input type="checkbox"${state === 'on' ? ' checked' : ''}${state === 'dis' ? ' disabled' : ''}>${inner}<span>${label}</span></label>`;
+}
+const host = document.getElementById('q1');
+const tpl = document.getElementById('tpl').innerHTML;
+for (const [k, t, d] of opts) {
+  let html = tpl;
+  let n = 0;
+  html = html.replace(/\{\{(on|off|dis):([^}]+)\}\}/g, (m, st, lab, at) => {
+    let kind = kinds[k];
+    if (k === 'D') kind = at > tpl.indexOf('Board options') ? 'sw' : 'cb';
+    return ctrl(kind, st, lab);
+  });
+  const r = document.createElement('div'); r.className = 'opt-row ' + k;
+  r.innerHTML = `<div><p class="t">${t}</p><p class="d">${d}</p></div>` + html;
+  host.appendChild(r);
+}
+document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => {
+  document.documentElement.setAttribute('data-bs-theme', b.dataset.scheme);
+  document.querySelectorAll('.switch button').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+</script>
+<script src="../answers.js"></script>
+</body>
+</html>

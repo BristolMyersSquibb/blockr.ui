@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Topic 1: telling the gear band apart from the block</title>
+<link rel="stylesheet" href="../fonts/open-sans.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../../inst/assets/css/blockr-tokens-dark.css">
+<link rel="stylesheet" href="../ds-page.css">
+<style>
+.opt-row { display: grid; grid-template-columns: 220px minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; padding: 22px 0; border-top: 1px solid var(--blockr-color-border-default); }
+.opt-row .t { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.opt-row .d { font-size: 13px; color: var(--blockr-color-text-muted); margin: 0; }
+.cap { font-size: 11px; color: var(--blockr-color-text-muted); margin: 0 0 6px; }
+.hrow { justify-content: flex-end; }
+.gearb.on { color: var(--blockr-color-text-accent); border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); }
+.ctrl { padding: 12px 16px 16px; }
+.face-t { font-size: 12px; color: var(--blockr-color-text-muted); }
+.tag { margin-right: 4px; }
+.bars { height: 90px; }
+.hdr { display: flex; align-items: flex-start; gap: 6px; }
+.hdr .tt { flex: 1; min-width: 0; }
+.hdr .o-sub { margin-bottom: 0; }
+
+/* A. today */
+.A .band { margin-bottom: 12px; }
+/* B. grey tray, white fields */
+.B .band { background: var(--blockr-color-bg-subtle); border-color: var(--blockr-color-bg-subtle); margin-bottom: 16px; }
+.B .band::before { background: var(--blockr-color-bg-subtle); border-color: var(--blockr-color-bg-subtle); }
+.B .band .ctl, .B .band .flag { background: var(--blockr-color-bg-surface); }
+[data-bs-theme="dark"] .B .band, [data-bs-theme="dark"] .B .band::before { background: var(--blockr-color-bg-page); border-color: var(--blockr-color-bg-page); }
+/* C. tray with a head */
+.C .band { background: var(--blockr-color-bg-subtle); border-color: var(--blockr-color-border-default); padding-top: 0; margin-bottom: 16px; }
+.C .band::before { background: var(--blockr-color-bg-subtle); }
+.C .band .ctl, .C .band .flag { background: var(--blockr-color-bg-surface); }
+.C .bhead { display: flex; align-items: center; justify-content: space-between; height: 34px; margin: 0 -14px 12px; padding: 0 8px 0 14px; border-bottom: 1px solid var(--blockr-color-border-default); font-size: 12px; font-weight: 600; color: var(--blockr-color-text-muted); }
+.C .bhead .x { display: inline-flex; width: 24px; height: 24px; align-items: center; justify-content: center; border-radius: 4px; color: var(--blockr-color-text-muted); }
+[data-bs-theme="dark"] .C .band, [data-bs-theme="dark"] .C .band::before { background: var(--blockr-color-bg-page); }
+/* D. a card the width of its content, under the gear */
+.D .band { width: min(100%, 380px); margin-left: auto; box-shadow: var(--blockr-shadow-md); margin-bottom: 16px; }
+.D .band .grid { --n: 1 !important; }
+/* E. accent edge */
+.E .band { border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); background: color-mix(in srgb, var(--blockr-accent-600) 3%, var(--blockr-color-bg-surface)); margin-bottom: 16px; }
+.E .band::before { border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); background: color-mix(in srgb, var(--blockr-accent-600) 3%, var(--blockr-color-bg-surface)); }
+.E .band .ctl, .E .band .flag { background: var(--blockr-color-bg-surface); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-gear" viewBox="0 0 16 16"><path fill="currentColor" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7l3.5 3.5L11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 12 12"><path d="M2.5 6.5l2.3 2.3L9.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-x" viewBox="0 0 12 12"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+</svg>
+<div class="wrap">
+<div class="row1"><h1>Topic 1: telling the gear band apart from the block</h1>
+<div class="switch"><button data-scheme="light" aria-pressed="true">Light</button> <button data-scheme="dark" aria-pressed="false">Dark</button></div></div>
+<p class="lede">Your point: the open gear band looks like the rest of the block. It is as wide as the block, white, with the same
+fields, so on a transform block you cannot tell the settings from the block's own controls. Five ways to set it apart,
+each in a transform block (pivot longer, fields on its face) and an output block (chart). Everything else stays as
+decided: in flow, under the header row, opened and closed by the gear.</p>
+
+<div id="opts"></div>
+
+<div class="rec">Proposal: <b>B, a grey tray</b>. The band takes the subtle background and its fields turn white, so the
+settings read as a separate layer at a glance, with no extra line, heading or colour. It is also the one option that
+makes the fields inside look different from the fields on the face, which is the confusion you describe. In dark mode the
+tray takes the page colour, one step below the block. Runner-up: <b>E</b>, if the band should also point back at the gear
+by colour.</div>
+</div>
+
+<template id="tpl">
+  <div class="opt-row">
+    <div><p class="t"></p><p class="d"></p></div>
+    <div><p class="cap">Transform block</p>
+      <div class="panel"><div class="ctrl">
+        <div class="hrow"><span class="gearb on"><svg width="14" height="14"><use href="#i-gear"/></svg></span></div>
+        <div class="band">
+          <div class="bhead" hidden>Settings<span class="x"><svg width="11" height="11"><use href="#i-x"/></svg></span></div>
+          <div class="gridhost"><div class="grid knobs" style="--n:2">
+            <div class="fld"><span class="lbl">Names prefix</span><div class="ctl"><span class="ph">e.g. week_</span></div></div>
+            <div class="fld"><span class="lbl spacer">.</span><div class="flag"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Drop NA values</div></div>
+          </div></div>
+        </div>
+        <div class="gridhost"><div class="grid wide" style="--n:1">
+          <div class="fld"><span class="lbl">Columns</span><div class="ctl"><span class="tag">Ozone</span><span class="tag">Temp</span><span class="car"></span></div></div>
+        </div></div>
+        <div class="gridhost" style="margin-top:16px"><div class="grid wide" style="--n:2">
+          <div class="fld"><span class="lbl">Names to</span><div class="ctl"><span class="v">name</span></div></div>
+          <div class="fld"><span class="lbl">Values to</span><div class="ctl"><span class="v">value</span></div></div>
+        </div></div>
+      </div></div></div>
+    <div><p class="cap">Output block</p>
+      <div class="panel"><div class="ctrl">
+        <div class="hdr"><div class="tt"><p class="o-title">Mean ozone by month</p><p class="o-sub">airquality</p></div><span class="tool"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gearb on"><svg width="14" height="14"><use href="#i-gear"/></svg></span></div>
+        <div class="band" style="margin-top:10px">
+          <div class="bhead" hidden>Settings<span class="x"><svg width="11" height="11"><use href="#i-x"/></svg></span></div>
+          <div class="sec">Presentation</div>
+          <div class="gridhost"><div class="grid knobs" style="--n:2">
+            <div class="fld"><span class="lbl">Sort</span><div class="ctl"><span class="v">By value</span><span class="car"></span></div></div>
+            <div class="fld"><span class="lbl spacer">.</span><div class="flag"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</div></div>
+          </div></div>
+        </div>
+        <div class="bars" style="margin-top:6px"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div>
+      </div></div></div>
+  </div>
+</template>
+
+<script>
+const opts = [
+  ['A', 'A. Today', 'White band, 1px border, beak. Same background and fields as the block around it.'],
+  ['B', 'B. Grey tray', 'Subtle grey band, no border; the fields inside turn white. A different layer, no extra line.'],
+  ['C', 'C. Tray with a head', 'B plus a thin head with "Settings" and a close ×, ruled off from the fields.'],
+  ['D', 'D. A card under the gear', 'Only as wide as its fields, right-aligned under the gear, with a shadow. Fields stack in one column.'],
+  ['E', 'E. Accent edge', 'Border and beak in the accent tint of the open gear, a 3% accent wash, white fields.'],
+];
+const tpl = document.getElementById('tpl').content;
+const out = document.getElementById('opts');
+for (const [k, t, d] of opts) {
+  const n = tpl.cloneNode(true);
+  const row = n.querySelector('.opt-row');
+  row.classList.add(k);
+  row.querySelector('.t').textContent = t;
+  row.querySelector('.d').textContent = d;
+  if (k === 'C') row.querySelectorAll('.bhead').forEach(h => h.hidden = false);
+  out.appendChild(n);
+}
+document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => {
+  document.documentElement.setAttribute('data-bs-theme', b.dataset.scheme);
+  document.querySelectorAll('.switch button').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+</script>
+</body>
+</html>
