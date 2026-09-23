@@ -1,0 +1,2043 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>blockr design system</title>
+<link rel="stylesheet" href="fonts/open-sans.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-tokens-dark.css">
+<style>
+/* The page is drawn from the tokens only (plus the fixed block category
+   colours), in Open Sans, so the Dark switch checks the dark file on every
+   part at once. Page chrome first, then the components as decided. */
+
+/* ================================================================ page */
+* { box-sizing: border-box; }
+:root { color-scheme: light; }
+[data-bs-theme="dark"] { color-scheme: dark; }
+body {
+  margin: 0;
+  background: var(--blockr-color-bg-page);
+  color: var(--blockr-color-text-default);
+  font: var(--blockr-font-size-base)/1.5 "Open Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+.wrap { max-width: 1340px; margin: 0 auto; padding: 0 32px 120px; }
+.top {
+  position: sticky; top: 0; z-index: 30;
+  background: var(--blockr-color-bg-page);
+  border-bottom: 1px solid var(--blockr-color-border-default);
+  padding: 14px 0 10px;
+}
+.top .row1 { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+h1 { font-size: var(--blockr-font-size-xl); font-weight: 600; margin: 0; }
+nav { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; font-size: var(--blockr-font-size-sm); }
+nav a { color: var(--blockr-color-text-muted); text-decoration: none; white-space: nowrap; }
+nav a:hover { color: var(--blockr-color-text-default); }
+nav a b { font-weight: 600; margin-right: 3px; }
+.lede { color: var(--blockr-color-text-muted); max-width: 96ch; margin: 18px 0 0; }
+code { font: 12px var(--blockr-font-mono); }
+section.part { padding-top: 56px; scroll-margin-top: 90px; }
+h2.ph { font-size: 22px; font-weight: 600; margin: 0 0 4px; display: flex; align-items: baseline; gap: 12px; }
+h2.ph .num { font-size: 14px; color: var(--blockr-color-text-muted); font-variant-numeric: tabular-nums; }
+.rl { font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-muted); margin: 0 0 20px; max-width: 110ch; }
+.rl a { color: var(--blockr-color-text-accent); text-decoration: none; white-space: nowrap; margin-left: 8px; font-size: 12px; }
+.rl a:hover { text-decoration: underline; }
+h3.sh { font-size: var(--blockr-font-size-lg); font-weight: 600; margin: 36px 0 2px; scroll-margin-top: 90px; }
+h4.mini { font-size: var(--blockr-font-size-sm); font-weight: 600; margin: 18px 0 6px; }
+p.note { font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-muted); margin: 0 0 14px; max-width: 100ch; }
+ul.rules { font-size: var(--blockr-font-size-sm); margin: 0 0 14px; padding-left: 18px; max-width: 100ch; line-height: 1.65; }
+ul.rules li::marker { color: var(--blockr-color-text-muted); }
+.card { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-xl); padding: 16px 18px; min-width: 0; }
+.cap { font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); margin: 0 0 6px; }
+.cols { display: grid; gap: 16px; align-items: start; }
+.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.c4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.line + .line { margin-top: 10px; }
+.m { color: var(--blockr-color-text-muted); }
+.sp { flex: 1; }
+@media (max-width: 1100px) { .c3, .c4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ============================================================ icons, tools */
+:where(button, [tabindex]):focus-visible { outline: none; box-shadow: var(--blockr-focus-ring); }
+.tool, .gear, .ib {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  padding: 0; cursor: pointer; background: transparent; color: var(--blockr-color-text-muted);
+  border: 1px solid transparent; border-radius: var(--blockr-radius-sm);
+  transition: background-color var(--blockr-transition), color var(--blockr-transition), border-color var(--blockr-transition);
+}
+.tool, .gear { width: 26px; height: 26px; }
+.tool:hover, .tool.open { background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-default); }
+.tool[aria-pressed="true"] { color: var(--blockr-color-text-accent); border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); }
+.gear { border-color: var(--blockr-color-border-default); }
+.gear:hover, .gear.f-hover { color: var(--blockr-color-text-default); border-color: var(--blockr-color-border-strong); background: var(--blockr-color-bg-hover); }
+.gear[aria-expanded="true"] { color: var(--blockr-color-text-accent); border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); }
+.gear[aria-expanded="true"]:hover { background: color-mix(in srgb, var(--blockr-accent-600) 13%, transparent); border-color: var(--blockr-color-border-accent); }
+.ib { width: 30px; height: 30px; }
+.ib.on { color: var(--blockr-color-text-accent); }
+.ib:hover, .ib.open { background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-default); }
+.ib.on:hover { color: var(--blockr-color-text-accent); }
+
+/* ================================================================= block */
+.dock { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-xl); min-width: 0; }
+.dock-h { display: flex; align-items: center; gap: 10px; padding: 10px 14px 10px 18px; border-bottom: 1px solid var(--blockr-color-border-default); }
+.cat { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: none; color: var(--cat); background: color-mix(in srgb, var(--cat) 18%, var(--blockr-color-bg-surface)); }
+.dh-t { min-width: 0; }
+.bt { font-size: var(--blockr-font-size-lg); font-weight: 600; line-height: 1.2; }
+.cat svg { width: 16px; height: 16px; }
+.bs { font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-muted); }
+.dock-acts { margin-left: auto; display: flex; gap: 2px; }
+.face { padding: 14px 18px 14px; }
+.out { border-top: 1px solid var(--blockr-color-border-default); padding: 12px 18px 12px; }
+
+/* header row: output title and sentence, tools, gear last */
+.hd { display: flex; align-items: flex-start; gap: 6px; }
+.hd .tt { flex: 1; min-width: 0; }
+.hd.end { justify-content: flex-end; }
+.o-title { font-size: var(--blockr-font-size-lg); font-weight: 600; line-height: 1.35; margin: 1px 0 0; }
+.o-sub { font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-muted); line-height: 1.6; margin: 2px 0 0; }
+.o-sub .ln { display: block; }
+.slot { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; color: var(--blockr-color-text-accent); text-decoration: underline dashed 1px; text-underline-offset: 3px; }
+.slot:hover, .slot.open { text-decoration-style: solid; }
+.slot .more { color: var(--blockr-color-text-muted); }
+.offers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.offer { font: inherit; font-size: var(--blockr-font-size-xs); line-height: 1.6; padding: 0 6px; border: 1px dashed var(--blockr-color-border-strong); border-radius: var(--blockr-radius-sm); background: transparent; color: var(--blockr-color-text-muted); cursor: pointer; white-space: nowrap; }
+.offer:hover, .offer.open { border-color: var(--blockr-color-border-accent); color: var(--blockr-color-text-accent); }
+.o-cap { font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); margin: 8px 0 0; }
+.o-foot { font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--blockr-color-border-default); display: flex; justify-content: space-between; gap: 12px; }
+.out .o-foot { margin-top: 8px; }
+
+/* the gear tray: in flow, slides open, grey, white fields, beak to the gear */
+.tray-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .22s ease; }
+.blk.open .tray-wrap { grid-template-rows: 1fr; }
+.tray-wrap > .inner { overflow: hidden; min-height: 0; visibility: hidden; transition: visibility 0s linear .22s; }
+.blk.open .tray-wrap > .inner { visibility: visible; transition: visibility 0s; }
+.tray { position: relative; margin: 10px 0 12px; background: var(--blockr-color-bg-subtle); border-radius: var(--blockr-radius-lg); padding: 12px 14px 16px; }
+.tray::before { content: ""; position: absolute; top: -5px; right: 8px; width: 10px; height: 10px; background: inherit; transform: rotate(45deg); }
+[data-bs-theme="dark"] .tray { background: var(--blockr-color-bg-page); }
+.tray .ctl, .tray .seg { background: var(--blockr-color-bg-surface); }
+
+/* section title */
+.sec { font-size: var(--blockr-font-size-xs); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--blockr-color-text-muted); margin: 0 0 10px; line-height: 1.5; }
+.gu + .sec, .rows + .sec, .addrow + .sec, .gu + .gu { margin-top: 24px; }
+
+/* the grid: ~130px columns by panel width, fields span 1, 2 or the row */
+.gu { container-type: inline-size; position: relative; }
+.gB { display: grid; gap: 16px 12px; grid-template-columns: repeat(var(--u), minmax(0, 1fr)); --u: 1; --s2: 1; }
+@container (min-width: 290px)  { .gB { --u: 2; --s2: 2; } }
+@container (min-width: 560px)  { .gB { --u: 4; } }
+@container (min-width: 840px)  { .gB { --u: 6; } }
+@container (min-width: 1110px) { .gB { --u: 8; } }
+.gB > .s1 { grid-column: span 1; }
+.gB > .s2 { grid-column: span var(--s2); }
+.gB > .sf { grid-column: 1 / -1; }
+
+/* fields */
+.fld { min-width: 0; }
+.lbl { display: block; font-size: var(--blockr-font-size-xs); font-weight: 400; color: var(--blockr-color-text-muted); margin-bottom: 4px; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lbl .req { color: var(--blockr-color-text-warning); }
+.ctl {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0;
+  height: var(--blockr-control-h); padding: 0 12px;
+  border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg);
+  background: var(--blockr-color-bg-field); color: var(--blockr-color-text-default);
+  font-size: var(--blockr-font-size-base); text-align: left; white-space: nowrap; overflow: hidden;
+  transition: border-color var(--blockr-transition), box-shadow var(--blockr-transition), background-color var(--blockr-transition);
+}
+button.ctl, .ctl[data-menu] { cursor: pointer; }
+.ctl:hover { border-color: var(--blockr-color-border-strong); }
+.ctl:focus-within, .ctl.open, .ctl:focus-visible, .ctl.f-focus, .ctl.dirty { background: var(--blockr-color-bg-surface); border-color: var(--blockr-color-border-accent); box-shadow: var(--blockr-focus-ring); }
+.ctl .v { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ctl .v.ph, .ctl .ph { color: var(--blockr-color-text-muted); }
+.ctl .car { margin-left: auto; flex: none; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--blockr-color-text-default); }
+.ctl input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; padding: 0; background: transparent; font: inherit; color: inherit; }
+.ctl input::placeholder { color: var(--blockr-color-text-muted); }
+.ctl.mono { font: 13px var(--blockr-font-mono); }
+.ctl.req { border-color: var(--blockr-color-border-warning); background: var(--blockr-color-bg-warning); }
+.ctl.bad { border-color: var(--blockr-color-border-danger); }
+.ctl.dis { color: var(--blockr-color-text-disabled); background: var(--blockr-color-bg-subtle); border-color: var(--blockr-color-border-default); cursor: not-allowed; box-shadow: none; }
+.ctl.dis .car { border-top-color: var(--blockr-color-text-disabled); }
+.ctl.multi { height: auto; min-height: var(--blockr-control-h); flex-wrap: wrap; padding: 8px 12px 8px 8px; gap: 4px; white-space: normal; }
+.ctl.multi .car { margin-left: auto; }
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.hint { font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); margin-top: 4px; }
+.err { font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-danger); margin-top: 4px; }
+.enter { display: none; align-items: center; gap: 3px; flex: none; height: 24px; padding: 0 8px; border-radius: var(--blockr-radius-sm); font-size: 11px; font-weight: 500; color: var(--blockr-color-text-accent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); border: 1px solid color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); cursor: pointer; }
+.enter b { font-weight: 500; opacity: .6; }
+.ctl.dirty .enter { display: inline-flex; }
+
+/* checkbox: bare box and its words; in the grid it sits on the controls' line */
+.ck { position: relative; display: inline-flex; align-items: center; gap: 9px; min-height: 26px; font-size: var(--blockr-font-size-base); cursor: pointer; user-select: none; min-width: 0; }
+.gB > .ck { display: flex; align-self: end; height: var(--blockr-control-h); padding: 0 2px; }
+.ck input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.ck .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.box { width: 16px; height: 16px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-strong); background: var(--blockr-color-bg-surface); display: inline-flex; align-items: center; justify-content: center; flex: none; color: var(--blockr-color-text-on-accent); transition: background-color var(--blockr-transition), border-color var(--blockr-transition); }
+.box svg { opacity: 0; }
+.ck:hover .box { border-color: var(--blockr-color-text-muted); }
+.ck input:checked + .box { background: var(--blockr-color-bg-accent); border-color: var(--blockr-color-bg-accent); }
+.ck input:checked + .box svg { opacity: 1; }
+.ck input:focus-visible + .box { box-shadow: var(--blockr-focus-ring); }
+.ck.dis { color: var(--blockr-color-text-disabled); cursor: default; }
+.ck.dis .box { opacity: .5; }
+
+/* segmented control */
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); height: var(--blockr-control-h); padding: 3px; gap: 3px; border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg); background: var(--blockr-color-bg-field); }
+.seg > button { display: flex; align-items: center; justify-content: center; min-width: 0; padding: 0 6px; border-radius: var(--blockr-radius-md); border: 1px solid transparent; background: transparent; font-size: var(--blockr-font-size-base); color: var(--blockr-color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.seg > button:hover { color: var(--blockr-color-text-default); background: var(--blockr-color-bg-hover); }
+.seg > button.on, .seg > button.on:hover { color: var(--blockr-color-text-accent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); font-weight: 500; }
+.seg.sm { display: inline-grid; grid-auto-columns: auto; height: 26px; padding: 2px; gap: 2px; border-radius: var(--blockr-radius-md); background: var(--blockr-color-bg-surface); }
+.seg.sm > button { font-size: var(--blockr-font-size-xs); border-radius: var(--blockr-radius-sm); padding: 0 10px; }
+
+/* rows: 42px, handle in the left padding, remove on the right */
+.rows { position: relative; }
+.row { position: relative; display: flex; align-items: center; gap: 8px; height: var(--blockr-control-h); padding: 0 6px 0 12px; border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg); background: var(--blockr-color-bg-field); margin-bottom: 6px; font-size: var(--blockr-font-size-base); }
+.row .hdl { position: absolute; left: -14px; top: 50%; margin-top: -8px; width: 10px; height: 16px; display: inline-flex; color: var(--blockr-color-text-muted); cursor: grab; }
+.row .rx { margin-left: auto; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; flex: none; border: 0; border-radius: var(--blockr-radius-sm); background: transparent; color: var(--blockr-color-text-muted); cursor: pointer; padding: 0; }
+.row .rx:hover { color: var(--blockr-color-text-danger); }
+.row .hdl, .row .rx { opacity: 0; transition: opacity .12s; }
+.row:hover .hdl, .row:hover .rx, .row:focus-within .hdl, .row:focus-within .rx, .row.f-hover .hdl, .row.f-hover .rx { opacity: 1; }
+.row input.rin { flex: 1; min-width: 40px; height: 100%; border: 0; outline: 0; background: transparent; font: inherit; color: inherit; padding: 0; }
+.rsel { display: inline-flex; align-items: center; gap: 6px; flex: none; border: 0; background: none; padding: 0 2px; font-size: var(--blockr-font-size-base); color: var(--blockr-color-text-default); cursor: pointer; border-radius: var(--blockr-radius-sm); }
+.rsel svg, .pill svg { color: var(--blockr-color-text-muted); flex: none; }
+.addrow { margin-top: 2px; }
+.fold { display: flex; align-items: center; justify-content: space-between; }
+.fold .ib { width: 26px; height: 26px; }
+
+/* the four small kinds: badge (read), tag (picked), pill (sets), count */
+.badge { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border-radius: var(--blockr-radius-pill); font-size: 11px; font-weight: 500; line-height: 1; border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-subtle); color: var(--blockr-color-text-muted); white-space: nowrap; vertical-align: middle; }
+.badge.on { color: var(--blockr-color-text-accent); background: var(--blockr-color-bg-accent-subtle); border-color: color-mix(in srgb, var(--blockr-accent-600) 30%, transparent); }
+.badge.danger { color: var(--blockr-color-text-danger); background: var(--blockr-color-bg-danger); border-color: color-mix(in srgb, var(--blockr-color-border-danger) 30%, transparent); }
+.badge.warning { color: var(--blockr-color-text-warning); background: var(--blockr-color-bg-warning); border-color: color-mix(in srgb, var(--blockr-color-border-warning) 40%, transparent); }
+.badge.success { color: var(--blockr-color-text-success); background: var(--blockr-color-bg-success); border-color: color-mix(in srgb, var(--blockr-color-border-success) 30%, transparent); }
+.tag { display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 3px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-default); white-space: nowrap; flex: none; }
+.tag .x { display: inline-flex; width: 16px; height: 16px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 3px; background: none; color: var(--blockr-color-text-muted); cursor: pointer; opacity: 0; }
+.tag:hover .x, .tag:focus-within .x, .tag.f-hover .x { opacity: 1; }
+.tag .x:hover { color: var(--blockr-color-text-danger); }
+.pill { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 5px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); font-size: var(--blockr-font-size-xs); font-weight: 500; color: var(--blockr-color-text-muted); cursor: pointer; white-space: nowrap; flex: none; }
+.pill:hover { border-color: var(--blockr-color-border-strong); color: var(--blockr-color-text-default); }
+.pill.open { border-color: var(--blockr-color-border-accent); color: var(--blockr-color-text-default); box-shadow: var(--blockr-focus-ring); }
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--blockr-radius-pill); font-size: 11px; font-weight: 600; line-height: 1; color: var(--blockr-accent-700); background: color-mix(in srgb, var(--blockr-accent-600) 14%, transparent); font-variant-numeric: tabular-nums; }
+[data-bs-theme="dark"] .count { color: var(--blockr-color-text-accent); }
+
+/* buttons: main, secondary, quiet, destructive; 42 / 30 / 26 */
+.b { font: inherit; font-size: var(--blockr-font-size-base); font-weight: 500; height: 30px; padding: 0 11px; border-radius: var(--blockr-radius-md); border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; transition: all var(--blockr-transition); }
+.b.m { height: var(--blockr-control-h); padding: 0 16px; border-radius: var(--blockr-radius-lg); }
+.b.s { height: var(--blockr-control-h-sm); font-size: var(--blockr-font-size-sm); padding: 0 11px; }
+.b.xs { height: var(--blockr-control-h-xs); font-size: var(--blockr-font-size-xs); padding: 0 9px; border-radius: var(--blockr-radius-sm); gap: 5px; }
+.b.main { color: var(--blockr-color-text-accent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); }
+.b.main:hover { background: color-mix(in srgb, var(--blockr-accent-600) 13%, transparent); border-color: var(--blockr-color-border-accent); }
+.b.second { background: var(--blockr-color-bg-surface); border-color: var(--blockr-color-border-default); color: var(--blockr-color-text-default); }
+.b.second:hover { background: var(--blockr-color-bg-hover); border-color: var(--blockr-color-border-strong); }
+.b.quiet { background: transparent; color: var(--blockr-color-text-muted); padding: 0 8px; }
+.b.quiet:hover { background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-default); }
+.b.danger { color: var(--blockr-color-text-danger); background: color-mix(in srgb, var(--blockr-red-600) 6%, transparent); border-color: color-mix(in srgb, var(--blockr-red-600) 35%, transparent); }
+.b.danger:hover { background: color-mix(in srgb, var(--blockr-red-600) 12%, transparent); border-color: var(--blockr-color-border-danger); }
+.b:disabled, .b:disabled:hover { color: var(--blockr-color-text-disabled); background: transparent; border-color: var(--blockr-color-border-default); cursor: default; }
+.b:disabled .count { display: none; }
+.b.quiet:disabled { border-color: transparent; }
+.joined { display: inline-flex; }
+.joined .b { border-radius: 0; }
+.joined .b:first-child { border-radius: var(--blockr-radius-sm) 0 0 var(--blockr-radius-sm); }
+.joined .b:last-child { border-radius: 0 var(--blockr-radius-sm) var(--blockr-radius-sm) 0; margin-left: -1px; padding: 0 7px; }
+
+/* ================================================================ floating */
+.mn { position: absolute; z-index: 40; min-width: 180px; max-width: 320px; max-height: 320px; overflow: auto; padding: 4px; background: var(--blockr-color-bg-raised); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg); box-shadow: var(--blockr-shadow-md); font-size: var(--blockr-font-size-base); }
+.mn.static { position: relative; z-index: auto; }
+.mr { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border-radius: var(--blockr-radius-sm); cursor: pointer; white-space: nowrap; color: var(--blockr-color-text-default); }
+.mr .lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.mr:hover, .mr.hi { background: var(--blockr-color-bg-hover); }
+.mr.cur { font-weight: 600; }
+.mr .meta { margin-left: auto; padding-left: 12px; font-size: var(--blockr-font-size-sm); font-weight: 400; color: var(--blockr-color-text-muted); }
+.mr:hover .meta, .mr.hi .meta { color: var(--blockr-color-text-default); }
+.mr.dis, .mr.dis .meta { color: var(--blockr-color-text-disabled); cursor: default; }
+.mr.dis:hover { background: none; }
+.mr.danger { color: var(--blockr-color-text-danger); }
+.mt { position: sticky; top: -4px; z-index: 1; background: var(--blockr-color-bg-raised); padding: 8px 10px 4px; font-size: var(--blockr-font-size-xs); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--blockr-color-text-muted); }
+.mn.has-filter .mt { top: 30px; }
+.mf { position: sticky; top: -4px; z-index: 2; background: var(--blockr-color-bg-raised); padding: 0 0 4px; margin-top: 0; }
+.mf input { width: 100%; height: 30px; padding: 0 10px; border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-md); background: var(--blockr-color-bg-field); font: inherit; font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-default); outline: none; }
+.mf input:focus { border-color: var(--blockr-color-border-accent); background: var(--blockr-color-bg-surface); }
+.mf input::placeholder { color: var(--blockr-color-text-muted); }
+.md { height: 1px; background: var(--blockr-color-border-default); margin: 4px -4px; }
+.mh { padding: 6px 10px 8px; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); line-height: 1.5; white-space: normal; }
+.mh b { color: var(--blockr-color-text-default); font-weight: 600; font-size: var(--blockr-font-size-sm); margin-right: 4px; }
+
+.tip { position: fixed; z-index: 60; pointer-events: none; max-width: 320px; padding: 5px 9px; border-radius: var(--blockr-radius-md); background: var(--blockr-color-bg-raised); color: var(--blockr-color-text-default); border: 1px solid var(--blockr-color-border-default); box-shadow: var(--blockr-shadow-md); font-size: var(--blockr-font-size-xs); line-height: 1.4; opacity: 0; transition: opacity .12s; }
+.tip.on { opacity: 1; }
+.tip.static { position: relative; display: inline-block; opacity: 1; z-index: auto; }
+.tipwrap { position: relative; display: inline-flex; flex-direction: column; }
+.tip.static.above { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: nowrap; }
+
+
+/* ================================================================ output */
+.chart { position: relative; margin: 14px 0 0 26px; }
+.ch-area { position: relative; height: 170px; border-bottom: 1px solid var(--blockr-color-border-strong); }
+.ch-grid { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--blockr-color-border-default); }
+.ch-grid span { position: absolute; right: calc(100% + 6px); top: 0; transform: translateY(-50%); font-size: var(--blockr-mark-font-size); color: var(--blockr-color-text-muted); font-variant-numeric: tabular-nums; }
+.ch-cols, .ch-x { display: flex; gap: 18px; padding: 0 12px; }
+.ch-cols { position: absolute; inset: 0; align-items: flex-end; }
+.ch-col { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.ch-bar { width: 100%; height: var(--v); background: var(--blockr-color-bg-accent); border-radius: var(--blockr-mark-radius) var(--blockr-mark-radius) 0 0; }
+.ch-dl { font-size: var(--blockr-mark-font-size); color: var(--blockr-color-text-muted); margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+.chart.no-labels .ch-dl { visibility: hidden; }
+.ch-x span { flex: 1; text-align: center; font-size: var(--blockr-mark-font-size); color: var(--blockr-color-text-muted); padding-top: 4px; }
+.ch-col:hover .ch-bar { opacity: .85; }
+.ctip { display: none; position: absolute; left: 50%; bottom: calc(var(--v) + 26px); transform: translateX(-50%); z-index: 5; }
+.ch-col:hover .ctip { display: block; }
+.ctip, .ctip-s { min-width: 150px; white-space: nowrap; padding: 8px 10px; background: var(--blockr-color-bg-raised); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg); box-shadow: var(--blockr-shadow-md); font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-default); }
+.ctip-s { display: inline-block; }
+.ctip .h, .ctip-s .h { display: flex; align-items: center; gap: 6px; font-size: var(--blockr-font-size-sm); font-weight: 600; margin-bottom: 4px; }
+.ctip .sw, .ctip-s .sw { width: 10px; height: 10px; border-radius: 2px; background: var(--blockr-color-bg-accent); flex: none; }
+.ctip .r, .ctip-s .r { display: flex; gap: 16px; line-height: 1.6; }
+.ctip .r span, .ctip-s .r span { color: var(--blockr-color-text-muted); }
+.ctip .r b, .ctip-s .r b { margin-left: auto; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.tbl { width: 100%; border-collapse: collapse; font-size: var(--blockr-font-size-base); font-variant-numeric: tabular-nums; }
+.tbl th { text-align: left; padding: 4px 12px 6px; font-weight: 500; vertical-align: bottom; border-bottom: 1px solid var(--blockr-color-border-default); white-space: nowrap; }
+.tbl th .ty { display: block; font-size: var(--blockr-font-size-xs); font-weight: 400; color: var(--blockr-color-text-muted); }
+.tbl td { padding: 5px 12px; border-bottom: 1px solid var(--blockr-color-border-default); }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl .rn { width: 36px; padding-left: 0; text-align: right; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); }
+.tbl .na { color: var(--blockr-color-text-muted); }
+.tbl .r { text-align: right; }
+
+/* messages */
+.msg { display: flex; gap: 10px; align-items: flex-start; font-size: var(--blockr-font-size-sm); padding: 10px 12px; border-radius: var(--blockr-radius-md); border: 1px solid; }
+.msg + .msg { margin-top: 8px; }
+.msg b { font-weight: 600; }
+.msg.danger  { background: var(--blockr-color-bg-danger);  color: var(--blockr-color-text-danger);  border-color: color-mix(in srgb, var(--blockr-color-border-danger) 35%, transparent); }
+.msg.warning { background: var(--blockr-color-bg-warning); color: var(--blockr-color-text-warning); border-color: color-mix(in srgb, var(--blockr-color-border-warning) 45%, transparent); }
+.msg.success { background: var(--blockr-color-bg-success); color: var(--blockr-color-text-success); border-color: color-mix(in srgb, var(--blockr-color-border-success) 35%, transparent); }
+.msg.neutral { background: var(--blockr-color-bg-subtle); color: var(--blockr-color-text-default); border-color: var(--blockr-color-border-default); }
+
+/* =============================================================== overview */
+.board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+@media (max-width: 1180px) { .board { grid-template-columns: minmax(0, 1fr); } }
+
+/* anatomy call-outs */
+.anat { display: grid; grid-template-columns: minmax(0, 600px) minmax(0, 1fr); gap: 28px; align-items: start; }
+.anat .dock { margin-left: 32px; }
+.an { position: relative; outline: 1px dashed var(--blockr-color-border-strong); outline-offset: 3px; border-radius: var(--blockr-radius-md); }
+.an > .n { position: absolute; left: -50px; top: 0; }
+.dock-h.an > .n { left: -32px; top: 12px; }
+.n { display: inline-flex; width: 20px; height: 20px; border-radius: var(--blockr-radius-pill); align-items: center; justify-content: center; font-size: 11px; font-weight: 600; background: var(--blockr-color-text-default); color: var(--blockr-color-bg-surface); flex: none; }
+.legend { font-size: var(--blockr-font-size-sm); }
+.legend > div { display: flex; gap: 10px; margin-bottom: 12px; }
+.legend b { font-weight: 600; }
+
+/* grid demo */
+.gdemo { resize: horizontal; overflow: hidden; min-width: 240px; max-width: 100%; }
+.w-read { font: 11px var(--blockr-font-mono); color: var(--blockr-color-text-muted); margin: 6px 0 0; }
+.show-cols .gdemo .gu::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--blockr-accent-500) 9%, transparent) 0 var(--cw), transparent var(--cw) calc(var(--cw) + 12px)); }
+.show-cols .gdemo [data-size] > .lbl::after { content: " · " attr(data-size); color: var(--blockr-color-text-accent); }
+.guide { position: relative; }
+.guide::before { content: ""; position: absolute; top: -4px; bottom: -4px; left: 0; border-left: 1px dashed var(--blockr-color-border-danger); opacity: .55; pointer-events: none; z-index: 1; }
+
+/* foundations */
+.levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.levels .big { font-size: var(--blockr-font-size-lg); font-weight: 500; }
+.levels ul { margin: 6px 0 0; padding-left: 18px; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); }
+.layers { display: flex; gap: 0; }
+.lay-page { background: var(--blockr-color-bg-page); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg); padding: 14px; flex: 1; }
+.lay-surf { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg); padding: 12px; margin-top: 6px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; font-size: 11px; }
+.lay-surf > div { border-radius: var(--blockr-radius-md); padding: 8px; min-height: 52px; border: 1px solid var(--blockr-color-border-default); }
+.lay-raised { background: var(--blockr-color-bg-raised); box-shadow: var(--blockr-shadow-md); }
+.spec { display: grid; grid-template-columns: 210px minmax(0, 1fr) 230px; gap: 10px 18px; align-items: baseline; }
+.spec .role { font-size: var(--blockr-font-size-sm); }
+.spec .how { font: 11px var(--blockr-font-mono); color: var(--blockr-color-text-muted); }
+.shapes { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-end; }
+.shapes > div { width: 150px; display: flex; flex-direction: column; gap: 6px; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); }
+.shapes .sq { width: 88px; height: 52px; border: 1px solid var(--blockr-color-border-strong); background: var(--blockr-color-bg-field); }
+.heights { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; }
+.heights > div { display: flex; flex-direction: column; gap: 6px; }
+.heights .m { font-size: var(--blockr-font-size-xs); }
+.elev { display: flex; gap: 22px; flex-wrap: wrap; }
+.elev > div { width: 150px; height: 70px; border-radius: var(--blockr-radius-lg); background: var(--blockr-color-bg-raised); border: 1px solid var(--blockr-color-border-default); padding: 8px 10px; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); }
+.marks { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 6px 10px; align-items: center; max-width: 520px; font-size: var(--blockr-mark-font-size); color: var(--blockr-color-text-muted); }
+.marks .bar { height: 16px; background: var(--blockr-color-bg-accent); border-radius: 0 var(--blockr-mark-radius) var(--blockr-mark-radius) 0; }
+.marks .bar.sup { opacity: var(--blockr-mark-weight-supporting); }
+.marks .lab { text-align: right; }
+.fixed { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; }
+.fixed div { display: flex; align-items: center; gap: 10px; font-size: var(--blockr-font-size-sm); }
+.fixed i { width: 30px; height: 30px; border-radius: 7px; display: inline-block; flex: none; }
+.ramp { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 14px; }
+.ramp div { width: 88px; }
+.ramp .sw { height: 40px; border-radius: var(--blockr-radius-md); border: 1px solid var(--blockr-color-border-default); }
+.ramp small { display: block; font: 11px var(--blockr-font-mono); color: var(--blockr-color-text-muted); margin-top: 3px; }
+table.tok { border-collapse: collapse; width: 100%; }
+table.tok th, table.tok td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--blockr-color-border-default); vertical-align: middle; font-size: var(--blockr-font-size-sm); }
+table.tok tr:last-child td { border-bottom: 0; }
+table.tok th { color: var(--blockr-color-text-muted); font-weight: 500; font-size: var(--blockr-font-size-xs); }
+table.tok td:nth-child(3) code { word-break: break-all; }
+table.tok td:first-child { white-space: nowrap; }
+.chip { display: inline-block; width: 44px; height: 26px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); vertical-align: middle; }
+.sample { white-space: nowrap; padding: 4px 10px; border-radius: var(--blockr-radius-md); }
+.cr { font-size: 11px; padding: 1px 7px; border-radius: var(--blockr-radius-pill); white-space: nowrap; }
+.cr.ok { background: var(--blockr-color-bg-success); color: var(--blockr-color-text-success); }
+.cr.bad { background: var(--blockr-color-bg-danger); color: var(--blockr-color-text-danger); }
+.cr.na { color: var(--blockr-color-text-muted); }
+.alias, .val { color: var(--blockr-color-text-muted); }
+.tbox { height: 34px; width: 110px; background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); display: inline-block; }
+details.legacy summary { cursor: pointer; font-weight: 600; }
+
+/* theming demo: a theme sets the accent ramp at :root; here one box stands in */
+.theme-teal {
+  --blockr-accent-50: #f0fdfa; --blockr-accent-100: #ccfbf1; --blockr-accent-500: #14b8a6; --blockr-accent-600: #0d9488; --blockr-accent-700: #0f766e;
+  --blockr-color-text-accent: var(--blockr-accent-600); --blockr-color-bg-accent: var(--blockr-accent-600); --blockr-color-bg-accent-hover: var(--blockr-accent-700);
+  --blockr-color-bg-accent-subtle: var(--blockr-accent-50); --blockr-color-border-accent: var(--blockr-accent-600);
+  --blockr-focus-ring: 0 0 0 3px color-mix(in srgb, var(--blockr-accent-600) 12%, transparent);
+}
+[data-bs-theme="dark"] .theme-teal {
+  --blockr-accent-50: rgb(20 184 166 / 0.14); --blockr-accent-100: rgb(20 184 166 / 0.24); --blockr-accent-500: #2dd4bf; --blockr-accent-600: #14b8a6; --blockr-accent-700: #99f6e4;
+  --blockr-color-text-accent: var(--blockr-accent-500); --blockr-color-bg-accent: var(--blockr-accent-600); --blockr-color-bg-accent-subtle: var(--blockr-accent-50);
+  --blockr-color-border-accent: var(--blockr-accent-600); --blockr-focus-ring: 0 0 0 3px color-mix(in srgb, var(--blockr-accent-500) 28%, transparent);
+}
+
+/* crossfilter */
+.xf-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 16px; }
+.xf-card-h { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; min-height: 26px; }
+.xf-cl { font-size: var(--blockr-font-size-sm); font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xf-cl small { font-size: var(--blockr-font-size-xs); font-weight: 400; color: var(--blockr-color-text-muted); margin-left: 6px; }
+.xf-srch { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; font-size: var(--blockr-font-size-sm); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-md); color: var(--blockr-color-text-muted); background: var(--blockr-color-bg-field); margin-bottom: 6px; }
+.xf-list { max-height: 200px; overflow: auto; }
+.xf-row { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 6px; font-size: var(--blockr-font-size-sm); border-radius: var(--blockr-radius-sm); cursor: pointer; }
+.xf-row:hover { background: var(--blockr-color-bg-hover); }
+.xf-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xf-trk { width: 90px; height: 12px; flex: none; }
+.xf-trk i { display: block; height: 100%; background: var(--blockr-color-bg-accent); opacity: var(--blockr-mark-weight-supporting); border-radius: 0 var(--blockr-mark-radius) var(--blockr-mark-radius) 0; }
+.xf-cnt { width: 30px; flex: none; text-align: right; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); font-variant-numeric: tabular-nums; }
+.xf-row.dim { color: var(--blockr-color-text-muted); }
+.xf-row.dim .xf-trk i { opacity: .2; }
+.xf-row:hover .xf-cnt, .xf-row.dim:hover { color: var(--blockr-color-text-default); }
+
+/* code editor */
+.ed { --blockr-code-keyword: var(--blockr-color-text-accent); --blockr-code-string: var(--blockr-color-text-success); --blockr-code-number: var(--blockr-color-text-warning); --blockr-code-comment: var(--blockr-color-text-muted);
+  border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg); overflow: hidden; background: var(--blockr-color-bg-field); font: 13px/1.6 var(--blockr-font-mono); padding: 6px 0; }
+.ed .ln { display: flex; }
+.ed .g { flex: 0 0 34px; text-align: right; padding-right: 10px; color: var(--blockr-color-text-muted); }
+.ed .cd { flex: 1; min-width: 0; padding: 0 10px; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.ed .ln.act .cd, .ed .ln.act .g { background: var(--blockr-color-bg-hover); }
+.ed .ln.in .cd { background: linear-gradient(90deg, color-mix(in srgb, var(--blockr-accent-600) 7%, transparent), color-mix(in srgb, var(--blockr-accent-600) 2%, transparent) 70%); box-shadow: inset 2px 0 0 color-mix(in srgb, var(--blockr-accent-600) 45%, transparent); }
+.ed .tk { color: var(--blockr-code-keyword); }
+.ed .ts { color: var(--blockr-code-string); }
+.ed .tn { color: var(--blockr-code-number); }
+.ed .tc { color: var(--blockr-code-comment); font-style: italic; }
+
+/* formula (builder or code) */
+.formula .as-code { display: none; }
+.formula.code .as-code { display: flex; }
+.formula.code .as-build { display: none; }
+.formula.code .as-build-add { visibility: hidden; }
+.formula .foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+
+/* facet mini chart */
+.facets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.hb { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 6px 8px; align-items: center; font-size: var(--blockr-mark-font-size); color: var(--blockr-color-text-muted); }
+.hb .lab { text-align: right; }
+.hb .bw { display: flex; align-items: center; gap: 4px; border-left: 1px solid var(--blockr-color-border-strong); height: 22px; }
+.hb .bw i { display: block; height: 14px; background: var(--blockr-color-bg-accent); border-radius: 0 var(--blockr-mark-radius) var(--blockr-mark-radius) 0; }
+
+.check { list-style: none; padding: 0; margin: 0; columns: 2; column-gap: 32px; font-size: var(--blockr-font-size-sm); }
+.check li { break-inside: avoid; display: flex; gap: 10px; margin-bottom: 10px; }
+.check li .box { margin-top: 3px; }
+
+/* ===================================================== late additions (topics 17-20) */
+.z-cap { font-size: 12px; color: var(--blockr-color-text-muted); margin: 14px 0 6px; }
+.z-h { font-size: 15px; font-weight: 600; margin: 26px 0 4px; }
+.z-note { font-size: 13px; color: var(--blockr-color-text-muted); margin: 0 0 10px; max-width: 86ch; }
+.z-nav { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 10px; font-size: 14px; }
+.z-nav > * { flex-shrink: 0; white-space: nowrap; }
+.z-nav .z-sp { flex: 1 1 auto; }
+.z-nav .z-logo { color: var(--blockr-color-text-muted); display: inline-flex; }
+.z-nav .z-nm { font-weight: 600; }
+.z-nav .z-meta { font-size: 12px; color: var(--blockr-color-text-muted); }
+.z-ib { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; border-radius: 4px; color: var(--blockr-color-text-muted); cursor: pointer; }
+.z-ib:hover { background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-default); }
+.z-view { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 0; background: transparent; border-radius: 6px; font: inherit; font-size: 13px; font-weight: 500; color: var(--blockr-color-text-default); cursor: pointer; }
+.z-view:hover { background: var(--blockr-color-bg-hover); }
+.z-car { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid currentColor; }
+.z-av { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: color-mix(in srgb, var(--blockr-accent-600) 14%, transparent); color: var(--blockr-accent-700); }
+[data-bs-theme="dark"] .z-av { color: var(--blockr-color-text-accent); }
+.z-mk { flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--c, #0072B2); background: color-mix(in srgb, var(--c, #0072B2) 18%, var(--blockr-color-bg-surface)); }
+.z-m28 { width: 28px; height: 28px; border-radius: 6px; } .z-m24 { width: 24px; height: 24px; border-radius: 6px; } .z-m16 { width: 16px; height: 16px; border-radius: 4px; }
+.z-ladder { display: flex; align-items: flex-end; gap: 22px; font-size: 11px; color: var(--blockr-color-text-muted); }
+.z-ladder div { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.z-badge { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; font-size: 11px; font-weight: 500; border-radius: 999px; border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-subtle); color: var(--blockr-color-text-muted); margin-left: auto; }
+.z-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.z-card { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 12px; overflow: hidden; position: relative; }
+.z-hd { display: flex; align-items: center; gap: 10px; padding: 10px 14px 10px 18px; border-bottom: 1px solid var(--blockr-color-border-default); }
+.z-hd .z-t { font-size: 16px; font-weight: 600; }
+.z-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; right: -2px; top: -2px; box-shadow: 0 0 0 2px var(--blockr-color-bg-surface); }
+.z-mkw { position: relative; display: inline-flex; }
+.z-body { padding: 12px 18px 14px; }
+.z-status { font-size: 12px; color: var(--blockr-color-text-muted); }
+.z-msg { display: flex; gap: 8px; font-size: 13px; padding: 10px 12px; border-radius: 6px; background: var(--blockr-color-bg-danger); color: var(--blockr-color-text-danger); border: 1px solid color-mix(in srgb, var(--blockr-color-border-danger) 35%, transparent); margin-bottom: 10px; }
+.z-msg b { font-weight: 600; }
+.z-bars { display: flex; align-items: flex-end; gap: 8px; height: 80px; transition: opacity .2s; }
+.z-bars i { flex: 1; background: var(--blockr-accent-500); border-radius: 2px 2px 0 0; opacity: .85; }
+.z-busy .z-bars { opacity: .45; }
+.z-clock { font-size: 12px; color: var(--blockr-color-text-muted); min-height: 18px; margin-top: 6px; }
+.z-tabs { display: flex; align-items: center; gap: 6px; padding: 8px 10px 0; }
+.z-tab { display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 9px; border-radius: 6px; font-size: 13px; background: var(--blockr-color-bg-hover); }
+.z-tab .z-x { font-size: 11px; color: var(--blockr-color-text-muted); }
+/* renaming in place */
+.z-ed { display: inline-block; font: inherit; border-radius: 6px; padding: 4px 8px; margin: -4px -8px; border: 1px solid transparent; cursor: default; outline: none; }
+.z-ed:hover { background: var(--blockr-color-bg-hover); }
+.z-ed[contenteditable="true"] { background: var(--blockr-color-bg-surface); border-color: var(--blockr-color-border-accent); box-shadow: var(--blockr-focus-ring); cursor: text; min-width: 120px; }
+.z-ed.z-bad { border-color: var(--blockr-color-border-danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blockr-color-border-danger) 15%, transparent); }
+.z-err { font-size: 12px; color: var(--blockr-color-text-danger); min-height: 16px; margin-top: 8px; }
+.z-rows .z-row { display: flex; align-items: center; gap: 9px; height: 34px; padding: 0 8px; border-radius: 6px; font-size: 14px; }
+/* block picker */
+.z-pick { position: relative; min-height: 360px; }
+.z-menu { position: absolute; top: 36px; left: 0; width: 320px; background: var(--blockr-color-bg-raised); border: 1px solid var(--blockr-color-border-default); border-radius: 8px; box-shadow: var(--blockr-shadow-md); padding: 4px; z-index: 30; }
+.z-menu[hidden] { display: none; }
+.z-flt { display: flex; align-items: center; gap: 8px; height: 32px; margin: 2px 2px 4px; padding: 0 8px; border: 1px solid var(--blockr-color-border-accent); border-radius: 6px; box-shadow: var(--blockr-focus-ring); background: var(--blockr-color-bg-surface); color: var(--blockr-color-text-muted); }
+.z-flt input { border: 0; outline: none; background: transparent; font: inherit; font-size: 13px; color: var(--blockr-color-text-default); width: 100%; }
+.z-gt { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--blockr-color-text-muted); padding: 8px 10px 4px; }
+.z-mi { display: flex; align-items: center; gap: 9px; height: 32px; padding: 0 8px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+.z-mi:hover, .z-mi.hi { background: var(--blockr-color-bg-hover); }
+.z-mi .z-meta2 { margin-left: auto; font-size: 13px; color: var(--blockr-color-text-muted); }
+.z-mi:hover .z-meta2, .z-mi.hi .z-meta2 { color: var(--blockr-color-text-default); }
+.z-list { max-height: 280px; overflow: auto; }
+.z-trigger { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; font: inherit; font-size: 13px; border: 1px solid var(--blockr-color-border-default); border-radius: 6px; background: var(--blockr-color-bg-surface); color: var(--blockr-color-text-default); cursor: pointer; }
+.z-trigger:hover { background: var(--blockr-color-bg-hover); border-color: var(--blockr-color-border-strong); }
+
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-gear" viewBox="0 0 16 16"><path fill="currentColor" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7l3.5 3.5L11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 12 12"><path d="M2.5 6.5l2.3 2.3L9.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-x" viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 12 12"><path d="M6 2v8M2 6h8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></g></symbol>
+  <symbol id="i-dots" viewBox="0 0 16 16"><g fill="currentColor"><circle cx="3.5" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12.5" cy="8" r="1.2"/></g></symbol>
+  <symbol id="i-sliders" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4h7M12 4h2M2 8h2M7 8h7M2 12h9"/><circle cx="10.5" cy="4" r="1.5"/><circle cx="5.5" cy="8" r="1.5"/><circle cx="12.5" cy="12" r="1.5"/></g></symbol>
+  <symbol id="i-eye" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></g></symbol>
+  <symbol id="i-funnel" viewBox="0 0 24 24"><path d="M4 5h16l-6 7.5V19l-4-2v-4.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 24 24"><path d="M5 19V11M12 19V5M19 19v-5M3 19.5h18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 10 16"><g fill="currentColor"><circle cx="3" cy="3.5" r="1"/><circle cx="7" cy="3.5" r="1"/><circle cx="3" cy="8" r="1"/><circle cx="7" cy="8" r="1"/><circle cx="3" cy="12.5" r="1"/><circle cx="7" cy="12.5" r="1"/></g></symbol>
+  <symbol id="i-chev" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-car" viewBox="0 0 10 10"><path d="M2.5 3.8L5 6.3l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.5-3.5M3 3v2.5h2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-code" viewBox="0 0 16 16"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<!-- ===================================================== menu contents -->
+<template id="m-cols"><div class="mt">Measurements</div>
+  <div class="mr" data-value="Ozone"><span class="lab">Ozone</span><span class="meta">int</span></div>
+  <div class="mr" data-value="Solar.R"><span class="lab">Solar.R</span><span class="meta">int</span></div>
+  <div class="mr" data-value="Wind"><span class="lab">Wind</span><span class="meta">dbl</span></div>
+  <div class="mr" data-value="Temp"><span class="lab">Temp</span><span class="meta">int</span></div>
+  <div class="mt">Date</div>
+  <div class="mr" data-value="Month"><span class="lab">Month</span><span class="meta">int</span></div>
+  <div class="mr" data-value="Day"><span class="lab">Day</span><span class="meta">int</span></div></template>
+<template id="m-cols-opt"><div class="mr" data-value="None" data-ph><span class="lab">None</span></div><div class="md"></div>
+  <div class="mr" data-value="Ozone"><span class="lab">Ozone</span><span class="meta">int</span></div>
+  <div class="mr" data-value="Solar.R"><span class="lab">Solar.R</span><span class="meta">int</span></div>
+  <div class="mr" data-value="Wind"><span class="lab">Wind</span><span class="meta">dbl</span></div>
+  <div class="mr" data-value="Temp"><span class="lab">Temp</span><span class="meta">int</span></div>
+  <div class="mr" data-value="Month"><span class="lab">Month</span><span class="meta">int</span></div>
+  <div class="mr" data-value="Day"><span class="lab">Day</span><span class="meta">int</span></div></template>
+<template id="m-ops">
+  <div class="mr" data-value="="><span class="lab">=</span><span class="meta">equals</span></div>
+  <div class="mr" data-value="≠"><span class="lab">≠</span><span class="meta">differs from</span></div>
+  <div class="mr" data-value="&gt;"><span class="lab">&gt;</span><span class="meta">greater than</span></div>
+  <div class="mr" data-value="≥"><span class="lab">≥</span><span class="meta">at least</span></div>
+  <div class="mr" data-value="&lt;"><span class="lab">&lt;</span><span class="meta">less than</span></div>
+  <div class="mr" data-value="≤"><span class="lab">≤</span><span class="meta">at most</span></div>
+  <div class="md"></div>
+  <div class="mr" data-value="in"><span class="lab">is one of</span></div>
+  <div class="mr" data-value="between"><span class="lab">between</span></div></template>
+<template id="m-months">
+  <div class="mr" data-value="5"><span class="lab">May</span></div>
+  <div class="mr" data-value="6"><span class="lab">June</span></div>
+  <div class="mr" data-value="7"><span class="lab">July</span></div>
+  <div class="mr" data-value="8"><span class="lab">August</span></div>
+  <div class="mr" data-value="9"><span class="lab">September</span></div></template>
+<template id="m-agg">
+  <div class="mr" data-value="Mean"><span class="lab">Mean</span></div>
+  <div class="mr" data-value="Median"><span class="lab">Median</span></div>
+  <div class="mr" data-value="Sum"><span class="lab">Sum</span></div>
+  <div class="mr" data-value="Count"><span class="lab">Count</span></div>
+  <div class="mr" data-value="Min"><span class="lab">Min</span></div>
+  <div class="mr" data-value="Max"><span class="lab">Max</span></div></template>
+<template id="m-sort">
+  <div class="mr" data-value="As in data"><span class="lab">As in data</span></div>
+  <div class="mr" data-value="By value"><span class="lab">By value</span></div>
+  <div class="mr" data-value="By label"><span class="lab">By label</span></div></template>
+<template id="m-pal">
+  <div class="mr" data-value="Okabe-Ito"><span class="lab">Okabe-Ito</span></div>
+  <div class="mr" data-value="Tableau 10"><span class="lab">Tableau 10</span></div>
+  <div class="mr" data-value="Viridis"><span class="lab">Viridis</span></div></template>
+<template id="m-adsl">
+  <div class="mr" data-value="None"><span class="lab">None</span></div>
+  <div class="mt">Categorical</div>
+  <div class="mr" data-value="ARM"><span class="lab">ARM</span><span class="meta">3 levels</span></div>
+  <div class="mr" data-value="SEX"><span class="lab">SEX</span><span class="meta">2 levels</span></div>
+  <div class="mr" data-value="RACE"><span class="lab">RACE</span><span class="meta">6 levels</span></div>
+  <div class="mr" data-value="ETHNIC"><span class="lab">ETHNIC</span><span class="meta">2 levels</span></div>
+  <div class="mr" data-value="AGEGR1"><span class="lab">AGEGR1</span><span class="meta">3 levels</span></div>
+  <div class="mr" data-value="SAFFL"><span class="lab">SAFFL</span><span class="meta">2 levels</span></div>
+  <div class="mr dis" data-tip="Too many distinct values to colour by (254)"><span class="lab">USUBJID</span><span class="meta">254 levels</span></div>
+  <div class="mt">Numeric</div>
+  <div class="mr" data-value="AGE"><span class="lab">AGE</span><span class="meta">int</span></div>
+  <div class="mr" data-value="BMIBL"><span class="lab">BMIBL</span><span class="meta">dbl</span></div>
+  <div class="mr" data-value="HEIGHTBL"><span class="lab">HEIGHTBL</span><span class="meta">dbl</span></div>
+  <div class="mr" data-value="WEIGHTBL"><span class="lab">WEIGHTBL</span><span class="meta">dbl</span></div></template>
+<template id="m-dl">
+  <div class="mr"><span class="lab">PNG image</span></div>
+  <div class="mr"><span class="lab">SVG image</span></div>
+  <div class="mr"><span class="lab">PowerPoint slide</span></div>
+  <div class="md"></div>
+  <div class="mr"><span class="lab">Data as CSV</span></div></template>
+<template id="m-block-subset"><div class="mh"><b>subset block</b><span class="badge">blockr.core</span><br>Keeps the rows that match the conditions, and the chosen columns.</div><div class="md"></div>
+  <div class="mr"><span class="lab">Rename</span></div>
+  <div class="mr"><span class="lab">Duplicate</span></div>
+  <div class="mr"><span class="lab">Copy block ID</span><span class="meta">block_7f3a</span></div>
+  <div class="md"></div>
+  <div class="mr danger"><span class="lab">Remove</span></div></template>
+<template id="m-block-chart"><div class="mh"><b>chart block</b><span class="badge">blockr.viz</span><br>Draws a bar, line or point chart from a table.</div><div class="md"></div>
+  <div class="mr"><span class="lab">Rename</span></div>
+  <div class="mr"><span class="lab">Duplicate</span></div>
+  <div class="mr"><span class="lab">Copy block ID</span><span class="meta">block_c21e</span></div>
+  <div class="md"></div>
+  <div class="mr danger"><span class="lab">Remove</span></div></template>
+
+<div class="wrap">
+<header class="top">
+  <div class="row1">
+    <h1>blockr design system</h1>
+    <div class="seg sm" id="scheme" role="radiogroup" aria-label="Colour scheme"><button class="on" data-scheme="light" role="radio" aria-checked="true">Light</button><button data-scheme="dark" role="radio" aria-checked="false">Dark</button></div>
+  </div>
+  <nav>
+    <a href="#overview">Two blocks</a>
+    <a href="#principles"><b>1</b>Principles</a>
+    <a href="#navbar">Navbar</a>
+    <a href="#foundations"><b>2</b>Foundations</a>
+    <a href="#block"><b>3</b>The block</a>
+    <a href="#layout"><b>4</b>Layout</a>
+    <a href="#controls"><b>5</b>Controls</a>
+    <a href="#actions"><b>6</b>Actions</a>
+    <a href="#floating"><b>7</b>Floating layer</a>
+    <a href="#labels"><b>8</b>Labels and status</a>
+    <a href="#special"><b>9</b>Special blocks</a>
+    <a href="#authors"><b>10</b>For package authors</a>
+    <a href="#appendix">Appendix</a>
+  </nav>
+</header>
+
+<p class="lede">The system as decided on 2026-09-23, drawn at real size in Open Sans. Every colour, size and radius on this
+page comes from <code>blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>, so Dark switches every part at once.
+The written rules are in <code>design-system.md</code>, under the same sections and anchors. Everything is live: open the
+gears, hover the icons, click the words, pills and boxes.</p>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="z-layers" viewBox="0 0 16 16"><path d="M8 2l6 3-6 3-6-3zM2 8l6 3 6-3M2 11l6 3 6-3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></symbol>
+  <symbol id="z-page" viewBox="0 0 16 16"><path d="M4 2h5l3 3v9H4z M9 2v3h3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></symbol>
+  <symbol id="z-db" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></g></symbol>
+  <symbol id="z-file" viewBox="0 0 16 16"><path d="M4 2h5l3 3v9H4z M9 2v3h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="z-filter" viewBox="0 0 16 16"><path d="M2.5 3.5h11L9.5 8.5v4l-3-1.5v-2.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="z-sort" viewBox="0 0 16 16"><path d="M4 3v10M2 11l2 2 2-2M8 4h6M8 8h4M8 12h2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="z-join" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="8" r="4"/><circle cx="10" cy="8" r="4"/></g></symbol>
+  <symbol id="z-sum" viewBox="0 0 16 16"><path d="M12 3H4l4 5-4 5h8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="z-chart" viewBox="0 0 16 16"><path d="M2.5 13.5h11M4.5 11V8M8 11V4.5M11.5 11V6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="z-out" viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7l3.5 3.5L11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="z-search" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></g></symbol>
+  <symbol id="z-dots" viewBox="0 0 16 16"><g fill="currentColor"><circle cx="3.5" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12.5" cy="8" r="1.2"/></g></symbol>
+  <symbol id="z-dotsv" viewBox="0 0 16 16"><g fill="currentColor"><circle cx="8" cy="3.5" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="8" cy="12.5" r="1.2"/></g></symbol>
+  <symbol id="z-sliders" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4h7M12 4h2M2 8h2M7 8h7M2 12h9"/><circle cx="10.5" cy="4" r="1.5"/><circle cx="5.5" cy="8" r="1.5"/><circle cx="12.5" cy="12" r="1.5"/></g></symbol>
+  <symbol id="z-eye" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></g></symbol>
+</svg>
+
+<!-- ================================================================ APP FRAME (topic 20) -->
+<section class="part" id="navbar">
+<h2 class="ph">The navbar</h2>
+<p class="rl">The board's toolbar: 48px, controls at 30px, tokens only. The workflow's name is its ID (chosen at the first save,
+like a file name), then its save state as text and one "…" workflow menu. On the right the view menu, the board options and
+the account. <a href="design-system.md#actions">rules: design-system.md#actions</a></p>
+<div class="z-nav">
+  <span class="z-logo"><svg width="18" height="18"><use href="#z-layers"/></svg></span>
+  <span class="z-nm">AE review 244</span><span class="z-meta">Saved just now</span>
+  <button class="z-ib" data-tip="Workflow menu" aria-label="Workflow menu"><svg width="15" height="15"><use href="#z-dots"/></svg></button>
+  <span class="z-sp"></span>
+  <button class="z-view" data-tip="Views"><svg width="13" height="13"><use href="#z-page"/></svg>Build<span class="z-car"></span></button>
+  <button class="z-ib" data-tip="Board options" aria-label="Board options"><svg width="15" height="15"><use href="#i-gear"/></svg></button>
+  <span class="z-av" data-tip="Signed in as Christoph">C</span>
+</div>
+</section>
+
+<!-- ================================================================ OVERVIEW -->
+<section class="part" id="overview">
+<h2 class="ph">Two blocks, as decided</h2>
+<p class="rl">A transform block holds the fields that define it on its face; an output block holds its output and a sentence
+with live words. Both keep the rest behind the gear, which opens the tray in flow and closes on the gear or Escape.
+<a href="design-system.md#block">rules: design-system.md#block</a></p>
+
+<div class="board">
+  <!-- ---------------------------------------------------- transform block -->
+  <div class="dock blk" id="blk-subset">
+    <div class="dock-h">
+      <span class="cat" data-tip="subset block · blockr.core" style="--cat:#009E73"><svg width="24" height="24"><use href="#i-funnel"/></svg></span>
+      <div class="dh-t"><div class="bt">Subset</div></div>
+      <div class="dock-acts">
+        <button class="ib on" data-tip="Controls" aria-label="Controls"><svg width="15" height="15"><use href="#i-sliders"/></svg></button>
+        <button class="ib on" data-tip="Output" aria-label="Output"><svg width="15" height="15"><use href="#i-eye"/></svg></button>
+        <button class="ib" data-tip="More" aria-label="More" data-menu="m-block-subset" data-place="right"><svg width="15" height="15"><use href="#i-dots"/></svg></button>
+      </div>
+    </div>
+    <div class="face">
+      <div class="hd end"><button class="gear" data-gear data-tip="Settings" aria-label="Settings" aria-expanded="false"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div>
+      <div class="tray-wrap"><div class="inner"><div class="tray" aria-label="Subset settings">
+        <div class="sec">Order</div>
+        <div class="gu"><div class="gB">
+          <div class="fld s2"><span class="lbl">Order by</span><button class="ctl" data-menu="m-cols-opt" data-place="field" data-value="None"><span class="v ph">None</span><span class="car"></span></button></div>
+          <label class="ck s1"><input type="checkbox"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Descending</span></label>
+          <label class="ck s1"><input type="checkbox" checked><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Keep groups</span></label>
+        </div></div>
+      </div></div></div>
+
+      <div class="sec">Conditions</div>
+      <div class="rows">
+        <div class="row">
+          <span class="hdl" data-tip="Drag to reorder"><svg width="10" height="16"><use href="#i-grip"/></svg></span>
+          <button class="rsel" data-menu="m-cols" data-value="Ozone"><span class="v">Ozone</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
+          <button class="pill" data-menu="m-ops" data-value="≥"><span class="v">≥</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
+          <input class="rin" value="40" aria-label="Value">
+          <button class="rx" data-tip="Remove condition" aria-label="Remove condition"><svg width="12" height="12"><use href="#i-x"/></svg></button>
+        </div>
+        <div class="row">
+          <span class="hdl" data-tip="Drag to reorder"><svg width="10" height="16"><use href="#i-grip"/></svg></span>
+          <button class="rsel" data-menu="m-cols" data-value="Month"><span class="v">Month</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
+          <button class="pill" data-menu="m-ops" data-value="in"><span class="v">is one of</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
+          <span class="tag">6<button class="x" aria-label="Remove 6"><svg width="10" height="10"><use href="#i-x"/></svg></button></span>
+          <span class="tag">7<button class="x" aria-label="Remove 7"><svg width="10" height="10"><use href="#i-x"/></svg></button></span>
+          <span class="tag">8<button class="x" aria-label="Remove 8"><svg width="10" height="10"><use href="#i-x"/></svg></button></span>
+          <button class="rx" data-tip="Remove condition" aria-label="Remove condition"><svg width="12" height="12"><use href="#i-x"/></svg></button>
+        </div>
+      </div>
+      <div class="addrow"><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add condition</button></div>
+
+      <div class="sec" style="margin-top:20px">Columns and rows</div>
+      <div class="gu"><div class="gB">
+        <div class="fld sf"><span class="lbl">Keep columns</span><div class="ctl multi" tabindex="0" data-menu="m-cols" data-multi data-place="field" data-value="Ozone|Solar.R|Wind|Month"><span class="car"></span></div></div>
+        <div class="fld s2"><span class="lbl">Keep rows that match</span><div class="seg" role="radiogroup"><button class="on" role="radio" aria-checked="true">All</button><button role="radio" aria-checked="false">Any</button></div></div>
+        <div class="fld s1"><span class="lbl">Maximum number of rows</span><div class="ctl" data-commit><input type="number" value="100" aria-label="Maximum number of rows"><span class="enter">Enter <b>↵</b></span></div></div>
+        <label class="ck s1"><input type="checkbox" checked><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Drop NA</span></label>
+      </div></div>
+    </div>
+    <div class="out">
+      <table class="tbl">
+        <thead><tr><th class="rn"></th><th>Ozone<span class="ty">int</span></th><th>Solar.R<span class="ty">int</span></th><th>Wind<span class="ty">dbl</span></th><th>Month<span class="ty">int</span></th></tr></thead>
+        <tbody>
+          <tr><td class="rn">1</td><td>71</td><td>291</td><td>13.8</td><td>6</td></tr>
+          <tr><td class="rn">2</td><td>135</td><td>269</td><td>4.1</td><td>7</td></tr>
+          <tr><td class="rn">3</td><td>49</td><td>248</td><td>9.2</td><td>7</td></tr>
+          <tr><td class="rn">4</td><td>64</td><td><span class="na">NA</span></td><td>7.4</td><td>8</td></tr>
+        </tbody>
+      </table>
+      <div class="o-foot"><span>37 of 153 rows · 4 of 6 columns</span></div>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------------- output block -->
+  <div class="dock blk" id="blk-chart">
+    <div class="dock-h">
+      <span class="cat" data-tip="chart block · blockr.viz" style="--cat:#E69F00"><svg width="24" height="24"><use href="#i-bars"/></svg></span>
+      <div class="dh-t"><div class="bt">Ozone by month</div></div>
+      <div class="dock-acts">
+        <button class="ib on" data-tip="Controls" aria-label="Controls"><svg width="15" height="15"><use href="#i-sliders"/></svg></button>
+        <button class="ib on" data-tip="Output" aria-label="Output"><svg width="15" height="15"><use href="#i-eye"/></svg></button>
+        <button class="ib" data-tip="More" aria-label="More" data-menu="m-block-chart" data-place="right"><svg width="15" height="15"><use href="#i-dots"/></svg></button>
+      </div>
+    </div>
+    <div class="face">
+      <div class="hd">
+        <div class="tt">
+          <p class="o-title">Mean ozone by month</p>
+          <p class="o-sub"><button class="slot" data-menu="m-agg" data-value="Mean">Mean</button> <button class="slot" data-menu="m-cols" data-value="Ozone">Ozone</button> by <button class="slot" data-menu="m-cols" data-value="Month">Month</button>, for <button class="slot" data-menu="m-months" data-multi data-value="5|6|7|8|9">May, June, July <span class="more">+2 more</span></button></p>
+          <div class="offers"><button class="offer" data-menu="m-cols-opt" data-value="None">+ Colour by</button><button class="offer" data-menu="m-cols-opt" data-value="None">+ Facet by</button><button class="offer" data-open-gear>More settings</button></div>
+        </div>
+        <button class="tool" data-tip="Download" aria-label="Download" data-menu="m-dl" data-place="right"><svg width="14" height="14"><use href="#i-dl"/></svg></button>
+        <button class="gear" data-gear data-tip="Settings" aria-label="Settings" aria-expanded="false"><svg width="14" height="14"><use href="#i-gear"/></svg></button>
+      </div>
+      <div class="tray-wrap"><div class="inner"><div class="tray" aria-label="Chart settings">
+        <div class="sec">Mapping</div>
+        <div class="gu"><div class="gB">
+          <div class="fld s2"><span class="lbl">Category</span><button class="ctl" data-menu="m-cols" data-place="field" data-value="Month"><span class="v">Month</span><span class="car"></span></button></div>
+          <div class="fld s2"><span class="lbl">Value</span><button class="ctl" data-menu="m-cols" data-place="field" data-value="Ozone"><span class="v">Ozone</span><span class="car"></span></button></div>
+          <div class="fld s2"><span class="lbl">Aggregate</span><button class="ctl" data-menu="m-agg" data-place="field" data-value="Mean"><span class="v">Mean</span><span class="car"></span></button></div>
+          <div class="fld s2"><span class="lbl">Colour by</span><button class="ctl" data-menu="m-cols-opt" data-place="field" data-value="None"><span class="v ph">None</span><span class="car"></span></button></div>
+        </div></div>
+        <div class="sec">Presentation</div>
+        <div class="gu"><div class="gB">
+          <div class="fld s2"><span class="lbl">Orientation</span><div class="seg" role="radiogroup"><button class="on" role="radio" aria-checked="true">Vertical</button><button role="radio" aria-checked="false">Horizontal</button></div></div>
+          <div class="fld s2"><span class="lbl">Sort</span><button class="ctl" data-menu="m-sort" data-place="field" data-value="As in data"><span class="v">As in data</span><span class="car"></span></button></div>
+          <div class="fld s1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter">Enter <b>↵</b></span></div></div>
+          <label class="ck s1"><input type="checkbox" checked data-labels="chart-main"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Labels</span></label>
+          <label class="ck s1"><input type="checkbox"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Legend</span></label>
+        </div></div>
+      </div></div></div>
+
+      <div class="chart" id="chart-main">
+        <div class="ch-area">
+          <div class="ch-grid" style="bottom:0;border:0"><span>0</span></div>
+          <div class="ch-grid" style="bottom:28.57%"><span>20</span></div>
+          <div class="ch-grid" style="bottom:57.14%"><span>40</span></div>
+          <div class="ch-grid" style="bottom:85.71%"><span>60</span></div>
+          <div class="ch-cols">
+            <div class="ch-col" style="--v:33.7%"><span class="ch-dl">23.6</span><i class="ch-bar"></i><div class="ctip"><div class="h"><i class="sw"></i>May</div><div class="r"><span>Mean ozone</span><b>23.6</b></div><div class="r"><span>Days</span><b>26</b></div></div></div>
+            <div class="ch-col" style="--v:42%"><span class="ch-dl">29.4</span><i class="ch-bar"></i><div class="ctip"><div class="h"><i class="sw"></i>June</div><div class="r"><span>Mean ozone</span><b>29.4</b></div><div class="r"><span>Days</span><b>9</b></div></div></div>
+            <div class="ch-col" style="--v:84.4%"><span class="ch-dl">59.1</span><i class="ch-bar"></i><div class="ctip"><div class="h"><i class="sw"></i>July</div><div class="r"><span>Mean ozone</span><b>59.1</b></div><div class="r"><span>Days</span><b>26</b></div></div></div>
+            <div class="ch-col" style="--v:85.7%"><span class="ch-dl">60.0</span><i class="ch-bar"></i><div class="ctip"><div class="h"><i class="sw"></i>August</div><div class="r"><span>Mean ozone</span><b>60.0</b></div><div class="r"><span>Days</span><b>26</b></div></div></div>
+            <div class="ch-col" style="--v:44.9%"><span class="ch-dl">31.4</span><i class="ch-bar"></i><div class="ctip"><div class="h"><i class="sw"></i>September</div><div class="r"><span>Mean ozone</span><b>31.4</b></div><div class="r"><span>Days</span><b>29</b></div></div></div>
+          </div>
+        </div>
+        <div class="ch-x"><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span></div>
+      </div>
+      <p class="o-cap">Days with missing ozone are left out.</p>
+      <div class="o-foot"><span>116 of 153 rows</span></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================== 1 PRINCIPLES -->
+<section class="part" id="principles">
+<h2 class="ph"><span class="num">1</span>Principles</h2>
+<p class="rl">Each principle below is a rule the later sections apply. <a href="design-system.md#principles">rules: design-system.md#principles</a></p>
+<div class="card">
+<ul class="rules" style="margin:0">
+  <li>Components read meaning tokens (<code>--blockr-color-text-muted</code>), never palette steps (<code>--blockr-grey-500</code>) and never a hex. A theme changes a few palette values and dark mode is a second mapping of the same ramps.</li>
+  <li>Text has three colours: default for content and headings, muted for what describes it, disabled for disabled controls only.</li>
+  <li>A transform block's face holds the fields that define it and its gear holds the rest. An output block's face holds the output and its sentence. Simplified mode removes the gear button and nothing else.</li>
+  <li>A setting applies the moment it changes. There is no Apply button.</li>
+  <li>Settings open in flow, in the gear tray. Choices and actions open in a menu on click. Names show in a tooltip on hover. There are no popovers.</li>
+  <li>Accent means "on" or "the main action": the tinted main button, a ticked box, a picked segment, a live word, an active filter. A view has at most one main button.</li>
+  <li>Shape tells what can be acted on. A badge, which is only read, has round ends. Tags, pills and buttons have 4px corners.</li>
+  <li>Sizes come from one ladder: controls 42px, toolbar buttons 30px, header tools 26px; fields sit in one grid of about 130px columns.</li>
+</ul>
+</div>
+</section>
+
+<!-- ============================================================= 2 FOUNDATIONS -->
+<section class="part" id="foundations">
+<h2 class="ph"><span class="num">2</span>Foundations</h2>
+<p class="rl">Palette tokens are read by other tokens only; components read meaning tokens, named <code>--blockr-color-&lt;text|bg|border&gt;-&lt;role&gt;</code>. Values below are read from the token file at load.
+<a href="design-system.md#foundations">rules: design-system.md#foundations</a></p>
+
+<h3 class="sh" id="colour">Colour: the palette</h3>
+<p class="note">A ten-step grey ramp, an accent ramp that points at blue unless a theme overrides it, and small red, amber and
+green ramps for status. No UI colour outside the palette.</p>
+<div class="card"><div id="palette"></div></div>
+
+<h3 class="sh">Three text levels</h3>
+<p class="note">The level follows the job the text does. Muted text does not sit on the hover or selected background; on a hovered row it turns default.</p>
+<div class="levels">
+  <div class="card"><div class="big">Default</div><code class="val">text-default</code>
+    <ul><li>values, body text, menu rows, tooltip text</li><li>headings: block title, output title, table column names</li><li>hover state of a muted icon</li></ul></div>
+  <div class="card"><div class="big" style="color:var(--blockr-color-text-muted)">Muted</div><code class="val">text-muted</code>
+    <ul><li>labels, section titles, placeholders, hints</li><li>subtitle, caption, status line, counts, meta</li><li>column types, row numbers, <code>NA</code>; icons at rest</li></ul></div>
+  <div class="card"><div class="big" style="color:var(--blockr-color-text-disabled)">Disabled</div><code class="val">text-disabled</code>
+    <ul><li>disabled controls only</li><li>below the text contrast minimum, which WCAG allows only here</li></ul></div>
+</div>
+
+<h3 class="sh">Surfaces, borders, status, focus</h3>
+<p class="note">Layers sit on each other: the board canvas (<code>bg-page</code>), a panel (<code>bg-surface</code>), anything
+floating (<code>bg-raised</code>). Inside a layer: a quiet fill (<code>bg-subtle</code>), a field (<code>bg-field</code>),
+hover and selected. Borders are soft (<code>border-default</code>); focus is the accent border plus the one focus ring.</p>
+<div class="layers"><div class="lay-page"><span class="cap">bg-page</span>
+  <div class="lay-surf">
+    <div style="background:var(--blockr-color-bg-surface)">bg-surface</div>
+    <div style="background:var(--blockr-color-bg-subtle)">bg-subtle</div>
+    <div style="background:var(--blockr-color-bg-field)">bg-field</div>
+    <div style="background:var(--blockr-color-bg-hover)">bg-hover</div>
+    <div class="lay-raised">bg-raised, shadow-md</div>
+  </div></div></div>
+<div class="card" style="margin-top:16px"><h4 class="mini" style="margin-top:0">Text</h4><div data-tokens="text"></div></div>
+<div class="card" style="margin-top:16px"><h4 class="mini" style="margin-top:0">Borders and focus</h4><div data-tokens="borders, focus"></div></div>
+<div class="card" style="margin-top:16px"><h4 class="mini" style="margin-top:0">Backgrounds</h4><div data-tokens="backgrounds"></div></div>
+
+<h3 class="sh" id="dark">Dark scheme</h3>
+<p class="note">Keyed off <code>data-bs-theme="dark"</code>, the attribute bslib writes. The grey and blue ramps are restated by
+position, page, surface and raised get their own values, and status colours turn lighter. The gear tray takes the page colour
+in dark. Use the switch at the top; every part of this page follows.</p>
+
+<h3 class="sh" id="theming">Theming: the accent ramp</h3>
+<p class="note">A theme overrides the five accent steps (and optionally the greys, a radius and a face). Every accent-derived
+token follows: main button, ticked box, picked segment, live word, count.</p>
+<div class="cols c2">
+  <div class="card"><p class="cap">Default accent (blue)</p>
+    <div class="line"><button class="b s main">Add block</button><label class="ck"><input type="checkbox" checked><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</label>
+      <div class="seg sm"><button class="on">Vertical</button><button>Horizontal</button></div><span class="o-sub" style="margin:0">by <button class="slot">Month</button></span><span class="badge on">Added</span><span class="count">3</span></div></div>
+  <div class="card theme-teal"><p class="cap">A theme's accent (teal, five values)</p>
+    <div class="line"><button class="b s main">Add block</button><label class="ck"><input type="checkbox" checked><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</label>
+      <div class="seg sm"><button class="on">Vertical</button><button>Horizontal</button></div><span class="o-sub" style="margin:0">by <button class="slot">Month</button></span><span class="badge on">Added</span><span class="count">3</span></div></div>
+</div>
+
+<h3 class="sh" id="type">Type</h3>
+<p class="note">Open Sans, set once through <code>--bs-body-font-family</code>. Five sizes, three weights, one monospace stack.</p>
+<div class="card">
+  <div class="spec">
+    <span class="role">Block title (dock header)</span><span style="font-size:var(--blockr-font-size-xl);font-weight:600;line-height:1.2">Subset</span><span class="how">xl · 20px · 600</span>
+    <span class="role">Output title</span><span style="font-size:var(--blockr-font-size-lg);font-weight:600">Mean ozone by month</span><span class="how">lg · 16px · 600</span>
+    <span class="role">Body, values, menu rows</span><span>airquality · 153 rows · Ozone, Solar.R, Wind</span><span class="how">base · 14px · 400</span>
+    <span class="role">Subtitle, sentence</span><span style="font-size:var(--blockr-font-size-sm);color:var(--blockr-color-text-muted)">Mean Ozone by Month, for May, June, July</span><span class="how">sm · 13px · 400 · muted</span>
+    <span class="role">Labels, caption, status, tooltips</span><span style="font-size:var(--blockr-font-size-xs);color:var(--blockr-color-text-muted)">Number of rows · 116 of 153 rows</span><span class="how">xs · 12px · 400 · muted</span>
+    <span class="role">Section title</span><span class="sec" style="margin:0">Presentation</span><span class="how">xs · 12px · 600 · caps · 0.05em</span>
+    <span class="role">Badge</span><span><span class="badge">Categorical</span></span><span class="how">11px · 500</span>
+    <span class="role">Chart canvas text</span><span style="font-size:var(--blockr-mark-font-size);color:var(--blockr-color-text-muted)">May · Jun · Jul · 0 · 20 · 40</span><span class="how">mark-font-size · 11px</span>
+    <span class="role">Code</span><span style="font:var(--blockr-font-size-sm) var(--blockr-font-mono)">filter(Ozone &gt; 40, !is.na(Wind))</span><span class="how">font-mono · 13px</span>
+  </div>
+  <div data-tokens="type" style="margin-top:14px"></div>
+</div>
+
+<h3 class="sh" id="shape">Shape and size</h3>
+<p class="note">Four radii and the capsule. Three control heights: 42px for fields, rows and buttons beside them, 30px in
+toolbars and dialogs, 26px in a header row next to the gear.</p>
+<div class="cols c2">
+  <div class="card"><div class="shapes">
+    <div><span class="sq" style="border-radius:var(--blockr-radius-sm)"></span>sm 4 · tags, pills, xs buttons, gear, menu rows</div>
+    <div><span class="sq" style="border-radius:var(--blockr-radius-md)"></span>md 6 · 30px buttons, tooltips</div>
+    <div><span class="sq" style="border-radius:var(--blockr-radius-lg)"></span>lg 8 · fields, rows, menus, tray</div>
+    <div><span class="sq" style="border-radius:var(--blockr-radius-xl)"></span>xl 12 · dock panels</div>
+    <div><span class="sq" style="border-radius:var(--blockr-radius-pill);width:60px;height:22px"></span>pill · badges, counts</div>
+  </div></div>
+  <div class="card"><div class="heights">
+    <div><div class="ctl" style="width:170px"><span class="v">Ozone</span><span class="car"></span></div><span class="m">42 · control-h</span></div>
+    <div><button class="b s second">Export</button><span class="m">30 · control-h-sm</span></div>
+    <div><span class="line"><button class="b xs main"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset</button><span class="gear" style="cursor:default"><svg width="14" height="14"><use href="#i-gear"/></svg></span></span><span class="m">26 · control-h-xs</span></div>
+    <div><span class="line"><span class="tag">Ozone</span><span class="pill">≥<svg width="10" height="10"><use href="#i-car"/></svg></span><span class="badge">int</span></span><span class="m">24 tag, pill · 18 badge</span></div>
+  </div></div>
+</div>
+<div class="card" style="margin-top:16px"><div data-tokens="shape and size"></div></div>
+
+<h3 class="sh" id="elevation">Elevation and motion</h3>
+<p class="note">One shadow carries the floating layer: <code>shadow-md</code> on menus, tooltips and the chart tooltip. The
+tray is in flow and has none. In dark the lighter <code>bg-raised</code> separates a menu from the surface. Hover and state
+changes take <code>--blockr-transition</code> (0.15s); the tray slides over 0.22s.</p>
+<div class="cols c2">
+  <div class="card"><div class="elev">
+    <div style="box-shadow:var(--blockr-shadow-sm)">shadow-sm</div>
+    <div style="box-shadow:var(--blockr-shadow-md)">shadow-md · menus, tooltips</div>
+    <div style="box-shadow:var(--blockr-shadow-lg)">shadow-lg</div>
+  </div></div>
+  <div class="card"><div data-tokens="elevation"></div></div>
+</div>
+
+<h3 class="sh" id="marks">Data marks</h3>
+<p class="note">A bar's free end takes <code>mark-radius</code> (2px); the end on the axis stays square. Text on a chart canvas is
+11px. A mark that supports a choice, such as the bars in a crossfilter list, is drawn at the supporting weight (0.6).
+Chart and series colours come from blockr.theme; this page draws them in the accent.</p>
+<div class="cols c2">
+  <div class="card"><div class="marks">
+    <span class="lab">Ozone</span><i class="bar" style="width:78%"></i>
+    <span class="lab">Solar.R</span><i class="bar" style="width:52%"></i>
+    <span class="lab">July (picker)</span><i class="bar sup" style="width:64%"></i>
+    <span class="lab">June (picker)</span><i class="bar sup" style="width:40%"></i>
+  </div></div>
+  <div class="card"><div data-tokens="data marks"></div></div>
+</div>
+
+<h3 class="sh" id="categories">Block category colours</h3>
+<p class="note">Fixed, outside the tokens: one Okabe-Ito colour per category from <code>blk_color()</code> in blockr.dock. The
+same under every theme and in dark.</p>
+<div class="card"><div class="fixed">
+  <div><i style="background:#0072B2"></i>input <code class="val">#0072B2</code></div>
+  <div><i style="background:#009E73"></i>transform <code class="val">#009E73</code></div>
+  <div><i style="background:#56B4E9"></i>structured <code class="val">#56B4E9</code></div>
+  <div><i style="background:#E69F00"></i>plot <code class="val">#E69F00</code></div>
+  <div><i style="background:#CC79A7"></i>table <code class="val">#CC79A7</code></div>
+  <div><i style="background:#F0E442"></i>model <code class="val">#F0E442</code></div>
+  <div><i style="background:#D55E00"></i>output <code class="val">#D55E00</code></div>
+  <div><i style="background:#CCCCCC"></i>utility <code class="val">#CCCCCC</code></div>
+  <div><i style="background:#999999"></i>uncategorised <code class="val">#999999</code></div>
+</div></div>
+</section>
+
+<!-- ================================================================ 3 BLOCK -->
+<section class="part" id="block">
+<h2 class="ph"><span class="num">3</span>The block</h2>
+<p class="rl">Below the dock header a block has a header row, the gear tray, the controls on its face and its output (body,
+caption, status line). Its output title and sentence belong to the output and export with it.
+<a href="design-system.md#block">rules: design-system.md#block</a></p>
+
+<h3 class="sh" id="anatomy">Anatomy</h3>
+<p class="note">An output block with its tray open. The transform block above shows the fourth part, controls on the face.</p>
+<div class="anat">
+  <div class="dock blk open" id="blk-anat">
+    <div class="dock-h an"><span class="n">1</span>
+      <span class="cat" data-tip="chart block · blockr.viz" style="--cat:#E69F00"><svg width="24" height="24"><use href="#i-bars"/></svg></span>
+      <div class="dh-t"><div class="bt">Ozone by month</div></div>
+      <div class="dock-acts"><button class="ib" data-tip="More" aria-label="More" data-menu="m-block-chart" data-place="right"><svg width="15" height="15"><use href="#i-dots"/></svg></button></div>
+    </div>
+    <div class="face">
+      <div class="hd an"><span class="n">2</span>
+        <div class="tt"><p class="o-title">Mean ozone by month</p>
+          <p class="o-sub">Mean <button class="slot" data-menu="m-cols" data-value="Ozone">Ozone</button> by <button class="slot" data-menu="m-cols" data-value="Month">Month</button></p></div>
+        <button class="tool" data-tip="Download" aria-label="Download" data-menu="m-dl" data-place="right"><svg width="14" height="14"><use href="#i-dl"/></svg></button>
+        <button class="gear" data-gear data-tip="Settings" aria-label="Settings" aria-expanded="true"><svg width="14" height="14"><use href="#i-gear"/></svg></button>
+      </div>
+      <div class="tray-wrap an" style="margin-top:4px"><span class="n">3</span><div class="inner"><div class="tray">
+        <div class="sec">Presentation</div>
+        <div class="gu"><div class="gB">
+          <div class="fld s2"><span class="lbl">Sort</span><button class="ctl" data-menu="m-sort" data-place="field" data-value="By value"><span class="v">By value</span><span class="car"></span></button></div>
+          <div class="fld s1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter">Enter <b>↵</b></span></div></div>
+          <label class="ck s1"><input type="checkbox" checked data-labels="chart-anat"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Labels</span></label>
+        </div></div>
+      </div></div></div>
+      <div class="an" style="margin-top:8px"><span class="n">4</span>
+        <div class="chart" id="chart-anat" style="margin-top:6px">
+          <div class="ch-area" style="height:110px">
+            <div class="ch-grid" style="bottom:0;border:0"><span>0</span></div>
+            <div class="ch-grid" style="bottom:28.57%"><span>20</span></div>
+            <div class="ch-grid" style="bottom:57.14%"><span>40</span></div>
+            <div class="ch-grid" style="bottom:85.71%"><span>60</span></div>
+            <div class="ch-cols"><div class="ch-col" style="--v:33.7%"><span class="ch-dl">23.6</span><i class="ch-bar"></i></div><div class="ch-col" style="--v:42%"><span class="ch-dl">29.4</span><i class="ch-bar"></i></div><div class="ch-col" style="--v:84.4%"><span class="ch-dl">59.1</span><i class="ch-bar"></i></div><div class="ch-col" style="--v:85.7%"><span class="ch-dl">60.0</span><i class="ch-bar"></i></div><div class="ch-col" style="--v:44.9%"><span class="ch-dl">31.4</span><i class="ch-bar"></i></div></div>
+          </div>
+          <div class="ch-x"><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span></div>
+        </div></div>
+      <div class="an" style="margin-top:10px"><span class="n">5</span><p class="o-cap" style="margin:0">Days with missing ozone are left out.</p></div>
+      <div class="an" style="margin-top:10px"><span class="n">6</span><div class="o-foot" style="margin:0"><span>116 of 153 rows</span></div></div>
+    </div>
+  </div>
+  <div class="legend">
+    <div><span class="n">1</span><span><b>Dock header.</b> <span class="m">Category icon, block title (20px, 600) and a plain-text subtitle. The block's package, description and "Copy block ID" head its "…" menu.</span></span></div>
+    <div><span class="n">2</span><span><b>Header row.</b> <span class="m">The output title (16px, 600) shares the row with the tools and wraps in the space they leave. Its sentence is the subtitle (13px, muted). Tools run left to right, gear last, all 26px.</span></span></div>
+    <div><span class="n">3</span><span><b>Gear tray.</b> <span class="m">In flow under the header row: <code>bg-subtle</code> (the page colour in dark), no border, white fields, a beak towards the gear, no heading. Sections are a section title and 24px of space. Fields use the grid.</span></span></div>
+    <div><span class="n">4</span><span><b>Body.</b> <span class="m">The chart or table. A transform block has its controls on the face above the output instead (see Subset above).</span></span></div>
+    <div><span class="n">5</span><span><b>Caption.</b> <span class="m">12px, muted.</span></span></div>
+    <div><span class="n">6</span><span><b>Status line.</b> <span class="m">12px, muted: row counts, filter state, timing.</span></span></div>
+  </div>
+</div>
+
+<h3 class="sh" id="tray">The gear tray</h3>
+<ul class="rules">
+  <li>The tray slides open in flow over about 0.22s and pushes the output down; nothing is covered. The gear shows the open state in the main-button tint.</li>
+  <li>It closes on the gear or Escape. A click on the output, or on a menu inside the tray, leaves it open. Several trays may be open at once.</li>
+  <li>The open state lasts for the session and is not saved with the board. Changes apply as they are made.</li>
+  <li>A block with nothing to configure has no gear. The gear holds a row for every argument, including those that also appear as a live word.</li>
+  <li>A section that a checkbox switches on keeps the checkbox before its title; its fields appear below when ticked.</li>
+</ul>
+
+<h3 class="sh" id="sentence">The sentence and its slots</h3>
+<p class="note">The sentence on a block's face looks as it will in print. The author writes it in the <code>#| subtitle:</code>
+template and decides the line breaks with <code>\n</code>; blockr generates nothing and adds no breaks. A live word is the only
+way an output block's argument reaches its face.</p>
+<div class="cols c2">
+  <div class="dock"><div class="face">
+    <p class="o-title">AE summary by worst grade</p>
+    <p class="o-sub"><span class="ln">Rows: <button class="slot" data-menu="m-cols" data-value="Ozone">AESOC, AEDECOD</button></span><span class="ln">Grades: <button class="slot">Any grade, Grade 1, Grade 2 <span class="more">+3 more</span></button></span></p>
+    <div class="offers"><button class="offer">+ Additional rows</button><button class="offer">+ High level filter</button><button class="offer">More settings</button></div>
+  </div></div>
+  <ul class="rules" style="margin:0">
+    <li>A live word is accent text with a dashed underline, solid on hover. A click opens its list under the word.</li>
+    <li>A slot with many values shows the first three, then "+N more" inside the same word. Exports print the same text.</li>
+    <li>Unset settings show as "+" offers on their own line under the sentence, three at most; past three the last reads "More settings" and opens the gear. Offers are not printed.</li>
+    <li>A clause in <code>[ ... ]</code> leaves with its value; the sentence never prints "(none)".</li>
+  </ul>
+</div>
+
+<h3 class="sh" id="simplified">Simplified mode</h3>
+<p class="note">Simplified mode removes the gear button and nothing else. What stays on the face stays live for the reader.</p>
+<div class="dock" style="max-width:560px"><div class="face">
+  <div class="hd"><div class="tt"><p class="o-title">Mean ozone by month</p><p class="o-sub">Mean <button class="slot" data-menu="m-cols" data-value="Ozone">Ozone</button> by <button class="slot" data-menu="m-cols" data-value="Month">Month</button></p></div>
+    <button class="tool" data-tip="Download" aria-label="Download" data-menu="m-dl" data-place="right"><svg width="14" height="14"><use href="#i-dl"/></svg></button></div>
+</div></div>
+
+<h3 class="z-h">The block's mark at each size</h3>
+<p class="z-note">A tinted square in the category colour with the glyph in that colour: 28px in the header, 24px in list rows
+(with the package as a badge), 16px in a tab. The header mark's tooltip names the block type and package.</p>
+<div class="z-grid2">
+  <div><div class="z-ladder">
+    <div><span class="z-mk z-m28" style="--c:#009E73" data-tip="filter block · blockr.dplyr"><svg width="15" height="15"><use href="#z-filter"/></svg></span>header 28</div>
+    <div><span class="z-mk z-m24" style="--c:#009E73"><svg width="13" height="13"><use href="#z-filter"/></svg></span>list 24</div>
+    <div><span class="z-mk z-m16" style="--c:#009E73"><svg width="10" height="10"><use href="#z-filter"/></svg></span>tab 16</div></div></div>
+  <div class="z-card" style="padding:4px"><div class="z-mi"><span class="z-mk z-m24" style="--c:#0072B2"><svg width="13" height="13"><use href="#z-file"/></svg></span>Import Data<span class="z-badge">blockr.io</span></div>
+    <div class="z-mi"><span class="z-mk z-m24" style="--c:#009E73"><svg width="13" height="13"><use href="#z-filter"/></svg></span>Filter Rows<span class="z-badge">blockr.dplyr</span></div>
+    <div class="z-mi"><span class="z-mk z-m24" style="--c:#E69F00"><svg width="13" height="13"><use href="#z-chart"/></svg></span>Chart<span class="z-badge">blockr.viz</span></div></div>
+</div>
+
+<h3 class="z-h">Block status, messages, computing</h3>
+<p class="z-note">A block that cannot run yet shows an amber dot on its mark and says so in its status line. An error or a
+warning for the whole block is a message above the output. Past 300ms of computing any block dims its output and runs a clock
+under it. Press Run.</p>
+<div class="z-grid2">
+  <div class="z-card"><div class="z-hd"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#0072B2" data-tip="read block · blockr.io"><svg width="15" height="15"><use href="#z-file"/></svg></span><span class="z-dot" style="background:var(--blockr-amber-500)"></span></span><span class="z-t">Read data</span></div>
+    <div class="z-body"><div class="z-msg"><b>Error.</b> Column "Ozone2" not found in the data.</div><div class="z-status">Set this block's inputs</div></div></div>
+  <div class="z-card" id="z-busy"><div class="z-hd"><span class="z-mk z-m28" style="--c:#E69F00"><svg width="15" height="15"><use href="#z-chart"/></svg></span><span class="z-t">Ozone by month</span><span style="margin-left:auto"><button class="b xs sec" id="z-run" style="text-transform:none;letter-spacing:normal;font-weight:500;margin:0">Run</button></span></div>
+    <div class="z-body"><div class="z-bars"><i style="height:40%"></i><i style="height:92%"></i><i style="height:100%"></i><i style="height:68%"></i><i style="height:52%"></i></div><div class="z-clock"></div></div></div>
+</div>
+
+<h3 class="z-h">Bare mode (later)</h3>
+<p class="z-note">A board option for dashboards: the card has no header; the tab carries the mark and the name, the actions sit
+right of the tabs, a double-click on the tab renames. It waits on dockViewR's tab components.</p>
+<div class="z-card" style="max-width:560px"><div class="z-tabs"><span class="z-tab"><span class="z-mk z-m16" style="--c:#009E73"><svg width="10" height="10"><use href="#z-filter"/></svg></span>Ozone above 40 <span class="z-x">✕</span></span><span style="flex:1"></span>
+  <button class="z-ib" style="width:26px;height:26px" data-tip="Controls"><svg width="14" height="14"><use href="#z-sliders"/></svg></button><button class="z-ib" style="width:26px;height:26px" data-tip="Output"><svg width="14" height="14"><use href="#z-eye"/></svg></button><button class="z-ib" style="width:26px;height:26px" data-tip="More"><svg width="14" height="14"><use href="#z-dotsv"/></svg></button></div>
+  <div class="z-body" style="padding-top:12px"><div class="fld" style="max-width:280px"><span class="lbl">Column</span><div class="ctl"><span class="v">Ozone</span><span class="car"></span></div></div></div></div>
+
+</section>
+
+<!-- =============================================================== 4 LAYOUT -->
+<section class="part" id="layout">
+<h2 class="ph"><span class="num">4</span>Layout</h2>
+<p class="rl">One grid of about 130px columns, 8, 6, 4, 2 or 1 by panel width. A number or checkbox takes one column, a select or
+text field two, tags or an expression the whole row. <a href="design-system.md#layout">rules: design-system.md#layout</a></p>
+
+<h3 class="sh" id="grid">The grid and field sizes</h3>
+<p class="note">Set the panel width, or drag the panel's bottom-right corner. Columns line up across sections at every width;
+a short section leaves room on the right. "Show columns" draws the tracks and each field's size.</p>
+<div class="line" style="margin-bottom:10px">
+  <span class="cap" style="margin:0">Panel width</span>
+  <div class="seg sm" id="gw"><button data-w="1150">1150</button><button data-w="880">880</button><button data-w="600" class="on">600</button><button data-w="340">340</button><button data-w="260">260</button></div>
+  <label class="ck" style="margin-left:12px"><input type="checkbox" id="showcols"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span>Show columns</label>
+</div>
+<div class="dock gdemo" id="gdemo" style="width:600px"><div class="face">
+  <div class="sec">Mapping</div>
+  <div class="gu"><div class="gB">
+    <div class="fld s2" data-size="2"><span class="lbl">Category</span><button class="ctl" data-menu="m-cols" data-place="field" data-value="Month"><span class="v">Month</span><span class="car"></span></button></div>
+    <div class="fld s2" data-size="2"><span class="lbl">Value</span><button class="ctl" data-menu="m-cols" data-place="field" data-value="Ozone"><span class="v">Ozone</span><span class="car"></span></button></div>
+    <div class="fld s2" data-size="2"><span class="lbl">Aggregate</span><button class="ctl" data-menu="m-agg" data-place="field" data-value="Mean"><span class="v">Mean</span><span class="car"></span></button></div>
+    <div class="fld s2" data-size="2"><span class="lbl">Title</span><div class="ctl" data-commit><input value="Mean ozone by month" aria-label="Title"><span class="enter">Enter <b>↵</b></span></div></div>
+  </div></div>
+  <div class="sec">Presentation</div>
+  <div class="gu"><div class="gB">
+    <div class="fld s1" data-size="1"><span class="lbl">Bins</span><div class="ctl" data-commit><input type="number" value="30" aria-label="Bins"><span class="enter">Enter <b>↵</b></span></div></div>
+    <div class="fld s1" data-size="1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter">Enter <b>↵</b></span></div></div>
+    <label class="ck s1"><input type="checkbox" checked><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Labels</span></label>
+    <label class="ck s1"><input type="checkbox"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Legend</span></label>
+    <div class="fld s2" data-size="2"><span class="lbl">Palette</span><button class="ctl" data-menu="m-pal" data-place="field" data-value="Okabe-Ito"><span class="v">Okabe-Ito</span><span class="car"></span></button></div>
+  </div></div>
+  <div class="sec">Filter</div>
+  <div class="gu"><div class="gB">
+    <div class="fld sf" data-size="full"><span class="lbl">Expression</span><div class="ctl mono" data-commit><input value="Ozone &gt; 40 &amp; Month %in% c(6, 7, 8)" aria-label="Expression"><span class="enter">Enter <b>↵</b></span></div></div>
+  </div></div>
+</div></div>
+<p class="w-read" id="gread"></p>
+
+<h3 class="sh" id="spacing">Spacing, section titles, field labels</h3>
+<div class="cols c2">
+  <div class="card">
+    <div class="sec">Presentation</div>
+    <div class="gu"><div class="gB">
+      <div class="fld s2"><span class="lbl">Sort</span><button class="ctl" data-menu="m-sort" data-place="field" data-value="By value"><span class="v">By value</span><span class="car"></span></button></div>
+      <div class="fld s2"><span class="lbl">Aggregate</span><button class="ctl" data-menu="m-agg" data-place="field" data-value="Mean"><span class="v">Mean</span><span class="car"></span></button></div>
+    </div></div>
+  </div>
+  <div class="card" style="padding:4px 18px"><table class="tok">
+    <tr><th>Between</th><th>Space</th></tr>
+    <tr><td>field label and its control</td><td>4px</td></tr>
+    <tr><td>grid rows · grid columns</td><td>16px · 12px</td></tr>
+    <tr><td>section title and its fields</td><td>10px</td></tr>
+    <tr><td>one section and the next</td><td>24px, no rule</td></tr>
+    <tr><td>list rows</td><td>6px</td></tr>
+    <tr><td>row handle's padding (left of the row)</td><td>at least 14px</td></tr>
+  </table></div>
+</div>
+<ul class="rules" style="margin-top:14px">
+  <li>A section title is 12px, weight 600, uppercase, 0.05em tracking, muted. It is the only heading inside a block; there is no 16px heading.</li>
+  <li>A field label is 12px, weight 400, muted, 4px above its control, in every package.</li>
+</ul>
+
+<h3 class="sh" id="rows">Rows</h3>
+<p class="note">A row in an add-and-reorder list is 42px, the height of a field, border included. Its content starts on the
+same edge as the label above it (the dashed line). The handle appears in the container's left padding on hover or focus; remove
+appears on the right and turns red on hover. The fold arrow stays visible. Hover a row.</p>
+<div class="dock" style="max-width:520px"><div class="face">
+  <div class="fold"><span class="sec" style="margin:0">Columns</span><button class="ib" data-tip="Fold" aria-label="Fold"><svg width="12" height="12"><use href="#i-chev"/></svg></button></div>
+  <span class="lbl" style="margin-top:6px">Keep, in this order</span>
+  <div class="rows guide">
+    <div class="row"><span class="hdl" data-tip="Drag to reorder"><svg width="10" height="16"><use href="#i-grip"/></svg></span><span>Ozone</span><span class="badge">int</span><button class="rx" data-tip="Remove Ozone" aria-label="Remove Ozone"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+    <div class="row f-hover"><span class="hdl" data-tip="Drag to reorder"><svg width="10" height="16"><use href="#i-grip"/></svg></span><span>Solar.R</span><span class="badge">int</span><button class="rx" data-tip="Remove Solar.R" aria-label="Remove Solar.R"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+    <div class="row"><span class="hdl" data-tip="Drag to reorder"><svg width="10" height="16"><use href="#i-grip"/></svg></span><span>Wind</span><span class="badge">dbl</span><button class="rx" data-tip="Remove Wind" aria-label="Remove Wind"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+  </div>
+  <div class="addrow"><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add column</button></div>
+</div></div>
+<p class="cap" style="margin-top:6px">The second row is drawn hovered.</p>
+</section>
+
+<!-- ============================================================= 5 CONTROLS -->
+<section class="part" id="controls">
+<h2 class="ph"><span class="num">5</span>Controls</h2>
+<p class="rl">Fields are 42px on the field background with a soft border; focus is the accent border and the ring. On/off is a
+bare checkbox; two or three short fixed values a segmented control; four or more, or values from the data, a Select; several
+from a list, tags. <a href="design-system.md#controls">rules: design-system.md#controls</a></p>
+
+<h3 class="sh" id="inputs">Text and number inputs</h3>
+<p class="note">Text and numbers commit on Enter or blur; while a field holds an uncommitted change the <code>Enter ↵</code>
+chip shows, and Escape reverts. Number fields keep <code>type=number</code> and hide the arrows. Type in any of them.</p>
+<div class="cols c4">
+  <div class="fld"><span class="lbl">Empty, with placeholder</span><div class="ctl" data-commit><input placeholder="e.g. week_" aria-label="Prefix"><span class="enter">Enter <b>↵</b></span></div><div class="hint">Leave empty to keep the names</div></div>
+  <div class="fld"><span class="lbl">Filled</span><div class="ctl" data-commit><input value="value" aria-label="Values to"><span class="enter">Enter <b>↵</b></span></div></div>
+  <div class="fld"><span class="lbl">Changed, not committed</span><div class="ctl dirty" data-commit><input value="values" aria-label="Values to"><span class="enter">Enter <b>↵</b></span></div></div>
+  <div class="fld"><span class="lbl">Number</span><div class="ctl" data-commit><input type="number" value="12" aria-label="Number of rows"><span class="enter">Enter <b>↵</b></span></div></div>
+  <div class="fld"><span class="lbl">Focused</span><div class="ctl f-focus"><input value="value" aria-label="Focused example"></div></div>
+  <div class="fld"><span class="lbl">Group by <span class="req">*</span></span><button class="ctl req" data-menu="m-cols" data-place="field"><span class="v ph">Select a column</span><span class="car"></span></button><div class="hint">Required, still empty</div></div>
+  <div class="fld"><span class="lbl">Number of rows</span><div class="ctl bad" data-commit><input type="number" value="-3" aria-label="Number of rows"><span class="enter">Enter <b>↵</b></span></div><div class="err">Must be a positive number</div></div>
+  <div class="fld"><span class="lbl">Disabled</span><div class="ctl dis"><input value="12" disabled aria-label="Disabled"></div></div>
+</div>
+
+<h3 class="sh" id="select">Select</h3>
+<p class="note">A select is a field with a caret. Its dropdown takes the field's width (at least 190px), shows a filter box above 8
+options, and marks the current pick at weight 600. Several from a list is one multi control with tags; the options stay
+hidden until it opens. Only the hovered tag shows its ×.</p>
+<div class="cols c3">
+  <div class="fld"><span class="lbl">Value</span><button class="ctl" data-menu="m-cols" data-place="field" data-value="Ozone"><span class="v">Ozone</span><span class="car"></span></button></div>
+  <div class="fld"><span class="lbl">Colour by (12 options)</span><button class="ctl" data-menu="m-adsl" data-place="field" data-value="None"><span class="v ph">None</span><span class="car"></span></button></div>
+  <div class="fld"><span class="lbl">Package</span><div class="ctl dis"><span class="v">datasets</span><span class="car"></span></div></div>
+  <div class="fld" style="grid-column:1 / -1"><span class="lbl">Keep columns</span><div class="ctl multi" tabindex="0" data-menu="m-cols" data-multi data-place="field" data-value="Ozone|Temp|Month|Day"><span class="car"></span></div></div>
+</div>
+
+<h3 class="sh" id="checkbox">Checkbox</h3>
+<p class="note">The bare box and its words, with no field shell and no empty label row. In the grid it sits on the bottom line
+of its row and takes one column; on a row of its own it takes only its own height. Click them.</p>
+<div class="cols c2">
+  <div class="card"><div class="gu"><div class="gB">
+    <div class="fld s1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter">Enter <b>↵</b></span></div></div>
+    <label class="ck s1"><input type="checkbox" checked><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Labels</span></label>
+    <label class="ck s1"><input type="checkbox"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Legend</span></label>
+    <label class="ck s1 dis"><input type="checkbox" disabled><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Stack</span></label>
+  </div></div></div>
+  <ul class="rules" style="margin:0">
+    <li>On is the accent fill with a white tick; off is the strong border; disabled is half opacity with disabled text.</li>
+    <li>The same checkbox is used in the tray, on the face and in the board options. There is no switch.</li>
+    <li>Space toggles; focus shows the ring.</li>
+  </ul>
+</div>
+
+<h3 class="sh" id="segmented">Segmented control</h3>
+<p class="note">For a fixed set of two or three short values. Both values stay in view and the pick reads without a click. It
+fills a grid cell like a field; three segments need about 240px, so they take two columns. The pick is the main-button tint.</p>
+<div class="cols c3">
+  <div class="fld"><span class="lbl">From</span><div class="seg"><button class="on">First</button><button>Last</button></div></div>
+  <div class="fld"><span class="lbl">Facet layout</span><div class="seg"><button>Wrap</button><button class="on">Grid</button><button>None</button></div></div>
+  <div class="fld"><span class="lbl">Missing values</span><div class="seg"><button class="on">Keep</button><button>Drop</button></div></div>
+</div>
+
+<h3 class="sh" id="pill">A pill that opens a menu</h3>
+<p class="note">Four or more values inside a row (a filter operator, a join key operator) are a pill with a caret that opens a
+menu anchored on it. It is 24px inside a 42px row, keeps the row's shape and puts every value one click away. Click the pills.</p>
+<div class="dock" style="max-width:600px"><div class="face">
+  <div class="rows">
+    <div class="row"><span class="hdl" data-tip="Drag to reorder"><svg width="10" height="16"><use href="#i-grip"/></svg></span>
+      <button class="rsel" data-menu="m-cols" data-value="Temp"><span class="v">Temp</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
+      <button class="pill" data-menu="m-ops" data-value="between"><span class="v">between</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
+      <input class="rin" value="70 and 85" aria-label="Value">
+      <button class="rx" data-tip="Remove condition" aria-label="Remove condition"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+    <div class="row"><span class="hdl" data-tip="Drag to reorder"><svg width="10" height="16"><use href="#i-grip"/></svg></span>
+      <button class="rsel" data-menu="m-cols" data-value="Wind"><span class="v">Wind</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
+      <button class="pill" data-menu="m-ops" data-value="&lt;"><span class="v">&lt;</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
+      <input class="rin" value="12" aria-label="Value">
+      <button class="rx" data-tip="Remove condition" aria-label="Remove condition"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+  </div>
+</div></div>
+
+<h3 class="sh" id="builder">Builder or code</h3>
+<p class="note">The one mode switch is a pressed icon button at the 26px tool size. It is a tool, so it stays out of the field
+grid; its tooltip names the other state and it sets <code>aria-pressed</code>. Click <code>&lt;/&gt;</code>.</p>
+<div class="dock formula" id="formula" style="max-width:600px"><div class="face">
+  <span class="lbl">Formula</span>
+  <div class="row as-build" style="padding-left:8px"><span class="tag" style="padding-right:8px">Ozone</span><span class="m">~</span><span class="tag" style="padding-right:8px">Temp</span><span class="m">+</span><span class="tag" style="padding-right:8px">Wind</span></div>
+  <div class="ctl as-code dirty mono" data-commit><input value="Ozone ~ Temp + Wind + Temp:Wind" aria-label="Formula"><span class="enter">Enter <b>↵</b></span></div>
+  <div class="foot"><button class="b s quiet as-build-add"><svg width="12" height="12"><use href="#i-plus"/></svg>Term</button><button class="tool" id="mode" aria-pressed="false" data-tip="Edit as formula text" aria-label="Edit as formula text"><svg width="14" height="14"><use href="#i-code"/></svg></button></div>
+</div></div>
+
+<h3 class="z-h">Renaming in place</h3>
+<p class="z-note">Double-click a name (or pick Rename in its menu): the text becomes a field at its own size. Enter commits,
+Escape restores, a click elsewhere commits; an empty or duplicate name is refused in place. Try both.</p>
+<div class="z-grid2">
+  <div class="z-card"><div class="z-hd"><span class="z-mk z-m28" style="--c:#009E73" data-tip="filter block · blockr.dplyr"><svg width="15" height="15"><use href="#z-filter"/></svg></span><span class="z-t"><span class="z-ed" data-group="blocks">Ozone above 40</span></span></div>
+    <div class="z-body"><div class="z-err"></div></div></div>
+  <div class="z-card"><div class="z-rows" style="padding:6px">
+    <div class="z-row"><span class="z-mk z-m24" style="--c:#0072B2"><svg width="13" height="13"><use href="#z-db"/></svg></span><span class="z-ed" data-group="blocks">Measurements</span></div>
+    <div class="z-row"><span class="z-mk z-m24" style="--c:#009E73"><svg width="13" height="13"><use href="#z-filter"/></svg></span><span class="z-ed" data-group="blocks">Complete cases</span></div>
+    <div class="z-row"><span class="z-mk z-m24" style="--c:#E69F00"><svg width="13" height="13"><use href="#z-chart"/></svg></span><span class="z-ed" data-group="blocks">Mean ozone</span></div>
+  </div><div class="z-err" style="padding:0 14px 10px"></div></div>
+</div>
+
+</section>
+
+<!-- ============================================================== 6 ACTIONS -->
+<section class="part" id="actions">
+<h2 class="ph"><span class="num">6</span>Actions</h2>
+<p class="rl">Four kinds of button in three sizes; the main button is the tinted accent and there is no solid accent button.
+Icon buttons are quiet and carry a tooltip. <a href="design-system.md#actions">rules: design-system.md#actions</a></p>
+
+<h3 class="sh" id="buttons">Buttons</h3>
+<p class="note">42px beside inputs, 30px in toolbars and dialogs, 26px in a header row next to the gear. At most one main
+button per view. Destructive is only for confirming a removal. Bootstrap's <code>btn-primary</code>, <code>btn-danger</code>
+and <code>btn-success</code> go.</p>
+<div class="card">
+<table class="tok">
+  <tr><th></th><th>42 · beside inputs</th><th>30 · toolbars, dialogs</th><th>26 · header row</th></tr>
+  <tr><td><b>Main</b><div class="m" style="font-size:12px">accent text, 7% fill, 35% border</div></td><td><button class="b m main">Write file</button></td><td><button class="b s main">Add block</button></td><td><button class="b xs main"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">3</span></button></td></tr>
+  <tr><td><b>Secondary</b><div class="m" style="font-size:12px">surface, soft border</div></td><td><button class="b m second">Cancel</button></td><td><button class="b s second">Export</button></td><td><button class="b xs second"><svg width="12" height="12"><use href="#i-dl"/></svg>Download</button></td></tr>
+  <tr><td><b>Quiet</b><div class="m" style="font-size:12px">text only, muted</div></td><td><button class="b m quiet">Skip</button></td><td><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add condition</button></td><td><button class="b xs quiet">Clear</button></td></tr>
+  <tr><td><b>Destructive</b><div class="m" style="font-size:12px">the main style in red</div></td><td><button class="b m danger">Delete board</button></td><td><button class="b s danger">Remove block</button></td><td><button class="b xs danger">Remove</button></td></tr>
+  <tr><td><b>Disabled</b></td><td><button class="b m main" disabled>Write file</button></td><td><button class="b s second" disabled>Export</button></td><td><button class="b xs main" disabled><svg width="12" height="12"><use href="#i-reset"/></svg>Reset</button></td></tr>
+</table>
+<div class="line" style="margin-top:14px;justify-content:flex-end;max-width:420px;margin-left:auto">
+  <span class="cap" style="margin:0 auto 0 0">A dialog footer</span><button class="b s quiet">Cancel</button><button class="b s main">Add block</button>
+</div>
+</div>
+
+<h3 class="sh" id="iconbuttons">Icon buttons and the gear</h3>
+<p class="note">Tools are 26px, muted at rest, default text and the hover fill on hover. The gear is the one control in the row
+that opens configuration, so it has a frame: at rest a soft border, on hover the strong border, open the main-button tint.
+Bootstrap gear-fill at 14px, one class <code>.blockr-gear-btn</code>, tooltip "Settings". Hover them.</p>
+<div class="cols c2">
+  <div class="card"><div class="line">
+    <button class="tool" data-tip="Search" aria-label="Search"><svg width="14" height="14"><use href="#i-search"/></svg></button>
+    <button class="tool" data-tip="Download" aria-label="Download"><svg width="14" height="14"><use href="#i-dl"/></svg></button>
+    <button class="tool" aria-pressed="true" data-tip="Back to the builder" aria-label="Back to the builder"><svg width="14" height="14"><use href="#i-code"/></svg></button>
+    <span style="width:20px"></span>
+    <span class="cap" style="margin:0">rest</span><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button>
+    <span class="cap" style="margin:0 0 0 8px">hover</span><button class="gear f-hover" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button>
+    <span class="cap" style="margin:0 0 0 8px">open</span><button class="gear" aria-expanded="true" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button>
+  </div></div>
+  <div class="card"><div class="line">
+    <span class="cap" style="margin:0">Small icons, at rest and on hover:</span>
+    <span class="row f-hover" style="margin:0 0 0 18px;width:200px"><span class="hdl"><svg width="10" height="16"><use href="#i-grip"/></svg></span>Wind<button class="rx" data-tip="Remove Wind" aria-label="Remove Wind"><svg width="12" height="12"><use href="#i-x"/></svg></button></span>
+    <button class="ib" data-tip="Fold" aria-label="Fold" style="width:26px;height:26px"><svg width="12" height="12"><use href="#i-chev"/></svg></button>
+  </div>
+  <p class="cap" style="margin:10px 0 0">Handles and remove buttons are thin, muted, hidden until their row is hovered or focused; remove turns red on its own hover. Fold arrows stay visible.</p></div>
+</div>
+</section>
+
+<!-- ============================================================= 7 FLOATING -->
+<section class="part" id="floating">
+<h2 class="ph"><span class="num">7</span>Floating layer</h2>
+<p class="rl">Menus hold choices and actions and open on click; tooltips name things on hover. Both use the raised surface with
+<code>shadow-md</code>. blockr has no popovers. <a href="design-system.md#floating">rules: design-system.md#floating</a></p>
+
+<h3 class="sh" id="menus">Menus</h3>
+<p class="note">Raised surface, 1px border, radius 8, 4px padding. Rows 32px at 14px with 10px side padding; meta 13px, muted,
+turning default on the hovered row. The current pick is weight 600. Disabled rows stay listed and say why in a tooltip. Group
+titles take the section-title style, sticky while the list scrolls; a divider separates groups without a title.</p>
+<div class="cols c3">
+  <div><p class="cap">A field dropdown: filter box above 8 options, groups, hovered row, current pick, disabled row</p>
+    <div class="mn static has-filter" style="max-width:260px;max-height:320px">
+      <div class="mf"><input placeholder="Filter" aria-label="Filter"></div>
+      <div class="mr cur"><span class="lab">None</span></div>
+      <div class="mt">Categorical</div>
+      <div class="mr hi"><span class="lab">ARM</span><span class="meta">3 levels</span></div>
+      <div class="mr"><span class="lab">SEX</span><span class="meta">2 levels</span></div>
+      <div class="mr"><span class="lab">RACE</span><span class="meta">6 levels</span></div>
+      <div class="mr"><span class="lab">AGEGR1</span><span class="meta">3 levels</span></div>
+      <div class="mr dis" data-tip="Too many distinct values to colour by (254)"><span class="lab">USUBJID</span><span class="meta">254 levels</span></div>
+      <div class="mt">Numeric</div>
+      <div class="mr"><span class="lab">AGE</span><span class="meta">int</span></div>
+      <div class="mr"><span class="lab">BMIBL</span><span class="meta">dbl</span></div>
+      <div class="mr"><span class="lab">WEIGHTBL</span><span class="meta">dbl</span></div>
+    </div></div>
+  <div><p class="cap">An action menu: the block's details head it, a divider sets off the removal</p>
+    <div class="mn static" style="width:250px">
+      <div class="mh"><b>subset block</b><span class="badge">blockr.core</span><br>Keeps the rows that match the conditions, and the chosen columns.</div><div class="md"></div>
+      <div class="mr"><span class="lab">Rename</span></div>
+      <div class="mr hi"><span class="lab">Copy block ID</span><span class="meta">block_7f3a</span></div>
+      <div class="md"></div>
+      <div class="mr danger"><span class="lab">Remove</span></div>
+    </div></div>
+  <div><p class="cap">Placement</p>
+    <ul class="rules" style="margin:0">
+      <li>One placement routine for every menu (Select's <code>computePosition</code>, moved to blockr.ui).</li>
+      <li>A field dropdown takes the control's width, at least 190px. A menu from a button or a word sizes to its content, 180 to 320px.</li>
+      <li>It lines up with the trigger's left edge, or its right edge when the trigger is in the header row.</li>
+      <li>Up to 320px high, then the list scrolls under its sticky titles and filter box; 8px from the viewport edge.</li>
+      <li>A menu closes on a pick, on Escape and on a click outside it.</li>
+    </ul></div>
+</div>
+<p class="note" style="margin-top:16px">Open the live ones: a field, a word and the "…" of a header row.</p>
+<div class="dock" style="max-width:760px"><div class="face">
+  <div class="hd"><div class="tt"><p class="o-title">Mean ozone by month</p><p class="o-sub">Mean <button class="slot" data-menu="m-cols" data-value="Ozone">Ozone</button> by <button class="slot" data-menu="m-cols" data-value="Month">Month</button></p></div>
+    <button class="tool" data-tip="Download" aria-label="Download" data-menu="m-dl" data-place="right"><svg width="14" height="14"><use href="#i-dl"/></svg></button>
+    <button class="tool" data-tip="More" aria-label="More" data-menu="m-block-chart" data-place="right"><svg width="14" height="14"><use href="#i-dots"/></svg></button></div>
+  <div class="gu" style="margin-top:12px"><div class="gB">
+    <div class="fld s2"><span class="lbl">Colour by</span><button class="ctl" data-menu="m-adsl" data-place="field" data-value="ARM"><span class="v">ARM</span><span class="car"></span></button></div>
+    <div class="fld s2"><span class="lbl">Aggregate</span><button class="ctl" data-menu="m-agg" data-place="field" data-value="Mean"><span class="v">Mean</span><span class="car"></span></button></div>
+  </div></div>
+</div></div>
+
+<h3 class="sh" id="tooltips">Tooltips</h3>
+<p class="note">One style for every name shown on hover: a small light card on the raised surface, 12px, soft shadow. Every
+icon-only button and every cut-off label gets one; nothing else does, and no native <code>title</code> tooltips remain. Hover
+the icons and the cut-off names.</p>
+<div class="cols c2">
+  <div class="card">
+    <p class="cap">Drawn open over the gear and the cut-off label; hover the others.</p>
+    <div class="line" style="padding-top:34px">
+      <button class="tool" data-tip="Search" aria-label="Search"><svg width="14" height="14"><use href="#i-search"/></svg></button>
+      <button class="tool" data-tip="Download" aria-label="Download"><svg width="14" height="14"><use href="#i-dl"/></svg></button>
+      <span class="tipwrap"><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button><span class="tip static above">Settings</span></span>
+      <span style="width:16px"></span>
+      <div class="fld tipwrap" style="width:150px"><span class="tip static above" style="left:0;transform:none">Dictionary-Derived Term (AEDECOD)</span><span class="lbl">Dictionary-Derived Term (AEDECOD)</span><button class="ctl" data-menu="m-cols" data-place="field" data-value="Ozone"><span class="v">AEDECOD, AESOC, AEBODSYS</span><span class="car"></span></button></div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="cap">A chart's data tooltip uses the same surface: the swatch carries the series colour, labels muted, values at 500 with tabular figures.</p>
+    <div class="ctip-s"><div class="h"><i class="sw"></i>July</div><div class="r"><span>Mean ozone</span><b>59.1</b></div><div class="r"><span>Days</span><b>26</b></div></div>
+  </div>
+</div>
+<p class="note" style="margin-top:14px">No popovers: a block's package and description head its "…" menu, and "Copy block ID" is
+a menu item. The block subtitle is plain text.</p>
+
+<h3 class="z-h">Adding a block, and picking one on the board</h3>
+<p class="z-note">Every "+" opens the same menu: search on top, category titles, one row per block type with its mark and
+package. Placing, linking or stacking a block that is already on the board uses the same menu, listing the board's blocks with
+their type as meta. Type to filter; arrows and Enter work.</p>
+<div class="z-grid2">
+  <div class="z-pick"><button class="z-trigger" id="z-addbtn"><svg width="11" height="11"><use href="#i-plus"/></svg>Add a block</button>
+    <div class="z-menu" id="z-addmenu" hidden><div class="z-flt"><svg width="13" height="13"><use href="#z-search"/></svg><input id="z-addq" placeholder="Search block types…"></div><div class="z-list" id="z-addlist"></div></div></div>
+  <div class="z-pick"><button class="z-trigger" id="z-placebtn"><svg width="11" height="11"><use href="#i-plus"/></svg>Add to view</button>
+    <div class="z-menu" id="z-placemenu" hidden><div class="z-flt"><svg width="13" height="13"><use href="#z-search"/></svg><input id="z-placeq" placeholder="Search this board…"></div><div class="z-list" id="z-placelist"></div></div></div>
+</div>
+
+</section>
+
+<!-- ============================================================== 8 LABELS -->
+<section class="part" id="labels">
+<h2 class="ph"><span class="num">8</span>Labels and status</h2>
+<p class="rl">Shape tells the four small kinds apart: a badge (read only) has round ends; a tag (a value you picked), a pill (a
+click changes a setting) and a button have 4px corners. A badge has colour only for status or "on".
+<a href="design-system.md#labels">rules: design-system.md#labels</a></p>
+
+<h3 class="sh" id="badges">Badges, tags, pills, counts</h3>
+<div class="cols c2">
+  <div class="card">
+    <div class="line"><span class="cap" style="margin:0;width:70px">badge</span><span class="badge">Categorical</span><span class="badge">blockr.dplyr</span><span class="badge on">Added</span><span class="badge danger">Not found</span><span class="badge warning">Stale</span><span class="badge success">Saved</span></div>
+    <div class="line"><span class="cap" style="margin:0;width:70px">tag</span><span class="tag">Ozone<button class="x" aria-label="Remove Ozone"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="tag f-hover">Month<button class="x" aria-label="Remove Month"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="tag">Wind<button class="x" aria-label="Remove Wind"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="m" style="font-size:12px">Month drawn hovered</span></div>
+    <div class="line"><span class="cap" style="margin:0;width:70px">pill</span><button class="pill" data-menu="m-ops" data-value="≥"><span class="v">≥</span><svg width="10" height="10"><use href="#i-car"/></svg></button><button class="pill" data-menu="m-ops" data-value="in"><span class="v">is one of</span><svg width="10" height="10"><use href="#i-car"/></svg></button></div>
+    <div class="line"><span class="cap" style="margin:0;width:70px">count</span><button class="b xs main"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">2</span></button><button class="b s second">Filters <span class="count">12</span></button></div>
+  </div>
+  <ul class="rules" style="margin:0">
+    <li>Badge: 18px capsule, 11px weight 500, 7px side padding, <code>bg-subtle</code>, <code>border-default</code>, muted. Types, packages and significance levels are neutral.</li>
+    <li>Accent tint on a badge means on, added or cutting rows. Status tints only for danger, warning and success; blue "info" becomes neutral.</li>
+    <li>Tag: 24px, 13px, <code>text-default</code>. Its × shows on the hovered tag only and turns red on its own hover.</li>
+    <li>Pill: 24px with a caret; it opens a menu. The click-to-cycle pill is retired.</li>
+    <li>Count: 16px capsule in the host's colour at 14%, text <code>accent-700</code> (4.5:1 for small text).</li>
+    <li>One class each in blockr.ui: <code>.blockr-badge</code>, <code>.blockr-tag</code>, <code>.blockr-pill</code>, <code>.blockr-count</code>. The word "chip" goes.</li>
+  </ul>
+</div>
+
+<h3 class="sh" id="messages">Messages and the status line</h3>
+<p class="note">Each status has a text, a background and a border colour; a message uses all three. The status line under an
+output is 12px muted text.</p>
+<div class="cols c2">
+  <div>
+    <div class="msg danger"><b>Error.</b> Column "Ozone2" not found in the data.</div>
+    <div class="msg warning"><b>Warning.</b> 37 rows have missing values and were dropped.</div>
+    <div class="msg success"><b>Saved.</b> The board was saved as "airquality exploration".</div>
+    <div class="msg neutral"><b>Note.</b> New directory (created on save).</div>
+  </div>
+  <div class="dock"><div class="face"><div class="chart" style="margin-top:0"><div class="ch-area" style="height:60px"><div class="ch-cols"><div class="ch-col" style="--v:34%"><i class="ch-bar"></i></div><div class="ch-col" style="--v:42%"><i class="ch-bar"></i></div><div class="ch-col" style="--v:84%"><i class="ch-bar"></i></div><div class="ch-col" style="--v:86%"><i class="ch-bar"></i></div><div class="ch-col" style="--v:45%"><i class="ch-bar"></i></div></div></div></div>
+    <div class="o-foot"><span>116 of 153 rows · 37 dropped (missing ozone)</span></div></div></div>
+</div>
+
+<h3 class="sh" id="filtering">Showing that a block filters</h3>
+<p class="note">The control that undoes a filter wears the accent tint while a filter is on, carries the number of active
+filters and names the clauses in its tooltip. It is the 26px button. Where the count is itself a control, count and reset join
+as one segment. Dots are for block status only.</p>
+<div class="cols c3">
+  <div class="card"><p class="cap">Filters on (hover Reset)</p><div class="hd end"><button class="b xs main" data-tip="Month is July · Wind is Light (5 to 10)"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">2</span></button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div></div>
+  <div class="card"><p class="cap">No filter</p><div class="hd end"><button class="b xs main" disabled><svg width="12" height="12"><use href="#i-reset"/></svg>Reset</button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div></div>
+  <div class="card"><p class="cap">Count and reset as one segment</p><div class="hd end"><span class="joined"><button class="b xs main">Cohort <span class="count">12</span></button><button class="b xs main" data-tip="Reset the cohort" aria-label="Reset the cohort"><svg width="12" height="12"><use href="#i-reset"/></svg></button></span></div></div>
+</div>
+</section>
+
+<!-- ============================================================= 9 SPECIAL -->
+<section class="part" id="special">
+<h2 class="ph"><span class="num">9</span>Special blocks</h2>
+<p class="rl">Charts, the crossfilter and the code editor follow the same anatomy and tokens as every block; their own settings
+are local tokens and the mark group. <a href="design-system.md#special">rules: design-system.md#special</a></p>
+
+<h3 class="sh" id="charts">Charts</h3>
+<p class="note">The canvas reads the tokens at render: axis and data labels <code>text-muted</code>, axis line
+<code>border-strong</code>, split lines <code>border-default</code>, separators <code>bg-surface</code>, reference lines
+<code>border-danger</code>, face from the body. Canvas text is one size, <code>--blockr-mark-font-size</code>. A facet strip takes
+the section-title style. Exports (PNG, pptx) take the light values.</p>
+<div class="dock" style="max-width:760px"><div class="face">
+  <div class="hd"><div class="tt"><p class="o-title">Days by temperature, per month</p><p class="o-sub">Count of days by <button class="slot" data-menu="m-cols" data-value="Temp">Temp</button> band, facet by <button class="slot" data-menu="m-cols" data-value="Month">Month</button></p></div>
+    <button class="tool" data-tip="Download" aria-label="Download" data-menu="m-dl" data-place="right"><svg width="14" height="14"><use href="#i-dl"/></svg></button>
+    <button class="gear" data-gear-static data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div>
+  <div class="facets" style="margin-top:14px">
+    <div><div class="sec" style="text-align:center">May</div><div class="hb">
+      <span class="lab">Cool</span><span class="bw"><i style="width:64%"></i>18</span>
+      <span class="lab">Mild</span><span class="bw"><i style="width:39%"></i>11</span>
+      <span class="lab">Warm</span><span class="bw"><i style="width:7%"></i>2</span></div></div>
+    <div><div class="sec" style="text-align:center">July</div><div class="hb">
+      <span class="lab">Cool</span><span class="bw"><i style="width:0%"></i>0</span>
+      <span class="lab">Mild</span><span class="bw"><i style="width:18%"></i>5</span>
+      <span class="lab">Warm</span><span class="bw"><i style="width:93%"></i>26</span></div></div>
+  </div>
+  <p class="o-cap">Cool below 70°F, warm above 84°F.</p>
+  <div class="o-foot"><span>62 of 153 rows</span></div>
+</div></div>
+
+<h3 class="sh" id="crossfilter">Crossfilter</h3>
+<p class="note">The standard header row, with Reset above every filter it clears. "Group by" labels a field; "Filter by" titles
+a section. Inside a card: search 30px, 26px icons always shown, rows 30px, a 200px scroll area (about six rows). The bars are
+supporting marks.</p>
+<div class="dock" style="max-width:980px"><div class="face">
+  <div class="hd end"><button class="b xs main" data-tip="Month is July"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">1</span></button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div>
+  <div class="gu" style="margin-top:4px"><div class="gB">
+    <div class="fld s2"><span class="lbl">Group by</span><button class="ctl" data-menu="m-cols-opt" data-place="field" data-value="None"><span class="v ph">None</span><span class="car"></span></button></div>
+  </div></div>
+  <div class="sec" style="margin-top:24px">Filter by</div>
+  <div class="xf-cards">
+    <div>
+      <div class="xf-card-h"><span class="xf-cl">Month<small>5 values</small></span><button class="tool" data-tip="Clear this filter" aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+      <div class="xf-srch"><svg width="13" height="13"><use href="#i-search"/></svg>Search</div>
+      <div class="xf-list">
+        <div class="xf-row dim"><span class="nm">May</span><span class="xf-trk"><i style="width:100%"></i></span><span class="xf-cnt">31</span></div>
+        <div class="xf-row dim"><span class="nm">June</span><span class="xf-trk"><i style="width:97%"></i></span><span class="xf-cnt">30</span></div>
+        <div class="xf-row"><span class="nm">July</span><span class="xf-trk"><i style="width:100%"></i></span><span class="xf-cnt">31</span></div>
+        <div class="xf-row dim"><span class="nm">August</span><span class="xf-trk"><i style="width:100%"></i></span><span class="xf-cnt">31</span></div>
+        <div class="xf-row dim"><span class="nm">September</span><span class="xf-trk"><i style="width:97%"></i></span><span class="xf-cnt">30</span></div>
+      </div></div>
+    <div>
+      <div class="xf-card-h"><span class="xf-cl">Wind<small>4 bands</small></span><button class="tool" data-tip="Clear this filter" aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+      <div class="xf-srch"><svg width="13" height="13"><use href="#i-search"/></svg>Search</div>
+      <div class="xf-list">
+        <div class="xf-row"><span class="nm">Calm (under 5)</span><span class="xf-trk"><i style="width:10%"></i></span><span class="xf-cnt">3</span></div>
+        <div class="xf-row"><span class="nm">Light (5 to 10)</span><span class="xf-trk"><i style="width:100%"></i></span><span class="xf-cnt">17</span></div>
+        <div class="xf-row"><span class="nm">Moderate (10 to 15)</span><span class="xf-trk"><i style="width:59%"></i></span><span class="xf-cnt">10</span></div>
+        <div class="xf-row"><span class="nm">Strong (15 and over)</span><span class="xf-trk"><i style="width:6%"></i></span><span class="xf-cnt">1</span></div>
+      </div></div>
+    <div>
+      <div class="xf-card-h"><span class="xf-cl">Day<small>31 values</small></span><button class="tool" data-tip="Clear this filter" aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+      <div class="xf-srch"><svg width="13" height="13"><use href="#i-search"/></svg>Search</div>
+      <div class="xf-list" id="xf-days"></div></div>
+  </div>
+  <div class="o-foot"><span>31 of 153 rows</span></div>
+</div></div>
+
+<h3 class="sh" id="code">Code editor</h3>
+<p class="note">The editor is a large input: field background, 13px mono. Its colours are four local tokens,
+<code>--blockr-code-keyword</code>, <code>-string</code>, <code>-number</code> and <code>-comment</code>, pointing at
+<code>text-accent</code>, <code>text-success</code>, <code>text-warning</code> and <code>text-muted</code>. Line numbers muted,
+the active line <code>bg-hover</code>, the input line a band mixed from the accent.</p>
+<div class="dock" style="max-width:760px"><div class="face">
+  <span class="lbl">Script</span>
+  <div class="ed">
+    <div class="ln"><span class="g">1</span><span class="cd"><span class="tk">library</span>(dplyr)</span></div>
+    <div class="ln"><span class="g">2</span><span class="cd"><span class="tc"># summer days with enough sun</span></span></div>
+    <div class="ln in"><span class="g">3</span><span class="cd">airquality <span class="tk">|&gt;</span></span></div>
+    <div class="ln act"><span class="g">4</span><span class="cd">  filter(Month <span class="tk">%in%</span> c(<span class="tn">6</span>, <span class="tn">7</span>, <span class="tn">8</span>), Solar.R &gt; <span class="tn">150</span>) <span class="tk">|&gt;</span></span></div>
+    <div class="ln"><span class="g">5</span><span class="cd">  summarise(ozone = mean(Ozone, na.rm = <span class="tk">TRUE</span>), label = <span class="ts">"summer"</span>)</span></div>
+  </div>
+  <div class="o-foot"><span>1 row</span></div>
+</div></div>
+</section>
+
+<!-- ============================================================= 10 AUTHORS -->
+<section class="part" id="authors">
+<h2 class="ph"><span class="num">10</span>For package authors</h2>
+<p class="rl">Check a block against this list before release, in light and in dark.
+<a href="design-system.md#authors">rules: design-system.md#authors</a></p>
+<div class="card"><ul class="check">
+  <li><span class="box"></span><span>Read meaning tokens only. No hex, no palette step, no grey outside the ramp.</span></li>
+  <li><span class="box"></span><span>Name a package's own settings <code>--blockr-&lt;owner&gt;-*</code> and read them only in its own stylesheet.</span></li>
+  <li><span class="box"></span><span>Take the face from the body (<code>--bs-body-font-family</code>); do not name a font.</span></li>
+  <li><span class="box"></span><span>Put fields in the grid and give each a size: one column, two, or the full row.</span></li>
+  <li><span class="box"></span><span>Labels 12px muted, 4px above; section titles from the one class. No heading inside a block.</span></li>
+  <li><span class="box"></span><span>On/off is a checkbox; two or three fixed values a segmented control; more, or data, a Select; several, tags.</span></li>
+  <li><span class="box"></span><span>One gear per block, <code>.blockr-gear-btn</code>, only when there is something to configure. No Apply button.</span></li>
+  <li><span class="box"></span><span>Every icon-only button and cut-off label has a tooltip; no native <code>title</code>.</span></li>
+  <li><span class="box"></span><span>Buttons: the tinted main at most once per view; no <code>btn-primary</code>, <code>btn-danger</code>, <code>btn-success</code>.</span></li>
+  <li><span class="box"></span><span>Badges neutral unless they state a status or that something is on.</span></li>
+  <li><span class="box"></span><span>Menus through blockr.ui's surface and placement; no popovers.</span></li>
+  <li><span class="box"></span><span>Chart canvas text from <code>--blockr-mark-font-size</code>, ink from the tokens at render.</span></li>
+</ul></div>
+</section>
+
+<!-- ============================================================= APPENDIX -->
+<section class="part" id="appendix">
+<h2 class="ph">Appendix</h2>
+<p class="rl">Where the code lives, the legacy names, and the decision record. <a href="design-system.md#appendix">rules: design-system.md#appendix</a></p>
+<div class="cols c2">
+  <div class="card">
+    <h4 class="mini" style="margin-top:0">Where the code lives</h4>
+    <ul class="rules" style="margin:0">
+      <li>blockr.ui owns the tokens: <code>inst/assets/css/blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>.</li>
+      <li>blockr.ui owns the shared components: badge, tag, pill and count classes, the gear button, Blockr.Select and the one menu placement routine.</li>
+      <li>blockr.dock owns the dock header and the block category colours (<code>blk_color()</code>).</li>
+      <li>blockr.theme owns data colours (chart palettes, map markers).</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4 class="mini" style="margin-top:0">Decision record</h4>
+    <p class="note" style="margin:0">The decisions, with their reasoning, in the order they were made: <a href="naming.md" style="color:var(--blockr-color-text-accent)">naming.md</a>.
+    The options drawn for each are in <a href="topics/index.html" style="color:var(--blockr-color-text-accent)">topics/</a>, <code>questions.html</code>, <code>buttons.html</code> and <code>block-layout.html</code>.</p>
+  </div>
+</div>
+<div class="card" style="margin-top:16px" id="legacy"></div>
+</section>
+</div>
+
+<script>
+/* ============================================= tokens: read at load, drawn */
+const root = document.documentElement;
+const cs = () => getComputedStyle(root);
+const val = (n) => cs().getPropertyValue(n).trim();
+
+// Colour maths: parse whatever the browser resolved, composite translucent
+// colours over the surface they sit on, then WCAG contrast.
+const probe = document.createElement('span');
+probe.style.display = 'none';
+document.body.appendChild(probe);
+function rgba(c) {
+  probe.style.color = ''; probe.style.color = c;
+  const m = getComputedStyle(probe).color.match(/[\d.]+/g);
+  if (!m) return null;
+  return m.slice(0, 4).map(Number).concat(m.length < 4 ? [1] : []).slice(0, 4);
+}
+function over(fg, bg) { const a = fg[3]; return [0, 1, 2].map(i => fg[i] * a + bg[i] * (1 - a)).concat([1]); }
+function lum(c) {
+  const l = c.slice(0, 3).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+}
+function contrast(fgC, bgC) {
+  const bg = rgba(bgC), fg0 = rgba(fgC);
+  if (!bg || !fg0) return null;
+  const fg = over(fg0, bg);
+  const [a, b] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+  return (a + 0.05) / (b + 0.05);
+}
+const badge = (r, min) => r == null ? '<span class="cr na">n/a</span>' :
+  `<span class="cr ${r >= min ? 'ok' : 'bad'}">${r.toFixed(1)}:1</span>`;
+
+function parse(text) {
+  // Sections from `/* ---- name */` markers inside :root, declarations after.
+  const body = text.slice(text.indexOf(':root'));
+  const out = [];
+  let cur = null;
+  const re = /\/\*\s*-{3,}\s*([^*]+?)\s*\*\/|(--blockr-[a-z0-9-]+)\s*:\s*([^;]+);/g;
+  let m;
+  while ((m = re.exec(body))) {
+    if (m[1]) { cur = { name: m[1].trim(), tokens: [] }; out.push(cur); }
+    else if (cur) cur.tokens.push({ name: m[2], raw: m[3].trim() });
+  }
+  return out;
+}
+
+const isColour = (v) => /^(#|rgb|hsl|color-mix)/.test(v);
+const short = (n) => n.replace('--blockr-', '');
+
+function row(t, kind) {
+  const v = val(t.name);
+  const ref = /^var\((--blockr-[a-z0-9-]+)\)$/.exec(t.raw);
+  // Only claim "points at X" while it is true in the current scheme; the
+  // dark file restates some tokens directly.
+  const refTxt = ref && val(ref[1]) === v ? `<span class="alias">→ ${short(ref[1])}</span>` : '';
+  let show = '', check = '';
+  if (kind === 'text' && t.name.includes('-text-')) {
+    const onAccent = t.name.endsWith('on-accent');
+    const bg = onAccent ? 'var(--blockr-color-bg-accent)' : 'var(--blockr-color-bg-surface)';
+    show = `<span class="sample" style="color:var(${t.name});background:${bg}">Number of rows</span>`;
+    const min = t.name.endsWith('disabled') ? 0 : 4.5;
+    check = badge(contrast(v, val(onAccent ? '--blockr-color-bg-accent' : '--blockr-color-bg-surface')), min) +
+      (t.name.endsWith('disabled') ? ' <span class="val">exempt (disabled)</span>' : '') +
+      (t.name.endsWith('muted') ? ` on hover ${badge(contrast(v, val('--blockr-color-bg-hover')), 4.5)}` : '');
+  } else if (t.name.includes('-border-') || t.name.endsWith('-border')) {
+    show = `<span class="chip" style="border:2px solid var(${t.name});background:var(--blockr-color-bg-surface)"></span>`;
+    const r = contrast(v, val('--blockr-color-bg-surface'));
+    // Neutral borders are dividers and outlines, which WCAG exempts; the 3:1
+    // minimum applies where a border is the only thing marking a control or
+    // a state. Report neutral ones without a verdict.
+    const neutral = /border(-default|-strong|-hover)?$/.test(t.name);
+    check = r == null ? '' : neutral
+      ? `<span class="cr na">${r.toFixed(1)}:1</span> <span class="val">divider: no minimum</span>`
+      : badge(r, 3) + ' <span class="val">marks a state: 3:1</span>';
+  } else if (isColour(v)) {
+    show = `<span class="chip" style="background:var(${t.name})"></span>`;
+  } else if (t.name.includes('radius')) {
+    show = `<span class="tbox" style="border-radius:var(${t.name})"></span>`;
+  } else if (t.name.includes('shadow')) {
+    show = `<span class="tbox" style="border:0;box-shadow:var(${t.name});border-radius:var(--blockr-radius-lg)"></span>`;
+  } else if (t.name.includes('focus-ring')) {
+    show = `<span class="tbox" style="border-color:var(--blockr-color-border-accent);box-shadow:var(${t.name});border-radius:var(--blockr-radius-lg)"></span>`;
+  } else if (t.name.includes('control-h')) {
+    show = `<span style="display:inline-block;height:var(${t.name});width:120px;border:1px solid var(--blockr-color-border-default);border-radius:var(--blockr-radius-lg);background:var(--blockr-color-bg-field);vertical-align:middle"></span>`;
+  } else if (t.name.includes('font-size')) {
+    show = `<span style="font-size:var(${t.name})">Number of rows</span>`;
+  } else if (t.name.includes('font-weight')) {
+    show = `<span style="font-weight:var(${t.name})">Number of rows</span>`;
+  } else if (t.name.includes('font-mono')) {
+    show = `<span style="font-family:var(${t.name})">filter(x > 1)</span>`;
+  }
+  return `<tr><td><code>${short(t.name)}</code> ${refTxt}</td><td>${show}</td><td><code class="val">${v}</code></td><td>${check}</td></tr>`;
+}
+
+function ramps(sec) {
+  const groups = {};
+  sec.tokens.forEach(t => { const h = short(t.name).replace(/-\d+$/, ''); (groups[h] = groups[h] || []).push(t); });
+  return Object.entries(groups).map(([h, ts]) =>
+    `<div><b>${h}</b></div><div class="ramp">` + ts.map(t =>
+      `<div><div class="sw" style="background:var(${t.name})"></div><small>${short(t.name).split('-').pop()}<br>${val(t.name)}</small></div>`
+    ).join('') + '</div>').join('');
+}
+
+let sections = [];
+function render() {
+  if (!sections.length) return;
+  const table = (sec) => `<table class="tok"><tr><th>token</th><th>looks like</th><th>resolves to</th><th>check</th></tr>${
+    sec.tokens.map(t => row(t, sec.name.split(' ')[0])).join('')}</table>`;
+  const byName = (n) => sections.find(s => s.name === n);
+  const pal = byName('palette');
+  document.getElementById('palette').innerHTML = pal ? ramps(pal) : '';
+  document.querySelectorAll('[data-tokens]').forEach(host => {
+    // A host names one or more sections; several are merged into one table.
+    const names = host.dataset.tokens.split(',').map(n => n.trim());
+    const secs = names.map(byName).filter(Boolean);
+    host.innerHTML = secs.length ? table({ name: secs[0].name, tokens: secs.flatMap(s => s.tokens) }) : '';
+  });
+  const leg = sections.find(s => s.name.startsWith('legacy'));
+  document.getElementById('legacy').innerHTML = leg ? `<details class="legacy"><summary>Legacy names (aliases)</summary>
+    <p class="note" style="margin-top:8px">Old names, kept so nothing breaks. Most point at their replacement;
+    <code>text-secondary</code> and <code>text-subtle</code> keep their old greys until each use moves to the token its job calls
+    for. The token tests warn on every read of an alias.</p>${table(leg)}</details>` : '';
+}
+
+fetch('../../inst/assets/css/blockr-tokens.css?' + Date.now())
+  .then(r => r.text())
+  .then(t => { sections = parse(t); render(); });
+
+/* ================================================================ scheme */
+document.querySelectorAll('#scheme button').forEach(b => b.addEventListener('click', () => {
+  root.setAttribute('data-bs-theme', b.dataset.scheme);
+  render();
+}));
+
+/* ================================================================ tooltips */
+const tip = document.createElement('div');
+tip.className = 'tip'; tip.setAttribute('role', 'tooltip');
+document.body.appendChild(tip);
+let tipFor = null, tipTimer = null;
+const TIP_SEL = '[data-tip], .lbl, .ctl .v, .mr .lab, .xf-row .nm, .xf-cl';
+function tipText(el) {
+  if (el.dataset.tip) return el.dataset.tip;
+  if (el.scrollWidth > el.clientWidth + 1) return el.textContent.trim();
+  return null;
+}
+function hideTip() { clearTimeout(tipTimer); tip.classList.remove('on'); tipFor = null; }
+function showTip(el) {
+  const text = tipText(el);
+  if (!text || !document.contains(el)) return;
+  tip.textContent = text;
+  tip.style.left = '0px'; tip.style.top = '0px';
+  const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
+  let top = r.top - t.height - 6;
+  if (top < 8) top = r.bottom + 6;
+  let left = r.left + r.width / 2 - t.width / 2;
+  left = Math.max(8, Math.min(left, innerWidth - t.width - 8));
+  tip.style.left = left + 'px'; tip.style.top = top + 'px';
+  tip.classList.add('on');
+}
+function tipTarget(e) {
+  const el = e.target.closest && e.target.closest(TIP_SEL);
+  if (!el || el.classList.contains('static')) return null;
+  return el;
+}
+document.addEventListener('mouseover', e => {
+  const el = tipTarget(e);
+  if (el === tipFor) return;
+  hideTip(); tipFor = el;
+  if (el) tipTimer = setTimeout(() => showTip(el), 800);
+});
+document.addEventListener('focusin', e => {
+  const el = tipTarget(e);
+  if (!el || !el.matches(':focus-visible')) return;
+  hideTip(); tipFor = el; showTip(el);
+});
+document.addEventListener('focusout', hideTip);
+document.addEventListener('mousedown', hideTip, true);
+document.addEventListener('scroll', hideTip, true);
+
+/* ================================================================== menus */
+let menu = null;
+const tplOf = (t) => document.getElementById(t.dataset.menu).content;
+const valsOf = (t) => (t.dataset.value || '').split('|').filter(Boolean);
+function labelOf(t, v) {
+  const r = tplOf(t).querySelector(`.mr[data-value="${CSS.escape(v)}"] .lab`);
+  return r ? r.textContent : v;
+}
+function refresh(t) {
+  const vals = valsOf(t);
+  if (t.classList.contains('multi')) {
+    t.querySelectorAll('.tag').forEach(x => x.remove());
+    const car = t.querySelector('.car');
+    vals.forEach(v => {
+      const s = document.createElement('span');
+      s.className = 'tag';
+      s.innerHTML = `${labelOf(t, v)}<button class="x" aria-label="Remove ${v}" data-v="${v}"><svg width="10" height="10"><use href="#i-x"/></svg></button>`;
+      t.insertBefore(s, car);
+    });
+  } else if (t.hasAttribute('data-multi')) {
+    const order = [...tplOf(t).querySelectorAll('.mr[data-value]')].map(r => r.dataset.value).filter(v => vals.includes(v));
+    const labs = order.map(v => labelOf(t, v));
+    t.innerHTML = labs.slice(0, 3).join(', ') + (labs.length > 3 ? ` <span class="more">+${labs.length - 3} more</span>` : '');
+  } else if (vals.length && !t.classList.contains('offer')) {
+    const v = t.querySelector('.v') || t;
+    v.textContent = labelOf(t, vals[0]);
+    if (v !== t) v.classList.toggle('ph', vals[0] === 'None');
+  }
+}
+function closeMenu() {
+  if (!menu) return;
+  menu.el.remove();
+  menu.trigger.classList.remove('open');
+  menu.trigger.setAttribute('aria-expanded', 'false');
+  menu = null;
+}
+function place(el, t) {
+  const r = t.getBoundingClientRect();
+  const kind = t.dataset.place || 'button';
+  if (kind === 'field') { el.style.width = Math.max(r.width, 190) + 'px'; el.style.maxWidth = 'none'; }
+  const w = el.offsetWidth, h = el.offsetHeight;
+  let left = kind === 'right' ? r.right - w : r.left;
+  left = Math.max(8, Math.min(left, innerWidth - w - 8));
+  let top = r.bottom + 4;
+  if (top + h > innerHeight - 8 && r.top - 4 - h > 8) top = r.top - 4 - h;
+  el.style.left = (left + scrollX) + 'px';
+  el.style.top = (top + scrollY) + 'px';
+}
+function openMenu(t) {
+  const el = document.createElement('div');
+  el.className = 'mn'; el.setAttribute('role', 'menu');
+  el.appendChild(tplOf(t).cloneNode(true));
+  const vals = valsOf(t);
+  el.querySelectorAll('.mr[data-value]').forEach(r => r.classList.toggle('cur', vals.includes(r.dataset.value)));
+  if (t.hasAttribute('data-multi')) el.dataset.multi = '1';
+  if (el.querySelectorAll('.mr').length > 8) {
+    const f = document.createElement('div');
+    f.className = 'mf';
+    f.innerHTML = '<input placeholder="Filter" aria-label="Filter">';
+    el.prepend(f); el.classList.add('has-filter');
+    f.querySelector('input').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase();
+      el.querySelectorAll('.mr').forEach(r => r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none');
+    });
+  }
+  document.body.appendChild(el);
+  place(el, t);
+  t.classList.add('open'); t.setAttribute('aria-expanded', 'true');
+  menu = { el, trigger: t };
+}
+document.addEventListener('click', e => {
+  // a tag's ×: remove that value
+  const x = e.target.closest('.tag .x');
+  if (x) {
+    e.stopPropagation();
+    const field = x.closest('[data-menu]');
+    const tag = x.closest('.tag');
+    if (field && x.dataset.v) { field.dataset.value = valsOf(field).filter(v => v !== x.dataset.v).join('|'); refresh(field); }
+    else tag.remove();
+    hideTip();
+    return;
+  }
+  const row = e.target.closest('.mn .mr');
+  if (row && menu) {
+    if (row.classList.contains('dis')) return;
+    const t = menu.trigger;
+    if (row.dataset.value != null) {
+      if (menu.el.dataset.multi) {
+        const vals = valsOf(t), v = row.dataset.value;
+        const next = vals.includes(v) ? vals.filter(w => w !== v) : vals.concat(v);
+        if (!next.length) return;
+        t.dataset.value = next.join('|');
+        row.classList.toggle('cur', next.includes(v));
+        refresh(t); place(menu.el, t);
+        return;
+      }
+      t.dataset.value = row.dataset.value;
+      refresh(t);
+    }
+    closeMenu();
+    return;
+  }
+  const trig = e.target.closest('[data-menu]');
+  if (trig && !(menu && menu.el.contains(trig))) {
+    e.preventDefault();
+    const same = menu && menu.trigger === trig;
+    closeMenu();
+    if (!same) openMenu(trig);
+    return;
+  }
+  if (menu && !menu.el.contains(e.target)) closeMenu();
+});
+document.querySelectorAll('[data-menu][data-value]').forEach(t => { if (t.classList.contains('multi')) refresh(t); });
+addEventListener('resize', () => { if (menu) place(menu.el, menu.trigger); });
+
+/* ============================================================ gear trays */
+function setTray(b, open) {
+  b.classList.toggle('open', open);
+  const g = b.querySelector('[data-gear]');
+  if (g) g.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-gear]');
+  if (g) { const b = g.closest('.blk'); setTray(b, !b.classList.contains('open')); return; }
+  const o = e.target.closest('[data-open-gear]');
+  if (o) setTray(o.closest('.blk'), true);
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  hideTip();
+  if (menu) { const t = menu.trigger; closeMenu(); t.focus({ preventScroll: true }); return; }
+  // Escape first reverts an uncommitted field; otherwise it closes the tray
+  const f = document.activeElement && document.activeElement.closest('[data-commit]');
+  if (f && f.classList.contains('dirty')) return;
+  const inBlk = document.activeElement && document.activeElement.closest('.blk.open');
+  (inBlk ? [inBlk] : [...document.querySelectorAll('.blk.open')]).forEach(b => setTray(b, false));
+});
+
+/* ================================================== checkbox side effects */
+document.querySelectorAll('input[data-labels]').forEach(i => i.addEventListener('change', () => {
+  document.getElementById(i.dataset.labels).classList.toggle('no-labels', !i.checked);
+}));
+
+/* ======================================================= segmented control */
+document.addEventListener('click', e => {
+  const b = e.target.closest('.seg > button');
+  if (!b) return;
+  b.parentElement.querySelectorAll('button').forEach(x => { x.classList.toggle('on', x === b); if (x.hasAttribute('role')) x.setAttribute('aria-checked', x === b); });
+});
+
+/* ==================================================== text commit (Enter) */
+document.querySelectorAll('[data-commit]').forEach(f => {
+  const inp = f.querySelector('input');
+  if (!inp) return;
+  let committed = f.classList.contains('dirty') ? inp.defaultValue.replace(/s$/, '') : inp.value;
+  inp.addEventListener('input', () => f.classList.toggle('dirty', inp.value !== committed));
+  const commit = () => { committed = inp.value; f.classList.remove('dirty'); };
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') commit();
+    if (e.key === 'Escape' && f.classList.contains('dirty')) { inp.value = committed; f.classList.remove('dirty'); e.stopPropagation(); }
+  });
+  inp.addEventListener('blur', () => { if (f.classList.contains('dirty') && !f.matches('.as-code')) commit(); });
+  const chip = f.querySelector('.enter');
+  if (chip) chip.addEventListener('mousedown', e => { e.preventDefault(); commit(); });
+});
+
+/* ======================================================= builder or code */
+const mode = document.getElementById('mode');
+mode.addEventListener('click', () => {
+  const on = mode.getAttribute('aria-pressed') !== 'true';
+  mode.setAttribute('aria-pressed', on);
+  document.getElementById('formula').classList.toggle('code', on);
+  const name = on ? 'Back to the builder' : 'Edit as formula text';
+  mode.dataset.tip = name; mode.setAttribute('aria-label', name);
+  hideTip();
+});
+
+/* ============================================================ grid demo */
+const gdemo = document.getElementById('gdemo');
+function setW(w) {
+  gdemo.style.width = w + 'px';
+  document.querySelectorAll('#gw button').forEach(b => b.classList.toggle('on', b.dataset.w == w));
+}
+document.querySelectorAll('#gw button').forEach(b => b.addEventListener('click', () => setW(b.dataset.w)));
+new ResizeObserver(() => {
+  const w = Math.round(gdemo.getBoundingClientRect().width);
+  const g = gdemo.querySelector('.gB');
+  const n = getComputedStyle(g).gridTemplateColumns.split(' ').length;
+  const cw = parseFloat(getComputedStyle(g).gridTemplateColumns.split(' ')[0]);
+  document.getElementById('gread').textContent = `panel ${w}px · ${n} column${n > 1 ? 's' : ''} of ${Math.round(cw)}px`;
+  gdemo.querySelectorAll('.gu').forEach(h => h.style.setProperty('--cw', cw + 'px'));
+  document.querySelectorAll('#gw button').forEach(b => b.classList.toggle('on', b.dataset.w == w));
+}).observe(gdemo);
+document.getElementById('showcols').addEventListener('change', e => document.body.classList.toggle('show-cols', e.target.checked));
+
+/* ========================================================== crossfilter */
+// July has one row per day, so every day counts 1 under the Month filter.
+document.getElementById('xf-days').innerHTML = Array.from({ length: 31 }, (_, i) =>
+  `<div class="xf-row"><span class="nm">${i + 1}</span><span class="xf-trk"><i style="width:100%"></i></span><span class="xf-cnt">1</span></div>`
+).join('');
+</script>
+
+<script>
+(function () {
+  // renaming in place
+  function names(group) { return [...document.querySelectorAll('.z-ed[data-group="' + group + '"]')].map(e => e.textContent.trim()); }
+  document.querySelectorAll('.z-ed').forEach(el => {
+    let before = '';
+    const err = () => el.closest('.z-card').querySelector('.z-err');
+    el.addEventListener('dblclick', () => {
+      before = el.textContent; el.contentEditable = 'true'; el.focus();
+      const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    });
+    const finish = (commit) => {
+      if (el.contentEditable !== 'true') return true;
+      const v = el.textContent.trim();
+      if (commit) {
+        const others = names(el.dataset.group).filter((n, i, a) => n !== v || a.indexOf(n) !== i);
+        let msg = '';
+        if (!v) msg = 'A name cannot be empty.';
+        else if (names(el.dataset.group).filter(n => n === v).length > 1) msg = 'Another block already has this name.';
+        if (msg) { el.classList.add('z-bad'); err().textContent = msg; return false; }
+      } else { el.textContent = before; }
+      el.classList.remove('z-bad'); err().textContent = ''; el.contentEditable = 'false'; return true;
+    };
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); if (finish(true)) el.blur(); }
+      if (e.key === 'Escape') { e.preventDefault(); finish(false); el.blur(); }
+    });
+    el.addEventListener('blur', () => { if (!finish(true)) { setTimeout(() => el.focus(), 0); } });
+  });
+
+  // busy cue
+  const run = document.getElementById('z-run');
+  if (run) run.addEventListener('click', () => {
+    const c = document.getElementById('z-busy'), clock = c.querySelector('.z-clock'), t0 = Date.now();
+    const start = setTimeout(() => { c.classList.add('z-busy'); iv = setInterval(() => clock.textContent = 'computing… ' + ((Date.now() - t0) / 1000).toFixed(1) + ' s', 100); }, 300);
+    let iv;
+    setTimeout(() => { clearTimeout(start); clearInterval(iv); c.classList.remove('z-busy'); clock.textContent = ''; }, 2400);
+  });
+
+  // pickers
+  const TYPES = [
+    ['Input', [['Dataset', 'blockr.core', '#0072B2', 'z-db'], ['Import Data', 'blockr.io', '#0072B2', 'z-file']]],
+    ['Transform', [['Arrange Rows', 'blockr.dplyr', '#009E73', 'z-sort'], ['Filter Rows', 'blockr.dplyr', '#009E73', 'z-filter'], ['Join', 'blockr.dplyr', '#009E73', 'z-join'], ['Summarize', 'blockr.dplyr', '#009E73', 'z-sum']]],
+    ['Plot', [['Chart', 'blockr.viz', '#E69F00', 'z-chart']]],
+    ['Output', [['Export Data', 'blockr.io', '#D55E00', 'z-out']]]];
+  const BOARD = [['Blocks', [['Measurements', 'Dataset', '#0072B2', 'z-db'], ['Complete cases', 'Filter Rows', '#009E73', 'z-filter'], ['Mean ozone', 'Chart', '#E69F00', 'z-chart']]],
+    ['Extensions', [['Outline', 'extension', '#6b7280', 'z-page']]]];
+  function row(n, meta, c, ic, badge) {
+    return '<div class="z-mi" data-n="' + n.toLowerCase() + '"><span class="z-mk z-m24" style="--c:' + c + '"><svg width="13" height="13"><use href="#' + ic + '"/></svg></span>' + n +
+      (badge ? '<span class="z-badge">' + meta + '</span>' : '<span class="z-meta2">' + meta + '</span>') + '</div>';
+  }
+  function setup(btnId, menuId, qId, listId, data, badge) {
+    const btn = document.getElementById(btnId), menu = document.getElementById(menuId), q = document.getElementById(qId), list = document.getElementById(listId);
+    if (!btn) return;
+    function draw() {
+      const t = q.value.trim().toLowerCase();
+      let h = '';
+      if (!t) data.forEach(([g, rs]) => { h += '<div class="z-gt">' + g + '</div>' + rs.map(r => row(r[0], r[1], r[2], r[3], badge)).join(''); });
+      else data.flatMap(([g, rs]) => rs).filter(r => r[0].toLowerCase().includes(t)).forEach(r => h += row(r[0], r[1], r[2], r[3], badge));
+      list.innerHTML = h || '<div class="z-gt" style="text-transform:none;letter-spacing:0;font-weight:400">No match</div>';
+      const first = list.querySelector('.z-mi'); if (first) first.classList.add('hi');
+    }
+    btn.addEventListener('click', e => { e.stopPropagation(); menu.hidden = !menu.hidden; if (!menu.hidden) { q.value = ''; draw(); q.focus(); } });
+    q.addEventListener('input', draw);
+    q.addEventListener('keydown', e => {
+      const rows = [...list.querySelectorAll('.z-mi')], i = rows.findIndex(r => r.classList.contains('hi'));
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); rows.forEach(r => r.classList.remove('hi')); const k = Math.max(0, Math.min(rows.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1))); rows[k] && rows[k].classList.add('hi'); rows[k] && rows[k].scrollIntoView({ block: 'nearest' }); }
+      if (e.key === 'Enter' && rows[i]) { menu.hidden = true; btn.focus(); }
+      if (e.key === 'Escape') { menu.hidden = true; btn.focus(); }
+    });
+    list.addEventListener('click', e => { if (e.target.closest('.z-mi')) menu.hidden = true; });
+    list.addEventListener('mouseover', e => { const r = e.target.closest('.z-mi'); if (r) { list.querySelectorAll('.z-mi').forEach(x => x.classList.remove('hi')); r.classList.add('hi'); } });
+    document.addEventListener('click', e => { if (!menu.contains(e.target) && e.target !== btn) menu.hidden = true; });
+  }
+  setup('z-addbtn', 'z-addmenu', 'z-addq', 'z-addlist', TYPES, true);
+  setup('z-placebtn', 'z-placemenu', 'z-placeq', 'z-placelist', BOARD, false);
+})();
+</script>
+</body>
+</html>
