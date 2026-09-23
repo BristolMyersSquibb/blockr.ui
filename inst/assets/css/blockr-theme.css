@@ -7,6 +7,18 @@
    Bootstrap Base Overrides
    ============================================ */
 
+/* --- Bootstrap's surface reads the blockr surface ---
+   bslib's Shiny preset sets its own body background, and Bootstrap paints
+   cards, accordions and the like from it. In dark that is #1D1F21, a neutral
+   grey that sat beside the blue-grey blockr surfaces as a brownish band on
+   every block. Pointing it at the tokens gives one surface in both schemes;
+   in light nothing changes, both are white. `:root:root` outranks bslib's
+   `:root` and `[data-bs-theme]` rules, which it injects after this sheet. */
+:root:root {
+  --bs-body-bg: var(--blockr-color-bg-surface);
+  --bs-body-color: var(--blockr-color-text-default);
+}
+
 /* --- Typography --- */
 body {
   font-size: var(--blockr-font-size-base);
