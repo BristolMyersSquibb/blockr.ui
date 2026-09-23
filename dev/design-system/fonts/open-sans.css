@@ -1,0 +1,5 @@
+/* Open Sans, the files bslib's Shiny preset ships (latin subset), so these
+   pages render in the face the app uses. */
+@font-face { font-family: "Open Sans"; src: url("open-sans-latin-400.woff2") format("woff2"); font-weight: 400; font-display: block; }
+@font-face { font-family: "Open Sans"; src: url("open-sans-latin-500.woff2") format("woff2"); font-weight: 500; font-display: block; }
+@font-face { font-family: "Open Sans"; src: url("open-sans-latin-600.woff2") format("woff2"); font-weight: 600; font-display: block; }

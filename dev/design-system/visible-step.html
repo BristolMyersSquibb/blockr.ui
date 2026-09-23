@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="fonts/open-sans.css">
+<meta charset="utf-8">
+<title>The visible step: what changes on screen</title>
+<link rel="stylesheet" href="../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-theme.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-table-preview.css">
+<style>
+/* Page chrome only. The three block cards below are styled by blockr.ui's
+   real stylesheets; the only difference between the columns is the few
+   token values set on each column. */
+body { margin: 0; padding: 32px; background: #f3f4f6; font-family: "Open Sans", sans-serif; color: #111827; }
+.wrap { max-width: 1180px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 6px; }
+.lede { color: #4b5563; max-width: 78ch; line-height: 1.55; margin: 0 0 4px; }
+h2 { font-size: 15px; margin: 26px 0 8px; }
+.zoom { display: grid; grid-template-columns: 170px 1fr 30px 1fr; gap: 10px 14px; align-items: center; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px 20px; }
+.zoom .big { font-size: 26px; font-weight: 500; }
+.zoom .meta { font: 12px ui-monospace, Menlo, monospace; color: #6b7280; }
+.zoom .arrow { color: #9ca3af; font-size: 20px; text-align: center; }
+.zoom .what { font-size: 13px; color: #374151; }
+.ok { color: #15803d; } .bad { color: #b91c1c; }
+.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 8px; }
+.col h3 { font-size: 14px; margin: 0 0 2px; }
+.col p { font-size: 12px; color: #4b5563; margin: 0 0 10px; line-height: 1.5; min-height: 54px; }
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; }
+.field { margin-bottom: 12px; }
+.card .form-control { width: 100%; box-sizing: border-box; }
+.hint { font-size: 12px; margin-top: 4px; color: var(--blockr-color-text-subtle); }
+.card .blockr-table { margin-top: 6px; width: 100%; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; margin-left: 6px; }
+.fine { font-size: 12px; color: #4b5563; max-width: 80ch; line-height: 1.55; }
+code { font: 12px ui-monospace, Menlo, monospace; background: #f3f4f6; padding: 1px 5px; border-radius: 4px; }
+
+/* ---- the change, and only the change ---------------------------------- */
+
+/* Proposed: secondary folds into default, readable subtle text into muted. */
+.after {
+  --blockr-color-text-secondary: var(--blockr-color-text-default);
+  --blockr-color-text-subtle: var(--blockr-color-text-muted);
+}
+/* The placeholder reads grey-400 directly rather than the token, so the
+   switch above does not reach it; this is the one-line edit it needs. */
+.after .form-control::placeholder,
+.alt .form-control::placeholder { color: var(--blockr-color-text-muted); }
+
+/* Alternative: labels (the old "secondary") go lighter instead, to muted. */
+.alt {
+  --blockr-color-text-secondary: var(--blockr-color-text-muted);
+  --blockr-color-text-subtle: var(--blockr-color-text-muted);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>The visible step: what changes on screen</h1>
+<p class="lede">Your decision was three text levels: <b>default</b> (near-black), <b>muted</b> (mid grey)
+and <b>disabled</b> (light grey, for disabled controls only). Two older names don't fit that and
+still hold their old colours. The "visible step" is switching them. Everything below uses blockr.ui's
+real stylesheets; the columns differ only in those two colours.</p>
+
+<h2>The two changes, up close</h2>
+<div class="zoom">
+  <div class="what"><b>1. "Secondary" text</b><br>labels above every input, table headers, section titles</div>
+  <div><div class="big" style="color:#374151">Number of rows</div><div class="meta">today: grey-700 #374151 · <span class="ok">10.3:1</span></div></div>
+  <div class="arrow">→</div>
+  <div><div class="big" style="color:#111827">Number of rows</div><div class="meta">proposed: default, grey-900 #111827 · <span class="ok">17.7:1</span></div></div>
+
+  <div class="what"><b>2. "Subtle" text</b><br>placeholders, hints, column types, row numbers, NA</div>
+  <div><div class="big" style="color:#9ca3af">e.g. 10 · dbl · NA</div><div class="meta">today: grey-400 #9ca3af · <span class="bad">2.5:1, below the 4.5 minimum</span></div></div>
+  <div class="arrow">→</div>
+  <div><div class="big" style="color:#6b7280">e.g. 10 · dbl · NA</div><div class="meta">proposed: muted, grey-500 #6b7280 · <span class="ok">4.8:1</span></div></div>
+</div>
+<p class="fine">Change 1 is not about contrast: grey-700 already passes easily. It is about having three text
+levels instead of five. It removes a colour that sits between "main text" and "muted" and is hard to tell apart
+from main text (the two are only 1.7:1 from each other). Change 2 is about contrast: light grey text is hard to
+read and fails the accessibility minimum.</p>
+
+<h2>On a block card</h2>
+<div class="cols">
+  <div class="col today">
+    <h3>Today</h3>
+    <p>Labels in dark grey, values in near-black. Placeholder, hint, column types, row numbers and NA in light grey.</p>
+    <div class="card">
+      <div class="field"><label class="control-label">Dataset</label><input class="form-control" value="airquality"></div>
+      <div class="field"><label class="control-label">Number of rows</label><input class="form-control" placeholder="e.g. 10"><div class="hint">Leave empty to show all rows</div></div>
+      <table class="blockr-table"><thead><tr><th class="blockr-row-number"></th><th><span class="blockr-col-name">Ozone</span> <span class="blockr-type-label">int</span></th><th><span class="blockr-col-name">Wind</span> <span class="blockr-type-label">dbl</span></th></tr></thead>
+      <tbody><tr><td class="blockr-row-number">1</td><td>41</td><td>7.4</td></tr><tr><td class="blockr-row-number">2</td><td><span class="blockr-na">NA</span></td><td>8.0</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <div class="col after">
+    <h3>Proposed <span class="tag">your decision</span></h3>
+    <p>Labels become near-black like the values, set apart only by their smaller size. Light grey text becomes mid grey and is readable.</p>
+    <div class="card">
+      <div class="field"><label class="control-label">Dataset</label><input class="form-control" value="airquality"></div>
+      <div class="field"><label class="control-label">Number of rows</label><input class="form-control" placeholder="e.g. 10"><div class="hint">Leave empty to show all rows</div></div>
+      <table class="blockr-table"><thead><tr><th class="blockr-row-number"></th><th><span class="blockr-col-name">Ozone</span> <span class="blockr-type-label">int</span></th><th><span class="blockr-col-name">Wind</span> <span class="blockr-type-label">dbl</span></th></tr></thead>
+      <tbody><tr><td class="blockr-row-number">1</td><td>41</td><td>7.4</td></tr><tr><td class="blockr-row-number">2</td><td><span class="blockr-na">NA</span></td><td>8.0</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <div class="col alt">
+    <h3>Alternative: labels lighter</h3>
+    <p>Same three levels, but labels go to muted instead of default, so they stay visibly quieter than the values.</p>
+    <div class="card">
+      <div class="field"><label class="control-label">Dataset</label><input class="form-control" value="airquality"></div>
+      <div class="field"><label class="control-label">Number of rows</label><input class="form-control" placeholder="e.g. 10"><div class="hint">Leave empty to show all rows</div></div>
+      <table class="blockr-table"><thead><tr><th class="blockr-row-number"></th><th><span class="blockr-col-name">Ozone</span> <span class="blockr-type-label">int</span></th><th><span class="blockr-col-name">Wind</span> <span class="blockr-type-label">dbl</span></th></tr></thead>
+      <tbody><tr><td class="blockr-row-number">1</td><td>41</td><td>7.4</td></tr><tr><td class="blockr-row-number">2</td><td><span class="blockr-na">NA</span></td><td>8.0</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<h2>What the step is, mechanically</h2>
+<p class="fine">Two lines in <code>blockr-tokens.css</code>: <code>--blockr-color-text-secondary</code> points at
+<code>text-default</code> (or <code>text-muted</code> for the alternative), and <code>--blockr-color-text-subtle</code>
+points at <code>text-muted</code>. Every package that uses those names follows at once: 74 places use
+"secondary" and 101 use "subtle", across 13 packages. A few spots read the grey directly instead of the name,
+like the input placeholder here, and need a one-line edit each.</p>
+</div>
+</body>
+</html>

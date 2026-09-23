@@ -1,0 +1,293 @@
+<section class="part" id="gear">
+<style>
+#gear h3.sub { font-size: 16px; font-weight: 500; margin: 30px 0 4px; }
+#gear .blk { padding: 14px 16px 16px; }
+#gear .cap { font-size: 11px; color: var(--blockr-color-text-muted); margin: 0 0 4px; }
+#gear .stack > .panel + .cap { margin-top: 12px; }
+
+/* header row with the output title on the left (viz chart, composer) */
+#gear .hrow.t { align-items: flex-start; margin-bottom: 8px; }
+#gear .ttl { flex: 1 1 auto; min-width: 0; padding-top: 1px; }
+#gear .ttl .o-title { line-height: 1.4; }
+#gear .ttl .o-sub { margin: 1px 0 0; }
+#gear .slot { color: var(--blockr-color-text-accent); border-bottom: 1px dashed currentColor; }
+
+/* proposed gear + tools, tokens only */
+#gear .gb { box-sizing: border-box; width: 26px; height: 26px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid var(--blockr-color-border-default); background: transparent; color: var(--blockr-color-text-muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: all var(--blockr-transition); }
+#gear .gb:hover { color: var(--blockr-color-text-default); border-color: var(--blockr-color-border-strong); background: var(--blockr-color-bg-hover); }
+#gear .gb.on, #gear .gb.on:hover { color: var(--blockr-color-text-accent); border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); }
+#gear .gb.q { border-color: transparent; }
+#gear .gb.q:hover { border-color: transparent; }
+#gear .gb.f { background: var(--blockr-color-bg-field); }
+#gear .gb.f:hover { background: var(--blockr-color-bg-hover); }
+#gear .gb.x30 { width: 30px; height: 30px; font-size: 13px; }
+#gear .gb.txt { width: auto; min-width: 26px; padding: 0 6px; }
+#gear .gb.x30.txt { min-width: 30px; }
+
+/* today's specimens: the packages' own values */
+#gear .spec { display: flex; flex-wrap: wrap; gap: 18px 28px; margin: 14px 0 6px; }
+#gear .spec .it { display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: var(--blockr-color-text-muted); }
+#gear .spec .row { display: flex; gap: 6px; align-items: center; min-height: 32px; }
+#gear .sb { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 1px solid #e5e7eb; border-radius: 4px; color: #9ca3af; background: #fff; }
+#gear .sb.act { color: #2563eb; border-color: rgba(37,99,235,.3); background: rgba(37,99,235,.08); }
+#gear .sb.s30 { width: 30px; height: 30px; }
+#gear .sb.s32 { width: 32px; height: 32px; }
+#gear .sb.fill { background: #f9fafb; color: #6b7280; }
+#gear .sb.pp { border-color: transparent; border-radius: 6px; color: #6b7280; }
+#gear .sb.pp.act { border-color: rgba(37,99,235,.2); background: rgba(37,99,235,.08); color: #2563eb; }
+#gear .sb.txt { width: auto; min-width: 30px; padding: 0 6px; font-size: 13px; font-weight: 600; color: #6b7280; }
+
+/* band variants */
+#gear .band { margin-bottom: 12px; }
+#gear .band.float { position: absolute; left: 16px; right: 16px; top: 48px; z-index: 2; margin: 0; box-shadow: 0 10px 28px rgba(17, 24, 39, 0.16); }
+#gear .band.inset { border-color: transparent; background: var(--blockr-color-bg-subtle); }
+#gear .band.inset::before { display: none; }
+#gear .rel { position: relative; }
+#gear .bt { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--blockr-color-text-muted); margin: 0 0 10px; }
+#gear .bt .done { text-transform: none; letter-spacing: 0; font-weight: 400; }
+#gear .ruled .sec { border-top: 1px solid var(--blockr-color-border-default); padding-top: 10px; margin-top: 12px; color: var(--blockr-grey-400); }
+#gear .capsec { display: flex; align-items: center; gap: 8px; margin: 22px 0 0; }
+#gear .capsec .sec { margin: 0; }
+#gear .ruled .capsec { border-top: 1px solid var(--blockr-color-border-default); padding-top: 10px; margin-top: 14px; }
+#gear .ruled .capsec .sec { border: 0; padding: 0; margin: 0; }
+#gear .foot { display: flex; justify-content: flex-end; margin-top: 12px; }
+
+/* chart body stand-in */
+#gear .bars { height: 84px; }
+#gear .bars.lo { height: 56px; }
+
+/* narrow panels */
+#gear .w300 { width: 300px; max-width: 100%; }
+#gear .t2 { font-size: 14px; }
+
+/* click marker */
+#gear .click { position: absolute; color: var(--blockr-color-text-default); }
+#gear .mnote { font-size: 11px; color: var(--blockr-color-text-muted); margin: 6px 0 0; }
+
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Bootstrap gear-fill: Blockr.icons.gear in blockr.dplyr, copied into viz, dm, io, extra -->
+  <symbol id="gear-bs" viewBox="0 0 16 16"><path fill="currentColor" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></symbol>
+  <!-- Bootstrap gear (outline): blockr.pharma's .pp-gear-btn -->
+  <symbol id="gear-bso" viewBox="0 0 16 16"><path fill="currentColor" d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/><path fill="currentColor" d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.901-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.541l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.541-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.892-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/></symbol>
+  <symbol id="gear-ptr" viewBox="0 0 16 16"><path d="M3 1.5v11l3-2.6 2 4.4 2-.9-2-4.3h4z" fill="var(--blockr-color-bg-surface)" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></symbol>
+</svg>
+
+<h2 class="ptitle">Gear</h2>
+<p class="deps">Builds on: buttons (26px header size, the tinted "main" style), the layout part (header row, section titles,
+params grid), "every configurable option is in the gear", "no gear when a block has no options". One correction to the
+brief: the chart block's <code>expose</code> band (2026-09-08) was retired on 2026-09-09 (blockr.viz <code>5fd51f1</code>,
+"the sentence is the only channel"). A chart argument reaches the block's face as a slot in its subtitle sentence now, per
+<code>blockr.docs/design-system/pinned-controls.md</code>. G6 assumes that.</p>
+
+<!-- ============================================================= -->
+<h3 class="sub"><span class="k">1</span>What exists today</h3>
+<div class="spec">
+  <div class="it"><div class="row"><span class="sb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span><span class="sb act"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>26px bordered, rest and open<br>dplyr, extra, stats, dm, ts</div>
+  <div class="it"><div class="row"><span class="sb s30 txt">%</span><span class="sb s30 fill"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="sb s30"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>30px, beside filled 30px tools<br>viz chart, table, rank, heatmap; composer</div>
+  <div class="it"><div class="row"><span class="sb s32"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>32px, unscoped selector<br>blockr.io</div>
+  <div class="it"><div class="row"><span class="sb pp"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="sb pp"><svg width="16" height="16"><use href="#gear-bso"/></svg></span><span class="sb pp act"><svg width="16" height="16"><use href="#gear-bso"/></svg></span></div>26px borderless, 16px outline icon<br>pharma patient profile</div>
+</div>
+<table class="inv">
+<tr><th>Job</th><th>Today</th><th>Where</th></tr>
+<tr><td>Gear button</td><td>26px, 1px <code>#e5e7eb</code> border, radius 4, icon <code>#9ca3af</code>; hover and open both blue, open with an 8% blue fill. Bootstrap gear-fill at 14px.</td>
+  <td class="w"><code>.blockr-gear-btn</code> in blockr.dplyr <code>inst/css/blockr-blocks.css</code>, copied in blockr.extra <code>code-block.css</code> and blockr.admiral; <code>.jscf-gear-btn</code> in blockr.dm <code>crossfilter-block.css</code>; <code>.blockr-rpt-gear</code> in blockr.outline <code>blockr-report.css</code></td></tr>
+<tr><td>Other sizes</td><td>30px next to 30px tools; 32px; 26px borderless with a 16px outline gear, radius 6</td>
+  <td class="w">viz <code>chart.css</code> <code>.dd-card .blockr-gear-header .blockr-gear-btn</code>, <code>table.css</code>, <code>heatmap-block.css</code>, sandbox <code>composer-block.css</code>; io <code>io-blocks.css</code> (unscoped, restyles every gear when loaded after dplyr); pharma <code>.pp-gear-btn</code></td></tr>
+<tr><td>Beside the gear</td><td>Chart and composer: title and sentence on the left, then aggregation switch, search, download (30px, <code>#f9fafb</code> fill). Crossfilter: "Filter by", row count, Reset all. io download: Download button and format select on the same row. dplyr, stats, ts: the gear alone.</td>
+  <td class="w">viz <code>chart.js</code> (title joined the row in <code>f81c21e</code>), <code>table.js</code>; dm <code>crossfilter-block.js</code>; io <code>R/download.R</code></td></tr>
+<tr><td>What it opens</td><td>In-flow band with a 10px beak at <code>right: 8px</code>: border <code>#e5e7eb</code>, radius 8, padding 12/14/16, white, 10px under it. Floating panels with a shadow in two blocks.</td>
+  <td class="w"><code>.blockr-settings--beak</code>: one <code>settings-band.css</code> copied into viz, dplyr, ggplot, io, stats; dm <code>.bi-filter-settings</code>. Floating: dm <code>.jscf-popover--overlay.jscf-popover--settings</code>, pharma <code>.pp-gear-popover</code></td></tr>
+<tr><td>Band heading</td><td>"Chart settings", "Heatmap settings", "Tile settings", "Advanced settings", "Options", "Advanced options", "Format options", "Pickers", "Block settings". Chart sections are split by a 1px rule with a <code>#9ca3af</code> title.</td>
+  <td class="w">viz <code>drilldown-config.js</code> <code>.dd-popover-title</code>, <code>.dd-section-title</code>; <code>.blockr-settings__title</code> in dplyr pivot/join/slice, stats, io, viz picker; dm crossfilter</td></tr>
+<tr><td>Closing</td><td>Gear only: viz, dplyr, stats, io, extra, ts. Any outside click: dm value filter (capture phase, so a portaled select menu does not close it), crossfilter, patient profile. A "Done" link: crossfilter.</td>
+  <td class="w">viz <code>table.js</code> comment "a panel, not a menu"; dm <code>value-filter-block.js</code>, <code>crossfilter-block.js</code>; pharma <code>pp-header.js</code></td></tr>
+<tr><td>Hiding the gear</td><td>Simplified and locked mode put <code>.blockr-no-edit</code> on <code>&lt;html&gt;</code>; one rule hides <code>.blockr-gear-btn</code>, <code>.jscf-gear-btn</code>, <code>.blockr-gear-editor</code>, <code>.blockr-settings--open</code>. It misses <code>.pp-gear-btn</code> and <code>.blockr-rpt-gear</code>, and hides the composer's search button, which wears <code>.blockr-gear-btn</code>.</td>
+  <td class="w">blockr.dock <code>blockr-dock.css</code> (branch <code>feat/simplified-mode</code>); sandbox <code>R/composer-block.R</code> <code>composer-search-btn</code></td></tr>
+<tr><td>Tooltip</td><td>"Chart settings", "Advanced settings", "Options", "Block settings", "Suffix settings", "Edit function"</td><td class="w">one per block family</td></tr>
+</table>
+
+<!-- ============================================================= -->
+<h3 class="q"><span class="qtag">G1</span>The gear button and the tools beside it</h3>
+<p class="note">26px is decided. Still open: whether the gear is the one bordered square in the row or one of several, and
+what hover and open look like. Today hover and open are the same blue, so a hovered gear reads as an open one. The icon's
+<code>#9ca3af</code> is 2.5:1, under the 3:1 icons need.</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. Bordered gear, quiet tools</p><p class="d">The gear is the only framed square; search and download are bare icons that fill on hover.</p>
+    <p class="cap">at rest</p>
+    <div class="panel"><div class="blk"><div class="hrow t" style="margin:0"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb q txt">%</span><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div></div></div>
+    <p class="cap" style="margin-top:10px">gear open</p>
+    <div class="panel"><div class="blk"><div class="hrow t" style="margin:0"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb q txt">%</span><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div></div></div></div>
+  <div class="opt"><p class="t">B. Three bordered squares, 26px</p><p class="d">Viz's look at the decided size: every tool framed and filled, the gear framed.</p>
+    <p class="cap">at rest</p>
+    <div class="panel"><div class="blk"><div class="hrow t" style="margin:0"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb f txt">%</span><span class="gb f"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div></div></div>
+    <p class="cap" style="margin-top:10px">gear open</p>
+    <div class="panel"><div class="blk"><div class="hrow t" style="margin:0"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb f txt">%</span><span class="gb f"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div></div></div></div>
+  <div class="opt"><p class="t">C. 30px control row (viz today)</p><p class="d">The row as a toolbar that can also hold a search field or a small select. Unratified idea from 2026-07-28.</p>
+    <p class="cap">at rest</p>
+    <div class="panel"><div class="blk"><div class="hrow t" style="margin:0"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb f x30 txt">%</span><span class="gb f x30"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb x30"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div></div></div>
+    <p class="cap" style="margin-top:10px">gear open</p>
+    <div class="panel"><div class="blk"><div class="hrow t" style="margin:0"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb f x30 txt">%</span><span class="gb f x30"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb on x30"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div></div></div></div>
+</div>
+<div class="rec">Proposal: <b>A.</b> The gear is the one control in the row that opens configuration, and the frame says so;
+the reader's tools stay as quiet as the dock header's icons, and in simplified mode the gear leaves a row of quiet tools
+behind. Icon muted at rest. Hover: default text, strong border, hover fill. Open: the main-button tint (hover over this
+page's buttons to compare). Bootstrap gear-fill at 14px everywhere; the patient profile's 16px outline gear goes. One
+class, <code>.blockr-gear-btn</code>, on every gear and on nothing else, so dock's one rule reaches the patient profile and
+the report and stops hiding the composer's search. Tooltip "Settings". Runner-up: C, if the 30px row is ratified.</div>
+
+<!-- ============================================================= -->
+<h3 class="q"><span class="qtag">G2</span>The header row in a narrow panel</h3>
+<p class="note">The chart and composer put the output title in the gear's row (viz <code>f81c21e</code>), which saves a row
+on every block. dplyr and the layout part's anatomy keep the row for tools only. Nothing decides what happens when the
+panel is narrow; below, all three at 300px.</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. Title shares the row (viz today)</p><p class="d">The title takes what the tools leave and wraps down.</p>
+    <div class="panel w300"><div class="blk"><div class="hrow t"><div class="ttl"><p class="o-title">Mean ozone by month and treatment arm</p><p class="o-sub">by <span class="slot">Month</span></p></div><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div><div class="bars lo"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div></div>
+  <div class="opt"><p class="t">B. Tools only in the row</p><p class="d">The title starts under the tools at every width. Costs 32px of height on every block.</p>
+    <div class="panel w300"><div class="blk"><div class="hrow"><span class="sp"></span><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div><p class="o-title">Mean ozone by month and treatment arm</p><p class="o-sub" style="margin-bottom:8px">by <span class="slot">Month</span></p><div class="bars lo"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div></div>
+  <div class="opt"><p class="t">C. A when wide, B when narrow</p><p class="d">Shares the row above 400px of panel width; below it the title drops under the tools.</p>
+    <div class="panel w300"><div class="blk"><div class="hrow"><span class="sp"></span><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div><p class="o-title">Mean ozone by month and treatment arm</p><p class="o-sub" style="margin-bottom:8px">by <span class="slot">Month</span></p><div class="bars lo"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div>
+    <p class="mnote">At 376px and up it is A.</p></div>
+</div>
+<div class="rec">Proposal: <b>C.</b> At dashboard widths the title and tools share one line and the block keeps its height; in a
+side panel the title gets the full width instead of the column the tools leave it. One container query on the
+block, like the params grid. Tools never shrink and never collapse into an overflow menu: there are at most four.
+The crossfilter's row ("Filter by", count, Reset) is a section header and keeps its layout. Runner-up: A.</div>
+
+<!-- ============================================================= -->
+<h3 class="q"><span class="qtag">G3</span>What the gear opens</h3>
+<p class="note">Most blocks open an in-flow band that pushes the output down. The crossfilter's settings and the patient
+profile open a floating panel with a shadow over the content; the crossfilter moved there because an in-flow band pushed
+its cards off screen.</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. In-flow band with a beak</p><p class="d">Between the header row and the output; the output moves down and stays visible.</p>
+    <div class="panel"><div class="blk"><div class="hrow t"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="band"><div class="gridhost"><div class="grid knobs" style="--n:2"><div class="fld"><span class="lbl">Chart type</span><div class="ctl"><span class="v">Bar</span><span class="car"></span></div></div><div class="fld"><span class="lbl">Sort</span><div class="ctl"><span class="v">By value</span><span class="car"></span></div></div></div></div></div>
+      <div class="bars"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div></div>
+  <div class="opt"><p class="t">B. Floating panel</p><p class="d">Over the output with a shadow, titled, with a Done link (crossfilter, patient profile).</p>
+    <div class="panel" style="overflow:visible"><div class="blk rel"><div class="hrow t"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="band float"><div class="bt">Block settings<span class="b quiet xs done">Done</span></div><div class="gridhost"><div class="grid knobs" style="--n:2"><div class="fld"><span class="lbl">Chart type</span><div class="ctl"><span class="v">Bar</span><span class="car"></span></div></div><div class="fld"><span class="lbl">Sort</span><div class="ctl"><span class="v">By value</span><span class="car"></span></div></div></div></div></div>
+      <div class="bars" style="height:262px"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div></div>
+  <div class="opt"><p class="t">C. In-flow inset</p><p class="d">Same place as A, drawn as a quiet fill with no border and no beak.</p>
+    <div class="panel"><div class="blk"><div class="hrow t"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="band inset"><div class="gridhost"><div class="grid knobs" style="--n:2"><div class="fld"><span class="lbl">Chart type</span><div class="ctl"><span class="v">Bar</span><span class="car"></span></div></div><div class="fld"><span class="lbl">Sort</span><div class="ctl"><span class="v">By value</span><span class="car"></span></div></div></div></div></div>
+      <div class="bars"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div></div>
+</div>
+<div class="rec">Proposal: <b>A</b>, as the settings-band spec already says: you see the chart change while you set it, and
+the band can never be wider than the block. Values: 1px default border, radius 8, padding 12/14/16, surface background,
+12px under it, a 10px beak 8px from the right edge, over the gear. The crossfilter's settings and the patient profile's
+gear move to it. The crossfilter's column search stays floating: it is a pick-and-go menu opened from the pill row, which
+the menus part covers. In C the fields' own grey-50 fill disappears into the band's. Runner-up: C.</div>
+
+<!-- ============================================================= -->
+<h3 class="q"><span class="qtag">G4</span>Inside the band: a heading, and how sections are separated</h3>
+<p class="note">Nine different band headings are in use, most of which restate the gear ("Chart settings", "Advanced
+settings", "Options"). The chart band then splits its sections with rules; dplyr's bands have one section. Some chart
+sections are switched on by a checkbox in their title (Prepare script, Titles, Drill-down).</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. No band heading; sections by space</p><p class="d">Section titles only, 24px above each. A one-section band has no heading at all.</p>
+    <div class="panel"><div class="blk"><div class="hrow"><span class="sp"></span><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="band" style="margin:0"><div class="sec">Mapping</div><div class="gridhost"><div class="grid wide" style="--n:2"><div class="fld"><span class="lbl">Category</span><div class="ctl"><span class="v">Month</span><span class="car"></span></div></div><div class="fld"><span class="lbl">Value</span><div class="ctl"><span class="v">Ozone</span><span class="car"></span></div></div></div></div>
+        <div class="sec" style="margin-top:24px">Presentation</div><div class="gridhost"><div class="grid knobs" style="--n:2"><div class="fld"><span class="lbl">Sort</span><div class="ctl"><span class="v">By value</span><span class="car"></span></div></div><div class="fld"><span class="lbl spacer">.</span><div class="flag"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</div></div></div></div>
+        <div class="capsec" style="margin-top:24px"><span class="box"></span><span class="sec">Drill-down</span></div></div></div></div></div>
+  <div class="opt ruled"><p class="t">B. Heading, sections ruled (viz today)</p><p class="d">"Chart settings" on top; a 1px rule and a grey-400 title start each section.</p>
+    <div class="panel"><div class="blk"><div class="hrow"><span class="sp"></span><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="band" style="margin:0"><div class="bt">Chart settings</div><div class="sec">Mapping</div><div class="gridhost"><div class="grid wide" style="--n:2"><div class="fld"><span class="lbl">Category</span><div class="ctl"><span class="v">Month</span><span class="car"></span></div></div><div class="fld"><span class="lbl">Value</span><div class="ctl"><span class="v">Ozone</span><span class="car"></span></div></div></div></div>
+        <div class="sec">Presentation</div><div class="gridhost"><div class="grid knobs" style="--n:2"><div class="fld"><span class="lbl">Sort</span><div class="ctl"><span class="v">By value</span><span class="car"></span></div></div><div class="fld"><span class="lbl spacer">.</span><div class="flag"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</div></div></div></div>
+        <div class="capsec"><span class="box"></span><span class="sec">Drill-down</span></div></div></div></div></div>
+  <div class="opt"><p class="t">C. Heading, sections by space</p><p class="d">A band heading on top, then A's sections.</p>
+    <div class="panel"><div class="blk"><div class="hrow"><span class="sp"></span><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="band" style="margin:0"><div class="bt">Chart settings</div><div class="sec" style="margin-top:16px">Mapping</div><div class="gridhost"><div class="grid wide" style="--n:2"><div class="fld"><span class="lbl">Category</span><div class="ctl"><span class="v">Month</span><span class="car"></span></div></div><div class="fld"><span class="lbl">Value</span><div class="ctl"><span class="v">Ozone</span><span class="car"></span></div></div></div></div>
+        <div class="sec" style="margin-top:24px">Presentation</div><div class="gridhost"><div class="grid knobs" style="--n:2"><div class="fld"><span class="lbl">Sort</span><div class="ctl"><span class="v">By value</span><span class="car"></span></div></div><div class="fld"><span class="lbl spacer">.</span><div class="flag"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</div></div></div></div>
+        <div class="capsec" style="margin-top:24px"><span class="box"></span><span class="sec">Drill-down</span></div></div></div></div></div>
+</div>
+<div class="rec">Proposal: <b>A.</b> The beak already says which button opened the band, and "Chart settings" under a chart's
+gear adds a line without adding a fact. Sections are separated the way the layout part separates them on the face: a
+section title and 24px of space, in muted, with no rules. A section that a checkbox switches on keeps the checkbox before
+its title, and its fields appear below when checked. The band's accessible name moves to <code>aria-label</code>. Fields
+use the params grid. Runner-up: C.</div>
+
+<!-- ============================================================= -->
+<h3 class="q"><span class="qtag">G5</span>How the band closes, and whether it stays open</h3>
+<p class="note">Six packages close the band only from the gear. Three blocks close it on any click outside, and the value
+filter had to move to the capture phase because a pick in a portaled select menu counts as outside. The chart and table
+keep the band open across a widget re-render (<code>_popoverOpen</code>, <code>bandOpen[elemId]</code>); nothing saves it with the board.</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. The gear is the only toggle</p><p class="d">Clicking the chart, another block or a menu leaves it open.</p>
+    <div class="panel"><div class="blk rel"><div class="hrow t"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="band"><div class="gridhost"><div class="grid knobs" style="--n:2"><div class="fld"><span class="lbl">Sort</span><div class="ctl"><span class="v">By value</span><span class="car"></span></div></div><div class="fld"><span class="lbl spacer">.</span><div class="flag"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</div></div></div></div></div>
+      <div class="bars"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div>
+      <span class="click" style="left:44%;bottom:44px"><svg width="16" height="16"><use href="#gear-ptr"/></svg></span></div></div>
+    <p class="mnote">After a click on the chart: still open.</p></div>
+  <div class="opt"><p class="t">B. Any outside click closes</p><p class="d">Behaves like a menu (value filter, crossfilter, patient profile).</p>
+    <div class="panel"><div class="blk rel"><div class="hrow t"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="bars"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div>
+      <span class="click" style="left:44%;bottom:44px"><svg width="16" height="16"><use href="#gear-ptr"/></svg></span></div></div>
+    <p class="mnote">After a click on the chart: closed, and the chart moves up by the band's height.</p></div>
+  <div class="opt"><p class="t">C. Gear, or Done in the band</p><p class="d">A second way out at the band's foot, for bands taller than the panel.</p>
+    <div class="panel"><div class="blk"><div class="hrow t"><div class="ttl"><p class="o-title">Mean ozone by month</p></div><span class="gb on"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="band"><div class="gridhost"><div class="grid knobs" style="--n:2"><div class="fld"><span class="lbl">Sort</span><div class="ctl"><span class="v">By value</span><span class="car"></span></div></div><div class="fld"><span class="lbl spacer">.</span><div class="flag"><span class="box on"><svg width="10" height="10"><use href="#i-check"/></svg></span>Labels</div></div></div></div><div class="foot"><span class="b quiet xs">Done</span></div></div>
+      <div class="bars"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div>
+    <p class="mnote">Done closes, the same as the gear.</p></div>
+</div>
+<div class="rec">Proposal: <b>A.</b> The band is a panel you work in while watching the output; closing it on an outside click
+moves the output under the pointer and fights every portaled menu inside it. The open state survives re-renders and data
+updates for the session and is not saved with the board, so a reload starts closed. Several blocks can have their bands
+open at once. Changes apply as they are made, with no Apply for the band (recorded below). Runner-up: C, with Done as a
+quiet 26px button.</div>
+
+<!-- ============================================================= -->
+<h3 class="q"><span class="qtag">G6</span>What stays on the face, and what simplified mode leaves</h3>
+<p class="note">"Every option is in the gear" is decided. How much of it also sits on the face differs by family: dplyr keeps
+a block's main fields on the face and puts extras in the gear; viz keeps everything in the gear and hands a reader the words
+of the subtitle sentence. Simplified mode hides the gear only, so this split decides what a reader can still change. The
+patient profile's gear holds reader view toggles (Timeline, Pre-treatment, Value lines), and dock's rule does not reach it.</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. By the block's job (today)</p><p class="d">Transform blocks: main fields on the face. Output blocks: everything in the gear, arguments a reader may change as slots in the sentence.</p>
+    <div class="stack">
+    <p class="cap">pivot longer</p>
+    <div class="panel"><div class="blk"><div class="hrow"><span class="sp"></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="fld"><span class="lbl">Columns</span><div class="ctl"><span class="tag">Ozone</span><span class="tag">Temp</span><span class="car"></span></div></div>
+      <div class="gridhost" style="margin-top:12px"><div class="grid wide" style="--n:2"><div class="fld"><span class="lbl">Names to</span><div class="ctl"><span class="v">name</span></div></div><div class="fld"><span class="lbl">Values to</span><div class="ctl"><span class="v">value</span></div></div></div></div></div></div>
+    <p class="cap">chart</p>
+    <div class="panel"><div class="blk"><div class="hrow t"><div class="ttl"><p class="o-title t2">Mean ozone</p><p class="o-sub">by <span class="slot">Month</span>, coloured by <span class="slot">Year</span></p></div><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="bars lo"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div>
+    </div></div>
+  <div class="opt"><p class="t">B. Everything behind the gear</p><p class="d">Every block's face is its output and its sentence; transform blocks too.</p>
+    <div class="stack">
+    <p class="cap">pivot longer</p>
+    <div class="panel"><div class="blk"><div class="hrow t"><div class="ttl"><p class="o-sub" style="font-size:14px;color:var(--blockr-color-text-default)">Pivot <span class="slot">Ozone, Temp</span> into <span class="slot">name</span> and <span class="slot">value</span></p></div><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div></div></div>
+    <p class="cap">chart</p>
+    <div class="panel"><div class="blk"><div class="hrow t"><div class="ttl"><p class="o-title t2">Mean ozone</p><p class="o-sub">by <span class="slot">Month</span>, coloured by <span class="slot">Year</span></p></div><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="bars lo"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div>
+    </div></div>
+  <div class="opt"><p class="t">C. Main fields on the face everywhere</p><p class="d">Charts get their mapping selects back on the face (the retired <code>expose</code> band).</p>
+    <div class="stack">
+    <p class="cap">pivot longer</p>
+    <div class="panel"><div class="blk"><div class="hrow"><span class="sp"></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="fld"><span class="lbl">Columns</span><div class="ctl"><span class="tag">Ozone</span><span class="tag">Temp</span><span class="car"></span></div></div>
+      <div class="gridhost" style="margin-top:12px"><div class="grid wide" style="--n:2"><div class="fld"><span class="lbl">Names to</span><div class="ctl"><span class="v">name</span></div></div><div class="fld"><span class="lbl">Values to</span><div class="ctl"><span class="v">value</span></div></div></div></div></div></div>
+    <p class="cap">chart</p>
+    <div class="panel"><div class="blk"><div class="hrow t"><div class="ttl"><p class="o-title t2">Mean ozone</p></div><span class="gb q"><svg width="14" height="14"><use href="#i-dl"/></svg></span><span class="gb"><svg width="14" height="14"><use href="#gear-bs"/></svg></span></div>
+      <div class="gridhost" style="margin-bottom:12px"><div class="grid wide" style="--n:2"><div class="fld"><span class="lbl">Category</span><div class="ctl"><span class="v">Month</span><span class="car"></span></div></div><div class="fld"><span class="lbl">Colour</span><div class="ctl"><span class="v">Year</span><span class="car"></span></div></div></div></div>
+      <div class="bars lo"><i style="height:40%"></i><i style="height:95%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:52%"></i></div></div></div>
+    </div></div>
+</div>
+<div class="rec">Proposal: <b>A</b>, written down as the rule. A transform block's face holds the fields that define it and
+the gear holds the rest; an output block's face holds the output and its sentence, and the sentence's slots are the only
+way to put one of its arguments on the face; its gear keeps a row for every argument, slotted or not. Simplified mode removes the gear button and
+nothing else, so what remains on the face stays live for the reader. The patient profile's three view toggles are reader
+controls, so under A they leave the gear for the face. Runner-up: B, which empties every transform block's face.</div>
+
+<!-- ============================================================= -->
+<h3 class="sub"><span class="k">2</span>Recorded as they are</h3>
+<ul class="note" style="line-height:1.7">
+<li>No gear when a block has no options, including per mode: stats <code>broom</code> on glance, dplyr slice, io formats with no options.</li>
+<li>The gear is the last item on the right of the header row; its band opens directly under that row, above the face's controls.</li>
+<li>Changes in the band apply as they are made. Text fields commit on Enter or blur with the "Enter" chip; code commits on Run (code and function blocks) or the Apply chip (chart prepare script). No band has an Apply button.</li>
+<li>The band shrinks with the block and never scrolls sideways; under 404px of band width the chart's sections drop to one column (<code>settings-band.css</code>).</li>
+<li>Hiding the gear in simplified and locked mode is dock's job, done with one CSS rule on the gear's class; blocks never ask which mode they are in.</li>
+</ul>
+</section>

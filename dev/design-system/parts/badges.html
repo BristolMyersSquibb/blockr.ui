@@ -1,0 +1,389 @@
+<section class="part" id="badges">
+<style>
+#badges h3.sub { font-size: 16px; font-weight: 500; margin: 30px 0 4px; }
+#badges .spec { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+#badges .inv td.s { min-width: 250px; }
+#badges .inv td.s .spec { gap: 5px 6px; }
+#badges .m { color: var(--blockr-color-text-muted); font-size: 12px; }
+#badges .st { font-size: 12px; color: var(--blockr-color-text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#badges .hrow .lbl { margin: 0; }
+#badges .zone + .zone { margin-top: 14px; }
+#badges .b.sec { text-transform: none; letter-spacing: 0; margin: 0; font-size: 12px; font-weight: 500; color: var(--blockr-color-text-default); }
+
+/* ---- proposed pieces (tokens only) ---- */
+/* badge: static information about something */
+#badges .bdg { display: inline-flex; align-items: center; gap: 4px; height: 18px; box-sizing: border-box; padding: 0 7px; border-radius: var(--blockr-radius-pill); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-subtle); color: var(--blockr-color-text-muted); font-size: 11px; font-weight: 500; line-height: 1; white-space: nowrap; flex: none; }
+#badges .bdg.acc { background: var(--blockr-color-bg-accent-subtle); color: var(--blockr-color-text-accent); border-color: color-mix(in srgb, var(--blockr-color-border-accent) 30%, transparent); }
+#badges .bdg.ok { background: var(--blockr-color-bg-success); color: var(--blockr-color-text-success); border-color: color-mix(in srgb, var(--blockr-color-border-success) 35%, transparent); }
+#badges .bdg.warn { background: var(--blockr-color-bg-warning); color: var(--blockr-color-text-warning); border-color: color-mix(in srgb, var(--blockr-color-border-warning) 45%, transparent); }
+#badges .bdg.bad { background: var(--blockr-color-bg-danger); color: var(--blockr-color-text-danger); border-color: color-mix(in srgb, var(--blockr-color-border-danger) 35%, transparent); }
+/* B2 variants */
+#badges .bdg.sq { border-radius: var(--blockr-radius-sm); background: var(--blockr-color-bg-hover); }
+#badges .bdg.nob { border-color: transparent; background: var(--blockr-color-bg-hover); }
+/* B4 option B: a hue per data type (purple has no palette entry; drawn with the crossfilter's hex) */
+#badges .bdg.t-cat { color: #7c3aed; background: #f3e8ff; border-color: transparent; }
+#badges .bdg.t-num { color: #059669; background: #ecfdf5; border-color: transparent; }
+#badges .bdg.t-date { color: #d97706; background: #fffbeb; border-color: transparent; }
+
+/* tag: a value; the x only when it can be removed */
+#badges .tg { display: inline-flex; align-items: center; gap: 2px; height: 22px; box-sizing: border-box; padding: 0 3px 0 7px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-default); font-size: 13px; white-space: nowrap; flex: none; }
+#badges .tg.ro { padding: 0 7px; }
+#badges .tg.acc { background: var(--blockr-color-bg-accent-subtle); color: var(--blockr-color-text-accent); border-color: color-mix(in srgb, var(--blockr-color-border-accent) 35%, transparent); }
+#badges .tg.open { background: var(--blockr-color-bg-surface); }
+#badges .tg .x { display: inline-flex; width: 16px; height: 16px; align-items: center; justify-content: center; color: var(--blockr-color-text-muted); border-radius: 2px; }
+#badges .tg .x:hover { color: var(--blockr-color-text-danger); background: var(--blockr-color-bg-danger); }
+#badges .tg .op { color: var(--blockr-color-text-muted); margin: 0 3px; }
+#badges .tg .val { font-weight: 600; }
+#badges .more { display: inline-flex; align-items: center; height: 22px; box-sizing: border-box; padding: 0 6px; border-radius: var(--blockr-radius-sm); font-size: 13px; color: var(--blockr-color-text-accent); background: color-mix(in srgb, var(--blockr-accent-600) 6%, transparent); border: 1px solid color-mix(in srgb, var(--blockr-accent-600) 20%, transparent); }
+#badges .hidex .tg .x { visibility: hidden; }
+#badges .hidex:hover .tg .x, #badges .hidex:focus-within .tg .x { visibility: visible; }
+#badges .ctl.tags { gap: 3px; padding: 0 12px 0 8px; }
+#badges .shelf-add { display: inline-flex; align-items: center; gap: 4px; height: 22px; box-sizing: border-box; padding: 0 8px 0 6px; font-size: 13px; color: var(--blockr-color-text-accent); border: 1px dashed color-mix(in srgb, var(--blockr-color-border-accent) 55%, transparent); border-radius: var(--blockr-radius-sm); }
+
+/* count: a number attached to a control */
+#badges .cnt { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; box-sizing: border-box; padding: 0 4px; border-radius: var(--blockr-radius-pill); font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; flex: none; }
+#badges .cnt.solid { background: var(--blockr-color-bg-accent); color: var(--blockr-color-text-on-accent); }
+#badges .cnt.surf { background: var(--blockr-color-bg-surface); color: inherit; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); }
+#badges .cnt.tint { background: color-mix(in srgb, currentColor 14%, transparent); color: inherit; }
+#badges .cnt.bare { min-width: 0; padding: 0 0 0 1px; }
+
+/* dot: block eval status on the block icon */
+#badges .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+#badges .d-stale { background: var(--blockr-color-text-muted); }
+#badges .d-wait { background: var(--blockr-color-border-warning); }
+#badges .d-fail { background: var(--blockr-color-border-danger); }
+#badges .d-acc { background: var(--blockr-color-bg-accent); width: 7px; height: 7px; }
+#badges .ico { position: relative; width: 24px; height: 24px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex: none; background: rgba(0, 158, 115, 0.15); color: #009e73; }
+#badges .ico .dot { position: absolute; right: -2px; bottom: -2px; box-shadow: 0 0 0 2px var(--blockr-color-bg-surface); }
+
+/* list rows (search list, block browser, outline rail) */
+#badges .li { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 8px; border-radius: 6px; font-size: 13px; }
+#badges .li + .li { margin-top: 2px; }
+#badges .li.on { background: var(--blockr-color-bg-hover); }
+#badges .li .ty { width: 18px; text-align: center; color: var(--blockr-color-text-muted); font-size: 12px; flex: none; }
+#badges .li .nm { flex: 1; font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#badges .li .nm .sub { font-weight: 400; color: var(--blockr-color-text-muted); margin-left: 4px; font-size: 12px; }
+#badges .band-lite { border: 1px solid var(--blockr-color-border-default); border-radius: 8px; padding: 6px; }
+
+/* segmented count + reset (pp) at 26px */
+#badges .seg { display: inline-flex; }
+#badges .seg > .b.xs:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+#badges .seg > .b.xs + .b.xs { margin-left: -1px; border-top-left-radius: 0; border-bottom-left-radius: 0; padding: 0 6px; }
+#badges .b.xs.neutral { background: var(--blockr-color-bg-hover); border-color: var(--blockr-color-border-default); color: var(--blockr-color-text-muted); font-weight: 500; }
+#badges .hm-reset { font: inherit; font-size: 11px; padding: 1px 8px; border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); color: var(--blockr-color-text-default); border-radius: 5px; }
+#badges .foot { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--blockr-color-text-muted); padding-top: 8px; border-top: 1px solid var(--blockr-color-border-default); margin-top: 10px; min-height: 26px; }
+#badges .foot .sp { flex: 1; }
+#badges .heat { display: grid; grid-template-columns: 70px repeat(5, 1fr); gap: 2px; font-size: 11px; color: var(--blockr-color-text-muted); }
+#badges .heat i { height: 16px; border-radius: 2px; background: var(--blockr-accent-500); }
+#badges .heat i.on { outline: 2px solid var(--blockr-color-text-default); outline-offset: -1px; }
+#badges .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+#badges .tbl td { padding: 5px 4px; border-bottom: 1px solid var(--blockr-color-border-default); }
+#badges .tbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+#badges .pathf { gap: 8px; }
+#badges .pathf .v { flex: 1; font: 13px var(--blockr-font-mono); }
+</style>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="bdg-reset" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 8a4.8 4.8 0 1 0 1.4-3.4"/><path d="M3.5 2.2v2.9h2.9"/></g></symbol>
+  <symbol id="bdg-chev" viewBox="0 0 12 12"><path d="M7.5 2.5L4 6l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="bdg-cal" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 7h11M5.5 2v3M10.5 2v3"/></g></symbol>
+  <symbol id="bdg-grid" viewBox="0 0 16 16"><g fill="currentColor"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></g></symbol>
+</svg>
+
+<h2 class="ptitle">Badges, pills, tags and counts</h2>
+<p class="deps">Builds on: tokens (text levels, status roles, accent tint), buttons (main = tinted accent, xs = 26px), small
+icons (remove shown on hover or focus, red on hover), block layout (header row, status line). The click-to-cycle pills are
+in the choice-controls part.</p>
+
+<!-- ============================================================= -->
+<h3 class="sub"><span class="k">1</span>What exists today</h3>
+<p class="note">Every small rounded label found in the packages, grouped by the job it does. The words "badge", "chip",
+"pill" and "tag" are used for all of these jobs.</p>
+<table class="inv">
+<tr><th>Job</th><th>Today</th><th>Where</th></tr>
+<tr><td>Package name</td>
+  <td class="s"><div class="spec">
+    <span style="display:inline-block;padding:2px 8px;font-size:10px;border-radius:4px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb">blockr.dplyr</span>
+    <span style="padding:2px 8px;font-size:10px;font-weight:500;border-radius:999px;background:#f3f4f6;color:#6b7280">blockr.dplyr</span>
+    <span style="padding:2px 6px;font-size:10px;border-radius:4px;background:rgba(148,163,184,.1);color:rgba(100,116,139,.9);border:1px solid rgba(100,116,139,.1)">blockr.dplyr</span></div></td>
+  <td class="w"><code>.badge-two-tone</code> in the block popover and details menu (blockr.dock <code>blockr-dock.css:224</code>); a second copy with slate rgba values inline in the add-block dialog (<code>R/action-ui.R:138</code>); a 999px capsule in the block browser (<code>.blockr-block-browser-card-package</code>, <code>sidebar-block.css:259</code>). The admiral rich select copies the slate one as <code>.blockr-srich__option-meta</code>.</td></tr>
+<tr><td>Column type</td>
+  <td class="s"><div class="spec">
+    <span style="padding:1px 8px;font-size:11px;font-weight:500;border-radius:9999px;color:#7c3aed;background:#f3e8ff">Categorical</span>
+    <span style="padding:1px 8px;font-size:11px;font-weight:500;border-radius:9999px;color:#059669;background:#ecfdf5">Numeric</span>
+    <span style="padding:1px 8px;font-size:11px;font-weight:500;border-radius:9999px;color:#d97706;background:#fffbeb">Date</span></div></td>
+  <td class="w">Crossfilter "Add filter" list, <code>.jscf-search-item-badge</code> + <code>.jscf-badge-*</code> (blockr.dm <code>crossfilter-block.css:181,231</code>). Numeric is 3.6:1 and Date 3.1:1 against their fills. The table preview's <code>int</code>/<code>dbl</code> is plain 11px text (<code>.blockr-type-label</code>, blockr.ui).</td></tr>
+<tr><td>Input kind</td>
+  <td class="s"><div class="spec"><span style="padding:2px 9px;border-radius:999px;background:#f3f4f6;color:#6b7280;font-size:11px;font-weight:500">Annotated data frame</span></div></td>
+  <td class="w"><code>.dd-input-badge</code> above Mapping in the table gear band (blockr.viz <code>chart.css:470</code>, copy in blockr.ggplot)</td></tr>
+<tr><td>Status or result</td>
+  <td class="s"><div class="spec">
+    <span style="padding:2px 8px;font-size:10px;border-radius:4px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0">CSV</span>
+    <span style="padding:2px 8px;font-size:10px;border-radius:4px;background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5">Not found</span>
+    <span style="padding:2px 8px;font-size:10px;border-radius:4px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe">New directory</span>
+    <span style="padding:2px 8px;font-size:10px;font-weight:500;border-radius:4px;background:#e6f5ec;color:#1f9d63;border:1px solid rgba(31,157,99,.25)">On track</span>
+    <span style="padding:.25em .4em;font-size:.75em;font-weight:700;border-radius:.375rem;background:#0066cc;color:#fff">0.1%</span>
+    <span style="padding:.25em .4em;font-size:.75em;font-weight:700;border-radius:.375rem;background:#17a2b8;color:#fff">1%</span></div></td>
+  <td class="w">File path status <code>.blockr-path-badge-success/-error/-info</code> (blockr.io <code>path-input.css:334</code>); tile status <code>.tk-pill.good/.warn/.bad</code> (blockr.viz <code>tile-block.css:110</code>); significance column, Bootstrap <code>.badge</code> with inline solid colours, the only Bootstrap badge found (blockr.extra <code>R/broom-summary-block.R:85</code>)</td></tr>
+<tr><td>A value you picked</td>
+  <td class="s"><div class="spec">
+    <span style="display:inline-flex;align-items:center;gap:2px;padding:1px 4px 1px 7px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:4px;font-size:13px;color:#374151">Ozone <span style="color:#9ca3af;font-size:11px;width:16px;text-align:center">&#x2715;</span></span>
+    <span style="padding:1px 6px;border-radius:4px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);font-size:13px;color:#2563eb">+3</span>
+    <span style="padding:2px 7px;font-size:13px;color:#374151;background:#fff;border:1px solid #e5e7eb;border-radius:4px">Month</span>
+    <span style="padding:2px 7px;font-size:13px;color:#1d4ed8;background:#eff6ff;border:1px solid rgba(37,99,235,.35);border-radius:4px">Wind</span>
+    <span style="display:inline-flex;gap:4px;align-items:center;height:26px;padding:2px 8px;box-sizing:border-box;border:1px solid #e5e7eb;border-radius:4px;background:#f9fafb;font-size:11px;font-weight:500"><span style="color:#6b7280">Month</span><span style="color:#9ca3af">=</span><b style="color:#111827">5</b></span></div></td>
+  <td class="w">Multi-select tag and "+N" overflow (<code>.blockr-select__tag</code>, <code>__more</code>, blockr.dplyr <code>blockr-select.css:173,190</code>; copies in admiral, seasonal); crossfilter "Filter by" pills, grey-100 when the card is open, blue when cutting rows (<code>.jscf-pill</code>, <code>--filtering</code>, <code>crossfilter-block.css:760</code>); receipt chip (<code>.ctrl-receipt-chip</code>, blockr.viz <code>ctrl-receipt.css:47</code>)</td></tr>
+<tr><td>Count</td>
+  <td class="s"><div class="spec">
+    <span style="display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;font-size:12px;font-weight:500;color:#2563eb;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.35);border-radius:4px">Reset all <span style="display:inline-flex;align-items:center;justify-content:center;min-width:15px;height:15px;padding:0 4px;box-sizing:border-box;border-radius:9999px;background:#2563eb;color:#fff;font-size:10px;font-weight:600">2</span></span>
+    <span style="font-size:10px;font-weight:600;line-height:14px;padding:0 5px;border-radius:8px;background:#1d4ed8;color:#fff">3</span>
+    <span style="height:16px;padding:0 6px;border-radius:999px;font-size:10px;font-weight:600;line-height:16px;background:#e5e7eb;color:#4b5563">4 blocks</span>
+    <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;font-size:11px;font-weight:500;border-radius:6px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb">&lsaquo; 306 patients</span></div></td>
+  <td class="w">Crossfilter <code>.jscf-reset-count</code>, solid accent inside the tinted Reset all (blockr.dm <code>crossfilter-block.css:332</code>); find-box filter count <code>.pp-ctrl-find-badge</code>, solid blue-700 (blockr.pharma <code>patient-profile.css:1609</code>); outline rail stack size <code>.md-badge</code> (blockr.outline <code>outline.css:407</code>); cohort tag <code>.pp-cohort-count</code>, a button (<code>patient-profile.css:958</code>)</td></tr>
+<tr><td>Filtering, and the way back</td>
+  <td class="s"><div class="spec">
+    <span style="display:inline-flex;align-items:stretch"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;font-size:11px;font-weight:500;border-radius:6px 0 0 6px;color:#2563eb;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.35)">&lsaquo; 33 patients</span><span style="display:inline-flex;align-items:center;width:24px;justify-content:center;margin-left:-1px;border-radius:0 6px 6px 0;color:#2563eb;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.35)"><svg width="12" height="12"><use href="#bdg-reset"/></svg></span></span>
+    <span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:#9ca3af"><span style="width:7px;height:7px;border-radius:50%;background:#2563eb"></span>Filtering downstream <span style="border:1px solid #e5e7eb;background:#fff;border-radius:5px;font-size:11px;padding:1px 8px;color:#111827">Reset</span></span></div></td>
+  <td class="w">Patient profile drill: count and reset as one segmented control, 23px, in the crossfilter's reset colours (<code>.pp-cohort-seg.is-drilled</code>, <code>patient-profile.css:1033</code>); heatmap: 7px accent dot, sentence, neutral Reset (<code>.hmb-dot</code>, blockr.viz <code>heatmap-block.css:251</code>)</td></tr>
+<tr><td>Block status</td>
+  <td class="s"><div class="spec">
+    <span class="ico" style="position:relative"><svg width="14" height="14"><use href="#bdg-grid"/></svg><span style="position:absolute;right:-2px;bottom:-2px;width:8px;height:8px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 2px #fff"></span></span>
+    <span style="width:8px;height:8px;border-radius:50%;background:#6b7280"></span><span class="m">stale</span>
+    <span style="width:8px;height:8px;border-radius:50%;background:#f59e0b"></span><span class="m">waiting</span>
+    <span style="width:8px;height:8px;border-radius:50%;background:#eab308"></span><span class="m">unset</span>
+    <span style="width:8px;height:8px;border-radius:50%;background:#dc2626"></span><span class="m">failed</span></div></td>
+  <td class="w">8px dot with a 2px white ring on the block icon, from <code>block_status_style()</code> (blockr.dock <code>R/plugin-block.R:720</code>); the DAG node badge draws the same spec (blockr.dag)</td></tr>
+</table>
+
+<!-- ============================================================= -->
+<h3 class="sub"><span class="k">2</span>Questions</h3>
+
+<h3 class="q"><span class="qtag">B1</span>The vocabulary: how many kinds, told apart by what</h3>
+<p class="note"><code>.tk-pill</code> is a static status, <code>.jscf-pill</code> a column you click to open its card,
+<code>.ctrl-receipt-chip</code> a read-only value and <code>.pp-ctrl-chip</code> a checkbox. Today the name says nothing about
+the job, and most of them share one shape (4px, grey fill, 1px border), so a package name, a picked value and a toggle look
+alike. Both panels below hold the same content.</p>
+<div class="cols c2">
+  <div class="opt"><p class="t">A. Four kinds, by what a click does</p><p class="d"><b>Badge</b> describes something, no click.
+    <b>Tag</b> is a value (a column, a level, a condition); it has a &times; when it can be removed. <b>Pill</b> changes a setting
+    on click (choice-controls part). <b>Count</b> is a number on a control. Plus the status <b>dot</b>.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="hrow"><span class="lbl">Filter by</span><span class="sp"></span><span class="st">116 of 153 rows</span><button class="b xs main"><svg width="14" height="14"><use href="#bdg-reset"/></svg>Reset all<span class="cnt surf">2</span></button><span class="gearb"><svg width="15" height="15"><use href="#i-gear"/></svg></span></div>
+      <div class="spec"><span class="tg ro acc">Month</span><span class="tg ro">Ozone</span><span class="tg ro acc">Wind</span><span class="shelf-add"><svg width="10" height="10"><use href="#i-plus"/></svg>Add</span></div>
+      <div class="zone band-lite" style="margin-top:12px">
+        <div class="li on"><span class="ty">#</span><span class="nm">Ozone <span class="sub">Mean ozone, ppb</span></span><span class="bdg acc"><svg width="10" height="10"><use href="#i-check"/></svg>Added</span></div>
+        <div class="li"><span class="ty">Aa</span><span class="nm">Month</span><span class="bdg">Categorical</span></div>
+        <div class="li"><span class="ty">#</span><span class="nm">Solar.R</span><span class="bdg">Numeric</span></div>
+      </div>
+      <div class="zone"><span class="lbl">Keep columns</span><div class="ctl tags"><span class="tg">Ozone<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="tg">Month<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="more">+3</span><span class="car"></span></div></div>
+    </div></div></div>
+  <div class="opt"><p class="t">B. One chip, told apart by colour</p><p class="d">What the packages converge on today: one small
+    rounded rectangle for everything, with colour as the only difference.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="hrow"><span class="lbl">Filter by</span><span class="sp"></span><span class="st">116 of 153 rows</span><button class="b xs main"><svg width="14" height="14"><use href="#bdg-reset"/></svg>Reset all<span class="tg ro" style="height:16px;font-size:11px;padding:0 5px">2</span></button><span class="gearb"><svg width="15" height="15"><use href="#i-gear"/></svg></span></div>
+      <div class="spec"><span class="tg ro acc">Month</span><span class="tg ro">Ozone</span><span class="tg ro acc">Wind</span><span class="tg ro">+ Add</span></div>
+      <div class="zone band-lite" style="margin-top:12px">
+        <div class="li on"><span class="ty">#</span><span class="nm">Ozone <span class="sub">Mean ozone, ppb</span></span><span class="tg ro acc" style="height:18px;font-size:11px">Added</span></div>
+        <div class="li"><span class="ty">Aa</span><span class="nm">Month</span><span class="tg ro" style="height:18px;font-size:11px">Categorical</span></div>
+        <div class="li"><span class="ty">#</span><span class="nm">Solar.R</span><span class="tg ro" style="height:18px;font-size:11px">Numeric</span></div>
+      </div>
+      <div class="zone"><span class="lbl">Keep columns</span><div class="ctl tags"><span class="tg">Ozone<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="tg">Month<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="tg ro">+3</span><span class="car"></span></div></div>
+    </div></div></div>
+</div>
+<div class="rec">Proposal: <b>A.</b> Four names, each with one look (A is drawn with the looks proposed in B2 to B6). Class
+names follow: <code>.blockr-badge</code>, <code>.blockr-tag</code>, <code>.blockr-pill</code> (exists), <code>.blockr-count</code>,
+in blockr.ui. The word "chip" goes. The crossfilter's "Filter by" pills are tags by this rule (a column you picked; the click
+opens its card), and receipt chips are read-only tags. Runner-up: B, which costs nothing but keeps a package name looking like
+a value you can remove.</div>
+
+<h3 class="q"><span class="qtag">B2</span>Badge shape</h3>
+<p class="note">Five badges use 4px corners (dock's two-tone, io, tile, admiral, the patient-profile arm chip "per the house
+badge"); five use a capsule (block browser, crossfilter type and state, input kind, outline). Sizes are 10px in dock, io and
+tile, 11px in viz and dm. Drawn here at one size, 11px on 18px, so only shape and edge differ. Tags keep 4px corners (recorded below).</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. 4px corners, bordered</p><p class="d">dock's <code>.badge-two-tone</code>, the most copied. Same
+    corners as a tag.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="li"><span class="ico"><svg width="14" height="14"><use href="#bdg-grid"/></svg></span><span class="nm">Filter rows</span><span class="bdg sq">blockr.dplyr</span></div>
+      <div class="li"><span class="ico"><svg width="14" height="14"><use href="#bdg-grid"/></svg></span><span class="nm">Summarize</span><span class="bdg sq">blockr.dplyr</span></div>
+      <div class="li"><span class="ty">Aa</span><span class="nm">SEX</span><span class="bdg sq">Categorical</span></div>
+      <div class="zone"><span class="lbl">Columns</span><div class="ctl tags"><span class="tg">SEX<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="tg">AGE<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="car"></span></div></div>
+    </div></div></div>
+  <div class="opt"><p class="t">B. Capsule, bordered</p><p class="d">Round ends for things you only read; 4px corners stay with
+    things you act on.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="li"><span class="ico"><svg width="14" height="14"><use href="#bdg-grid"/></svg></span><span class="nm">Filter rows</span><span class="bdg">blockr.dplyr</span></div>
+      <div class="li"><span class="ico"><svg width="14" height="14"><use href="#bdg-grid"/></svg></span><span class="nm">Summarize</span><span class="bdg">blockr.dplyr</span></div>
+      <div class="li"><span class="ty">Aa</span><span class="nm">SEX</span><span class="bdg">Categorical</span></div>
+      <div class="zone"><span class="lbl">Columns</span><div class="ctl tags"><span class="tg">SEX<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="tg">AGE<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="car"></span></div></div>
+    </div></div></div>
+  <div class="opt"><p class="t">C. Capsule, fill only</p><p class="d">The block browser's look. Quietest; needs the grey-100 fill
+    to show on white.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="li"><span class="ico"><svg width="14" height="14"><use href="#bdg-grid"/></svg></span><span class="nm">Filter rows</span><span class="bdg nob">blockr.dplyr</span></div>
+      <div class="li"><span class="ico"><svg width="14" height="14"><use href="#bdg-grid"/></svg></span><span class="nm">Summarize</span><span class="bdg nob">blockr.dplyr</span></div>
+      <div class="li"><span class="ty">Aa</span><span class="nm">SEX</span><span class="bdg nob">Categorical</span></div>
+      <div class="zone"><span class="lbl">Columns</span><div class="ctl tags"><span class="tg">SEX<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="tg">AGE<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="car"></span></div></div>
+    </div></div></div>
+</div>
+<div class="rec">Proposal: <b>B.</b> Capsule, 18px tall, 11px weight 500, 7px side padding, <code>bg-subtle</code> fill,
+<code>border-default</code> edge, <code>text-muted</code>. The border is what lets the fill be grey-50: muted text is 4.6:1 on
+grey-50 and 4.4:1 on the grey-100 that A and C need. Every badge moves from 10px to 11px. Runner-up: A, which keeps today's
+most-copied class but puts a package name in the same shape as a removable tag.</div>
+
+<h3 class="q"><span class="qtag">B3</span>Counts on a control</h3>
+<p class="note">The two counts inside controls are solid accent with white text (crossfilter Reset all, patient-profile find
+box). They are the last solid accent fills now that buttons are tinted. Shown on the three controls that carry a count.</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. Solid accent (today)</p><p class="d">Loudest; white on accent-600 is 5.2:1. The only solid accent
+    left on a board.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="hrow"><span class="lbl">Filter by</span><span class="sp"></span><button class="b xs main"><svg width="14" height="14"><use href="#bdg-reset"/></svg>Reset all<span class="cnt solid">2</span></button><span class="gearb"><svg width="15" height="15"><use href="#i-gear"/></svg></span></div>
+      <div class="hrow" style="margin-top:14px"><span class="o-title" style="font-size:14px">Adverse events</span><span class="sp"></span><button class="b xs main"><svg width="13" height="13"><use href="#i-search"/></svg>Find<span class="cnt solid">3</span></button></div>
+      <div class="hrow" style="margin-top:14px"><button class="b xs sec"><svg width="13" height="13"><use href="#i-search"/></svg>Find<span class="cnt solid">1</span></button></div>
+    </div></div></div>
+  <div class="opt"><p class="t">B. Surface counter</p><p class="d">Surface fill, the host's text colour, a hairline in that colour.
+    Accent-600 on white is 5.2:1.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="hrow"><span class="lbl">Filter by</span><span class="sp"></span><button class="b xs main"><svg width="14" height="14"><use href="#bdg-reset"/></svg>Reset all<span class="cnt surf">2</span></button><span class="gearb"><svg width="15" height="15"><use href="#i-gear"/></svg></span></div>
+      <div class="hrow" style="margin-top:14px"><span class="o-title" style="font-size:14px">Adverse events</span><span class="sp"></span><button class="b xs main"><svg width="13" height="13"><use href="#i-search"/></svg>Find<span class="cnt surf">3</span></button></div>
+      <div class="hrow" style="margin-top:14px"><button class="b xs sec"><svg width="13" height="13"><use href="#i-search"/></svg>Find<span class="cnt surf">1</span></button></div>
+    </div></div></div>
+  <div class="opt"><p class="t">C. Tint of the host</p><p class="d">The host's colour at 14%. Accent-600 on it is 3.9:1, under the
+    4.5 small text needs.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="hrow"><span class="lbl">Filter by</span><span class="sp"></span><button class="b xs main"><svg width="14" height="14"><use href="#bdg-reset"/></svg>Reset all<span class="cnt tint">2</span></button><span class="gearb"><svg width="15" height="15"><use href="#i-gear"/></svg></span></div>
+      <div class="hrow" style="margin-top:14px"><span class="o-title" style="font-size:14px">Adverse events</span><span class="sp"></span><button class="b xs main"><svg width="13" height="13"><use href="#i-search"/></svg>Find<span class="cnt tint">3</span></button></div>
+      <div class="hrow" style="margin-top:14px"><button class="b xs sec"><svg width="13" height="13"><use href="#i-search"/></svg>Find<span class="cnt tint">1</span></button></div>
+    </div></div></div>
+</div>
+<div class="rec">Proposal: <b>B.</b> One counter: 16px capsule, 11px weight 600, tabular figures, <code>bg-surface</code> fill,
+text and hairline taken from the control it sits in, so it follows main, secondary and destructive buttons without variants.
+It is shown only when the number is above zero. A count with a unit ("4 blocks" in the outline rail) is a badge.
+Runner-up: A, if a count has to be noticed from across the board.</div>
+
+<h3 class="q"><span class="qtag">B4</span>When a badge may have colour</h3>
+<p class="note">Colour is used for four different things today: status (io path, tile), "on" (crossfilter "Added"), a hue per
+data type (crossfilter Categorical purple, Numeric green, Date amber), and ranks of a p-value (broom, Bootstrap solid badges in
+blue, teal and grey). Purple and teal are not in the palette.</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. Status and "on" only</p><p class="d">Neutral by default. Accent tint = on, added, cutting rows.
+    Danger, warning, success tints = a result the user must know about.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="zone band-lite">
+        <div class="li on"><span class="ty">#</span><span class="nm">AGE</span><span class="bdg acc"><svg width="10" height="10"><use href="#i-check"/></svg>Added</span></div>
+        <div class="li"><span class="ty">Aa</span><span class="nm">SEX</span><span class="bdg">Categorical</span></div>
+        <div class="li"><span class="ty"><svg width="12" height="12"><use href="#bdg-cal"/></svg></span><span class="nm">TRTSDT</span><span class="bdg">Date</span></div>
+      </div>
+      <div class="zone"><span class="lbl">File</span><div class="ctl pathf"><span class="v">data/adsl.csv</span><span class="bdg ok">CSV</span></div></div>
+      <div class="zone"><span class="lbl">File</span><div class="ctl pathf"><span class="v">data/adae.csv</span><span class="bdg bad">Not found</span></div></div>
+      <table class="tbl zone"><tr><td>AGE</td><td class="num">0.021</td><td><span class="bdg">5%</span></td></tr><tr><td>SEX</td><td class="num">&lt;0.001</td><td><span class="bdg">0.1%</span></td></tr></table>
+    </div></div></div>
+  <div class="opt"><p class="t">B. A plus a hue per type</p><p class="d">Today's crossfilter list: purple, green, amber by column
+    type. Needs a purple; Numeric and Date fail contrast.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="zone band-lite">
+        <div class="li on"><span class="ty">#</span><span class="nm">AGE</span><span class="bdg acc"><svg width="10" height="10"><use href="#i-check"/></svg>Added</span></div>
+        <div class="li"><span class="ty">Aa</span><span class="nm">SEX</span><span class="bdg t-cat">Categorical</span></div>
+        <div class="li"><span class="ty"><svg width="12" height="12"><use href="#bdg-cal"/></svg></span><span class="nm">TRTSDT</span><span class="bdg t-date">Date</span></div>
+      </div>
+      <div class="zone"><span class="lbl">File</span><div class="ctl pathf"><span class="v">data/adsl.csv</span><span class="bdg ok">CSV</span></div></div>
+      <div class="zone"><span class="lbl">File</span><div class="ctl pathf"><span class="v">data/adae.csv</span><span class="bdg bad">Not found</span></div></div>
+      <table class="tbl zone"><tr><td>AGE</td><td class="num">0.021</td><td><span class="bdg acc">5%</span></td></tr><tr><td>SEX</td><td class="num">&lt;0.001</td><td><span class="bdg" style="background:var(--blockr-color-bg-accent);color:var(--blockr-color-text-on-accent);border-color:transparent">0.1%</span></td></tr></table>
+    </div></div></div>
+  <div class="opt"><p class="t">C. Neutral always</p><p class="d">Every badge grey; status reaches the eye by an icon or the word
+    alone.</p>
+    <div class="panel"><div class="ctrl">
+      <div class="zone band-lite">
+        <div class="li on"><span class="ty">#</span><span class="nm">AGE</span><span class="bdg"><svg width="10" height="10"><use href="#i-check"/></svg>Added</span></div>
+        <div class="li"><span class="ty">Aa</span><span class="nm">SEX</span><span class="bdg">Categorical</span></div>
+        <div class="li"><span class="ty"><svg width="12" height="12"><use href="#bdg-cal"/></svg></span><span class="nm">TRTSDT</span><span class="bdg">Date</span></div>
+      </div>
+      <div class="zone"><span class="lbl">File</span><div class="ctl pathf"><span class="v">data/adsl.csv</span><span class="bdg"><svg width="10" height="10"><use href="#i-check"/></svg>CSV</span></div></div>
+      <div class="zone"><span class="lbl">File</span><div class="ctl pathf"><span class="v">data/adae.csv</span><span class="bdg"><svg width="9" height="9"><use href="#i-x"/></svg>Not found</span></div></div>
+      <table class="tbl zone"><tr><td>AGE</td><td class="num">0.021</td><td><span class="bdg">5%</span></td></tr><tr><td>SEX</td><td class="num">&lt;0.001</td><td><span class="bdg">0.1%</span></td></tr></table>
+    </div></div></div>
+</div>
+<div class="rec">Proposal: <b>A.</b> Neutral unless the badge states a status or that something is on. Accent tint means on,
+added or cutting rows, the same tint as the main button. Status tints only for danger, warning and success; io's blue "info"
+("New directory (created on save)") becomes neutral, because blue means "on". Types, packages and significance levels are
+neutral; the type icon beside the name already carries the type. Data colours (the arm chip in the cohort list, the tile's
+colour-by pill) come from the board's scale and are outside this rule. Runner-up: C, which is calmer but leaves a failed file
+path looking like a successful one.</div>
+
+<h3 class="q"><span class="qtag">B5</span>How a block says it is filtering, and where the way back is</h3>
+<p class="note">Three blocks push a filter downstream and show it three ways: the crossfilter tints its Reset all and puts the
+filter count on it; the patient profile joins its patient count and a reset into one segment in the same tint (23px); the
+heatmap puts a 7px accent dot before a sentence and a neutral Reset. Drawn on the heatmap.</p>
+<div class="cols c3">
+  <div class="opt"><p class="t">A. Dot and sentence (heatmap today)</p><p class="d">The dot marks the state; the Reset is
+    neutral. A second dot style next to the block-status dot.</p>
+    <div class="panel"><div class="prev" style="border:0">
+      <p class="o-title">AE by body system and arm</p><p class="o-sub">Share of patients, any grade</p>
+      <div class="heat"><span>Cardiac</span><i style="opacity:.3"></i><i style="opacity:.5"></i><i class="on" style="opacity:.8"></i><i style="opacity:.4"></i><i style="opacity:.2"></i><span>Skin</span><i style="opacity:.6"></i><i style="opacity:.3"></i><i style="opacity:.9"></i><i style="opacity:.5"></i><i style="opacity:.3"></i></div>
+      <div class="foot"><span class="dot d-acc"></span><span class="st">Filtering downstream: SOC = Cardiac</span><span class="sp"></span><button class="hm-reset">Reset</button></div>
+    </div></div></div>
+  <div class="opt"><p class="t">B. The reset carries the state</p><p class="d">The crossfilter's rule: a tinted xs reset while a
+    filter is on, disabled when none is. The sentence stays muted text.</p>
+    <div class="panel"><div class="prev" style="border:0">
+      <p class="o-title">AE by body system and arm</p><p class="o-sub">Share of patients, any grade</p>
+      <div class="heat"><span>Cardiac</span><i style="opacity:.3"></i><i style="opacity:.5"></i><i class="on" style="opacity:.8"></i><i style="opacity:.4"></i><i style="opacity:.2"></i><span>Skin</span><i style="opacity:.6"></i><i style="opacity:.3"></i><i style="opacity:.9"></i><i style="opacity:.5"></i><i style="opacity:.3"></i></div>
+      <div class="foot"><span class="st">SOC = Cardiac</span><span class="sp"></span><button class="b xs main"><svg width="14" height="14"><use href="#bdg-reset"/></svg>Reset</button></div>
+    </div></div>
+    <div class="panel" style="margin-top:10px"><div class="ctrl" style="padding-bottom:14px">
+      <div class="hrow" style="margin:0"><span class="seg"><button class="b xs main"><svg width="11" height="11"><use href="#bdg-chev"/></svg>33 patients</button><button class="b xs main" title="Reset drill-down: TRT = Placebo; SEX = M"><svg width="13" height="13"><use href="#bdg-reset"/></svg></button></span><span class="sp"></span><span class="st">Patient 01-701-1015</span></div>
+    </div></div></div>
+  <div class="opt"><p class="t">C. A filter tag with &times;</p><p class="d">The clause as an accent tag; its &times; is the reset.
+    Names the filter; long clauses need an ellipsis.</p>
+    <div class="panel"><div class="prev" style="border:0">
+      <p class="o-title">AE by body system and arm</p><p class="o-sub">Share of patients, any grade</p>
+      <div class="heat"><span>Cardiac</span><i style="opacity:.3"></i><i style="opacity:.5"></i><i class="on" style="opacity:.8"></i><i style="opacity:.4"></i><i style="opacity:.2"></i><span>Skin</span><i style="opacity:.6"></i><i style="opacity:.3"></i><i style="opacity:.9"></i><i style="opacity:.5"></i><i style="opacity:.3"></i></div>
+      <div class="foot"><span class="st">Filtering</span><span class="tg acc">SOC<span class="op">=</span>Cardiac<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="sp"></span></div>
+    </div></div></div>
+</div>
+<div class="rec">Proposal: <b>B.</b> The control that undoes the filter wears the accent tint while a filter is on, carries the
+number of active filters (B3), and names the clause in its title. Size is the 26px xs button, so the patient
+profile's segment grows from 23px to 26px. Where the count is itself a control (the cohort tag opens the sidebar), count and
+reset join as one segment, as the patient profile does. The heatmap's dot goes; dots are for block status only. Runner-up: C,
+which names the filter but adds a second filter vocabulary next to the crossfilter's.</div>
+
+<h3 class="q"><span class="qtag">B6</span>Tags: the &times; at rest</h3>
+<p class="note">Tags show their &times; at all times. The small-icon decision hides row handles and remove buttons until the
+row is hovered or focused. A tag's &times; is the same kind of icon. In a multi-select it is the only way to remove a pick,
+because the dropdown lists only what is not picked. Hover the second panel.</p>
+<div class="cols c2">
+  <div class="opt"><p class="t">A. Always shown (today)</p><p class="d">Every tag carries a muted 16px &times; at rest.</p>
+    <div class="panel"><div class="ctrl"><div class="gridhost"><div class="grid wide" style="--n:2">
+      <div class="fld"><span class="lbl">Columns</span><div class="ctl tags"><span class="tg">USUBJID<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="tg">AGE<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="more">+3</span><span class="car"></span></div></div>
+      <div class="fld"><span class="lbl">Group by</span><div class="ctl tags"><span class="tg">TRT01A<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="car"></span></div></div>
+    </div></div></div></div></div>
+  <div class="opt hidex"><p class="t">B. Shown when the field is hovered or focused</p><p class="d">Same rule as rows, keyed on
+    the whole field so every &times; appears at once. Space stays reserved, so nothing moves.</p>
+    <div class="panel"><div class="ctrl"><div class="gridhost"><div class="grid wide" style="--n:2">
+      <div class="fld"><span class="lbl">Columns</span><div class="ctl tags" tabindex="0"><span class="tg">USUBJID<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="tg">AGE<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="more">+3</span><span class="car"></span></div></div>
+      <div class="fld"><span class="lbl">Group by</span><div class="ctl tags" tabindex="0"><span class="tg">TRT01A<span class="x"><svg width="9" height="9"><use href="#i-x"/></svg></span></span><span class="car"></span></div></div>
+    </div></div></div></div></div>
+</div>
+<div class="rec">Proposal: <b>B.</b> The &times; appears on hover or focus of the field it belongs to, and turns red on its own
+hover, as decided for rows. Tag text moves from grey-700 to <code>text-default</code> (a picked value is content). Runner-up: A,
+if tags are ever used where no hover exists.</div>
+
+<!-- ============================================================= -->
+<h3 class="sub"><span class="k">3</span>Recorded as they are</h3>
+<ul class="note" style="line-height:1.7">
+<li>Tag geometry: 13px text, 4px corners, 1px <code>border-default</code>, <code>bg-hover</code> fill. The select tag and the
+  crossfilter "Filter by" pills share it; the crossfilter's comment names <code>.blockr-select__tag</code> as its model.</li>
+<li>Accent tint on a tag means the value is cutting rows (<code>.jscf-pill--filtering</code>), at the main button's 7% fill and
+  35% border.</li>
+<li>The "+N" overflow stands in for hidden tags: tag geometry, accent tint, a click expands the field.</li>
+<li>Block status is an 8px dot on the block icon with a 2px ring, one spec for dock and DAG (<code>block_status_style()</code>).
+  Its colours become tokens: stale <code>text-muted</code>, waiting <code>border-warning</code>, failed <code>border-danger</code>,
+  the ring <code>bg-surface</code> so it holds in dark mode. Unset uses <code>#eab308</code>, which is not in the palette; it
+  needs a palette step or merges with waiting.</li>
+<li>Stays text, no chip: column types in the table preview (<code>int</code>, <code>dbl</code>), the chart and table status
+  line and its drill receipt (<code>.dd-status-text</code>, <code>.dd-status-receipt</code>), the filter trail (printed in
+  captions from the dm), the Big N at the end of a column header.</li>
+<li>Click-to-cycle pills (<code>.blockr-pill</code> in dplyr, dm, viz, ggplot, input; <code>.pp-ctrl-pill</code>,
+  <code>.pp-ctrl-chip</code>; join type, arrange direction, slice mode) are in the choice-controls part.</li>
+</ul>
+</section>

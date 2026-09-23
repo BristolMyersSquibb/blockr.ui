@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Buttons: what we have, and options</title>
+<link rel="stylesheet" href="fonts/open-sans.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-tokens-dark.css">
+<style>
+body { margin: 0; padding: 28px 32px 80px; background: var(--blockr-color-bg-page); color: var(--blockr-color-text-default); font: 14px/1.5 "Open Sans", sans-serif; }
+.wrap { max-width: 1160px; margin: 0 auto; }
+.row1 { display: flex; justify-content: space-between; align-items: baseline; }
+h1 { font-size: 20px; font-weight: 600; margin: 0; }
+h2 { font-size: 16px; font-weight: 500; margin: 34px 0 4px; }
+.lede, .note { color: var(--blockr-color-text-muted); max-width: 84ch; margin: 6px 0 12px; }
+.note { font-size: 13px; }
+.switch button { font: inherit; font-size: 13px; padding: 4px 12px; border-radius: 6px; border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); color: var(--blockr-color-text-default); cursor: pointer; }
+.switch button[aria-pressed="true"] { border-color: var(--blockr-color-border-accent); color: var(--blockr-color-text-accent); }
+code { font: 12px var(--blockr-font-mono); }
+.panel { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 12px; padding: 16px 18px; }
+.k { display: inline-block; min-width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 999px; background: var(--blockr-color-text-default); color: var(--blockr-color-bg-surface); font-size: 12px; margin-right: 6px; }
+.rec { background: var(--blockr-color-bg-accent-subtle); border: 1px solid color-mix(in srgb, var(--blockr-color-border-accent) 25%, transparent); border-radius: 8px; padding: 10px 14px; margin-top: 12px; max-width: 86ch; }
+.rec b { color: var(--blockr-color-text-accent); }
+
+/* ---- inventory ---- */
+.inv { width: 100%; border-collapse: collapse; }
+.inv td, .inv th { text-align: left; padding: 10px 10px; border-bottom: 1px solid var(--blockr-color-border-default); vertical-align: middle; font-size: 13px; }
+.inv th { font-size: 12px; font-weight: 500; color: var(--blockr-color-text-muted); }
+.inv td.where { color: var(--blockr-color-text-muted); font-size: 12px; }
+.fam { font-weight: 600; white-space: nowrap; }
+
+/* Inventory specimens: each is the package's own values, copied. */
+.x-tint { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; font: inherit; font-size: 12px; font-weight: 500; color: #2563eb; background: rgba(37,99,235,.07); border: 1px solid rgba(37,99,235,.35); border-radius: 4px; cursor: pointer; }
+.x-tint:hover { background: rgba(37,99,235,.13); border-color: #2563eb; }
+.x-conf { display: inline-flex; align-items: center; gap: 3px; height: 24px; padding: 2px 8px; font: inherit; font-size: 10px; font-weight: 500; letter-spacing: .02em; color: #2563eb; background: rgba(37,99,235,.08); border: 1px solid rgba(37,99,235,.3); border-radius: 4px; }
+.x-pill { display: inline-flex; align-items: center; justify-content: center; height: 24px; min-width: 28px; padding: 2px 8px; font: inherit; font-size: 11px; font-weight: 500; color: #6b7280; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; cursor: pointer; }
+.x-pill.on { color: #2563eb; background: rgba(37,99,235,.08); border-color: rgba(37,99,235,.2); }
+.x-link { font: inherit; font-size: 13px; color: #9ca3af; background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.x-link:hover { color: #2563eb; }
+.x-under { font: inherit; font-size: 12px; color: #9ca3af; background: none; border: 0; padding: 0; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; cursor: pointer; }
+.x-under:hover { color: #2563eb; text-decoration-color: currentColor; }
+.x-bs { font: inherit; font-size: 14px; font-weight: 500; border-radius: 6px; padding: 8px 16px; border: 1px solid; cursor: pointer; }
+.x-bs.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+.x-bs.danger { background: #dc3545; border-color: #dc3545; color: #fff; }
+.x-bs.success { background: #198754; border-color: #198754; color: #fff; }
+.x-bs.outline { background: #f3f4f6; border-color: #e5e7eb; color: #111827; }
+.x-bs.sm { font-size: 13px; padding: 6px 12px; }
+.x-hm { font: inherit; font-size: 11px; padding: 1px 8px; border: 1px solid #e5e7eb; background: #fff; border-radius: 5px; }
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 999px; background: #2563eb; color: #fff; font-size: 10px; }
+
+/* ---- the options, all on tokens ---- */
+.opts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.opt h3 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.opt p { font-size: 12px; color: var(--blockr-color-text-muted); margin: 0 0 10px; min-height: 54px; }
+.scene { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.scene .cap { font-size: 11px; color: var(--blockr-color-text-muted); margin: 0 0 10px; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.bar.left { justify-content: flex-start; }
+.fld-l { font-size: 12px; color: var(--blockr-color-text-muted); margin-bottom: 4px; }
+.fld { height: 42px; box-sizing: border-box; border: 1px solid var(--blockr-color-border-default); border-radius: 8px; background: var(--blockr-color-bg-field); display: flex; align-items: center; padding: 0 12px; margin-bottom: 12px; font-size: 14px; }
+
+.b { font: inherit; font-size: 14px; font-weight: 500; border-radius: 6px; padding: 0 14px; height: 36px; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all var(--blockr-transition); white-space: nowrap; }
+.b.xs { height: 26px; font-size: 12px; padding: 0 9px; border-radius: 4px; gap: 5px; }
+.b:focus-visible { outline: none; box-shadow: var(--blockr-focus-ring); }
+
+/* secondary and ghost are the same in every option */
+.b.sec { background: var(--blockr-color-bg-surface); border-color: var(--blockr-color-border-default); color: var(--blockr-color-text-default); }
+.b.sec:hover { background: var(--blockr-color-bg-hover); border-color: var(--blockr-color-border-strong); }
+.b.ghost { background: transparent; color: var(--blockr-color-text-muted); padding: 0 8px; }
+.b.ghost:hover { background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-default); }
+
+/* A. solid accent (today) */
+.oA .b.pri { background: var(--blockr-color-bg-accent); border-color: var(--blockr-color-bg-accent); color: var(--blockr-color-text-on-accent); }
+.oA .b.pri:hover { background: var(--blockr-color-bg-accent-hover); }
+/* B. tinted: the crossfilter reset, scaled */
+.oB .b.pri { color: var(--blockr-color-text-accent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent); }
+.oB .b.pri:hover { background: color-mix(in srgb, var(--blockr-accent-600) 13%, transparent); border-color: var(--blockr-color-border-accent); }
+/* C. soft solid: pale accent fill, no border */
+.oC .b.pri { color: var(--blockr-accent-700); background: var(--blockr-accent-100); }
+.oC .b.pri:hover { background: color-mix(in srgb, var(--blockr-accent-100) 60%, var(--blockr-accent-500) 40%); }
+[data-bs-theme="dark"] .oC .b.pri { color: var(--blockr-color-text-accent); background: color-mix(in srgb, var(--blockr-accent-500) 22%, transparent); }
+/* D. neutral solid: near black */
+.oD .b.pri { background: var(--blockr-color-text-default); color: var(--blockr-color-bg-surface); }
+.oD .b.pri:hover { opacity: .88; }
+/* E. outline accent */
+.oE .b.pri { background: var(--blockr-color-bg-surface); border-color: var(--blockr-color-border-accent); color: var(--blockr-color-text-accent); }
+.oE .b.pri:hover { background: var(--blockr-color-bg-accent-subtle); }
+
+.b.pri:disabled, .b.sec:disabled { color: var(--blockr-color-text-disabled); background: transparent; border-color: var(--blockr-color-border-default); cursor: default; opacity: .7; }
+.b .n { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--blockr-color-bg-accent); color: var(--blockr-color-text-on-accent); font-size: 10px; }
+.oA .b .n { background: var(--blockr-color-text-on-accent); color: var(--blockr-color-text-accent); }
+.oD .b .n { background: var(--blockr-color-bg-surface); color: var(--blockr-color-text-default); }
+.gear { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; color: var(--blockr-color-text-muted); border-radius: 4px; }
+
+/* ---- proposed system ---- */
+.sys { display: grid; grid-template-columns: 150px repeat(3, 1fr); gap: 12px 16px; align-items: center; }
+.sys .h { font-size: 12px; color: var(--blockr-color-text-muted); }
+.sys .v { font-size: 13px; font-weight: 600; }
+.sys .v small { display: block; font-weight: 400; color: var(--blockr-color-text-muted); font-size: 12px; }
+.b.m { height: 42px; padding: 0 16px; border-radius: 8px; }
+.b.s { height: 30px; font-size: 13px; padding: 0 11px; }
+.tint { color: var(--blockr-color-text-accent); background: color-mix(in srgb, var(--blockr-accent-600) 7%, transparent); border-color: color-mix(in srgb, var(--blockr-accent-600) 35%, transparent) !important; }
+.tint:hover { background: color-mix(in srgb, var(--blockr-accent-600) 13%, transparent); border-color: var(--blockr-color-border-accent) !important; }
+.tint:disabled { color: var(--blockr-color-text-disabled); background: transparent; border-color: var(--blockr-color-border-default) !important; cursor: default; }
+.tint:disabled .n { display: none; }
+.tint-d { color: var(--blockr-color-text-danger); background: color-mix(in srgb, var(--blockr-red-600) 6%, transparent); border-color: color-mix(in srgb, var(--blockr-red-600) 35%, transparent) !important; }
+.tint-d:hover { background: color-mix(in srgb, var(--blockr-red-600) 12%, transparent); border-color: var(--blockr-color-border-danger) !important; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-reset" viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.5-3.5M3 3v2.5h2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 12 12"><path d="M6 2v8M2 6h8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 16 16"><path fill="currentColor" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7l3.5 3.5L11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+<div class="row1"><h1>Buttons: what we have, and options</h1>
+<div class="switch"><button data-scheme="light" aria-pressed="true">Light</button> <button data-scheme="dark" aria-pressed="false">Dark</button></div></div>
+<p class="lede">A separate discussion, as you said. First every button style in the packages today, then five options for the
+main button in three real situations, then a proposed system. Everything is in Open Sans.</p>
+
+<!-- ============================================================ -->
+<h2><span class="k">1</span>What the packages use today</h2>
+<p class="note">Copied with each package's own values. The inventory section does not follow the dark switch, because the code
+does not either.</p>
+<div class="panel">
+<table class="inv">
+<tr><th>Family</th><th>Looks like</th><th>Where</th><th>Values</th></tr>
+<tr><td class="fam">Tinted accent</td>
+  <td><button class="x-tint"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">3</span></button></td>
+  <td class="where">blockr.dm crossfilter <code>.jscf-reset-btn</code>; pharma patient profile <code>.pp-cohort-reset</code> (the drill reset)</td>
+  <td class="where">26px, 12px/500, accent text, 7% fill, 35% border, radius 4</td></tr>
+<tr><td></td>
+  <td><button class="x-conf">Enter ↵</button></td>
+  <td class="where">blockr.dplyr <code>.blockr-expr-confirm</code> (commit an expression)</td>
+  <td class="where">24px, 10px/500, 8% fill, 30% border: the same idea, other numbers</td></tr>
+<tr><td class="fam">Neutral pill</td>
+  <td><button class="x-pill">&gt;=</button> <button class="x-pill">AND</button> <button class="x-pill on">desc</button></td>
+  <td class="where">blockr.dplyr <code>.blockr-pill</code>: filter operator and AND/OR, arrange direction, join type. Click cycles through the values.</td>
+  <td class="where">24px, 11px/500, grey-500 on grey-50, radius 4; "on" state tinted</td></tr>
+<tr><td class="fam">Text link</td>
+  <td><button class="x-link"><svg width="11" height="11"><use href="#i-plus"/></svg>Add condition</button> &nbsp; <button class="x-under">reset</button></td>
+  <td class="where">blockr.dplyr <code>.blockr-add-link</code>; blockr.viz <code>.dd-status-reset</code></td>
+  <td class="where">grey-400 (2.5:1), accent on hover</td></tr>
+<tr><td class="fam">Bootstrap solid</td>
+  <td><button class="x-bs primary">Add</button> <button class="x-bs danger">Remove</button> <button class="x-bs success">Save</button></td>
+  <td class="where">blockr.dock dialogs (<code>action-ui.R</code>, <code>ext-edit.R</code>), link edit confirm; blockr.io download</td>
+  <td class="where"><code>btn-primary</code> recoloured by blockr-theme.css; <code>btn-danger</code>, <code>btn-success</code> are Bootstrap's own colours</td></tr>
+<tr><td></td>
+  <td><button class="x-bs outline sm">Cancel</button> <button class="x-bs primary sm">Write</button></td>
+  <td class="where">blockr.io write, blockr.dm write (<code>btn-outline-secondary btn-sm</code> + <code>btn-primary btn-sm</code>)</td>
+  <td class="where">Bootstrap small</td></tr>
+<tr><td class="fam">One-off</td>
+  <td><button class="x-hm">Reset</button></td>
+  <td class="where">blockr.viz heatmap <code>.hmb-reset</code></td>
+  <td class="where">11px, bordered, no hover</td></tr>
+</table>
+</div>
+<p class="note">So: the tinted style exists three times with three sets of numbers; resets are drawn four different ways; the solid
+style comes from Bootstrap and only appears in dialogs and the write/download blocks.</p>
+
+<!-- ============================================================ -->
+<h2><span class="k">2</span>Five options for the main button</h2>
+<p class="note">Same three situations in each column: a dialog footer, a write block, and a block's header strip with a reset.
+Secondary and ghost buttons are the same everywhere; only the main button changes. Hover them.</p>
+<div class="opts">
+  <div class="opt oA"><h3>A. Solid accent</h3><p>Today's <code>btn-primary</code>. The strongest; the one you find too stark.</p></div>
+  <div class="opt oB"><h3>B. Tinted</h3><p>The crossfilter reset, scaled up: accent text, 7% fill, 35% border.</p></div>
+  <div class="opt oC"><h3>C. Soft solid</h3><p>Pale accent fill, darker accent text, no border.</p></div>
+  <div class="opt oD"><h3>D. Near-black</h3><p>Neutral solid, as in Linear or Vercel. Strong without colour.</p></div>
+  <div class="opt oE"><h3>E. Outline</h3><p>Accent border and text on the surface.</p></div>
+</div>
+<div class="opts" id="scenes"></div>
+
+<!-- ============================================================ -->
+<h2><span class="k">3</span>Proposed system</h2>
+<p class="note">Three kinds and three sizes, with B as the main button. The sizes follow the control heights that already exist:
+42 beside inputs, 30 in toolbars, 26 in a header strip next to the gear.</p>
+<div class="panel">
+<div class="sys">
+  <span></span><span class="h">42 · beside inputs</span><span class="h">30 · toolbars, dialogs</span><span class="h">26 · header strip, next to the gear</span>
+  <span class="v">Main<small>tinted accent; one per view</small></span>
+  <span><button class="b m tint">Write file</button></span><span><button class="b s tint">Add block</button></span><span><button class="b xs tint"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="n">3</span></button></span>
+  <span class="v">Secondary<small>surface, soft border</small></span>
+  <span><button class="b m sec">Cancel</button></span><span><button class="b s sec">Export</button></span><span><button class="b xs sec"><svg width="12" height="12"><use href="#i-dl"/></svg>Download</button></span>
+  <span class="v">Quiet<small>text only, muted</small></span>
+  <span><button class="b m ghost">Skip</button></span><span><button class="b s ghost"><svg width="12" height="12"><use href="#i-plus"/></svg>Add condition</button></span><span><button class="b xs ghost">clear</button></span>
+  <span class="v">Destructive<small>tinted red, only to confirm</small></span>
+  <span><button class="b m tint-d">Delete board</button></span><span><button class="b s tint-d">Remove block</button></span><span><button class="b xs tint-d">Remove</button></span>
+  <span class="v">Disabled</span>
+  <span><button class="b m tint" disabled>Write file</button></span><span><button class="b s sec" disabled>Export</button></span><span><button class="b xs tint" disabled><svg width="12" height="12"><use href="#i-reset"/></svg>Reset</button></span>
+</div>
+</div>
+<div class="rec">Proposal: <b>B, tinted, as the main button everywhere</b>; no solid accent button in blockr. It is the style the
+production boards already use for reset, it follows a theme's accent and dark mode through one token, and three existing copies
+collapse into one. Secondary moves from grey fill to surface with a soft border, so it sits quieter than the main button instead of
+competing with it. Quiet replaces the grey-400 text links, which fail contrast. Runner-up: <b>C</b>, if B reads too light in a dialog.</div>
+
+<p class="note" style="margin-top:18px">Not on this page: the click-to-cycle pills (<code>&gt;=</code>, <code>AND</code>,
+<code>desc</code>). Whether a choice is a pill, a select, a checkbox or a toggle is the next discussion, together with badges.</p>
+</div>
+
+<script>
+const scene = (k) => `
+<div class="o${k}">
+  <div class="scene"><p class="cap">Dialog: add a block</p>
+    <div class="fld-l">Block</div><div class="fld">Filter</div>
+    <div class="bar"><button class="b ghost">Cancel</button><button class="b pri">Add block</button></div></div>
+  <div class="scene"><p class="cap">Write block</p>
+    <div class="fld-l">File name</div><div class="fld">airquality.csv</div>
+    <div class="bar left"><button class="b pri"><svg width="14" height="14"><use href="#i-dl"/></svg>Write file</button><button class="b sec">Preview</button></div></div>
+  <div class="scene"><p class="cap">Header strip: filters on</p>
+    <div class="bar"><button class="b xs pri"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="n">3</span></button><span class="gear"><svg width="15" height="15"><use href="#i-gear"/></svg></span></div></div>
+</div>`;
+document.getElementById('scenes').innerHTML = ['A','B','C','D','E'].map(scene).join('');
+document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => {
+  document.documentElement.setAttribute('data-bs-theme', b.dataset.scheme);
+  document.querySelectorAll('.switch button').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+</script>
+</body>
+</html>

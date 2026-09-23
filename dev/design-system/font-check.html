@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fonts: blockr today and two alternatives</title>
+<style>
+/* Shipped under their own family names, so a copy installed on this machine
+   can never stand in for them: what the card says it shows is what it shows. */
+@font-face { font-family: "Shipped Open Sans"; src: url("fonts/open-sans-latin-400.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Shipped Open Sans"; src: url("fonts/open-sans-latin-500.woff2") format("woff2"); font-weight: 500; }
+@font-face { font-family: "Shipped Open Sans"; src: url("fonts/open-sans-latin-600.woff2") format("woff2"); font-weight: 600; }
+@font-face { font-family: "Shipped Inter"; src: url("fonts/inter-latin.woff2") format("woff2"); font-weight: 100 900; }
+
+body { margin:0; padding:32px; background:#f3f4f6; color:#111827;
+       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+.wrap { max-width:1180px; margin:0 auto; }
+h1 { font-size:22px; margin:0 0 6px; } h2 { font-size:16px; margin:28px 0 6px; }
+.lede { color:#4b5563; max-width:84ch; line-height:1.55; margin:0 0 4px; font-size:14px; }
+.facts { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:14px 18px; margin-top:16px; font-size:14px; line-height:1.9; }
+.facts b { font-weight:600; }
+.yes { color:#15803d; font-weight:600; } .no { color:#b91c1c; font-weight:600; }
+.row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:12px; }
+.col h3 { font-size:13px; margin:0 0 2px; } .col p { font-size:12px; color:#4b5563; margin:0 0 8px; line-height:1.45; min-height:50px; }
+.badge { font:11px ui-monospace,Menlo,monospace; color:#6b7280; display:block; margin-top:2px; }
+.card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:14px; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+.bt { font-size:20px; font-weight:600; margin-bottom:10px; } .bs { font-size:13px; font-weight:400; color:#6b7280; margin-left:4px; }
+label { display:inline-block; font-size:12px; color:#6b7280; margin-bottom:4px; }
+.field { margin-bottom:14px; }
+.ctl { display:flex; align-items:center; justify-content:space-between; height:42px; box-sizing:border-box; padding:0 12px;
+       border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb; font-size:14px; }
+.chev { width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid #374151; }
+.tb { width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
+.tb th { text-align:left; color:#6b7280; font-weight:500; font-size:12px; border-bottom:1px solid #e5e7eb; padding:5px 3px; }
+.tb td { padding:5px 3px; border-bottom:1px solid #f3f4f6; }
+.big { font-size:34px; line-height:1.25; margin-top:12px; letter-spacing:-0.01em; }
+.note { font-size:13px; color:#374151; max-width:86ch; line-height:1.6; margin-top:18px; }
+</style>
+</head>
+<body><div class="wrap">
+<h1>Fonts: blockr today and two alternatives</h1>
+<p class="lede">Verified in the running board on 2026-09-23: every blockr user sees <b>Open Sans</b>.
+bslib's default theme ships it (<code>bootstrap-5.3.8/font.css</code>, 120 font rules, files downloaded from
+<code>bootstrap-5.3.8/fonts/</code>). All three fonts below are loaded from files that come with this page,
+so what each card says is what it shows.</p>
+<h2>The same block in three fonts</h2>
+<div class="row" id="row"></div>
+
+<p class="note" id="note"></p>
+</div>
+
+<script>
+const cards = [
+  ["open", "Open Sans · blockr today", "What every user sees now, shipped by bslib.", "'Shipped Open Sans', monospace"],
+  ["system", "System font", "San Francisco on a Mac. On Windows this would be Segoe UI instead.", "system-ui, -apple-system, sans-serif"],
+  ["inter", "Inter", "Designed for interfaces; close to San Francisco, but the same on every platform.", "'Shipped Inter', monospace"],
+];
+const sample = "mean(Ozone), n() · Group by Month";
+
+function width(stack, weight = 400) {
+  const s = document.createElement("span");
+  s.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-size:40px;font-weight:${weight};font-family:${stack}`;
+  s.textContent = "abcdefghijklmnopqrstuvwxyz mean(Ozone) 0123456789 WMQRG";
+  document.body.appendChild(s); const w = s.getBoundingClientRect().width; s.remove(); return w;
+}
+// A font is present if text set in it measures differently from the bare fallback.
+const has = (name) => ["monospace", "serif"].some(fb => Math.abs(width(`${name}, ${fb}`) - width(fb)) > 0.5);
+
+function card([key, title, desc, stack]) {
+  return `<div class="col"><h3>${title}</h3><p>${desc}<span class="badge" id="b-${key}"></span></p>
+  <div class="card" id="c-${key}">
+    <div class="bt">Summarise<span class="bs">transform block</span></div>
+    <div class="field"><label>Group by</label><div class="ctl"><span>Month</span><span class="chev"></span></div></div>
+    <div class="field"><label>Summarise</label><div class="ctl"><span>mean(Ozone), n()</span></div></div>
+    <table class="tb"><tr><th>Month</th><th>mean_Ozone</th><th>n</th></tr><tr><td>5</td><td>23.6</td><td>31</td></tr><tr><td>6</td><td>29.4</td><td>30</td></tr></table>
+    <div class="big">gag Rg 12</div>
+  </div></div>`;
+}
+document.getElementById("row").innerHTML = cards.map(card).join("");
+// Set through the DOM: font names carry quotes, and a quote inside a
+// style="..." attribute ends the attribute, silently dropping the font.
+for (const [key, , , stack] of cards) document.getElementById(`c-${key}`).style.fontFamily = stack;
+
+document.fonts.load('16px "Shipped Open Sans"').then(() => document.fonts.load('16px "Shipped Inter"')).then(() => document.fonts.ready).then(() => {
+  for (const [key] of cards) {
+    const el = document.querySelectorAll(`#c-${key} .ctl span`)[2];
+    document.getElementById(`b-${key}`).textContent = `"mean(Ozone), n()" measures ${el.getBoundingClientRect().width.toFixed(1)}px`;
+  }
+  document.getElementById("note").innerHTML = "Open Sans is the widest and the most rounded of the three. " +
+    "Inter and San Francisco are drawn in the same style, which is why the two look alike; the difference is that " +
+    "Inter looks the same for everyone, while the system font becomes Segoe UI on Windows.";
+});
+</script>
+</body></html>
