@@ -26,15 +26,25 @@ test_that("type tags are rendered per column", {
   }
 })
 
-test_that("column labels render, truncate and carry a title", {
+test_that("column labels render whole, with the label as their title", {
   df <- data.frame(x = 1, y = 2)
   attr(df$x, "label") <- "Short label"
-  attr(df$y, "label") <- strrep("Long label ", 5)
+  long <- trimws(strrep("Long label ", 5))
+  attr(df$y, "label") <- long
   html <- render_chr(build_html_table(df, 1L))
   expect_match(html, "Short label")
   expect_match(html, "blockr-col-label")
-  expect_match(html, "title=")
-  expect_match(html, "…")
+  # The layout cuts a long label (CSS ellipsis); R passes it whole.
+  expect_match(html, paste0('title="', long, '"'), fixed = TRUE)
+  expect_no_match(html, "…")
+})
+
+test_that("haven value labels and a label equal to the name show no label", {
+  df <- data.frame(sex = c(1, 2), age = c(30, 40))
+  attr(df$sex, "labels") <- c(Male = 1, Female = 2)
+  attr(df$age, "label") <- "age"
+  html <- render_chr(build_html_table(df, 2L))
+  expect_no_match(html, "blockr-col-label")
 })
 
 test_that("NA and negative values get their styling hooks", {

@@ -208,10 +208,15 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
 
   col_names <- names(dat)
 
-  # Extract column labels (e.g. from ADaM datasets)
-  col_labels <- vapply(dat, function(x) {
-    lbl <- attr(x, "label")
-    if (is.null(lbl)) "" else lbl
+  # Column labels (e.g. from ADaM datasets). `exact = TRUE`: without it a
+  # column carrying haven value labels but no variable label returns those
+  # (`attr(x, "label")` partial-matches `labels`) and vapply() errors. A label
+  # equal to the column name adds nothing and is dropped.
+  col_labels <- vapply(seq_along(dat), function(j) {
+    lbl <- attr(dat[[j]], "label", exact = TRUE)
+    ok <- is.character(lbl) && length(lbl) == 1L && !is.na(lbl) &&
+      nzchar(lbl) && !identical(lbl, names(dat)[j])
+    if (ok) lbl else ""
   }, character(1))
   has_labels <- any(nzchar(col_labels))
 
@@ -285,21 +290,14 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
       sort_icon_class <- paste0(sort_icon_class, icon_class_suffix)
     }
 
+    # The label sits under the name and is cut by the layout (CSS ellipsis),
+    # with the whole label as its tooltip.
     label_tag <- if (has_labels && nzchar(col_labels[j])) {
-      is_truncated <- nchar(col_labels[j]) > 20
-      display_text <- if (is_truncated) {
-        paste0(substr(col_labels[j], 1, 18), "\u2026")
-      } else {
-        col_labels[j]
-      }
-      label_args <- list(
+      shiny::tags$span(
         class = "blockr-col-label",
-        display_text
+        title = col_labels[j],
+        col_labels[j]
       )
-      if (is_truncated) {
-        label_args[["title"]] <- col_labels[j]
-      }
-      do.call(shiny::tags$span, label_args)
     }
 
     th_style <- sprintf("width: %dpx;", col_widths_px[j])
