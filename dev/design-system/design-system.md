@@ -677,9 +677,11 @@ Header tools (search, download, the builder/code switch) are 26px, radius 4,
 bare, icon `text-muted`. Hover: `bg-hover`, icon `text-default`. Every
 icon-only button has a tooltip. Tools do not shrink with the panel.
 
-The dock header's section toggles (controls, preview) are tools too. One that
-is on shows its icon in `text-accent`, with no fill and no frame; hover adds
-the `bg-hover` wash. The accent tint's fill and frame are for the builder/code
+The dock header's tools (the controls and preview toggles, the "…" menu) are
+quieter than other tools: at rest their icon is `border-strong` grey, on hover
+`text-disabled` on the `bg-hover` wash, so the header reads as the block's
+name. A toggle that is on shows its icon in `text-accent`, with no fill and no
+frame. The accent tint's fill and frame are for the builder/code
 switch, which changes how a value is edited rather than what is shown.
 
 ### The gear button
