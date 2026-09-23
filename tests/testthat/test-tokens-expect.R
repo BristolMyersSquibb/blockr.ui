@@ -67,7 +67,7 @@ test_that("a name this package does not define is reported, never asserted", {
   root <- consumer_css(
     "widget.css" = c(
       ".a { color: var(--blockr-grey-50, #f9fafb); }",
-      ".b { color: var(--blockr-focus-ring, 0 0 0 3px rgba(1, 2, 3, 0.4)); }"
+      ".b { color: var(--blockr-color-focus, rgba(1, 2, 3, 0.4)); }"
     )
   )
 

@@ -1,11 +1,13 @@
 #' Shared blockr stylesheet
 #'
 #' The `--blockr-*` design tokens and the Bootstrap theme layer that the
-#' blockr packages style themselves from, carried as two stylesheets:
+#' blockr packages style themselves from, carried as three stylesheets:
 #' `blockr-tokens.css` defines the vocabulary in a `:root` block - the
-#' grey and blue ramps, font sizes and weights, shadows, and the semantic
-#' text and surface colours derived from them - and `blockr-theme.css`
-#' applies it to the host app.
+#' colour palette, the meaning tokens built on it (text, backgrounds,
+#' borders, status colours), type, radii, control heights and shadows -
+#' `blockr-tokens-dark.css` restates them under `data-bs-theme="dark"`,
+#' the attribute blockr.core's dark-mode board option sets, and
+#' `blockr-theme.css` applies them to the host app.
 #'
 #' Attach it once, from the app's UI. The theme layer is deliberately
 #' unscoped: it restyles Bootstrap typography, labels, form controls,
@@ -34,7 +36,11 @@ theme_dep <- function() {
     version = utils::packageVersion("blockr.ui"),
     package = "blockr.ui",
     src = "assets",
-    stylesheet = c("css/blockr-tokens.css", "css/blockr-theme.css"),
+    stylesheet = c(
+      "css/blockr-tokens.css",
+      "css/blockr-tokens-dark.css",
+      "css/blockr-theme.css"
+    ),
     all_files = FALSE
   )
 }

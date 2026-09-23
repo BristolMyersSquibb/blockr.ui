@@ -18,31 +18,93 @@
       --blockr-blue-500: #3b82f6
       --blockr-blue-600: #2563eb
       --blockr-blue-700: #1d4ed8
-      --blockr-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)
-      --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25)
-      --blockr-mark-radius: 2px
-      --blockr-mark-weight-supporting: 0.6
-      --blockr-font-size-base: 0.875rem
-      --blockr-font-size-sm: 0.8125rem
+      --blockr-red-50: #fef2f2
+      --blockr-red-100: #fee2e2
+      --blockr-red-600: #dc2626
+      --blockr-red-700: #b91c1c
+      --blockr-amber-50: #fffbeb
+      --blockr-amber-100: #fef3c7
+      --blockr-amber-500: #f59e0b
+      --blockr-amber-700: #b45309
+      --blockr-green-50: #f0fdf4
+      --blockr-green-100: #dcfce7
+      --blockr-green-600: #16a34a
+      --blockr-green-700: #15803d
+      --blockr-accent-50: #eff6ff
+      --blockr-accent-100: #dbeafe
+      --blockr-accent-500: #3b82f6
+      --blockr-accent-600: #2563eb
+      --blockr-accent-700: #1d4ed8
+      --blockr-color-text-default: #111827
+      --blockr-color-text-muted: #6b7280
+      --blockr-color-text-disabled: #9ca3af
+      --blockr-color-text-on-accent: #ffffff
+      --blockr-color-text-accent: #2563eb
+      --blockr-color-text-danger: #b91c1c
+      --blockr-color-text-warning: #b45309
+      --blockr-color-text-success: #15803d
+      --blockr-color-bg-page: #f9fafb
+      --blockr-color-bg-surface: #ffffff
+      --blockr-color-bg-raised: #ffffff
+      --blockr-color-bg-subtle: #f9fafb
+      --blockr-color-bg-field: #f9fafb
+      --blockr-color-bg-hover: color-mix(in srgb, #111827 6%, transparent)
+      --blockr-color-bg-selected: #f3f4f6
+      --blockr-color-bg-accent: #2563eb
+      --blockr-color-bg-accent-hover: #1d4ed8
+      --blockr-color-bg-accent-subtle: #eff6ff
+      --blockr-color-bg-danger: #fef2f2
+      --blockr-color-bg-warning: #fffbeb
+      --blockr-color-bg-success: #f0fdf4
+      --blockr-color-border-default: #e5e7eb
+      --blockr-color-border-strong: #d1d5db
+      --blockr-color-border-accent: #2563eb
+      --blockr-color-border-danger: #dc2626
+      --blockr-color-border-warning: #f59e0b
+      --blockr-color-border-success: #16a34a
+      --blockr-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.12)
       --blockr-font-size-xs: 0.75rem
-      --blockr-font-size-title: 1.25rem
-      --blockr-font-size-section: 1rem
+      --blockr-font-size-sm: 0.8125rem
+      --blockr-font-size-base: 0.875rem
+      --blockr-font-size-lg: 1rem
+      --blockr-font-size-xl: 1.25rem
       --blockr-font-weight-normal: 400
       --blockr-font-weight-medium: 500
       --blockr-font-weight-semibold: 600
+      --blockr-font-mono: ,            ,           ,         , monospace
+      --blockr-radius-sm: 4px
+      --blockr-radius-md: 6px
+      --blockr-radius-lg: 8px
+      --blockr-radius-xl: 12px
+      --blockr-radius-pill: 999px
+      --blockr-control-h: 42px
+      --blockr-control-h-sm: 30px
+      --blockr-control-h-xs: 26px
+      --blockr-shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)
+      --blockr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1)
+      --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25)
+      --blockr-transition: 0.15s ease
+      --blockr-mark-radius: 2px
+      --blockr-mark-font-size: 11px
+      --blockr-mark-weight-supporting: 0.6
       --blockr-color-text-primary: #111827
       --blockr-color-text-secondary: #374151
-      --blockr-color-text-muted: #6b7280
       --blockr-color-text-subtle: #9ca3af
       --blockr-color-text-meta: #6b7280
       --blockr-color-border: #e5e7eb
       --blockr-color-border-hover: #d1d5db
-      --blockr-color-bg-subtle: #f9fafb
-      --blockr-color-bg-hover: #f3f4f6
       --blockr-color-bg-input: #f9fafb
       --blockr-color-primary: #2563eb
       --blockr-color-primary-hover: #1d4ed8
       --blockr-color-primary-bg: #eff6ff
       --blockr-color-error: #dc2626
+      --blockr-color-danger: #dc2626
       --blockr-color-success: #16a34a
+      --blockr-color-warning: #f59e0b
+      --blockr-color-warning-bg: #fffbeb
+      --blockr-color-warning-text: #b45309
+      --blockr-font-size-section: 1rem
+      --blockr-font-size-title: 1.25rem
+      --blockr-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)
+      --blockr-shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.1)
 

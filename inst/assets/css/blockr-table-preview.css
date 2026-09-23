@@ -1,5 +1,5 @@
 .blockr-table-container {
-      background: white;
+      background: var(--blockr-color-bg-surface, #ffffff);
       width: 100%;
     }
 
@@ -31,7 +31,7 @@
     .blockr-table thead {
       position: sticky;
       top: 0;
-      background: white;
+      background: var(--blockr-color-bg-surface, #ffffff);
       z-index: 1;
     }
 
