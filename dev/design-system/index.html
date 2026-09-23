@@ -1444,6 +1444,22 @@ output is 12px muted text.</p>
     <div class="o-foot"><span>116 of 153 rows · 37 dropped (missing ozone)</span></div></div></div>
 </div>
 
+<h3 class="sh" id="columns">Column names and their labels</h3>
+<p class="note">The board speaks in names, an exhibit in labels. Where a column is picked it shows its name with the label as
+muted meta text, cut first. An exhibit shows the label only; hover an output table header for the name. Printed filter text
+uses labels; the board's pills and receipts use names.</p>
+<div class="cols c3">
+  <div class="card"><p class="cap">Picking (a tag, a filter row)</p>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"><span class="tag">AGE<span style="font-size:12px;color:var(--blockr-color-text-muted);margin-left:6px">Age</span></span><span class="tag">TRTEMFL<span style="font-size:12px;color:var(--blockr-color-text-muted);margin-left:6px">Treatment Emergent Analysis Flag</span></span></div>
+    <div class="row" style="display:flex;align-items:center;gap:10px"><span style="white-space:nowrap">SAFFL</span><span style="font-size:13px;color:var(--blockr-color-text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">Safety Population Flag</span><span class="pill">=</span>Y</div></div>
+  <div class="card"><p class="cap">An exhibit (hover a header)</p>
+    <table class="tbl"><thead><tr><th data-tip="USUBJID · Unique Subject Identifier">Unique Subject Identifier</th><th data-tip="AGE · Age">Age</th><th data-tip="SEX · Sex">Sex</th></tr></thead>
+    <tbody><tr><td>01-701-1015</td><td>63</td><td>F</td></tr><tr><td>01-701-1023</td><td>64</td><td>M</td></tr></tbody></table></div>
+  <div class="card"><p class="cap">Filter text</p>
+    <p style="font-size:12px;color:var(--blockr-color-text-muted);font-style:italic;margin:0 0 10px">Filtered: Sex = F; Age 18 to 64</p>
+    <p class="cap">On the board</p><div style="display:flex;gap:4px"><span class="tag" style="background:var(--blockr-color-bg-accent-subtle);border-color:var(--blockr-color-border-accent-subtle);color:var(--blockr-color-text-accent)">SEX = F</span><span class="tag" style="background:var(--blockr-color-bg-accent-subtle);border-color:var(--blockr-color-border-accent-subtle);color:var(--blockr-color-text-accent)">AGE 18 to 64</span></div></div>
+</div>
+
 <h3 class="sh" id="filtering">Showing that a block filters</h3>
 <p class="note">The control that undoes a filter wears the accent tint while a filter is on, carries the number of active
 filters and names the clauses in its tooltip. It is the 26px button. Where the count is itself a control, count and reset join

@@ -547,7 +547,8 @@ selected row, the active group's front tab.
 
 - In the grid it is a bordered 42px field with a caret. Inside a row it is
   bare.
-- Options show the value first and the label after it as 13px muted meta text;
+- Options show the value first and the label after it as 13px muted meta text
+  (for columns, see [Column names and their labels](#labels));
   the label is cut first when space runs out.
 - Its dropdown is a menu ([Floating layer](#floating)).
 
@@ -902,7 +903,35 @@ you has the solid dot, and the blocks below it, which wait for it, have rings.
 The status line under the output is 12px `text-muted`: row counts, filter
 state, timing, the drill receipt. These stay plain text, with no badge: column
 types in the table preview (int, dbl), the status line and its receipt, the
-filter trail printed in captions, the Big N at the end of a column header.
+filter trail printed in captions (in column labels, see below), the Big N at
+the end of a column header.
+
+### Column names and their labels
+
+A column has a name (`AGE`) and often a label ("Age"). The board speaks in
+names, an exhibit in labels.
+
+| Where | Shows |
+|---|---|
+| a control that holds a column: Select options and the chosen value, tags, filter rows, crossfilter cards, gear fields, the @ menu | the name, then the label as meta text: 13px `text-muted`, 8px after the name, no separator, cut first when space runs out (12px inside a tag) |
+| an exhibit: chart axes, legends and tooltips, output and summary tables, exports | the label only; an output table header shows the name in its tooltip |
+| the table preview (a building surface) | the name, with the label on its own line under it, 12px `text-muted` |
+| filter text printed with an exhibit: the filter trail in captions and exports | labels: "Sex = F; Age 18 to 64" |
+| filter text that stays on the board: crossfilter shelf pills, drill receipts | names: "SEX = F" |
+
+- No label, or a label equal to the name: the name alone. Never "unset",
+  never the name twice.
+- A tooltip that shows both reads `AGE · Age`.
+- An aggregate reads "Mean of Age", on a chart, in a table and in a rank
+  table header.
+- Code and decode pairs (PARAMCD and PARAM) follow the same rule: where one is
+  picked, the code with the decode as meta ("ALB  Albumin (g/L)"); in an
+  exhibit, the decode, with the code in the tooltip.
+- One reader for every package: `attr(x, "label", exact = TRUE)`, returning
+  one string or nothing. Without `exact`, a column with haven value labels
+  returns those, and the readers that expect one string break.
+- A sentence slot prints the name (`{@x}`) or the label (`{label(@x)}`), as
+  its author writes it.
 
 ### Messages
 
@@ -925,7 +954,9 @@ Drawn in index.html#labels
 ### Charts
 
 - **Around the plot:** the header row, output title, sentence, caption and
-  status line follow [The block](#block). Header tools are 26px (the chart's
+  status line follow [The block](#block). Axis titles, legend titles and
+  tooltips use column labels ([Labels](#labels)); blockr.ggplot's axis titles
+  move from names to labels. Header tools are 26px (the chart's
   and composer's 30px tools move to 26px).
 - **On the canvas:** all text at `--blockr-mark-font-size` (11px), read by
   chart.js once per render. The gutter measurement (11px), the 14px label-row
@@ -1037,6 +1068,8 @@ Drawn in index.html#special
       routine. No popovers. Tooltips on icon-only buttons and cut-off labels
       only, using the light card; no native `title`.
 - [ ] Badges are capsules and neutral unless they state status or "on".
+- [ ] Columns: the name with its label as meta where a column is picked, the
+      label alone in an exhibit; read labels with the shared reader.
 - [ ] Focus: a field takes the accent border and the ring; everything else
       takes the focus outline, on `:focus-visible` only.
 - [ ] Check the block in the dark scheme.
@@ -1055,7 +1088,7 @@ blockr.ui owns the tokens (`inst/assets/css/blockr-tokens.css`,
 from blockr.extra), `Blockr.Select` and its placement routine,
 `Blockr.checkbox`, the badge, tag, pill and count classes, the slot and offer
 rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
-`crossfilter-block.css`), and the gear button. blockr.dock owns the dock
+`crossfilter-block.css`), the gear button, and the column-label reader. blockr.dock owns the dock
 header, the "…" menu, the block status dot, the category colours
 (`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
 rule that hides the gear in simplified mode. blockr.theme owns data colours.
