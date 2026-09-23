@@ -2,11 +2,8 @@
 
 This is the reference for how blockr looks and behaves: tokens, the block, its
 layout, controls, actions, the floating layer, labels and the special blocks.
-It states each rule once, with exact values and token names. The reasoning
-behind every rule, and the order in which the rules were decided, is in the
-decision record, [`naming.md`](naming.md); where this document and naming.md
-seem to differ, naming.md's latest entry is the intent and this document has a
-bug. [`index.html`](index.html) draws the whole system with the same table of
+It states each rule once, with exact values and token names.
+[`index.html`](index.html) draws the whole system with the same table of
 contents, so every section here has an anchor of the same name there. Token
 values come from `inst/assets/css/blockr-tokens.css` and
 `blockr-tokens-dark.css` in blockr.ui.
@@ -629,7 +626,7 @@ title, an outline row, a view name, a tab (in bare mode).
   duplicate name is refused in place: the field's `border-danger` edge and a
   one-line 12px `text-danger` message under it.
 
-Drawn in topics/20-editable-text-and-navbar.html
+Drawn in index.html#controls
 
 ---
 
@@ -702,7 +699,7 @@ it, every control 30px, tokens only.
 - Hover on every navbar control is `bg-hover`. The spinner's label is the
   light tooltip.
 
-Drawn in topics/20-editable-text-and-navbar.html
+Drawn in index.html#actions
 
 ---
 
@@ -1087,6 +1084,7 @@ variables and reads the blockr tokens.
 
 ### Decision record
 
-[`naming.md`](naming.md) holds every decision with its reasoning, in the order
-made. The drawings of each decided option are in `buttons.html`,
-`block-layout.html`, `questions.html` and `topics/*.html`.
+The reasoning behind each rule, the options that were compared and the
+questions they answered were in `naming.md`, `questions.html` and `topics/`
+in this folder. They were removed once this document was complete; git
+history has them (`git log --all -- dev/design-system/naming.md`).
