@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>blockr design system</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&display=block">
-<link rel="stylesheet" href="../../inst/assets/css/blockr-tokens.css">
-<link rel="stylesheet" href="../../inst/assets/css/blockr-tokens-dark.css">
+<link rel="stylesheet" href="blockr-tokens.css">
+<link rel="stylesheet" href="blockr-tokens-dark.css">
 <style>
 /* The page is drawn from the tokens only (plus the fixed block category
    colours), in Open Sans, so the Dark switch checks the dark file on every
@@ -638,7 +638,7 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
 
 <p class="lede">The system as decided on 2026-09-23, drawn at real size in Open Sans. Every colour, size and radius on this
 page comes from <code>blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>, so Dark switches every part at once.
-The written rules are in <code>design-system.md</code>, under the same sections and anchors. Everything is live: open the
+The written rules are in <a href="../design-system.html">the design system article</a>, under the same sections and anchors. Everything is live: open the
 gears, hover the icons, click the words, pills and boxes.</p>
 
 <svg width="0" height="0" style="position:absolute">
@@ -664,7 +664,7 @@ gears, hover the icons, click the words, pills and boxes.</p>
 <h2 class="ph">The navbar</h2>
 <p class="rl">The board's toolbar: 48px, controls at 30px, tokens only. The workflow's name is its ID (chosen at the first save,
 like a file name), then its save state as text and one "…" workflow menu. On the right the view menu, the board options and
-the account. <a href="design-system.md#actions">rules: design-system.md#actions</a></p>
+the account. <a href="../design-system.html#actions">rules: design-system#actions</a></p>
 <div class="z-nav">
   <span class="z-logo"><svg width="18" height="18"><use href="#z-layers"/></svg></span>
   <span class="z-nm">AE review 244</span><span class="z-meta">Saved just now</span>
@@ -681,7 +681,7 @@ the account. <a href="design-system.md#actions">rules: design-system.md#actions<
 <h2 class="ph">Two blocks, as decided</h2>
 <p class="rl">A transform block holds the fields that define it on its face; an output block holds its output and a sentence
 with live words. Both keep the rest behind the gear, which opens the tray in flow and closes on the gear or Escape.
-<a href="design-system.md#block">rules: design-system.md#block</a></p>
+<a href="../design-system.html#block">rules: design-system#block</a></p>
 
 <div class="board">
   <!-- ---------------------------------------------------- transform block -->
@@ -814,7 +814,7 @@ with live words. Both keep the rest behind the gear, which opens the tray in flo
 <!-- ============================================================== 1 PRINCIPLES -->
 <section class="part" id="principles">
 <h2 class="ph"><span class="num">1</span>Principles</h2>
-<p class="rl">Each principle below is a rule the later sections apply. <a href="design-system.md#principles">rules: design-system.md#principles</a></p>
+<p class="rl">Each principle below is a rule the later sections apply. <a href="../design-system.html#principles">rules: design-system#principles</a></p>
 <div class="card">
 <ul class="rules" style="margin:0">
   <li>Components read meaning tokens (<code>--blockr-color-text-muted</code>), never palette steps (<code>--blockr-grey-500</code>) and never a hex. A theme changes a few palette values and dark mode is a second mapping of the same ramps.</li>
@@ -833,7 +833,7 @@ with live words. Both keep the rest behind the gear, which opens the tray in flo
 <section class="part" id="foundations">
 <h2 class="ph"><span class="num">2</span>Foundations</h2>
 <p class="rl">Palette tokens are read by other tokens only; components read meaning tokens, named <code>--blockr-color-&lt;text|bg|border&gt;-&lt;role&gt;</code>. Values below are read from the token file at load.
-<a href="design-system.md#foundations">rules: design-system.md#foundations</a></p>
+<a href="../design-system.html#foundations">rules: design-system#foundations</a></p>
 
 <h3 class="sh" id="colour">Colour: the palette</h3>
 <p class="note">A ten-step grey ramp, an accent ramp that points at blue unless a theme overrides it, and small red, amber and
@@ -969,7 +969,7 @@ same under every theme and in dark.</p>
 <h2 class="ph"><span class="num">3</span>The block</h2>
 <p class="rl">Below the dock header a block has a header row, the gear tray, the controls on its face and its output (body,
 caption, status line). Its output title and sentence belong to the output and export with it.
-<a href="design-system.md#block">rules: design-system.md#block</a></p>
+<a href="../design-system.html#block">rules: design-system#block</a></p>
 
 <h3 class="sh" id="anatomy">Anatomy</h3>
 <p class="note">An output block with its tray open. The transform block above shows the fourth part, controls on the face.</p>
@@ -1093,7 +1093,7 @@ right of the tabs, a double-click on the tab renames. It waits on dockViewR's ta
 <section class="part" id="layout">
 <h2 class="ph"><span class="num">4</span>Layout</h2>
 <p class="rl">One grid of about 130px columns, 8, 6, 4, 2 or 1 by panel width. A number or checkbox takes one column, a select or
-text field two, tags or an expression the whole row. <a href="design-system.md#layout">rules: design-system.md#layout</a></p>
+text field two, tags or an expression the whole row. <a href="../design-system.html#layout">rules: design-system#layout</a></p>
 
 <h3 class="sh" id="grid">The grid and field sizes</h3>
 <p class="note">Set the panel width, or drag the panel's bottom-right corner. Columns line up across sections at every width;
@@ -1172,7 +1172,7 @@ appears on the right and turns red on hover. The fold arrow stays visible. Hover
 <h2 class="ph"><span class="num">5</span>Controls</h2>
 <p class="rl">Fields are 42px on the field background with a soft border; focus is the accent border and the ring. On/off is a
 bare checkbox; two or three short fixed values a segmented control; four or more, or values from the data, a Select; several
-from a list, tags. <a href="design-system.md#controls">rules: design-system.md#controls</a></p>
+from a list, tags. <a href="../design-system.html#controls">rules: design-system#controls</a></p>
 
 <h3 class="sh" id="inputs">Text and number inputs</h3>
 <p class="note">Text and numbers commit on Enter or blur; while a field holds an uncommitted change the <code>Enter ↵</code>
@@ -1272,7 +1272,7 @@ Escape restores, a click elsewhere commits; an empty or duplicate name is refuse
 <section class="part" id="actions">
 <h2 class="ph"><span class="num">6</span>Actions</h2>
 <p class="rl">Four kinds of button in three sizes; the main button is the tinted accent and there is no solid accent button.
-Icon buttons are quiet and carry a tooltip. <a href="design-system.md#actions">rules: design-system.md#actions</a></p>
+Icon buttons are quiet and carry a tooltip. <a href="../design-system.html#actions">rules: design-system#actions</a></p>
 
 <h3 class="sh" id="buttons">Buttons</h3>
 <p class="note">42px beside inputs, 30px in toolbars and dialogs, 26px in a header row next to the gear. At most one main
@@ -1319,7 +1319,7 @@ Bootstrap gear-fill at 14px, one class <code>.blockr-gear-btn</code>, tooltip "S
 <section class="part" id="floating">
 <h2 class="ph"><span class="num">7</span>Floating layer</h2>
 <p class="rl">Menus hold choices and actions and open on click; tooltips name things on hover. Both use the raised surface with
-<code>shadow-md</code>. blockr has no popovers. <a href="design-system.md#floating">rules: design-system.md#floating</a></p>
+<code>shadow-md</code>. blockr has no popovers. <a href="../design-system.html#floating">rules: design-system#floating</a></p>
 
 <h3 class="sh" id="menus">Menus</h3>
 <p class="note">Raised surface, 1px border, radius 8, 4px padding. Rows 32px at 14px with 10px side padding; meta 13px, muted,
@@ -1410,7 +1410,7 @@ their type as meta. Type to filter; arrows and Enter work.</p>
 <h2 class="ph"><span class="num">8</span>Labels and status</h2>
 <p class="rl">Shape tells the four small kinds apart: a badge (read only) has round ends; a tag (a value you picked), a pill (a
 click changes a setting) and a button have 4px corners. A badge has colour only for status or "on".
-<a href="design-system.md#labels">rules: design-system.md#labels</a></p>
+<a href="../design-system.html#labels">rules: design-system#labels</a></p>
 
 <h3 class="sh" id="badges">Badges, tags, pills, counts</h3>
 <div class="cols c2">
@@ -1475,7 +1475,7 @@ as one segment. Dots are for block status only.</p>
 <section class="part" id="special">
 <h2 class="ph"><span class="num">9</span>Special blocks</h2>
 <p class="rl">Charts, the crossfilter and the code editor follow the same anatomy and tokens as every block; their own settings
-are local tokens and the mark group. <a href="design-system.md#special">rules: design-system.md#special</a></p>
+are local tokens and the mark group. <a href="../design-system.html#special">rules: design-system#special</a></p>
 
 <h3 class="sh" id="charts">Charts</h3>
 <p class="note">The canvas reads the tokens at render: axis and data labels <code>text-muted</code>, axis line
@@ -1560,7 +1560,7 @@ the active line <code>bg-hover</code>, the input line a band mixed from the acce
 <section class="part" id="authors">
 <h2 class="ph"><span class="num">10</span>For package authors</h2>
 <p class="rl">Check a block against this list before release, in light and in dark.
-<a href="design-system.md#authors">rules: design-system.md#authors</a></p>
+<a href="../design-system.html#authors">rules: design-system#authors</a></p>
 <div class="card"><ul class="check">
   <li><span class="box"></span><span>Read meaning tokens only. No hex, no palette step, no grey outside the ramp.</span></li>
   <li><span class="box"></span><span>Name a package's own settings <code>--blockr-&lt;owner&gt;-*</code> and read them only in its own stylesheet.</span></li>
@@ -1580,7 +1580,7 @@ the active line <code>bg-hover</code>, the input line a band mixed from the acce
 <!-- ============================================================= APPENDIX -->
 <section class="part" id="appendix">
 <h2 class="ph">Appendix</h2>
-<p class="rl">Where the code lives and the legacy names. <a href="design-system.md#appendix">rules: design-system.md#appendix</a></p>
+<p class="rl">Where the code lives and the legacy names. <a href="../design-system.html#appendix">rules: design-system#appendix</a></p>
 <div>
   <div class="card">
     <h4 class="mini" style="margin-top:0">Where the code lives</h4>
@@ -1720,7 +1720,7 @@ function render() {
     for. The token tests warn on every read of an alias.</p>${table(leg)}</details>` : '';
 }
 
-fetch('../../inst/assets/css/blockr-tokens.css?' + Date.now())
+fetch('blockr-tokens.css?' + Date.now())
   .then(r => r.text())
   .then(t => { sections = parse(t); render(); });
 
@@ -2053,6 +2053,17 @@ document.getElementById('xf-days').innerHTML = Array.from({ length: 31 }, (_, i)
   }
   setup('z-addbtn', 'z-addmenu', 'z-addq', 'z-addlist', TYPES, true);
   setup('z-placebtn', 'z-placemenu', 'z-placeq', 'z-placelist', BOARD, false);
+})();
+</script>
+<script>
+/* Open in the scheme the pkgdown site shows. The site keeps the choice in
+   localStorage under `theme` ("light", "dark" or "auto"); no choice, or auto,
+   follows the system. */
+(function () {
+  const stored = localStorage.getItem('theme');
+  const dark = stored === 'dark' ||
+    (stored !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+  if (dark) document.querySelector('#scheme button[data-scheme="dark"]').click();
 })();
 </script>
 </body>

@@ -1,31 +1,20 @@
-# The blockr design system
+---
+title: "The blockr design system"
+resource_files:
+  - design-system/index.html
+  - design-system/blockr-tokens.css
+  - design-system/blockr-tokens-dark.css
+---
 
 This is the reference for how blockr looks and behaves: tokens, the block, its
 layout, controls, actions, the floating layer, labels and the special blocks.
-It states each rule once, with exact values and token names.
-[`index.html`](index.html) draws the whole system with the same table of
-contents, so every section here has an anchor of the same name there. Token
-values come from `inst/assets/css/blockr-tokens.css` and
+It states each rule once, with exact values and token names. The
+[design system page](design-system/index.html) draws the whole system with the
+same table of contents, so every section here has an anchor of the same name
+there. Token values come from `inst/assets/css/blockr-tokens.css` and
 `blockr-tokens-dark.css` in blockr.ui.
 
-## Contents
-
-1. [Principles](#principles)
-2. [Foundations](#foundations)
-3. [The block](#block)
-4. [Layout](#layout)
-5. [Controls](#controls)
-6. [Actions](#actions)
-7. [Floating layer](#floating)
-8. [Labels and status](#labels)
-9. [Special blocks](#special)
-10. [For package authors](#authors)
-- [Appendix](#appendix)
-
----
-
-<a id="principles"></a>
-## 1. Principles
+## 1. Principles {#principles}
 
 - Components read meaning tokens only. Palette tokens (`--blockr-grey-500`,
   `--blockr-blue-600`) are read by other tokens and never by a component.
@@ -50,12 +39,11 @@ values come from `inst/assets/css/blockr-tokens.css` and
   tooltips (names, on hover). There are no popovers.
 - The sentence on a block's face looks as it will in print.
 
-Drawn in index.html#principles
+Drawn in the [design system page](design-system/index.html#principles).
 
 ---
 
-<a id="foundations"></a>
-## 2. Foundations
+## 2. Foundations {#foundations}
 
 ### Token grammar
 
@@ -307,12 +295,11 @@ set: identical under every theme and in dark mode.
 | utility | `#CCCCCC` |
 | uncategorised | `#999999` |
 
-Drawn in index.html#foundations
+Drawn in the [design system page](design-system/index.html#foundations).
 
 ---
 
-<a id="block"></a>
-## 3. The block
+## 3. The block {#block}
 
 ### Anatomy, top to bottom
 
@@ -424,12 +411,11 @@ name stays in the gear.
 - One template, two renderers: the face draws live words, exports print the
   same text.
 
-Drawn in index.html#block
+Drawn in the [design system page](design-system/index.html#block).
 
 ---
 
-<a id="layout"></a>
-## 4. Layout
+## 4. Layout {#layout}
 
 ### The grid
 
@@ -500,12 +486,11 @@ between its parts, 6px between rows. Its operator pill is 24px.
   (see [Actions](#actions)).
 - "Add condition" under the list is a quiet button.
 
-Drawn in index.html#layout
+Drawn in the [design system page](design-system/index.html#layout).
 
 ---
 
-<a id="controls"></a>
-## 5. Controls
+## 5. Controls {#controls}
 
 ### Which control for which decision
 
@@ -640,12 +625,11 @@ title, an outline row, a view name, a tab (in bare mode).
   duplicate name is refused in place: the field's `border-danger` edge and a
   one-line 12px `text-danger` message under it.
 
-Drawn in index.html#controls
+Drawn in the [design system page](design-system/index.html#controls).
 
 ---
 
-<a id="actions"></a>
-## 6. Actions
+## 6. Actions {#actions}
 
 ### Buttons
 
@@ -720,12 +704,11 @@ it, every control 30px, tokens only.
 - Hover on every navbar control is `bg-hover`. The spinner's label is the
   light tooltip.
 
-Drawn in index.html#actions
+Drawn in the [design system page](design-system/index.html#actions).
 
 ---
 
-<a id="floating"></a>
-## 7. Floating layer
+## 7. Floating layer {#floating}
 
 blockr has no popovers. Floating things are menus (choices and actions, opened
 by a click) and tooltips (names, on hover). The gear tray is in flow and not
@@ -820,12 +803,11 @@ Escape hides it.
   stack) uses the same menu, listing the board's blocks: mark, title, and the
   block type as meta text. The Bootstrap modal with selectize goes.
 
-Drawn in index.html#floating
+Drawn in the [design system page](design-system/index.html#floating).
 
 ---
 
-<a id="labels"></a>
-## 8. Labels and status
+## 8. Labels and status {#labels}
 
 ### Four kinds, told apart by shape
 
@@ -951,12 +933,11 @@ names, an exhibit in labels.
   `border-<status>-subtle` edge, 13px, radius 6. Danger for errors, the amber set for
   warnings.
 
-Drawn in index.html#labels
+Drawn in the [design system page](design-system/index.html#labels).
 
 ---
 
-<a id="special"></a>
-## 9. Special blocks
+## 9. Special blocks {#special}
 
 ### Charts
 
@@ -1042,12 +1023,11 @@ in `text-muted`. Every block gets the same cue: past 300ms of computing, its out
 0.45 and a clock ("computing… 1.2 s") runs under it; nothing shows for a
 faster run. blockr.core applies it from outside the block.
 
-Drawn in index.html#special
+Drawn in the [design system page](design-system/index.html#special).
 
 ---
 
-<a id="authors"></a>
-## 10. For package authors
+## 10. For package authors {#authors}
 
 - [ ] Read meaning tokens only. No `--blockr-grey-*`, `--blockr-blue-*` or hex
       in a component.
@@ -1081,12 +1061,11 @@ Drawn in index.html#special
       takes the focus outline, on `:focus-visible` only.
 - [ ] Check the block in the dark scheme.
 
-Drawn in index.html#authors
+Drawn in the [design system page](design-system/index.html#authors).
 
 ---
 
-<a id="appendix"></a>
-## Appendix
+## Appendix {#appendix}
 
 ### Where the code lives
 
@@ -1154,5 +1133,5 @@ set with its sizes.
 
 The reasoning behind each rule, the options that were compared and the
 questions they answered were in `naming.md`, `questions.html` and `topics/`
-in this folder. They were removed once this document was complete; git
+in `dev/design-system/`. They were removed once this document was complete; git
 history has them (`git log --all -- dev/design-system/naming.md`).
