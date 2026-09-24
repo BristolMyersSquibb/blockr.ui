@@ -1,8 +1,18 @@
-blockr_tokens <- function() {
+blockr_tokens <- function(scheme = c("light", "dark")) {
+
+  sheets <- switch(
+    match.arg(scheme),
+    light = "blockr-tokens.css",
+    dark = c("blockr-tokens.css", "blockr-tokens-dark.css")
+  )
 
   definitions <- css_definitions(
-    read_css(
-      system.file("assets", "css", "blockr-tokens.css", package = "blockr.ui")
+    paste(
+      blockr.core::chr_ply(
+        system.file("assets", "css", sheets, package = "blockr.ui"),
+        read_css
+      ),
+      collapse = "\n"
     )
   )
 

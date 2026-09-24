@@ -14,6 +14,29 @@ test_that("every claimed token resolves to a literal", {
   expect_identical(tokens[["--blockr-grey-900"]], "#111827")
 })
 
+test_that("the dark scheme changes only deliberately", {
+
+  tokens <- blockr_tokens("dark")
+
+  expect_snapshot(cat(paste(names(tokens), tokens, sep = ": "), sep = "\n"))
+})
+
+test_that("the dark scheme restates only claimed names", {
+
+  dark <- css_definitions(
+    read_css(
+      system.file(
+        "assets", "css", "blockr-tokens-dark.css",
+        package = "blockr.ui"
+      )
+    )
+  )
+
+  expect_gt(length(dark), 0L)
+  expect_identical(setdiff(names(dark), names(blockr_tokens())), character())
+  expect_false(any(is.na(blockr_tokens("dark"))))
+})
+
 test_that("var() sites survive nested parens and nested var()", {
 
   nested <- var_sites(
