@@ -12,10 +12,15 @@
    cards, accordions and the like from it. In dark that is #1D1F21, a neutral
    grey that sat beside the blue-grey blockr surfaces as a brownish band on
    every block. Pointing it at the tokens gives one surface in both schemes;
-   in light nothing changes, both are white. `:root:root` outranks bslib's
-   `:root` and `[data-bs-theme]` rules, which it injects after this sheet. */
+   in light nothing changes, both are white. The text colour follows in dark
+   only, because in light bslib's #1D1F21 is not the tokens' #111827. The
+   doubled `:root:root` outranks bslib's `:root` and `[data-bs-theme]` rules,
+   which it injects after this sheet. */
 :root:root {
   --bs-body-bg: var(--blockr-color-bg-surface);
+}
+
+:root:root[data-bs-theme="dark"] {
   --bs-body-color: var(--blockr-color-text-default);
 }
 
