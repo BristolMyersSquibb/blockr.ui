@@ -94,10 +94,9 @@
   --blockr-color-bg-raised: #ffffff;
   --blockr-color-bg-subtle: var(--blockr-grey-50);
   --blockr-color-bg-field: var(--blockr-grey-50);
-  /* A wash of the text colour rather than a grey step, so a hovered row is
-     one step lighter than whatever it sits on in the dark scheme too (on
-     surface or on raised); in light it lands where grey-100 was. */
-  --blockr-color-bg-hover: color-mix(in srgb, var(--blockr-color-text-default) 6%, transparent);
+  /* Stays grey-100, its old value, while consumers' fallbacks still write
+     #f3f4f6. The dark scheme already takes the text wash it moves to. */
+  --blockr-color-bg-hover: var(--blockr-grey-100);
   /* The chosen thing takes the accent tint, like every other selected
      state: a selected row, the front tab of the active dock group. Front
      tabs of the other groups are selected too, but not where you work, so

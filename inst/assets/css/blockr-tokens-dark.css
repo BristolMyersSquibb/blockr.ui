@@ -40,6 +40,10 @@
   --blockr-color-bg-page: #0e1219;
   --blockr-color-bg-surface: #161b23;
   --blockr-color-bg-raised: #1e242e;
+  /* A wash of the text colour rather than a grey step, so a hovered row is
+     one step lighter than whatever it sits on, surface or raised. Light
+     keeps grey-100 until its consumers' fallbacks move to the wash. */
+  --blockr-color-bg-hover: color-mix(in srgb, var(--blockr-color-text-default) 6%, transparent);
 
   /* The accent fill is lighter in dark, so text on it turns dark. */
   --blockr-color-text-on-accent: #0e1219;

@@ -49,7 +49,7 @@
       --blockr-color-bg-raised: #ffffff
       --blockr-color-bg-subtle: #f9fafb
       --blockr-color-bg-field: #f9fafb
-      --blockr-color-bg-hover: color-mix(in srgb, #111827 6%, transparent)
+      --blockr-color-bg-hover: #f3f4f6
       --blockr-color-bg-selected: color-mix(in srgb, #2563eb 7%, transparent)
       --blockr-color-bg-selected-inactive: color-mix(in srgb, #111827 10%, transparent)
       --blockr-color-bg-accent: #2563eb

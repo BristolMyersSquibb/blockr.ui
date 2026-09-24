@@ -1133,6 +1133,10 @@ it.
 | `--blockr-shadow` | `shadow-sm` |
 | `--blockr-shadow-dropdown` | `shadow-md` |
 
+One new token reuses an old name: `--blockr-color-bg-hover` was grey-100, and
+it stays grey-100 in light until the fallbacks that write `#f3f4f6` move to the
+text wash. The dark scheme uses the wash already.
+
 Removed from the UI tokens: `--blockr-color-negative` (data colour, belongs in
 blockr.theme). Local names move under their owner: dock's `spinner-delay`,
 `sidebar-*`, `stack-height` and header settings to `--blockr-dock-*`; viz's
