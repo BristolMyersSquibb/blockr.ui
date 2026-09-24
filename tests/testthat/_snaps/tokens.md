@@ -80,7 +80,7 @@
       --blockr-font-weight-normal: 400
       --blockr-font-weight-medium: 500
       --blockr-font-weight-semibold: 600
-      --blockr-font-mono: ,            ,           ,         , monospace
+      --blockr-font-mono: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace
       --blockr-radius-sm: 4px
       --blockr-radius-md: 6px
       --blockr-radius-lg: 8px

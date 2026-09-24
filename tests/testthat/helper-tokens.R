@@ -199,17 +199,17 @@ expand_hex <- function(hex) {
 }
 
 read_css <- function(file) {
-  mask_css_comments_and_strings(
-    paste(readLines(file, warn = FALSE), collapse = "\n")
-  )
+  mask_css(paste(readLines(file, warn = FALSE), collapse = "\n"), FALSE)
 }
 
-# Strings go with comments because a quoted paren would otherwise unbalance
-# the scan: `var(--x, "(")` loses its closing paren and the site vanishes,
-# which is the one direction a detector cannot afford. One alternation, so
-# whichever opens first consumes the other - a quote inside a comment does
-# not open a string, and `/*` inside a string does not open a comment.
-mask_css_comments_and_strings <- function(css) {
+# The scan masks strings as well as comments, because a quoted paren would
+# otherwise unbalance it: `var(--x, "(")` loses its closing paren and the site
+# vanishes, which is the one direction a detector cannot afford. Values are
+# then cut from the text with its strings intact, so a quoted font name stays
+# part of the value it belongs to. One alternation, so whichever opens first
+# consumes the other - a quote inside a comment does not open a string, and
+# `/*` inside a string does not open a comment.
+mask_css <- function(css, strings = TRUE) {
 
   spans <- gregexpr(
     "(?s)/\\*.*?\\*/|\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'",
@@ -219,19 +219,26 @@ mask_css_comments_and_strings <- function(css) {
 
   regmatches(css, spans) <- lapply(
     regmatches(css, spans),
-    gsub,
-    pattern = "[^\n]",
-    replacement = " "
+    blank_spans,
+    strings = strings
   )
 
   css
+}
+
+blank_spans <- function(spans, strings) {
+
+  blank <- strings | startsWith(spans, "/*")
+  spans[blank] <- gsub("[^\n]", " ", spans[blank])
+
+  spans
 }
 
 css_definitions <- function(css) {
 
   declarations <- regmatches(
     css,
-    gregexpr("--blockr-[a-z0-9-]+\\s*:[^;}]*", css, perl = TRUE)
+    gregexpr("--blockr-[a-z0-9-]+\\s*:[^;}]*", mask_css(css), perl = TRUE)
   )[[1L]]
 
   colon <- regexpr(":", declarations, fixed = TRUE)
@@ -245,7 +252,8 @@ css_definitions <- function(css) {
 
 var_sites <- function(css) {
 
-  hits <- gregexpr("var\\(\\s*--blockr-[a-z0-9-]+", css, perl = TRUE)[[1L]]
+  scan <- mask_css(css)
+  hits <- gregexpr("var\\(\\s*--blockr-[a-z0-9-]+", scan, perl = TRUE)[[1L]]
 
   if (hits[1L] < 0L) {
     return(
@@ -258,7 +266,7 @@ var_sites <- function(css) {
     )
   }
 
-  chars <- strsplit(css, "", fixed = TRUE)[[1L]]
+  chars <- strsplit(scan, "", fixed = TRUE)[[1L]]
   depth <- cumsum((chars == "(") - (chars == ")"))
 
   start <- as.integer(hits)
@@ -270,11 +278,12 @@ var_sites <- function(css) {
     token = sub(
       "^var\\(\\s*",
       "",
-      substring(css, start, start + attr(hits, "match.length") - 1L)
+      substring(scan, start, start + attr(hits, "match.length") - 1L)
     ),
-    fallback = blockr.core::chr_ply(
-      substring(css, start + 4L, end - 1L),
-      var_fallback
+    fallback = blockr.core::chr_mply(
+      var_fallback,
+      substring(scan, start + 4L, end - 1L),
+      substring(css, start + 4L, end - 1L)
     )
   )[!is.na(end), ]
 
@@ -291,9 +300,9 @@ closing_paren <- function(open, depth) {
   if (length(after)) after[1L] else NA_integer_
 }
 
-var_fallback <- function(inner) {
+var_fallback <- function(scan, inner) {
 
-  chars <- strsplit(inner, "", fixed = TRUE)[[1L]]
+  chars <- strsplit(scan, "", fixed = TRUE)[[1L]]
   depth <- cumsum((chars == "(") - (chars == ")"))
   comma <- which(chars == "," & depth == 0L)
 
