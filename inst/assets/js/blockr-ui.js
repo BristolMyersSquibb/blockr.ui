@@ -494,6 +494,233 @@ Blockr.tooltip = (() => {
   };
 })();
 
+/* --- Menu --------------------------------------------------------------- */
+
+/**
+ * The action menu (design system, "Menus"): one floating surface for every
+ * menu of actions -- a block's "…" menu, the views menu, a user menu.
+ * Blockr.Select.menu() is the other kind, a list of values to pick from.
+ *
+ * Blockr.menu(anchor, config) opens a menu under `anchor` and returns
+ * `{ el, close }`. `config.items` is a list of entries:
+ *
+ *   { label, icon?, meta?, mono?, current?, danger?, disabled?, reason?,
+ *     onSelect? }            a row; `icon` is an SVG/HTML string, `meta` grey
+ *                            text after the label (`mono` sets it in the code
+ *                            face), `current` the item in use (weight 600),
+ *                            `danger` a destructive action, `reason` the
+ *                            tooltip on a disabled row
+ *   { divider: true }        a rule between groups without a title
+ *   { title }                a group title
+ *
+ * `config.head` ({ title, badge?, text? }) puts a block of text above the
+ * rows, as the "…" menu's name, package and description. `align` is 'start'
+ * (default) or 'end', for a trigger in a header row. `onClose` runs once
+ * whichever way the menu closes.
+ *
+ * The panel is portalled to <body> and placed with Blockr.place: 4px under
+ * the trigger, above when there is no room below, 180 to 320px wide. Arrows
+ * move, Home/End jump, Enter and Space pick, Escape closes and hands focus
+ * back to the trigger; Tab, a click outside and a pick close it.
+ *
+ * Blockr.menu.bind(trigger, config) wires a button to open and close its
+ * menu; `config` may be a function, read on each open.
+ */
+Blockr.menu = (() => {
+  /** @type {{ el: HTMLDivElement, close: () => void, anchor: HTMLElement } | null} */
+  let open = null;
+
+  /**
+   * @param {HTMLElement} anchor
+   * @param {BlockrMenuConfig} config
+   * @returns {{ el: HTMLDivElement, close: () => void }}
+   */
+  const menu = (anchor, config) => {
+    if (open) open.close();
+
+    const panel = document.createElement('div');
+    panel.className = 'blockr-menu';
+    panel.id = Blockr.uid('blockr-menu');
+    panel.setAttribute('role', 'menu');
+    panel.tabIndex = -1;
+
+    if (config.head) {
+      const head = document.createElement('div');
+      head.className = 'blockr-menu__head';
+      const line = document.createElement('div');
+      line.className = 'blockr-menu__head-title';
+      line.textContent = config.head.title;
+      if (config.head.badge) {
+        const badge = document.createElement('span');
+        badge.className = 'blockr-menu__badge';
+        badge.textContent = config.head.badge;
+        line.append(' ', badge);
+      }
+      head.appendChild(line);
+      if (config.head.text) {
+        const text = document.createElement('div');
+        text.className = 'blockr-menu__head-text';
+        text.textContent = config.head.text;
+        head.appendChild(text);
+      }
+      panel.appendChild(head);
+    }
+
+    /** @type {{ row: HTMLButtonElement, item: BlockrMenuItem }[]} */
+    const rows = [];
+    for (const entry of config.items || []) {
+      if ('divider' in entry) {
+        const hr = document.createElement('div');
+        hr.className = 'blockr-menu__divider';
+        hr.setAttribute('role', 'separator');
+        panel.appendChild(hr);
+        continue;
+      }
+      if (!('label' in entry)) {
+        const t = document.createElement('div');
+        t.className = 'blockr-menu__title';
+        t.textContent = entry.title;
+        panel.appendChild(t);
+        continue;
+      }
+      const item = entry;
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.tabIndex = -1;
+      row.className = 'blockr-menu__item' +
+        (item.current ? ' blockr-menu__item--current' : '') +
+        (item.danger ? ' blockr-menu__item--danger' : '');
+      row.setAttribute('role', 'menuitem');
+      if (item.disabled) {
+        row.setAttribute('aria-disabled', 'true');
+        if (item.reason) Blockr.tooltip.set(row, item.reason);
+      }
+      if (item.icon) {
+        const ic = document.createElement('span');
+        ic.className = 'blockr-menu__icon';
+        ic.innerHTML = item.icon;
+        row.appendChild(ic);
+      }
+      const label = document.createElement('span');
+      label.className = 'blockr-menu__label';
+      label.textContent = item.label;
+      row.appendChild(label);
+      if (item.meta) {
+        const meta = document.createElement('span');
+        meta.className = 'blockr-menu__meta' + (item.mono ? ' blockr-menu__meta--mono' : '');
+        meta.textContent = item.meta;
+        row.appendChild(meta);
+      }
+      rows.push({ row, item });
+      panel.appendChild(row);
+    }
+
+    let active = -1;
+    /** @param {number} i */
+    const setActive = (i) => {
+      if (active >= 0 && rows[active]) rows[active].row.classList.remove('blockr-menu__item--active');
+      active = i;
+      if (active >= 0 && rows[active]) {
+        rows[active].row.classList.add('blockr-menu__item--active');
+        rows[active].row.scrollIntoView({ block: 'nearest' });
+      }
+    };
+    const enabled = rows.map((r, i) => (r.item.disabled ? -1 : i)).filter((i) => i >= 0);
+    /** @param {number} dir */
+    const step = (dir) => {
+      if (!enabled.length) return;
+      const at = enabled.indexOf(active);
+      const next = at < 0 ? (dir > 0 ? 0 : enabled.length - 1)
+        : (at + dir + enabled.length) % enabled.length;
+      setActive(enabled[next]);
+    };
+
+    let closed = false;
+    /** @type {BlockrPlaceHandle | null} */
+    let placed = null;
+    /** @param {boolean} [refocus] */
+    const close = (refocus) => {
+      if (closed) return;
+      closed = true;
+      if (placed) placed.stop();
+      panel.remove();
+      anchor.setAttribute('aria-expanded', 'false');
+      if (open && open.el === panel) open = null;
+      if (refocus) anchor.focus();
+      if (config.onClose) config.onClose();
+    };
+    /** @param {number} i */
+    const pick = (i) => {
+      const r = rows[i];
+      if (!r || r.item.disabled) return;
+      close(true);
+      if (r.item.onSelect) r.item.onSelect();
+    };
+
+    rows.forEach((r, i) => {
+      r.row.addEventListener('mousemove', () => { if (!r.item.disabled && active !== i) setActive(i); });
+      r.row.addEventListener('click', (e) => { e.stopPropagation(); pick(i); });
+    });
+    panel.addEventListener('mouseleave', () => setActive(-1));
+    panel.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); step(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); step(-1); }
+      else if (e.key === 'Home') { e.preventDefault(); if (enabled.length) setActive(enabled[0]); }
+      else if (e.key === 'End') { e.preventDefault(); if (enabled.length) setActive(enabled[enabled.length - 1]); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(active); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
+      else if (e.key === 'Tab') { close(false); }
+    });
+    panel.addEventListener('focusout', (e) => {
+      const to = e.relatedTarget;
+      if (to instanceof Node && (panel.contains(to) || anchor.contains(to))) return;
+      if (to) close(false);
+    });
+
+    document.body.appendChild(panel);
+    placed = Blockr.place(panel, anchor, {
+      width: { min: 180, max: 320 },
+      align: config.align || 'start'
+    });
+    anchor.setAttribute('aria-expanded', 'true');
+    anchor.setAttribute('aria-haspopup', 'menu');
+    // A click outside closes it; the trigger's own click is its binding's.
+    Blockr.onDocClick(panel, (e) => {
+      const t = e.target;
+      if (t instanceof Node && (panel.contains(t) || anchor.contains(t))) return;
+      close(false);
+    });
+    panel.focus({ preventScroll: true });
+
+    open = { el: panel, close: () => close(false), anchor };
+    return { el: panel, close: () => close(false) };
+  };
+
+  /**
+   * @param {HTMLElement} trigger
+   * @param {BlockrMenuConfig | (() => BlockrMenuConfig)} config
+   */
+  menu.bind = (trigger, config) => {
+    const read = () => (typeof config === 'function' ? config() : config);
+    /** @param {boolean} keyboard */
+    const toggle = (keyboard) => {
+      if (open && open.anchor === trigger) { open.close(); return; }
+      const m = menu(trigger, read());
+      if (keyboard) {
+        m.el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+      }
+    };
+    trigger.setAttribute('aria-haspopup', 'menu');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.addEventListener('click', (e) => { e.preventDefault(); toggle(false); });
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); toggle(true); }
+    });
+  };
+
+  return menu;
+})();
+
 /* --- Controls ----------------------------------------------------------- */
 
 (function () {

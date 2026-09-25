@@ -235,8 +235,45 @@ interface BlockrTooltip {
   text(el: Element): string;
 }
 
+/** A row of Blockr.menu(). */
+interface BlockrMenuItem {
+  label: string;
+  /** SVG or HTML string drawn before the label. */
+  icon?: string;
+  /** Grey text after the label (a block ID, a shortcut). */
+  meta?: string;
+  /** Set `meta` in the code face. */
+  mono?: boolean;
+  /** The item in use (the active view): weight 600. */
+  current?: boolean;
+  /** A destructive action: text-danger. */
+  danger?: boolean;
+  disabled?: boolean;
+  /** Tooltip on a disabled row saying why. */
+  reason?: string;
+  onSelect?: () => void;
+}
+
+type BlockrMenuEntry = BlockrMenuItem | { divider: true } | { title: string };
+
+interface BlockrMenuConfig {
+  items: BlockrMenuEntry[];
+  /** Text above the rows: a title with an optional badge, then a line. */
+  head?: { title: string; badge?: string; text?: string };
+  /** 'end' lines the menu up with the trigger's right edge. */
+  align?: 'start' | 'end';
+  onClose?: () => void;
+}
+
+interface BlockrMenu {
+  (anchor: HTMLElement, config: BlockrMenuConfig): { el: HTMLDivElement; close: () => void };
+  /** Wire `trigger` to open and close its menu; a function config is read on each open. */
+  bind(trigger: HTMLElement, config: BlockrMenuConfig | (() => BlockrMenuConfig)): void;
+}
+
 interface BlockrNamespace {
   tooltip: BlockrTooltip;
+  menu: BlockrMenu;
   uid(prefix?: string): string;
   escapeHtml(s: string): string;
   removeNode(node: Node | null | undefined): void;

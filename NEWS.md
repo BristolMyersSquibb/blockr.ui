@@ -1,5 +1,14 @@
 # blockr.ui (development version)
 
+* `Blockr.menu()`, the design system's action menu, joins `controls_dep()`:
+  rows with an icon, label and meta text, dividers, group titles, a head
+  (a name with a badge and a line of text), current, disabled and
+  destructive rows, placed with `Blockr.place()` and driven from the
+  keyboard. `Blockr.menu.bind()` wires a trigger. Its classes also style
+  menus built elsewhere.
+
+* A `Blockr.tooltip` line can carry a `badge`.
+
 * The design tokens are rewritten around the vocabulary of the design spec:
   a colour palette, meaning tokens for text, backgrounds, borders and status,
   type, radii, control heights and shadows. Every name defined before keeps

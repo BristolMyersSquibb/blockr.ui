@@ -728,6 +728,10 @@ Every menu, dropdown and list that floats uses one surface:
   13px.
 - The dock "…" menu, the download menus, the add menu and the @ menu move to
   it. The beak belongs to the gear tray only.
+- Menus of actions are `Blockr.menu` (blockr.ui): rows, dividers, group
+  titles and an optional head. Its classes (`.blockr-menu`,
+  `.blockr-menu__item`, ...) also style a menu whose markup is rendered
+  elsewhere, so it looks the same.
 
 **Row states.**
 
