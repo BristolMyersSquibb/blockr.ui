@@ -4,11 +4,15 @@
    The design system's "Menus": one floating surface for every menu of
    actions. The classes also style markup that is not built by Blockr.menu
    (a menu rendered from R with its own binding), so the look is the same
-   wherever a menu comes from. */
+   wherever a menu comes from. That includes a Bootstrap dropdown: the doubled
+   selectors (`.dropdown-menu.blockr-menu`) outrank Bootstrap's own, and its
+   `.active` item reads as the current one. Blockr.place makes a Blockr.menu
+   panel fixed; a Bootstrap dropdown keeps its own positioning. */
 
-.blockr-menu {
-  position: fixed;
+.blockr-menu,
+.dropdown-menu.blockr-menu {
   z-index: 1070;
+  min-width: 180px;
   box-sizing: border-box;
   max-height: 320px;
   overflow-y: auto;
@@ -24,7 +28,8 @@
 
 /* Rows: 32px at 14px, radius 4, 10px side padding. Hover and the keyboard
    row share one look, where meta text and icons turn default. */
-.blockr-menu__item {
+.blockr-menu__item,
+.dropdown-item.blockr-menu__item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -43,12 +48,22 @@
 }
 
 .blockr-menu__item:hover,
+.blockr-menu__item:active,
+.blockr-menu__item:focus-visible,
 .blockr-menu__item--active {
   background: var(--blockr-color-bg-hover);
+  color: var(--blockr-color-text-default);
 }
 
-.blockr-menu__item--current {
+.blockr-menu__item--current,
+.blockr-menu__item.active {
   font-weight: var(--blockr-font-weight-semibold);
+  color: var(--blockr-color-text-default);
+  background: transparent;
+}
+
+.blockr-menu__item.active:hover {
+  background: var(--blockr-color-bg-hover);
 }
 
 .blockr-menu__item--danger,
@@ -110,6 +125,12 @@
   height: 1px;
   margin: 4px -4px;
   background: var(--blockr-color-border-default);
+}
+
+.blockr-menu .dropdown-divider {
+  margin: 4px -4px;
+  border-top-color: var(--blockr-color-border-default);
+  opacity: 1;
 }
 
 /* A group title: the section-title style, inset to the row text. */
