@@ -11,6 +11,20 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}
 
+  # The shared controls' JavaScript (inst/assets/js): the tests in tests/js
+  # run in node with happy-dom, and files with `// @ts-check` are
+  # type-checked against inst/assets/js/types.d.ts. No build step.
+  js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - run: npx -y -p typescript@~6.0.0 tsc
+
   revdep:
     uses: BristolMyersSquibb/blockr.ci/.github/workflows/revdep.yaml@main
     with:
