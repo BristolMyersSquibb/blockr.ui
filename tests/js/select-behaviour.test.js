@@ -661,6 +661,39 @@ test('multi: removing a tag by its x reports a copy', (newWindow) => {
   win.close();
 });
 
+test('multi: a tag\'s x is a tab stop and removes on Enter or Space, keeping focus in the control', (newWindow) => {
+  const win = newWindow();
+  const seen = [];
+  const sel = multi(win, { options: ABC, selected: ['a', 'b', 'c'], onChange: (v) => seen.push(v) });
+  const xOf = (v) => sel.el.querySelector(`.blockr-select__tag[data-value="${v}"] .blockr-select__tag-remove`);
+  assert.strictEqual(xOf('a').tabIndex, 0, 'reachable by Tab');
+  xOf('b').focus();
+  const enter = press(win, xOf('b'), 'Enter');
+  assert.ok(enter.defaultPrevented, 'the native click does not fire a second time');
+  assert.deepStrictEqual(tags(sel), ['a', 'c']);
+  assert.strictEqual(win.document.activeElement, search(sel), 'focus stays in the control');
+  assert.ok(!isOpen(sel), 'and the list stays closed');
+  xOf('c').focus();
+  press(win, xOf('c'), ' ');
+  assert.deepStrictEqual(tags(sel), ['a']);
+  assert.deepStrictEqual(json(seen), [['a', 'c'], ['a']]);
+  win.close();
+});
+
+test('a bare select in a row is reached by Tab, so the row can show its focus', (newWindow) => {
+  const win = newWindow();
+  const row = win.document.createElement('div');
+  row.className = 'blockr-row';
+  win.document.body.appendChild(row);
+  const sel = win.Blockr.Select.single(row, { options: ABC });
+  assert.ok(!sel.el.classList.contains('blockr-select--bordered'));
+  assert.strictEqual(search(sel).tabIndex, 0);
+  search(sel).focus();
+  assert.ok(row.contains(win.document.activeElement), 'focus is inside the row (:focus-within)');
+  assert.ok(!isOpen(sel), 'focus alone does not open it');
+  win.close();
+});
+
 test('multi menu: picks are tags in the head, above the filter box, and the prompt survives', (newWindow) => {
   const win = newWindow();
   const seen = [];

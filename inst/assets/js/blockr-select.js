@@ -350,7 +350,6 @@
         remove.type = 'button';
         remove.className = 'blockr-select__tag-remove';
         remove.setAttribute('aria-label', `Remove ${val}`);
-        remove.setAttribute('tabindex', '-1');
         remove.innerHTML = Blockr.icons.remove;
         tag.appendChild(remove);
         // In a menu the input is the panel's filter box, not a child here.
@@ -629,6 +628,23 @@
         const val = tag && tag.getAttribute('data-value');
         if (val != null) removeTag(val);
       }
+    });
+
+    // A tag's x is a tab stop (design system: remove shows on hover or
+    // keyboard focus). Handled on keydown rather than left to the button's
+    // own click, so the focus can move before the re-render removes the
+    // button under it; preventDefault keeps the native click from firing a
+    // second time on whatever lands there.
+    tagsEl.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const remove = /** @type {Element} */ (e.target).closest('.blockr-select__tag-remove');
+      if (!remove) return;
+      e.preventDefault();
+      const tag = remove.closest('.blockr-select__tag');
+      const val = tag && tag.getAttribute('data-value');
+      if (val == null) return;
+      input.focus();
+      removeTag(val);
     });
 
     /** @type {ReturnType<typeof setTimeout> | null} */

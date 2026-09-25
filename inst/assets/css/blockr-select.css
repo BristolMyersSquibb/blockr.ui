@@ -26,7 +26,12 @@
   box-sizing: border-box;
 }
 
-/* --- Control (clickable area) --- */
+/* --- Control (clickable area) ---
+   Bare (no --bordered): the select sits inside a .blockr-row, and the row is
+   its field shell. Keyboard focus on the combobox input shows as the row's
+   :focus-within look (blockr-blocks.css); the bare control draws nothing of
+   its own, because the ring alone does not show on a frameless element
+   (design system, Focus). */
 .blockr-select__control {
   display: flex;
   align-items: center;
@@ -248,6 +253,13 @@
 
 .blockr-select__tag-remove:hover {
   color: var(--blockr-color-text-danger);
+}
+
+/* Reached by Tab: shown, with the focus outline every button takes. */
+.blockr-select__tag-remove:focus-visible {
+  opacity: 1;
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
 }
 
 /* A column label inside a tag is 12px meta. */

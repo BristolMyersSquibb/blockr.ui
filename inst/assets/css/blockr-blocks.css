@@ -216,6 +216,11 @@
   background: var(--blockr-color-bg-hover);
 }
 
+.blockr-add-link:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}
+
 .blockr-add-icon {
   display: inline-flex;
   align-items: center;
@@ -244,6 +249,11 @@
 .blockr-expr-confirm:hover {
   background: var(--blockr-color-bg-accent-subtle-hover);
   border-color: var(--blockr-color-border-accent);
+}
+
+.blockr-expr-confirm:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
 }
 
 .blockr-expr-confirm.confirmed {
@@ -426,4 +436,9 @@
 .blockr-add-link-expr:hover {
   color: var(--blockr-color-text-default);
   background: var(--blockr-color-bg-hover);
+}
+
+.blockr-add-link-expr:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
 }
