@@ -193,10 +193,13 @@ Blockr.icons = {
     'stroke-width="1" stroke-linecap="round">' +
     '<line x1="2.5" y1="2.5" x2="7.5" y2="7.5"></line>' +
     '<line x1="7.5" y1="2.5" x2="2.5" y2="7.5"></line></svg>',
+  // A row's remove button: the same thin stroke as `remove`, at 14px. It was
+  // Bootstrap's filled x, which read heavier than every other small icon.
   x:
-    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" ' +
-    'viewBox="0 0 16 16"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 ' +
-    '.708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg>',
+    '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" ' +
+    'stroke-width="1" stroke-linecap="round">' +
+    '<line x1="3.5" y1="3.5" x2="10.5" y2="10.5"></line>' +
+    '<line x1="10.5" y1="3.5" x2="3.5" y2="10.5"></line></svg>',
   plus:
     '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" ' +
     'viewBox="0 0 16 16"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 ' +
