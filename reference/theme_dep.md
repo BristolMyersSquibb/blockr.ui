@@ -1,11 +1,13 @@
 # Shared blockr stylesheet
 
 The `--blockr-*` design tokens and the Bootstrap theme layer that the
-blockr packages style themselves from, carried as two stylesheets:
-`blockr-tokens.css` defines the vocabulary in a `:root` block - the grey
-and blue ramps, font sizes and weights, shadows, and the semantic text
-and surface colours derived from them - and `blockr-theme.css` applies
-it to the host app.
+blockr packages style themselves from, carried as three stylesheets:
+`blockr-tokens.css` defines the vocabulary in a `:root` block - the
+colour palette, the meaning tokens built on it (text, backgrounds,
+borders, status colours), type, radii, control heights and shadows -
+`blockr-tokens-dark.css` restates them under `data-bs-theme="dark"`, the
+attribute blockr.core's dark-mode board option sets, and
+`blockr-theme.css` applies them to the host app.
 
 ## Usage
 

@@ -10,13 +10,13 @@ Source:
 [`DESCRIPTION`](https://github.com/BristolMyersSquibb/blockr.ui/blob/main/DESCRIPTION)
 
 Granjon D (2026). *blockr.ui: User Interface Components for the 'blockr'
-Ecosystem*. R package version 0.0.1,
+Ecosystem*. R package version 0.0.1.9001,
 <https://bristolmyerssquibb.github.io/blockr.ui/>.
 
     @Manual{,
       title = {blockr.ui: User Interface Components for the 'blockr' Ecosystem},
       author = {David Granjon},
       year = {2026},
-      note = {R package version 0.0.1},
+      note = {R package version 0.0.1.9001},
       url = {https://bristolmyerssquibb.github.io/blockr.ui/},
     }

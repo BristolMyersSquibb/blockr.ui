@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">blockr.ui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,6 +16,10 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/design-system.html">The blockr design system</a></li>
+  </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -39,6 +43,11 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="blockrui-development-version">blockr.ui (development version)<a class="anchor" aria-label="anchor" href="#blockrui-development-version"></a></h2>
+<ul><li><p>The design tokens are rewritten around the vocabulary of the design spec: a colour palette, meaning tokens for text, backgrounds, borders and status, type, radii, control heights and shadows. Every name defined before keeps its old value.</p></li>
+<li><p>The <code><a href="../reference/theme_dep.html">theme_dep()</a></code> dependency also attaches <code>blockr-tokens-dark.css</code>, which restates the tokens under <code>data-bs-theme="dark"</code>, the attribute that blockr.core’s dark-mode board option sets. In dark, Bootstrap’s body background and text colour follow the tokens too.</p></li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.1" id="blockrui-001">blockr.ui 0.0.1<a class="anchor" aria-label="anchor" href="#blockrui-001"></a></h2>
 <ul><li><p>The <code><a href="../reference/shiny_has_perf_dep.html">shiny_has_perf_dep()</a></code> dependency strips a redundant <code>:has(&gt; *)</code> guard out of the rule Shiny uses to fade a pass-through <code>uiOutput()</code> while it recalculates. That guard sits in non-subject position with a universal subject, which makes Chrome restyle the whole document on every DOM insertion: 107ms per insertion on a 40-block dock board against 3ms without it, growing linearly with element count, and paid by every block re-render and every keystroke in a picker. Removing it is provably behaviour-neutral, since reaching the subject already proves the guarded container has an element child, so both the <code>display: contents</code> pass-through and the fade survive. Attach it once at the page level.</p></li>
 <li><p>One <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var()</a></code> fallback had drifted from the token it backs: the <code>.blockr-type-label</code> rule wrote <code>#b0b7c3</code> where <code>--blockr-color-text-subtle</code> resolves to <code>#9ca3af</code>, which the two other readers of that token in the same file already spelled correctly. It rendered the wrong grey in any host that does not attach <code><a href="../reference/theme_dep.html">theme_dep()</a></code>.</p></li>
@@ -54,7 +63,8 @@
 <li><p>New exported <code>is_hex_color()</code> helper (<code>#rgb</code> / <code>#rrggbb</code>) so consumers validate colours against the same rule the stack menu uses.</p></li>
 <li><p>Initial package scaffold.</p></li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
