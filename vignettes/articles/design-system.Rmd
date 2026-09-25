@@ -789,7 +789,8 @@ It shows on hover and on keyboard focus, and leaves with the pointer or focus;
 Escape hides it.
 
 - Every icon-only button and every cut-off label gets one, and so does the
-  block's mark in the dock header (its type and package). Nothing else does:
+  block's mark in the dock header (its type, then the package as a neutral
+  badge). Nothing else does:
   a button that says its name has no tooltip.
 - No native `title` tooltips remain.
 - It matches the chart's data tooltip (see [Special blocks](#special)), so

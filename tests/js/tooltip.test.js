@@ -107,3 +107,15 @@ test('the controls set no native title', (newWindow) => {
   assert.strictEqual(win.Blockr.tooltip.text(seg.el.querySelector('button')), '', 'so does a segment');
   win.close();
 });
+
+test('a line can carry a badge after the name', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  win.Blockr.tooltip.set(b, { name: 'dataset block', badge: 'blockr.core' });
+  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  const badge = card(win).querySelector('.blockr-tooltip__badge');
+  assert.ok(badge, 'badge drawn');
+  assert.strictEqual(badge.textContent, 'blockr.core');
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'dataset block · blockr.core');
+  win.close();
+});

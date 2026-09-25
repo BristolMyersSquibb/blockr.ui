@@ -324,7 +324,8 @@ Blockr.textCommit = (input, opts) => {
  *
  * Blockr.tooltip.set(el, content, { overflow }) gives `el` a tooltip.
  * `content` is a string, a column `{ name, label }` (the label shows muted
- * after the name), a list of either (one per line, as the "+N" chip's), or a
+ * after the name), a line with a `badge` (a neutral badge after the name, as
+ * a block type with its package), a list of either (one per line, as the "+N" chip's), or a
  * function returning one of those at show time. With `overflow: true` it
  * shows only while the element or a child is cut off, so a value that fits
  * has none. Blockr.tooltip.clear(el) takes it away.
@@ -358,7 +359,9 @@ Blockr.tooltip = (() => {
   /** @param {BlockrTooltipLine} line */
   const lineText = (line) => {
     if (typeof line === 'string') return line;
-    return line.label && line.label !== line.name ? `${line.name} · ${line.label}` : line.name;
+    let text = line.label && line.label !== line.name ? `${line.name} · ${line.label}` : line.name;
+    if (line.badge) text += ` · ${line.badge}`;
+    return text;
   };
 
   /** @param {BlockrTooltipContent} content */
@@ -380,6 +383,12 @@ Blockr.tooltip = (() => {
       meta.className = 'blockr-tooltip__meta';
       meta.textContent = line.label;
       parent.append(' ', meta);
+    }
+    if (line.badge) {
+      const badge = document.createElement('span');
+      badge.className = 'blockr-tooltip__badge';
+      badge.textContent = line.badge;
+      parent.append(' ', badge);
     }
   };
 
