@@ -374,14 +374,19 @@
 }
 
 /* The menu's head: title, tags and filter box in one element that stays put
-   while the rows scroll under it. It starts at the panel's top edge (the
-   negative margin swallows the panel's 4px padding, the padding puts it
-   back inside) so nothing shows between it and the border while stuck. */
+   while the rows scroll under it. The panel gives up its top padding to the
+   head (a sticky box cannot leave its container's content box, so a
+   negative margin would not get it there), so nothing shows between the
+   head and the border while it is stuck. The modifier sits on the panel
+   itself, because the panel is on <body> while open and no rule through
+   .blockr-select--headless reaches it there. */
+.blockr-select__dropdown--menu {
+  padding-top: 0;
+}
 .blockr-select__head {
   position: sticky;
   top: 0;
   z-index: 1;
-  margin-top: -4px;
   padding-top: 4px;
   background: var(--blockr-color-bg-raised);
 }

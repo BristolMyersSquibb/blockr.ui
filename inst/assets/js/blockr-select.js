@@ -269,6 +269,7 @@
       // a long list scrolls under all three (design system, Menus). Three
       // separately sticky elements would pile up at the top edge instead.
       const head = div('blockr-select__head');
+      list.classList.add('blockr-select__dropdown--menu');
       if (config.title) head.appendChild(div('blockr-select__menu-title', config.title));
       // A multi menu carries its picks in the panel's own head, above the
       // filter box, where the control has them relative to the list. The

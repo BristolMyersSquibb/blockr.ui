@@ -87,6 +87,8 @@ test('title, tags and filter box share one head, in that order, before the rows'
   const head = dropdown(win).querySelector('.blockr-select__head');
   assert.ok(head, 'one element to make sticky');
   assert.strictEqual(head.parentElement, dropdown(win));
+  assert.ok(dropdown(win).classList.contains('blockr-select__dropdown--menu'),
+    'the panel is marked, so CSS can hand its top padding to the head');
   assert.deepStrictEqual(
     [...head.children].map((c) => c.className.split(' ')[0]),
     ['blockr-select__menu-title', 'blockr-select__tags', 'blockr-select__search']
