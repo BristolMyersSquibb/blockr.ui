@@ -27,7 +27,11 @@ test_that("theme_dep ships the token and theme stylesheets", {
   expect_s3_class(dep, "html_dependency")
   expect_identical(
     dep$stylesheet,
-    c("css/blockr-tokens.css", "css/blockr-theme.css")
+    c(
+      "css/blockr-tokens.css",
+      "css/blockr-tokens-dark.css",
+      "css/blockr-theme.css"
+    )
   )
 
   assets <- system.file("assets", package = "blockr.ui")

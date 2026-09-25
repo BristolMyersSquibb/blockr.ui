@@ -1,80 +1,236 @@
-/* ============================================
-   CSS Design System - Variables (Figma-aligned)
-   ============================================ */
-:root {
-  /* ===========================================
-     Grey Scale (Tailwind-style)
-     =========================================== */
-  --blockr-grey-50: #f9fafb;   /* Page bg, subtle backgrounds */
-  --blockr-grey-100: #f3f4f6;  /* Hover states, input bg */
-  --blockr-grey-200: #e5e7eb;  /* Borders */
-  --blockr-grey-300: #d1d5db;  /* Darker borders, dividers */
-  --blockr-grey-400: #9ca3af;  /* Placeholder text */
-  --blockr-grey-500: #6b7280;  /* Muted text */
-  --blockr-grey-600: #4b5563;  /* Secondary icons */
-  --blockr-grey-700: #374151;  /* Secondary text */
-  --blockr-grey-800: #1f2937;  /* Dark text */
-  --blockr-grey-900: #111827;  /* Primary text */
+/* ============================================================
+   blockr design tokens
+   ============================================================
+   Three kinds of token, told apart by the second word of the name:
 
-  /* Primary Blue */
+     palette   --blockr-<hue>-<step>     how a colour looks; read by other
+                                         tokens only, never by components
+     meaning   --blockr-color-<property>-<role>[-<state>], --blockr-font-*,
+               --blockr-radius-*, --blockr-control-*, --blockr-shadow-*,
+               --blockr-focus-*, --blockr-transition, --blockr-mark-*
+     local     --blockr-<owner>-*        one component's or package's own
+                                         setting, read only in its own sheet
+
+   Colour meaning tokens lead with the property (`text`, `bg`, `border`),
+   because a colour chosen for text is not automatically right as a fill.
+
+   The dark scheme lives in blockr-tokens-dark.css. Themes override the
+   palette, most usefully the `accent` ramp, and every meaning token follows.
+
+   Legacy names at the end of this file are aliases. Each keeps exactly the
+   value it had, so adopting this file changes nothing on screen. */
+
+:root {
+
+  /* ---------------------------------------------------------- palette */
+
+  --blockr-grey-50: #f9fafb;
+  --blockr-grey-100: #f3f4f6;
+  --blockr-grey-200: #e5e7eb;
+  --blockr-grey-300: #d1d5db;
+  --blockr-grey-400: #9ca3af;
+  --blockr-grey-500: #6b7280;
+  --blockr-grey-600: #4b5563;
+  --blockr-grey-700: #374151;
+  --blockr-grey-800: #1f2937;
+  --blockr-grey-900: #111827;
+
   --blockr-blue-50: #eff6ff;
   --blockr-blue-100: #dbeafe;
   --blockr-blue-500: #3b82f6;
   --blockr-blue-600: #2563eb;
   --blockr-blue-700: #1d4ed8;
 
-  /* Shadow - elevated dropdowns */
-  --blockr-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --blockr-red-50: #fef2f2;
+  --blockr-red-100: #fee2e2;
+  --blockr-red-600: #dc2626;
+  --blockr-red-700: #b91c1c;
 
-  /* Data marks - bars, boxes, lanes */
-  /* Cosmetic ONLY. This radius carries no information: it exists so a mark
-     does not read as a raw div, and nothing may ever be inferred from its
-     presence. Two rules keep it honest:
-       - it applies to the SILHOUETTE, never to sub-marks (median ticks,
-         whiskers, fence caps are 1-2px and a radius turns them into dots);
-       - an end stays SQUARE if it sits on an axis (a bar's zero end) or
-         abuts a sibling segment (a stack's inner joins). Rounding a baseline
-         lifts the bar off its axis, and zero is shared structure, not data.
-     It must also never approach half the mark's thickness, because a capsule
-     is a SEPARATE and semantic signal meaning "soft boundary" (the
-     point-range band). Clamp with min(radius, thickness / 4) on thin lanes;
-     at 12-14px the token applies unchanged. */
-  --blockr-mark-radius: 2px;
+  --blockr-amber-50: #fffbeb;
+  --blockr-amber-100: #fef3c7;
+  --blockr-amber-500: #f59e0b;
+  --blockr-amber-700: #b45309;
 
-  /* Weight for a mark that supports a CHOICE rather than carrying the answer:
-     the crossfilter's bars rank options in a picker, they are not the
-     analysis output. Marks that are the content stay at full weight. */
-  --blockr-mark-weight-supporting: 0.6;
+  --blockr-green-50: #f0fdf4;
+  --blockr-green-100: #dcfce7;
+  --blockr-green-600: #16a34a;
+  --blockr-green-700: #15803d;
 
-  /* Font Sizes */
-  --blockr-font-size-base: 0.875rem;      /* 14px - base for body/inputs */
-  --blockr-font-size-sm: 0.8125rem;       /* 13px - helper text */
-  --blockr-font-size-xs: 0.75rem;         /* 12px - meta, toggles, subtitle */
-  --blockr-font-size-title: 1.25rem;      /* 20px - block title */
-  --blockr-font-size-section: 1rem;       /* 16px - section headers */
+  /* The accent is its own ramp, pointing at blue. A theme that wants teal
+     overrides these five and every accent-derived token follows, without
+     `blue-600` ever having to mean teal. */
+  --blockr-accent-50: var(--blockr-blue-50);
+  --blockr-accent-100: var(--blockr-blue-100);
+  --blockr-accent-500: var(--blockr-blue-500);
+  --blockr-accent-600: var(--blockr-blue-600);
+  --blockr-accent-700: var(--blockr-blue-700);
 
-  /* Font Weights */
+  /* ------------------------------------------------------------- text */
+
+  /* Three levels. `disabled` is for disabled controls only: grey-400 is
+     2.5:1 on white, below WCAG's minimum for readable text and for icons.
+     `muted` is 4.8:1 on white and 4.4:1 on grey-100, so muted text does not
+     go on a hover or selected background. */
+  --blockr-color-text-default: var(--blockr-grey-900);
+  --blockr-color-text-muted: var(--blockr-grey-500);
+  --blockr-color-text-disabled: var(--blockr-grey-400);
+  --blockr-color-text-on-accent: #ffffff;
+  --blockr-color-text-accent: var(--blockr-accent-600);
+  /* Accent text on an accent tint (a count on the main button): accent-600
+     there is 3.9:1. */
+  --blockr-color-text-accent-strong: var(--blockr-accent-700);
+  --blockr-color-text-danger: var(--blockr-red-700);
+  --blockr-color-text-warning: var(--blockr-amber-700);
+  --blockr-color-text-success: var(--blockr-green-700);
+
+  /* ------------------------------------------------------ backgrounds */
+
+  /* Layers, each sitting on the one before: the board canvas, a panel or
+     card, then anything floating above a panel. Within a layer: a quiet
+     fill, an input field, and the two interaction states. Several names over
+     few light values, because the jobs diverge under a dark scheme. */
+  --blockr-color-bg-page: var(--blockr-grey-50);
+  --blockr-color-bg-surface: #ffffff;
+  --blockr-color-bg-raised: #ffffff;
+  --blockr-color-bg-subtle: var(--blockr-grey-50);
+  --blockr-color-bg-field: var(--blockr-grey-50);
+  /* Stays grey-100, its old value, while consumers' fallbacks still write
+     #f3f4f6. The dark scheme already takes the text wash it moves to. */
+  --blockr-color-bg-hover: var(--blockr-grey-100);
+  /* The chosen thing takes the accent tint, like every other selected
+     state: a selected row, the front tab of the active dock group. Front
+     tabs of the other groups are selected too, but not where you work, so
+     they get a grey wash, one step above hover. */
+  --blockr-color-bg-selected: var(--blockr-color-bg-accent-subtle);
+  --blockr-color-bg-selected-inactive: color-mix(in srgb, var(--blockr-color-text-default) 10%, transparent);
+  --blockr-color-bg-accent: var(--blockr-accent-600);
+  --blockr-color-bg-accent-hover: var(--blockr-accent-700);
+  --blockr-color-bg-danger: var(--blockr-red-50);
+  --blockr-color-bg-warning: var(--blockr-amber-50);
+  --blockr-color-bg-success: var(--blockr-green-50);
+
+  /* ---------------------------------------------------------- borders */
+
+  --blockr-color-border-default: var(--blockr-grey-200);
+  --blockr-color-border-strong: var(--blockr-grey-300);
+  --blockr-color-border-accent: var(--blockr-accent-600);
+  --blockr-color-border-danger: var(--blockr-red-600);
+  --blockr-color-border-warning: var(--blockr-amber-500);
+  --blockr-color-border-success: var(--blockr-green-600);
+
+  /* ------------------------------------------------------------ tints */
+
+  /* Mixed from the meaning tokens above, so a theme's accent and the dark
+     scheme carry through. The accent tint is the main button's look, and
+     every "selected" or "on" state borrows it: a selected segment, a
+     pressed tool, the open gear, a tag that is cutting rows, an "on" badge.
+     The status edges frame badges, messages and the destructive button;
+     amber is paler than the other hues, so its edge is stronger. */
+  --blockr-color-bg-accent-subtle: color-mix(in srgb, var(--blockr-color-border-accent) 7%, transparent);
+  --blockr-color-bg-accent-subtle-hover: color-mix(in srgb, var(--blockr-color-border-accent) 13%, transparent);
+  --blockr-color-border-accent-subtle: color-mix(in srgb, var(--blockr-color-border-accent) 35%, transparent);
+  --blockr-color-border-danger-subtle: color-mix(in srgb, var(--blockr-color-border-danger) 35%, transparent);
+  --blockr-color-border-warning-subtle: color-mix(in srgb, var(--blockr-color-border-warning) 45%, transparent);
+  --blockr-color-border-success-subtle: color-mix(in srgb, var(--blockr-color-border-success) 35%, transparent);
+
+  /* ------------------------------------------------------------ focus */
+
+  /* Two focus styles. A field (text, number, select, code) turns its border
+     accent and adds the soft ring, on any focus. Everything else (buttons,
+     tools, segments, checkboxes, tabs) gets the outline on :focus-visible
+     only; the ring alone is 1.2:1 on white and does not show on a frameless
+     tool. The ring is a literal so it matches the fallback every consumer
+     already carries; a theme that changes the accent overrides it too. */
+  --blockr-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  --blockr-focus-outline: 2px solid var(--blockr-color-border-accent);
+  --blockr-focus-offset: 2px;
+
+  /* ------------------------------------------------------------- type */
+
+  --blockr-font-size-xs: 0.75rem;
+  --blockr-font-size-sm: 0.8125rem;
+  --blockr-font-size-base: 0.875rem;
+  --blockr-font-size-lg: 1rem;
+  --blockr-font-size-xl: 1.25rem;
+
   --blockr-font-weight-normal: 400;
   --blockr-font-weight-medium: 500;
   --blockr-font-weight-semibold: 600;
 
-  /* Colors - Text (Figma-aligned) */
-  --blockr-color-text-primary: var(--blockr-grey-900);
-  --blockr-color-text-secondary: var(--blockr-grey-700);
-  --blockr-color-text-muted: var(--blockr-grey-500);
-  --blockr-color-text-subtle: var(--blockr-grey-400);
-  --blockr-color-text-meta: var(--blockr-grey-500);
+  --blockr-font-mono: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
 
-  /* Colors - UI */
-  --blockr-color-border: var(--blockr-grey-200);
-  --blockr-color-border-hover: var(--blockr-grey-300);
-  --blockr-color-bg-subtle: var(--blockr-grey-50);
-  --blockr-color-bg-hover: var(--blockr-grey-100);
-  --blockr-color-bg-input: var(--blockr-grey-50);
-  --blockr-color-primary: var(--blockr-blue-600);
-  --blockr-color-primary-hover: var(--blockr-blue-700);
-  --blockr-color-primary-bg: var(--blockr-blue-50);
-  --blockr-color-error: #dc2626;
-  --blockr-color-success: #16a34a;
+  /* No sans face is declared here, on purpose. The body face is set in one
+     place, Bootstrap's --bs-body-font-family (Open Sans in bslib's Shiny
+     preset), and a theme that ships a face sets that. Declaring a
+     --blockr-font-sans as `inherit` would not mean "no opinion"; at :root
+     that makes the property invalid and every reader falls back anyway. */
+
+  /* ---------------------------------------------------- shape and size */
+
+  --blockr-radius-sm: 4px;
+  --blockr-radius-md: 6px;
+  --blockr-radius-lg: 8px;
+  --blockr-radius-xl: 12px;
+  --blockr-radius-pill: 999px;
+
+  --blockr-control-h: 42px;
+  --blockr-control-h-sm: 30px;
+  --blockr-control-h-xs: 26px;
+
+  /* -------------------------------------------------------- elevation */
+
+  --blockr-shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --blockr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  --blockr-transition: 0.15s ease;
+
+  /* ------------------------------------------------------- data marks */
+
+  /* Cosmetic only: keeps a bar or box from reading as a raw div. Applies to
+     the silhouette, never to sub-marks (ticks, whiskers); an end on an axis
+     or against a sibling segment stays square; and it never approaches half
+     the mark's thickness, because a capsule means "soft boundary". */
+  --blockr-mark-radius: 2px;
+
+  /* Text drawn on a chart canvas (axis labels, value labels, legend keys):
+     one size, read by the chart code once per render. Text outside the plot
+     follows the type scale. */
+  --blockr-mark-font-size: 11px;
+
+  /* Weight for a mark that supports a choice rather than carrying the
+     answer, e.g. the bars ranking options in a crossfilter picker. */
+  --blockr-mark-weight-supporting: 0.6;
+
+  /* ------------------------------------------------- legacy (aliases) */
+
+  /* Old names, kept so nothing changes and nothing breaks. Each points at
+     its replacement where the value is identical. Three keep their own old
+     value because the replacement is deliberately different, and switching
+     them is a separate, visible step, done per use by the job it does:
+       text-secondary  grey-700; labels and status lines become text-muted,
+                       headings, content and hover states text-default
+       text-subtle     grey-400; placeholders, meta and icons become
+                       text-muted, disabled controls text-disabled
+       primary-bg      accent-50; the accent tint is now bg-accent-subtle */
+  --blockr-color-text-primary: var(--blockr-color-text-default);
+  --blockr-color-text-secondary: var(--blockr-grey-700);
+  --blockr-color-text-subtle: var(--blockr-grey-400);
+  --blockr-color-text-meta: var(--blockr-color-text-muted);
+  --blockr-color-border: var(--blockr-color-border-default);
+  --blockr-color-border-hover: var(--blockr-color-border-strong);
+  --blockr-color-bg-input: var(--blockr-color-bg-field);
+  --blockr-color-primary: var(--blockr-color-bg-accent);
+  --blockr-color-primary-hover: var(--blockr-color-bg-accent-hover);
+  --blockr-color-primary-bg: var(--blockr-accent-50);
+  --blockr-color-error: var(--blockr-color-border-danger);
+  --blockr-color-danger: var(--blockr-color-border-danger);
+  --blockr-color-success: var(--blockr-color-border-success);
+  --blockr-color-warning: var(--blockr-color-border-warning);
+  --blockr-color-warning-bg: var(--blockr-color-bg-warning);
+  --blockr-color-warning-text: var(--blockr-color-text-warning);
+  --blockr-font-size-section: var(--blockr-font-size-lg);
+  --blockr-font-size-title: var(--blockr-font-size-xl);
+  --blockr-shadow: var(--blockr-shadow-sm);
+  --blockr-shadow-dropdown: var(--blockr-shadow-md);
 }

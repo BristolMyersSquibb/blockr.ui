@@ -11,11 +11,13 @@ An \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
 }
 \description{
 The \verb{--blockr-*} design tokens and the Bootstrap theme layer that the
-blockr packages style themselves from, carried as two stylesheets:
+blockr packages style themselves from, carried as three stylesheets:
 \code{blockr-tokens.css} defines the vocabulary in a \verb{:root} block - the
-grey and blue ramps, font sizes and weights, shadows, and the semantic
-text and surface colours derived from them - and \code{blockr-theme.css}
-applies it to the host app.
+colour palette, the meaning tokens built on it (text, backgrounds,
+borders, status colours), type, radii, control heights and shadows -
+\code{blockr-tokens-dark.css} restates them under \code{data-bs-theme="dark"},
+the attribute blockr.core's dark-mode board option sets, and
+\code{blockr-theme.css} applies them to the host app.
 }
 \details{
 Attach it once, from the app's UI. The theme layer is deliberately

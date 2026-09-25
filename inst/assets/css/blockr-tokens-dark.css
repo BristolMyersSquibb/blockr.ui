@@ -1,0 +1,70 @@
+/* ============================================================
+   blockr design tokens: dark scheme
+   ============================================================
+   Keyed off `data-bs-theme="dark"`, the attribute bslib writes and
+   blockr.core's dark-mode board option toggles. No switch of its own.
+
+   Kept apart from blockr-tokens.css so the light values stay the file's
+   claimed vocabulary, and so the scheme can be reviewed as one unit.
+
+   The grey and blue ramps are restated POSITIONALLY: grey-50 still means
+   "the quietest surface" and grey-900 "the loudest text". Components still
+   read the palette directly in many places, and this carries every one of
+   those reads across without touching them. The border steps (100 to 300)
+   are compressed harder than a mirror would give, because a light line on a
+   dark field reads far stronger than a grey line on white.
+
+   Status and accent meaning tokens are restated directly: they have no
+   legacy palette reads to preserve, and a dark scheme wants their text and
+   borders lighter, not the ramp flipped. */
+
+[data-bs-theme="dark"] {
+
+  --blockr-grey-50: #14181f;
+  --blockr-grey-100: #191e26;
+  --blockr-grey-200: #232932;
+  --blockr-grey-300: #2d343f;
+  --blockr-grey-400: #6b7686;
+  --blockr-grey-500: #8a94a3;
+  --blockr-grey-600: #a3acb9;
+  --blockr-grey-700: #c2c9d3;
+  --blockr-grey-800: #dde2e9;
+  --blockr-grey-900: #f0f3f7;
+
+  --blockr-blue-50: rgb(59 130 246 / 0.14);
+  --blockr-blue-100: rgb(59 130 246 / 0.24);
+  --blockr-blue-500: #60a5fa;
+  --blockr-blue-600: #3b82f6;
+  --blockr-blue-700: #93c5fd;
+
+  --blockr-color-bg-page: #0e1219;
+  --blockr-color-bg-surface: #161b23;
+  --blockr-color-bg-raised: #1e242e;
+  /* A wash of the text colour rather than a grey step, so a hovered row is
+     one step lighter than whatever it sits on, surface or raised. Light
+     keeps grey-100 until its consumers' fallbacks move to the wash. */
+  --blockr-color-bg-hover: color-mix(in srgb, var(--blockr-color-text-default) 6%, transparent);
+
+  /* The accent fill is lighter in dark, so text on it turns dark. */
+  --blockr-color-text-on-accent: #0e1219;
+  --blockr-color-text-accent: var(--blockr-accent-500);
+  --blockr-color-text-accent-strong: var(--blockr-color-text-accent);
+
+  --blockr-color-text-danger: #f87171;
+  --blockr-color-text-warning: #fbbf24;
+  --blockr-color-text-success: #4ade80;
+  --blockr-color-bg-danger: rgb(248 113 113 / 0.12);
+  --blockr-color-bg-warning: rgb(251 191 36 / 0.12);
+  --blockr-color-bg-success: rgb(74 222 128 / 0.12);
+  --blockr-color-border-danger: #f87171;
+  --blockr-color-border-warning: #fbbf24;
+  --blockr-color-border-success: #4ade80;
+
+  --blockr-focus-ring: 0 0 0 3px rgb(96 165 250 / 0.28);
+
+  /* Shadows barely read on a dark page; the lighter `bg-raised` is what
+     separates a dropdown from the surface under it. */
+  --blockr-shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --blockr-shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
+  --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.7);
+}

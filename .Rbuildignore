@@ -11,3 +11,4 @@
 ^blockr\.ui\.Rproj$
 ^\.Rproj\.user$
 ^\.lintr$
+^vignettes/articles$

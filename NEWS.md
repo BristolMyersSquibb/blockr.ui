@@ -1,3 +1,15 @@
+# blockr.ui (development version)
+
+* The design tokens are rewritten around the vocabulary of the design spec:
+  a colour palette, meaning tokens for text, backgrounds, borders and status,
+  type, radii, control heights and shadows. Every name defined before keeps
+  its old value.
+
+* The `theme_dep()` dependency also attaches `blockr-tokens-dark.css`, which
+  restates the tokens under `data-bs-theme="dark"`, the attribute that
+  blockr.core's dark-mode board option sets. In dark, Bootstrap's body
+  background and text colour follow the tokens too.
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard

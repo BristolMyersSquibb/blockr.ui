@@ -62,12 +62,29 @@ test_that("expect_tokens_agree reports the disagreeing site", {
   )
 })
 
+test_that("quoted font names take part in the comparison", {
+
+  root <- consumer_css(
+    "widget.css" = paste0(
+      c(".a", ".b"),
+      " { font-family: var(--blockr-font-mono, ",
+      c(
+        "'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace",
+        "'A', 'B', 'C', 'D', monospace"
+      ),
+      "); }"
+    )
+  )
+
+  expect_identical(token_references("fixture", root)$agrees, c(TRUE, FALSE))
+})
+
 test_that("a name this package does not define is reported, never asserted", {
 
   root <- consumer_css(
     "widget.css" = c(
       ".a { color: var(--blockr-grey-50, #f9fafb); }",
-      ".b { color: var(--blockr-focus-ring, 0 0 0 3px rgba(1, 2, 3, 0.4)); }"
+      ".b { color: var(--blockr-color-focus, rgba(1, 2, 3, 0.4)); }"
     )
   )
 

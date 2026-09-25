@@ -18,31 +18,221 @@
       --blockr-blue-500: #3b82f6
       --blockr-blue-600: #2563eb
       --blockr-blue-700: #1d4ed8
-      --blockr-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)
-      --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25)
-      --blockr-mark-radius: 2px
-      --blockr-mark-weight-supporting: 0.6
-      --blockr-font-size-base: 0.875rem
-      --blockr-font-size-sm: 0.8125rem
+      --blockr-red-50: #fef2f2
+      --blockr-red-100: #fee2e2
+      --blockr-red-600: #dc2626
+      --blockr-red-700: #b91c1c
+      --blockr-amber-50: #fffbeb
+      --blockr-amber-100: #fef3c7
+      --blockr-amber-500: #f59e0b
+      --blockr-amber-700: #b45309
+      --blockr-green-50: #f0fdf4
+      --blockr-green-100: #dcfce7
+      --blockr-green-600: #16a34a
+      --blockr-green-700: #15803d
+      --blockr-accent-50: #eff6ff
+      --blockr-accent-100: #dbeafe
+      --blockr-accent-500: #3b82f6
+      --blockr-accent-600: #2563eb
+      --blockr-accent-700: #1d4ed8
+      --blockr-color-text-default: #111827
+      --blockr-color-text-muted: #6b7280
+      --blockr-color-text-disabled: #9ca3af
+      --blockr-color-text-on-accent: #ffffff
+      --blockr-color-text-accent: #2563eb
+      --blockr-color-text-accent-strong: #1d4ed8
+      --blockr-color-text-danger: #b91c1c
+      --blockr-color-text-warning: #b45309
+      --blockr-color-text-success: #15803d
+      --blockr-color-bg-page: #f9fafb
+      --blockr-color-bg-surface: #ffffff
+      --blockr-color-bg-raised: #ffffff
+      --blockr-color-bg-subtle: #f9fafb
+      --blockr-color-bg-field: #f9fafb
+      --blockr-color-bg-hover: #f3f4f6
+      --blockr-color-bg-selected: color-mix(in srgb, #2563eb 7%, transparent)
+      --blockr-color-bg-selected-inactive: color-mix(in srgb, #111827 10%, transparent)
+      --blockr-color-bg-accent: #2563eb
+      --blockr-color-bg-accent-hover: #1d4ed8
+      --blockr-color-bg-danger: #fef2f2
+      --blockr-color-bg-warning: #fffbeb
+      --blockr-color-bg-success: #f0fdf4
+      --blockr-color-border-default: #e5e7eb
+      --blockr-color-border-strong: #d1d5db
+      --blockr-color-border-accent: #2563eb
+      --blockr-color-border-danger: #dc2626
+      --blockr-color-border-warning: #f59e0b
+      --blockr-color-border-success: #16a34a
+      --blockr-color-bg-accent-subtle: color-mix(in srgb, #2563eb 7%, transparent)
+      --blockr-color-bg-accent-subtle-hover: color-mix(in srgb, #2563eb 13%, transparent)
+      --blockr-color-border-accent-subtle: color-mix(in srgb, #2563eb 35%, transparent)
+      --blockr-color-border-danger-subtle: color-mix(in srgb, #dc2626 35%, transparent)
+      --blockr-color-border-warning-subtle: color-mix(in srgb, #f59e0b 45%, transparent)
+      --blockr-color-border-success-subtle: color-mix(in srgb, #16a34a 35%, transparent)
+      --blockr-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.12)
+      --blockr-focus-outline: 2px solid #2563eb
+      --blockr-focus-offset: 2px
       --blockr-font-size-xs: 0.75rem
-      --blockr-font-size-title: 1.25rem
-      --blockr-font-size-section: 1rem
+      --blockr-font-size-sm: 0.8125rem
+      --blockr-font-size-base: 0.875rem
+      --blockr-font-size-lg: 1rem
+      --blockr-font-size-xl: 1.25rem
       --blockr-font-weight-normal: 400
       --blockr-font-weight-medium: 500
       --blockr-font-weight-semibold: 600
+      --blockr-font-mono: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace
+      --blockr-radius-sm: 4px
+      --blockr-radius-md: 6px
+      --blockr-radius-lg: 8px
+      --blockr-radius-xl: 12px
+      --blockr-radius-pill: 999px
+      --blockr-control-h: 42px
+      --blockr-control-h-sm: 30px
+      --blockr-control-h-xs: 26px
+      --blockr-shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)
+      --blockr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1)
+      --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25)
+      --blockr-transition: 0.15s ease
+      --blockr-mark-radius: 2px
+      --blockr-mark-font-size: 11px
+      --blockr-mark-weight-supporting: 0.6
       --blockr-color-text-primary: #111827
       --blockr-color-text-secondary: #374151
-      --blockr-color-text-muted: #6b7280
       --blockr-color-text-subtle: #9ca3af
       --blockr-color-text-meta: #6b7280
       --blockr-color-border: #e5e7eb
       --blockr-color-border-hover: #d1d5db
-      --blockr-color-bg-subtle: #f9fafb
-      --blockr-color-bg-hover: #f3f4f6
       --blockr-color-bg-input: #f9fafb
       --blockr-color-primary: #2563eb
       --blockr-color-primary-hover: #1d4ed8
       --blockr-color-primary-bg: #eff6ff
       --blockr-color-error: #dc2626
+      --blockr-color-danger: #dc2626
       --blockr-color-success: #16a34a
+      --blockr-color-warning: #f59e0b
+      --blockr-color-warning-bg: #fffbeb
+      --blockr-color-warning-text: #b45309
+      --blockr-font-size-section: 1rem
+      --blockr-font-size-title: 1.25rem
+      --blockr-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)
+      --blockr-shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.1)
+
+# the dark scheme changes only deliberately
+
+    Code
+      cat(paste(names(tokens), tokens, sep = ": "), sep = "\n")
+    Output
+      --blockr-red-50: #fef2f2
+      --blockr-red-100: #fee2e2
+      --blockr-red-600: #dc2626
+      --blockr-red-700: #b91c1c
+      --blockr-amber-50: #fffbeb
+      --blockr-amber-100: #fef3c7
+      --blockr-amber-500: #f59e0b
+      --blockr-amber-700: #b45309
+      --blockr-green-50: #f0fdf4
+      --blockr-green-100: #dcfce7
+      --blockr-green-600: #16a34a
+      --blockr-green-700: #15803d
+      --blockr-accent-50: rgb(59 130 246 / 0.14)
+      --blockr-accent-100: rgb(59 130 246 / 0.24)
+      --blockr-accent-500: #60a5fa
+      --blockr-accent-600: #3b82f6
+      --blockr-accent-700: #93c5fd
+      --blockr-color-text-default: #f0f3f7
+      --blockr-color-text-muted: #8a94a3
+      --blockr-color-text-disabled: #6b7686
+      --blockr-color-bg-subtle: #14181f
+      --blockr-color-bg-field: #14181f
+      --blockr-color-bg-selected: color-mix(in srgb, #3b82f6 7%, transparent)
+      --blockr-color-bg-selected-inactive: color-mix(in srgb, #f0f3f7 10%, transparent)
+      --blockr-color-bg-accent: #3b82f6
+      --blockr-color-bg-accent-hover: #93c5fd
+      --blockr-color-border-default: #232932
+      --blockr-color-border-strong: #2d343f
+      --blockr-color-border-accent: #3b82f6
+      --blockr-color-bg-accent-subtle: color-mix(in srgb, #3b82f6 7%, transparent)
+      --blockr-color-bg-accent-subtle-hover: color-mix(in srgb, #3b82f6 13%, transparent)
+      --blockr-color-border-accent-subtle: color-mix(in srgb, #3b82f6 35%, transparent)
+      --blockr-color-border-danger-subtle: color-mix(in srgb, #f87171 35%, transparent)
+      --blockr-color-border-warning-subtle: color-mix(in srgb, #fbbf24 45%, transparent)
+      --blockr-color-border-success-subtle: color-mix(in srgb, #4ade80 35%, transparent)
+      --blockr-focus-outline: 2px solid #3b82f6
+      --blockr-focus-offset: 2px
+      --blockr-font-size-xs: 0.75rem
+      --blockr-font-size-sm: 0.8125rem
+      --blockr-font-size-base: 0.875rem
+      --blockr-font-size-lg: 1rem
+      --blockr-font-size-xl: 1.25rem
+      --blockr-font-weight-normal: 400
+      --blockr-font-weight-medium: 500
+      --blockr-font-weight-semibold: 600
+      --blockr-font-mono: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace
+      --blockr-radius-sm: 4px
+      --blockr-radius-md: 6px
+      --blockr-radius-lg: 8px
+      --blockr-radius-xl: 12px
+      --blockr-radius-pill: 999px
+      --blockr-control-h: 42px
+      --blockr-control-h-sm: 30px
+      --blockr-control-h-xs: 26px
+      --blockr-transition: 0.15s ease
+      --blockr-mark-radius: 2px
+      --blockr-mark-font-size: 11px
+      --blockr-mark-weight-supporting: 0.6
+      --blockr-color-text-primary: #f0f3f7
+      --blockr-color-text-secondary: #c2c9d3
+      --blockr-color-text-subtle: #6b7686
+      --blockr-color-text-meta: #8a94a3
+      --blockr-color-border: #232932
+      --blockr-color-border-hover: #2d343f
+      --blockr-color-bg-input: #14181f
+      --blockr-color-primary: #3b82f6
+      --blockr-color-primary-hover: #93c5fd
+      --blockr-color-primary-bg: rgb(59 130 246 / 0.14)
+      --blockr-color-error: #f87171
+      --blockr-color-danger: #f87171
+      --blockr-color-success: #4ade80
+      --blockr-color-warning: #fbbf24
+      --blockr-color-warning-bg: rgb(251 191 36 / 0.12)
+      --blockr-color-warning-text: #fbbf24
+      --blockr-font-size-section: 1rem
+      --blockr-font-size-title: 1.25rem
+      --blockr-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5)
+      --blockr-shadow-dropdown: 0 4px 12px rgb(0 0 0 / 0.5)
+      --blockr-grey-50: #14181f
+      --blockr-grey-100: #191e26
+      --blockr-grey-200: #232932
+      --blockr-grey-300: #2d343f
+      --blockr-grey-400: #6b7686
+      --blockr-grey-500: #8a94a3
+      --blockr-grey-600: #a3acb9
+      --blockr-grey-700: #c2c9d3
+      --blockr-grey-800: #dde2e9
+      --blockr-grey-900: #f0f3f7
+      --blockr-blue-50: rgb(59 130 246 / 0.14)
+      --blockr-blue-100: rgb(59 130 246 / 0.24)
+      --blockr-blue-500: #60a5fa
+      --blockr-blue-600: #3b82f6
+      --blockr-blue-700: #93c5fd
+      --blockr-color-bg-page: #0e1219
+      --blockr-color-bg-surface: #161b23
+      --blockr-color-bg-raised: #1e242e
+      --blockr-color-bg-hover: color-mix(in srgb, #f0f3f7 6%, transparent)
+      --blockr-color-text-on-accent: #0e1219
+      --blockr-color-text-accent: #60a5fa
+      --blockr-color-text-accent-strong: #60a5fa
+      --blockr-color-text-danger: #f87171
+      --blockr-color-text-warning: #fbbf24
+      --blockr-color-text-success: #4ade80
+      --blockr-color-bg-danger: rgb(248 113 113 / 0.12)
+      --blockr-color-bg-warning: rgb(251 191 36 / 0.12)
+      --blockr-color-bg-success: rgb(74 222 128 / 0.12)
+      --blockr-color-border-danger: #f87171
+      --blockr-color-border-warning: #fbbf24
+      --blockr-color-border-success: #4ade80
+      --blockr-focus-ring: 0 0 0 3px rgb(96 165 250 / 0.28)
+      --blockr-shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5)
+      --blockr-shadow-md: 0 4px 12px rgb(0 0 0 / 0.5)
+      --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.7)
 
