@@ -65,6 +65,50 @@ test('setValue changes the pick without reporting it', (newWindow) => {
   win.close();
 });
 
+test('disabled: marked, not a tab stop, does not open, and setDisabled flips it', (newWindow) => {
+  const win = newWindow();
+  const click = (el) => el.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  const sel = win.Blockr.Select.single(host(win), { options: MANY, bordered: true, disabled: true });
+  const input = sel.el.querySelector('.blockr-select__search');
+  assert.ok(sel.el.classList.contains('blockr-select--disabled'));
+  assert.ok(input.disabled, 'the combobox input is disabled, so Tab skips it');
+  input.focus();
+  assert.notStrictEqual(win.document.activeElement, input);
+  click(sel.el.querySelector('.blockr-select__control'));
+  assert.ok(!sel.el.classList.contains('blockr-select--open'), 'a click does not open it');
+
+  sel.setDisabled(false);
+  assert.ok(!sel.el.classList.contains('blockr-select--disabled'));
+  assert.ok(!input.disabled);
+  click(sel.el.querySelector('.blockr-select__control'));
+  assert.ok(sel.el.classList.contains('blockr-select--open'));
+  // Disabling an open select closes it.
+  sel.setDisabled(true);
+  assert.ok(!sel.el.classList.contains('blockr-select--open'));
+  assert.ok(sel.el.classList.contains('blockr-select--disabled'));
+  win.close();
+});
+
+test('disabled multi: tags stay, their x is disabled and nothing is draggable', (newWindow) => {
+  const win = newWindow();
+  const seen = [];
+  const sel = win.Blockr.Select.multi(host(win), {
+    options: MANY, selected: ['a', 'b'], disabled: true, onChange: (v) => seen.push(v)
+  });
+  const tags = [...sel.el.querySelectorAll('.blockr-select__tag')];
+  assert.strictEqual(tags.length, 2);
+  assert.ok(tags.every((t) => !t.hasAttribute('draggable')));
+  const x = tags[0].querySelector('.blockr-select__tag-remove');
+  assert.ok(x.disabled);
+  x.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  assert.strictEqual(sel.el.querySelectorAll('.blockr-select__tag').length, 2, 'the tag stays');
+  assert.deepStrictEqual(seen, []);
+  sel.setDisabled(false);
+  assert.ok(sel.el.querySelector('.blockr-select__tag').hasAttribute('draggable'));
+  assert.ok(!sel.el.querySelector('.blockr-select__tag-remove').disabled);
+  win.close();
+});
+
 test('a menu hands back close and nothing else', (newWindow) => {
   const win = newWindow();
   const m = win.Blockr.Select.menu(host(win), { options: MANY });

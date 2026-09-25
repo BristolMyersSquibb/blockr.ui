@@ -63,6 +63,28 @@
   box-shadow: var(--blockr-focus-ring);
 }
 
+/* Disabled (config `disabled`, handle setDisabled): the shell stays, the
+   text and the caret go text-disabled, and nothing reacts. The combobox
+   input carries the disabled attribute, so it is out of the tab order. */
+.blockr-select--disabled .blockr-select__control {
+  cursor: default;
+}
+.blockr-select--disabled .blockr-select__value,
+.blockr-select--disabled .blockr-select__arrow,
+.blockr-select--disabled .blockr-select__tag,
+.blockr-select--disabled .blockr-select__tag .blockr-select__opt-label,
+.blockr-select--disabled .blockr-select__search::placeholder {
+  color: var(--blockr-color-text-disabled);
+}
+.blockr-select--disabled .blockr-select__tag {
+  cursor: default;
+}
+/* The x keeps its space (nothing moves) but never shows; the button is
+   disabled, so it is not a tab stop either. */
+.blockr-select--disabled .blockr-select__tag:hover .blockr-select__tag-remove {
+  opacity: 0;
+}
+
 /* --- Value display (single mode) --- */
 .blockr-select__value {
   flex: 1;

@@ -41,6 +41,11 @@ interface BlockrSelectConfigBase {
    * true). `false` for a short fixed list (operators, join types).
    */
   search?: boolean;
+  /**
+   * Start greyed out: text-disabled, never opens, not a tab stop (default
+   * false). setDisabled() changes it later.
+   */
+  disabled?: boolean;
 }
 
 interface BlockrSelectSingleConfig extends BlockrSelectConfigBase {
@@ -134,6 +139,11 @@ interface BlockrSelectHandleBase {
   setValue(value: string | string[] | null): void;
   /** Toggle the "Loading…" dropdown state. */
   setLoading(flag: boolean): void;
+  /**
+   * Grey the control out and take it out of the tab order, or put it back.
+   * Disabling an open select closes it first.
+   */
+  setDisabled(flag: boolean): void;
   /**
    * Enter/leave server-search mode from a column-values response:
    * `truncated` activates the onSearch hook and the "N values — type to

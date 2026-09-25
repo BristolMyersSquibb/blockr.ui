@@ -202,6 +202,20 @@
   transform: scale(1);
 }
 
+/* Disabled: the box at half opacity, the label in text-disabled, and the
+   hover border change withheld. */
+.blockr-checkbox input:disabled + .blockr-checkbox__box,
+.blockr-checkbox:hover input:disabled + .blockr-checkbox__box {
+  opacity: 0.5;
+  border-color: var(--blockr-color-border-strong);
+}
+.blockr-checkbox input:disabled ~ .blockr-checkbox__label {
+  color: var(--blockr-color-text-disabled);
+}
+.blockr-checkbox:has(input:disabled) {
+  cursor: default;
+}
+
 /* A wrapping row of several checkboxes (e.g. the summary-table stats). */
 .blockr-checkbox-row {
   display: flex;

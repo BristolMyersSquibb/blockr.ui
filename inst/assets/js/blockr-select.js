@@ -195,6 +195,10 @@
       // relying on the client-side filter alone. Set by setSearchInfo().
       serverSearch: false,
       serverTotal: 0,
+      // Shown in text-disabled, never opens, out of the tab order (the
+      // combobox input carries the disabled attribute). setDisabled() flips
+      // it after construction.
+      disabled: config.disabled === true,
       destroyed: false
     };
     if (!multi) {
@@ -336,7 +340,7 @@
         const tag = document.createElement('span');
         tag.className = 'blockr-select__tag';
         tag.setAttribute('data-value', val);
-        if (reorderable) tag.setAttribute('draggable', 'true');
+        if (reorderable && !st.disabled) tag.setAttribute('draggable', 'true');
         const label = document.createElement('span');
         label.className = 'blockr-select__tag-label';
         const opt = findOpt(st.options, val);
@@ -355,6 +359,7 @@
         remove.type = 'button';
         remove.className = 'blockr-select__tag-remove';
         remove.setAttribute('aria-label', `Remove ${val}`);
+        remove.disabled = st.disabled;
         remove.innerHTML = Blockr.icons.remove;
         tag.appendChild(remove);
         // In a menu the input is the panel's filter box, not a child here.
@@ -457,6 +462,8 @@
       else renderFace();
       root.classList.toggle('blockr-select--open', st.open);
       root.classList.toggle('blockr-select--expanded', st.expanded);
+      root.classList.toggle('blockr-select--disabled', st.disabled);
+      input.disabled = st.disabled;
       input.setAttribute('aria-expanded', st.open ? 'true' : 'false');
       // A short menu still filters as you type, as a native menu does; only
       // the box is kept off screen (display: none could not hold focus).
@@ -511,7 +518,7 @@
 
     /** @param {boolean} [byKeyboard] */
     const open = (byKeyboard) => {
-      if (st.open || st.destroyed) return;
+      if (st.open || st.destroyed || st.disabled) return;
       st.open = true;
       st.keyboard = !!byKeyboard || !!st.query;
       // A single select opens on its pick, so the keyboard row and the pick
@@ -597,6 +604,7 @@
     // --- Events ------------------------------------------------------------
 
     control.addEventListener('click', (e) => {
+      if (st.disabled) return;
       const t = /** @type {Element} */ (e.target);
       const remove = t.closest('.blockr-select__tag-remove');
       if (remove) {
@@ -862,6 +870,16 @@
       },
       /** @param {boolean} flag */
       setLoading(flag) { st.loading = !!flag; render(); },
+      /**
+       * Grey the control out and take it out of the tab order, or put it
+       * back. Disabling an open select closes it first.
+       * @param {boolean} flag
+       */
+      setDisabled(flag) {
+        st.disabled = !!flag;
+        if (st.disabled) { collapse(); close(); }
+        render();
+      },
       // Enter or leave server-search mode from a column-values response.
       // `truncated` means the full value list exceeds the server's limit
       // (sticky across queries); `total` is the full distinct count.

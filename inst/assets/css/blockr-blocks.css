@@ -350,6 +350,12 @@
   color: var(--blockr-color-text-muted);
 }
 
+/* A disabled field keeps its shell and greys its text. */
+.blockr-num-input:disabled,
+.blockr-text-input:disabled {
+  color: var(--blockr-color-text-disabled);
+}
+
 /* --- Standalone text input (matches blockr.dock .form-control sizing) --- */
 .blockr-text-input {
   width: 100%;
