@@ -593,7 +593,7 @@ test('single: a pick closes, shows the value, and reports only a change', (newWi
   assert.strictEqual(sel.getValue(), 'CHG');
   assert.strictEqual(face(sel).textContent, 'CHGChange from Baseline');
   assert.strictEqual(face(sel).querySelector('.blockr-select__opt-label').textContent, 'Change from Baseline');
-  assert.strictEqual(control(sel).title, 'CHG — Change from Baseline', 'full text on hover');
+  assert.strictEqual(win.Blockr.tooltip.text(control(sel)), 'CHG · Change from Baseline', 'full text on hover');
   click(win, control(sel));
   clickRow(win, sel, 'CHG');
   assert.deepStrictEqual(seen, ['CHG'], 'the same value again is not a change');
@@ -860,9 +860,9 @@ test('a tag shows the value and, muted, its label; full text on hover', (newWind
   const labels = [...sel.el.querySelectorAll('.blockr-select__tag-label')];
   assert.strictEqual(labels[0].textContent, 'AVALAnalysis Value');
   assert.strictEqual(labels[0].querySelector('.blockr-select__opt-label').textContent, 'Analysis Value');
-  assert.strictEqual(labels[0].title, 'AVAL — Analysis Value');
+  assert.strictEqual(win.Blockr.tooltip.text(labels[0]), 'AVAL · Analysis Value');
   assert.strictEqual(labels[1].textContent, 'BASE');
-  assert.strictEqual(labels[1].title, 'BASE');
+  assert.strictEqual(win.Blockr.tooltip.text(labels[1]), 'BASE');
   const x = sel.el.querySelector('.blockr-select__tag[data-value="AVAL"] .blockr-select__tag-remove');
   assert.strictEqual(x.getAttribute('aria-label'), 'Remove AVAL');
   win.close();
@@ -874,7 +874,7 @@ test('a tag for a value the list does not carry still shows the value', (newWind
   sel.updateOptions(ABC, ['zz']);
   const label = sel.el.querySelector('.blockr-select__tag-label');
   assert.strictEqual(label.textContent, 'zz');
-  assert.strictEqual(label.title, 'zz');
+  assert.strictEqual(win.Blockr.tooltip.text(label), 'zz');
   win.close();
 });
 
@@ -886,7 +886,7 @@ test('maxTagChars cuts the middle of a long value and keeps it whole on hover', 
   });
   const label = sel.el.querySelector('.blockr-select__tag-label');
   assert.strictEqual(label.textContent, 'Xanome… Dose');
-  assert.strictEqual(label.title, 'Xanomeline High Dose — Arm');
+  assert.strictEqual(win.Blockr.tooltip.text(label), 'Xanomeline High Dose · Arm');
   assert.deepStrictEqual(values(sel), ['Xanomeline High Dose']);
   win.close();
 });
@@ -976,20 +976,20 @@ test('singleLine: tags past the first row hide behind a +N chip that lists them'
     [...sel.el.querySelectorAll('.blockr-select__tag--hidden')].map((t) => t.getAttribute('data-value'));
   const chipOf = (sel) => {
     const chip = sel.el.querySelector('.blockr-select__more');
-    return chip && chip.style.display !== 'none' ? { text: chip.textContent, title: chip.title } : null;
+    return chip && chip.style.display !== 'none' ? { text: chip.textContent, title: win.Blockr.tooltip.text(chip) } : null;
   };
   assert.deepStrictEqual(hiddenIn(three), []);
   assert.strictEqual(chipOf(three), null);
 
   const five = multi(win, { options: ABC, selected: ABC, singleLine: true });
   assert.deepStrictEqual(hiddenIn(five), ['c', 'd', 'e']);
-  assert.deepStrictEqual(chipOf(five), { text: '+3', title: 'c, d, e' });
+  assert.deepStrictEqual(chipOf(five), { text: '+3', title: 'c\nd\ne' });
   assert.deepStrictEqual(values(five), ABC, 'hidden is not removed');
 
   // Widening (or narrowing) refits: a removal gives room back.
   click(win, five.el.querySelector('.blockr-select__tag[data-value="d"] .blockr-select__tag-remove'));
   assert.deepStrictEqual(hiddenIn(five), ['c', 'e']);
-  assert.deepStrictEqual(chipOf(five), { text: '+2', title: 'c, e' });
+  assert.deepStrictEqual(chipOf(five), { text: '+2', title: 'c\ne' });
   win.close();
 });
 

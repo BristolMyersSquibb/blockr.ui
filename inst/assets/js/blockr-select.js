@@ -44,9 +44,9 @@
     const lead = labelFirst && lbl ? lbl : val;
     const trail = labelFirst && lbl ? val : lbl;
     el.appendChild(document.createTextNode(lead));
-    // The element (or an ancestor) ellipsizes on overflow, so always offer
-    // the full text on hover.
-    el.title = lbl ? `${val} — ${lbl}` : val;
+    // The element (or an ancestor) ellipsizes on overflow; the full text
+    // shows on hover while it is cut off.
+    Blockr.tooltip.set(el, { name: String(val), label: lbl }, { overflow: true });
     if (trail) {
       const span = document.createElement('span');
       span.className = 'blockr-select__opt-label';
@@ -321,18 +321,23 @@
       if (sel !== '') {
         const opt = findOpt(st.options, sel);
         if (opt) fillOptContent(face, opt);
-        else { face.textContent = String(sel); face.title = String(sel); }
+        else face.textContent = String(sel);
         face.classList.remove('blockr-select__value--placeholder');
         // While open the input replaces the face, so the pick shows there.
         input.setAttribute('placeholder', st.open ? String(sel) : '');
       } else {
         face.textContent = placeholder;
-        face.title = '';
         face.classList.add('blockr-select__value--placeholder');
         input.setAttribute('placeholder', placeholder);
       }
-      // The face has pointer-events: none, so hover happens on the control.
-      control.title = face.title;
+      // The face has pointer-events: none, so hover happens on the control;
+      // the tooltip shows while the face is cut off.
+      if (sel === '') Blockr.tooltip.clear(control);
+      else {
+        const opt = findOpt(st.options, sel);
+        Blockr.tooltip.set(control,
+          { name: String(sel), label: opt ? optLabel(opt) : '' }, { overflow: true });
+      }
     };
 
     const renderTags = () => {
@@ -348,12 +353,13 @@
         if (maxTagChars && val.length > maxTagChars) {
           const lbl = opt ? optLabel(opt) : '';
           label.textContent = midTruncate(val, maxTagChars);
-          label.title = lbl ? `${val} — ${lbl}` : val;
+          // Cut in the middle by us, not by CSS, so it always has one.
+          Blockr.tooltip.set(label, { name: val, label: lbl });
         } else if (opt) {
           fillOptContent(label, opt);
         } else {
           label.textContent = val;
-          label.title = val;
+          Blockr.tooltip.set(label, val, { overflow: true });
         }
         tag.appendChild(label);
         const remove = document.createElement('button');
@@ -412,7 +418,12 @@
       const hidden = tags.slice(shown);
       hidden.forEach((t) => t.classList.add('blockr-select__tag--hidden'));
       chip.textContent = `+${hidden.length}`;
-      chip.title = hidden.map((t) => t.getAttribute('data-value')).join(', ');
+      // The hidden tags, one per line, each name with its label muted.
+      Blockr.tooltip.set(chip, hidden.map((t) => {
+        const v = t.getAttribute('data-value') || '';
+        const o = findOpt(st.options, v);
+        return { name: v, label: o ? optLabel(o) : '' };
+      }));
     };
 
     const renderList = () => {

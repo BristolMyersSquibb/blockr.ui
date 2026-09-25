@@ -215,7 +215,28 @@ interface BlockrPlaceOptions {
   onFlip?: (above: boolean) => void;
 }
 
+/* --- Blockr.tooltip (blockr-ui.js) --- */
+
+/** One tooltip line: plain text, or a column shown as its name, then its label muted. */
+type BlockrTooltipLine = string | { name: string; label?: string };
+
+/** A tooltip's content: one line, or several (the "+N" chip lists its hidden tags). */
+type BlockrTooltipContent = BlockrTooltipLine | BlockrTooltipLine[];
+
+interface BlockrTooltip {
+  /** Give `el` a tooltip; with `overflow`, only while it or a child is cut off. */
+  set(
+    el: Element,
+    content: BlockrTooltipContent | (() => BlockrTooltipContent),
+    opts?: { overflow?: boolean }
+  ): void;
+  clear(el: Element): void;
+  /** Plain text of `el`'s tooltip ("AGE · Age", lines joined by newlines), '' if none. */
+  text(el: Element): string;
+}
+
 interface BlockrNamespace {
+  tooltip: BlockrTooltip;
   uid(prefix?: string): string;
   escapeHtml(s: string): string;
   removeNode(node: Node | null | undefined): void;

@@ -261,7 +261,7 @@ Blockr.textCommit = (input, opts) => {
   const chip = document.createElement('button');
   chip.type = 'button';
   chip.className = 'blockr-expr-confirm';
-  chip.title = 'Apply (Enter)';
+  // The button says its name ("Enter ↵"), so it has no tooltip.
   chip.setAttribute('aria-label', 'Apply (Enter)');
   chip.style.display = 'none';
   let committed = input.value;
@@ -315,6 +315,175 @@ Blockr.textCommit = (input, opts) => {
     }
   };
 };
+
+/**
+ * The light-card tooltip (design system, "Tooltips"): one style for every
+ * name shown on hover, in place of the browser's native `title` box, which
+ * ignores the tokens and dark mode, never shows on keyboard focus, and waits
+ * as long as the browser likes.
+ *
+ * Blockr.tooltip.set(el, content, { overflow }) gives `el` a tooltip.
+ * `content` is a string, a column `{ name, label }` (the label shows muted
+ * after the name), a list of either (one per line, as the "+N" chip's), or a
+ * function returning one of those at show time. With `overflow: true` it
+ * shows only while the element or a child is cut off, so a value that fits
+ * has none. Blockr.tooltip.clear(el) takes it away.
+ *
+ * One set of document listeners serves every tooltip, added when this file
+ * loads (like Blockr.onDocClick's), so no instance adds or leaks its own.
+ * The card shows after the pointer rests 300ms, at once on keyboard focus,
+ * and at once while "warm": within 400ms of another card leaving, so moving
+ * along a row of icons does not wait at each one.
+ */
+Blockr.tooltip = (() => {
+  const DELAY = 300;
+  const WARM = 400;
+  const GAP = 6;
+  const MARGIN = 8;
+  /** @type {WeakMap<Element, { content: BlockrTooltipContent | (() => BlockrTooltipContent), overflow: boolean }>} */
+  const tips = new WeakMap();
+  /** @type {HTMLDivElement | null} */
+  let card = null;
+  /** @type {Element | null} */
+  let current = null;
+  /** @type {ReturnType<typeof setTimeout> | null} */
+  let timer = null;
+  let warmUntil = 0;
+
+  /** @param {Element} el */
+  const cutOff = (el) => [el, ...Array.from(el.querySelectorAll('*'))].some(
+    (n) => n.clientWidth > 0 && n.scrollWidth > n.clientWidth + 1
+  );
+
+  /** @param {BlockrTooltipLine} line */
+  const lineText = (line) => {
+    if (typeof line === 'string') return line;
+    return line.label && line.label !== line.name ? `${line.name} · ${line.label}` : line.name;
+  };
+
+  /** @param {BlockrTooltipContent} content */
+  const asLines = (content) => (Array.isArray(content) ? content : [content]);
+
+  /** @param {Element} el */
+  const contentOf = (el) => {
+    const tip = tips.get(el);
+    if (!tip) return null;
+    return typeof tip.content === 'function' ? tip.content() : tip.content;
+  };
+
+  /** @param {HTMLElement} parent @param {BlockrTooltipLine} line */
+  const drawLine = (parent, line) => {
+    if (typeof line === 'string') { parent.textContent = line; return; }
+    parent.textContent = line.name;
+    if (line.label && line.label !== line.name) {
+      const meta = document.createElement('span');
+      meta.className = 'blockr-tooltip__meta';
+      meta.textContent = line.label;
+      parent.append(' ', meta);
+    }
+  };
+
+  const hide = () => {
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (card && card.isConnected) {
+      card.remove();
+      warmUntil = Date.now() + WARM;
+    }
+    if (current) current.removeAttribute('aria-describedby');
+    current = null;
+  };
+
+  /** @param {Element} el */
+  const show = (el) => {
+    timer = null;
+    const content = el.isConnected ? contentOf(el) : null;
+    if (!content) return;
+    if (!card) {
+      card = document.createElement('div');
+      card.className = 'blockr-tooltip';
+      card.id = Blockr.uid('blockr-tooltip');
+      card.setAttribute('role', 'tooltip');
+    }
+    card.textContent = '';
+    for (const line of asLines(content)) {
+      const row = document.createElement('div');
+      row.className = 'blockr-tooltip__line';
+      drawLine(row, line);
+      card.appendChild(row);
+    }
+    document.body.appendChild(card);
+    // Above the element, centred on it; below only where there is no room.
+    const r = el.getBoundingClientRect();
+    const c = card.getBoundingClientRect();
+    const left = Math.max(MARGIN,
+      Math.min(r.left + r.width / 2 - c.width / 2, window.innerWidth - c.width - MARGIN));
+    let top = r.top - c.height - GAP;
+    if (top < MARGIN) top = r.bottom + GAP;
+    card.style.left = `${left}px`;
+    card.style.top = `${top}px`;
+    el.setAttribute('aria-describedby', card.id);
+    current = el;
+  };
+
+  /** @param {Event} e */
+  const enter = (e) => {
+    const target = /** @type {Element | null} */ (e.target instanceof Element ? e.target : null);
+    let el = target;
+    while (el && !tips.has(el)) el = el.parentElement;
+    if (!el || el === current) return;
+    hide();
+    const tip = /** @type {{ overflow: boolean }} */ (tips.get(el));
+    if (tip.overflow && !cutOff(el)) return;
+    const found = el;
+    const now = e.type === 'focusin' || Date.now() < warmUntil;
+    if (now) show(found);
+    else timer = setTimeout(() => show(found), DELAY);
+  };
+
+  /** @param {PointerEvent} e */
+  const leave = (e) => {
+    if (!current && !timer) return;
+    const to = e.relatedTarget;
+    let el = /** @type {Element | null} */ (e.target instanceof Element ? e.target : null);
+    while (el && !tips.has(el)) el = el.parentElement;
+    if (!el) return;
+    if (to instanceof Node && el.contains(to)) return;
+    hide();
+  };
+
+  document.addEventListener('pointerover', enter, true);
+  document.addEventListener('focusin', enter, true);
+  document.addEventListener('pointerout', /** @type {EventListener} */ (leave), true);
+  document.addEventListener('focusout', hide, true);
+  document.addEventListener('pointerdown', hide, true);
+  document.addEventListener('scroll', hide, true);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); }, true);
+
+  return {
+    /**
+     * @param {Element} el
+     * @param {BlockrTooltipContent | (() => BlockrTooltipContent)} content
+     * @param {{ overflow?: boolean }} [opts]
+     */
+    set(el, content, opts) {
+      tips.set(el, { content, overflow: !!(opts && opts.overflow) });
+    },
+    /** @param {Element} el */
+    clear(el) {
+      if (current === el) hide();
+      tips.delete(el);
+    },
+    /**
+     * The tooltip as plain text, lines joined by newlines ("AGE · Age"), or
+     * '' when `el` has none. Tests read it; it ignores `overflow`.
+     * @param {Element} el
+     */
+    text(el) {
+      const content = contentOf(el);
+      return content ? asLines(content).map(lineText).join('\n') : '';
+    }
+  };
+})();
 
 /* --- Controls ----------------------------------------------------------- */
 
@@ -379,7 +548,7 @@ Blockr.textCommit = (input, opts) => {
 
     band.setAttribute('role', 'region');
     band.setAttribute('aria-label', (opts && opts.label) || 'Settings');
-    gear.title = 'Settings';
+    Blockr.tooltip.set(gear, 'Settings');
     gear.setAttribute('aria-label', 'Settings');
     gear.setAttribute('aria-expanded', 'false');
 
@@ -469,7 +638,9 @@ Blockr.textCommit = (input, opts) => {
       b.type = 'button';
       b.className = 'blockr-segmented__seg';
       b.textContent = o.label;
-      if (o.title) b.title = o.title;
+      // A segment that says its name has no tooltip; `title` names an
+      // icon-only one.
+      if (o.title && !o.label) Blockr.tooltip.set(b, o.title);
       b.setAttribute('role', 'radio');
       b.addEventListener('click', function () {
         if (current === o.value) return;

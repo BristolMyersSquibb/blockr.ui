@@ -81,7 +81,7 @@ test('a tag past the cap is truncated and keeps the full value on hover', (newWi
 
   const labels = [...sel.el.querySelectorAll('.blockr-select__tag-label')];
   assert.strictEqual(labels[0].textContent, 'Xanomeli\u2026gh Dose');
-  assert.strictEqual(labels[0].title, 'Xanomeline High Dose');
+  assert.strictEqual(win.Blockr.tooltip.text(labels[0]), 'Xanomeline High Dose');
   assert.strictEqual(labels[1].textContent, 'AGE');
 
   // The value that leaves the widget is the value, not what is painted on it.
