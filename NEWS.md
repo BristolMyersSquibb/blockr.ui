@@ -10,6 +10,13 @@
   blockr.core's dark-mode board option sets. In dark, Bootstrap's body
   background and text colour follow the tokens too.
 
+* The `controls_dep()` dependency carries the controls blockr blocks are
+  built from, moved here from blockr.dplyr: `Blockr.Select`, the Enter
+  button, the required-empty cue, the checkbox, the segmented control, the
+  gear tray and `Blockr.place`, with the stylesheets they draw with. The
+  dependency names are the ones blockr.dplyr used, so a page never loads two
+  copies.
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
