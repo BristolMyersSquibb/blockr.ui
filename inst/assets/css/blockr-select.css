@@ -109,7 +109,7 @@
   display: flex;
   align-items: center;
   color: var(--blockr-color-text-muted);
-  transition: transform 150ms ease;
+  transition: transform var(--blockr-transition);
   pointer-events: none;
 }
 
@@ -284,10 +284,11 @@
   outline-offset: var(--blockr-focus-offset);
 }
 
-/* A column label inside a tag is 12px meta. */
+/* A column label inside a tag is 12px meta, 8px after the name like
+   everywhere else. */
 .blockr-select__tag .blockr-select__opt-label {
   font-size: var(--blockr-font-size-xs);
-  margin-left: 6px;
+  margin-left: 8px;
 }
 
 /* Tags the single-line fit dropped. After `.blockr-select__tag`, whose
@@ -476,7 +477,7 @@
   font-size: var(--blockr-font-size-sm);
   color: var(--blockr-color-text-muted);
   margin-left: 8px;
-  font-weight: 400;
+  font-weight: var(--blockr-font-weight-normal);
 }
 
 /* --- Empty state --- */
