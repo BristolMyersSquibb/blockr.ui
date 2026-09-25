@@ -238,7 +238,7 @@ interface BlockrTooltip {
 /** A row of Blockr.menu(). */
 interface BlockrMenuItem {
   label: string;
-  /** SVG or HTML string drawn before the label. */
+  /** Drawn before the label: a Blockr.icons name ('trash') or an SVG/HTML string. */
   icon?: string;
   /** Grey text after the label (a block ID, a shortcut). */
   meta?: string;
@@ -246,15 +246,17 @@ interface BlockrMenuItem {
   mono?: boolean;
   /** The item in use (the active view): weight 600. */
   current?: boolean;
-  /** A destructive action: text-danger. */
+  /** A destructive action: red under the pointer. */
   danger?: boolean;
+  /** A muted row, such as "Manage pages". */
+  quiet?: boolean;
   disabled?: boolean;
   /** Tooltip on a disabled row saying why. */
   reason?: string;
   onSelect?: () => void;
 }
 
-type BlockrMenuEntry = BlockrMenuItem | { divider: true } | { title: string };
+type BlockrMenuEntry = BlockrMenuItem | { gap: true } | { divider: true } | { title: string };
 
 interface BlockrMenuConfig {
   items: BlockrMenuEntry[];

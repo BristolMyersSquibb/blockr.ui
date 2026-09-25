@@ -16,29 +16,31 @@
   box-sizing: border-box;
   max-height: 320px;
   overflow-y: auto;
-  padding: 4px;
+  padding: 6px;
   background: var(--blockr-color-bg-raised);
   border: 1px solid var(--blockr-color-border-default);
-  border-radius: var(--blockr-radius-lg);
+  border-radius: 10px;
   box-shadow: var(--blockr-shadow-md);
   color: var(--blockr-color-text-default);
   font-size: var(--blockr-font-size-base);
   outline: none;
 }
 
-/* Rows: 32px at 14px, radius 4, 10px side padding. Hover and the keyboard
-   row share one look, where meta text and icons turn default. */
+/* Rows: 34px at 14px, radius 6, 10px side padding, a little more air than a
+   Select list, which is read top to bottom where a menu is scanned for one
+   verb. Hover and the keyboard row share one look, where meta text and icons
+   turn default. */
 .blockr-menu__item,
 .dropdown-item.blockr-menu__item {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
-  min-height: 32px;
+  min-height: 34px;
   box-sizing: border-box;
-  padding: 6px 10px;
+  padding: 7px 10px;
   border: none;
-  border-radius: var(--blockr-radius-sm);
+  border-radius: var(--blockr-radius-md);
   background: transparent;
   color: var(--blockr-color-text-default);
   font: inherit;
@@ -66,9 +68,27 @@
   background: var(--blockr-color-bg-hover);
 }
 
-.blockr-menu__item--danger,
-.blockr-menu__item--danger .blockr-menu__icon {
+/* A destructive row is plain at rest and red only under the pointer, so the
+   menu does not shout about deleting every time it opens. */
+.blockr-menu__item--danger:hover,
+.blockr-menu__item--danger.blockr-menu__item--active {
+  background: var(--blockr-color-bg-danger);
   color: var(--blockr-color-text-danger);
+}
+
+.blockr-menu__item.blockr-menu__item--quiet {
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-menu__item.blockr-menu__item--quiet:hover,
+.blockr-menu__item.blockr-menu__item--quiet.blockr-menu__item--active {
+  color: var(--blockr-color-text-default);
+}
+
+.blockr-menu__check {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--blockr-color-text-accent);
 }
 
 .blockr-menu__item[aria-disabled="true"] {
@@ -102,6 +122,11 @@
   color: var(--blockr-color-text-danger);
 }
 
+/* A small space between groups; `.blockr-menu__divider` is the rule. */
+.blockr-menu__gap {
+  height: 6px;
+}
+
 .blockr-menu__label {
   flex: 1 1 auto;
   min-width: 0;
@@ -123,12 +148,12 @@
 /* A rule between groups without a title, edge to edge. */
 .blockr-menu__divider {
   height: 1px;
-  margin: 4px -4px;
+  margin: 5px -6px;
   background: var(--blockr-color-border-default);
 }
 
 .blockr-menu .dropdown-divider {
-  margin: 4px -4px;
+  margin: 5px -6px;
   border-top-color: var(--blockr-color-border-default);
   opacity: 1;
 }

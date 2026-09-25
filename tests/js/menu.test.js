@@ -133,3 +133,25 @@ test('opening a second menu closes the first', (newWindow) => {
   assert.strictEqual(open[0].textContent, 'B');
   win.close();
 });
+
+test('a gap separates groups, the current item carries a check, quiet rows are marked', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, {
+    items: [
+      { label: 'Overview', current: true },
+      { label: 'Labs' },
+      { gap: true },
+      { label: 'Manage pages', quiet: true, icon: 'sliders' }
+    ]
+  });
+  const p = panel(win);
+  assert.ok(p.querySelector('.blockr-menu__gap'), 'gap drawn');
+  const rows = p.querySelectorAll('.blockr-menu__item');
+  assert.ok(rows[0].querySelector('.blockr-menu__check'), 'check on the current item');
+  assert.ok(!rows[1].querySelector('.blockr-menu__check'));
+  assert.ok(!rows[1].querySelector('.blockr-menu__icon'), 'no icon unless given');
+  assert.ok(rows[2].classList.contains('blockr-menu__item--quiet'));
+  assert.ok(rows[2].querySelector('.blockr-menu__icon svg'), 'icon by name from Blockr.icons');
+  win.close();
+});

@@ -204,6 +204,26 @@ Blockr.icons = {
     '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" ' +
     'viewBox="0 0 16 16"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 ' +
     '0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/></svg>',
+  // Menu icons, drawn at 1.25 stroke so the few rows that carry one read as
+  // one set: the bin of a destructive row, the sliders of a row that opens a
+  // mode ("Manage pages").
+  trash:
+    '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M2.5 4.5h11M6.5 4.5V3h3v1.5M4 4.5l.7 9h6.6l.7-9"></path></svg>',
+  sliders:
+    '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.25" stroke-linecap="round">' +
+    '<path d="M2 4h12M2 8h12M2 12h12"></path>' +
+    '<circle cx="5" cy="4" r="1.6" fill="var(--blockr-color-bg-raised)"></circle>' +
+    '<circle cx="10" cy="8" r="1.6" fill="var(--blockr-color-bg-raised)"></circle>' +
+    '<circle cx="6" cy="12" r="1.6" fill="var(--blockr-color-bg-raised)"></circle></svg>',
+  // The current item's mark in a menu: a thin check, like the other small
+  // icons.
+  check:
+    '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M3.5 8.5l3 3 6-7"></path></svg>',
   confirm:
     '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" ' +
     'viewBox="0 0 16 16"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 ' +
@@ -504,14 +524,23 @@ Blockr.tooltip = (() => {
  * Blockr.menu(anchor, config) opens a menu under `anchor` and returns
  * `{ el, close }`. `config.items` is a list of entries:
  *
- *   { label, icon?, meta?, mono?, current?, danger?, disabled?, reason?,
- *     onSelect? }            a row; `icon` is an SVG/HTML string, `meta` grey
- *                            text after the label (`mono` sets it in the code
- *                            face), `current` the item in use (weight 600),
- *                            `danger` a destructive action, `reason` the
- *                            tooltip on a disabled row
- *   { divider: true }        a rule between groups without a title
+ *   { label, icon?, meta?, mono?, current?, danger?, quiet?, disabled?,
+ *     reason?, onSelect? }   a row; `meta` is grey text after the label
+ *                            (`mono` sets it in the code face), `current` the
+ *                            item in use (weight 600 and a check), `danger` a
+ *                            destructive action (red only under the pointer),
+ *                            `quiet` a muted row such as "Manage pages",
+ *                            `reason` the tooltip on a disabled row
+ *   { gap: true }            a small space between groups
+ *   { divider: true }        a rule between groups
  *   { title }                a group title
+ *
+ * Rows have no icon unless `icon` is given, either the name of one of
+ * Blockr.icons ('trash', 'sliders') or an SVG/HTML string, and only a
+ * row that is more than a plain action gets one: it opens a mode or another
+ * surface, or it destroys something. Such a row sits in a group of its own,
+ * after a gap or a divider, so a label with an icon never sits right under
+ * one without.
  *
  * `config.head` ({ title, badge?, text? }) puts a block of text above the
  * rows, as the "…" menu's name, package and description. `align` is 'start'
@@ -569,6 +598,13 @@ Blockr.menu = (() => {
     /** @type {{ row: HTMLButtonElement, item: BlockrMenuItem }[]} */
     const rows = [];
     for (const entry of config.items || []) {
+      if ('gap' in entry) {
+        const gap = document.createElement('div');
+        gap.className = 'blockr-menu__gap';
+        gap.setAttribute('role', 'separator');
+        panel.appendChild(gap);
+        continue;
+      }
       if ('divider' in entry) {
         const hr = document.createElement('div');
         hr.className = 'blockr-menu__divider';
@@ -589,7 +625,8 @@ Blockr.menu = (() => {
       row.tabIndex = -1;
       row.className = 'blockr-menu__item' +
         (item.current ? ' blockr-menu__item--current' : '') +
-        (item.danger ? ' blockr-menu__item--danger' : '');
+        (item.danger ? ' blockr-menu__item--danger' : '') +
+        (item.quiet ? ' blockr-menu__item--quiet' : '');
       row.setAttribute('role', 'menuitem');
       if (item.disabled) {
         row.setAttribute('aria-disabled', 'true');
@@ -598,13 +635,20 @@ Blockr.menu = (() => {
       if (item.icon) {
         const ic = document.createElement('span');
         ic.className = 'blockr-menu__icon';
-        ic.innerHTML = item.icon;
+        ic.innerHTML = Object.prototype.hasOwnProperty.call(Blockr.icons, item.icon)
+          ? Blockr.icons[item.icon] : item.icon;
         row.appendChild(ic);
       }
       const label = document.createElement('span');
       label.className = 'blockr-menu__label';
       label.textContent = item.label;
       row.appendChild(label);
+      if (item.current) {
+        const check = document.createElement('span');
+        check.className = 'blockr-menu__check';
+        check.innerHTML = Blockr.icons.check;
+        row.appendChild(check);
+      }
       if (item.meta) {
         const meta = document.createElement('span');
         meta.className = 'blockr-menu__meta' + (item.mono ? ' blockr-menu__meta--mono' : '');
