@@ -246,7 +246,8 @@ interface BlockrNamespace {
     opts?: { size?: 'xs'; label?: string }
   ): BlockrSegmentedHandle;
   /** The gear tray behaviour (blockr-ui.js): the gear toggles the band,
-   *  which slides open and closed; Escape inside the band closes it. */
+   *  which slides open and closed; Escape inside the band or on the gear
+   *  closes it. */
   gearTray(
     band: HTMLElement,
     gear: HTMLButtonElement,

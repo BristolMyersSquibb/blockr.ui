@@ -290,7 +290,14 @@ Blockr.textCommit = (input, opts) => {
   input.addEventListener('input', syncChip);
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); commit(); }
-    else if (e.key === 'Escape') { input.value = committed; syncChip(); }
+    else if (e.key === 'Escape' && input.value !== committed) {
+      // A dirty field owns this Escape: it reverts and the key goes no
+      // further, so the gear tray the field sits in stays open. A clean
+      // field lets it through to whatever closes on Escape.
+      e.stopPropagation();
+      input.value = committed;
+      syncChip();
+    }
   });
   input.addEventListener('blur', commit);
   // Keep focus on the input so the chip click doesn't race blur-commit.
@@ -354,8 +361,8 @@ Blockr.textCommit = (input, opts) => {
   /**
    * The gear tray (design system, "The gear tray"): the gear toggles the band
    * in flow under the header row. It slides open and closed over 0.22s, so
-   * the content below is seen moving; Escape inside it closes it and returns
-   * focus to the gear. The gear carries the tooltip "Settings", reports its
+   * the content below is seen moving; Escape inside it, or on the gear,
+   * closes it and returns focus to the gear. The gear carries the tooltip "Settings", reports its
    * state in aria-expanded and takes the accent tint while open
    * (.blockr-gear-active).
    * @param {HTMLElement} band
@@ -409,13 +416,18 @@ Blockr.textCommit = (input, opts) => {
     }
 
     gear.addEventListener('click', function () { set(!open); });
-    band.addEventListener('keydown', function (e) {
+    /** @param {KeyboardEvent} e */
+    function onEscape(e) {
       if (e.key === 'Escape' && open) {
         e.stopPropagation();
         set(false);
         gear.focus();
       }
-    });
+    }
+    band.addEventListener('keydown', onEscape);
+    // After a click on the gear, focus is on the gear, not in the band; the
+    // spec says Escape closes the tray, so listen there too.
+    gear.addEventListener('keydown', onEscape);
 
     return {
       set: set,
