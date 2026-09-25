@@ -94,11 +94,15 @@ Blockr.onDocClick = (el, cb) => {
  * flow, the panel has to be told where the anchor is: `gap` px under it,
  * flipped above when there is no room below and there is room above.
  *
- * `width: 'anchor'` (the default) spans the anchor's width, which is what a
- * dropdown under its control does. `width: { min, max }` lets the panel size
- * to its own content within those bounds and pulls it back inside the
- * viewport by `margin`, which is what a menu under a word needs: a word is
- * not a control, and lining up with it would run a menu off the right edge.
+ * `width: 'anchor'` (the default) spans the anchor's width, at least
+ * `minWidth`, which is what a dropdown under its control does. `width:
+ * { min, max }` lets the panel size to its own content within those bounds,
+ * which is what a menu under a word needs: a word is not a control. Either
+ * way the panel stays `margin` px inside the viewport horizontally.
+ *
+ * `align: 'start'` (the default) lines the panel up with the anchor's left
+ * edge; `'end'` with its right edge, for a trigger in the header row, where
+ * a menu opening to the right would leave the block.
  *
  * The panel follows scroll (capture phase, so an ancestor scrolling counts),
  * window resize, and size changes of the anchor and of the panel itself
@@ -109,8 +113,7 @@ Blockr.onDocClick = (el, cb) => {
  *
  * @param {HTMLElement} panel
  * @param {HTMLElement} anchor
- * @param {{ width?: 'anchor' | { min: number, max: number }, gap?: number,
- *           margin?: number, onFlip?: (above: boolean) => void }} [opts]
+ * @param {BlockrPlaceOptions} [opts]
  * @returns {BlockrPlaceHandle}
  */
 Blockr.place = (panel, anchor, opts) => {
@@ -118,6 +121,8 @@ Blockr.place = (panel, anchor, opts) => {
   const gap = o.gap == null ? 4 : o.gap;
   const margin = o.margin == null ? 8 : o.margin;
   const width = o.width || 'anchor';
+  const minWidth = o.minWidth || 0;
+  const align = o.align || 'start';
 
   const update = () => {
     const r = anchor.getBoundingClientRect();
@@ -132,17 +137,19 @@ Blockr.place = (panel, anchor, opts) => {
     // A stylesheet may pin `right` for the in-flow case; on a fixed box that
     // would stretch it to the window edge.
     panel.style.right = 'auto';
+    let w;
     if (width === 'anchor') {
-      panel.style.width = r.width + 'px';
-      panel.style.left = r.left + 'px';
+      w = Math.max(r.width, minWidth);
+      panel.style.width = w + 'px';
     } else {
       panel.style.width = '';
       panel.style.minWidth = width.min + 'px';
       panel.style.maxWidth = width.max + 'px';
-      const w = panel.offsetWidth || width.min;
-      panel.style.left = Math.max(margin, Math.min(r.left,
-        document.documentElement.clientWidth - w - margin)) + 'px';
+      w = panel.offsetWidth || width.min;
     }
+    const left = align === 'end' ? r.right - w : r.left;
+    panel.style.left = Math.max(margin, Math.min(left,
+      document.documentElement.clientWidth - w - margin)) + 'px';
     panel.style.top = (above ? r.top - h - gap : r.bottom + gap) + 'px';
     if (o.onFlip) o.onFlip(above);
   };

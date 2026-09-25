@@ -350,6 +350,19 @@
   padding: 4px;
 }
 
+/* The menu's head: title, tags and filter box in one element that stays put
+   while the rows scroll under it. It starts at the panel's top edge (the
+   negative margin swallows the panel's 4px padding, the padding puts it
+   back inside) so nothing shows between it and the border while stuck. */
+.blockr-select__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin-top: -4px;
+  padding-top: 4px;
+  background: var(--blockr-color-bg-raised);
+}
+
 /* The role this menu sets. The word that was clicked says which VALUE is in
    the slot, never which setting it fills, so the panel has to. */
 .blockr-select__menu-title {

@@ -190,9 +190,16 @@ interface BlockrPlaceHandle {
 interface BlockrPlaceOptions {
   /** Span the anchor (default), or size to content within bounds. */
   width?: 'anchor' | { min: number; max: number };
+  /** With `width: 'anchor'`: never narrower than this (default 0). */
+  minWidth?: number;
+  /**
+   * Line up with the anchor's left edge (default) or its right edge, for a
+   * trigger in the header row.
+   */
+  align?: 'start' | 'end';
   /** Pixels between anchor and panel (default 4). */
   gap?: number;
-  /** Distance kept from the viewport edges (default 8). */
+  /** Distance kept from the viewport edges, both ways (default 8). */
   margin?: number;
   /** Called on every placement with whether the panel sits above the anchor. */
   onFlip?: (above: boolean) => void;

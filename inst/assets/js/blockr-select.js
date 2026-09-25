@@ -261,7 +261,11 @@
     // the user is typing into.
     const headEnd = document.createComment('rows');
     if (headless) {
-      if (config.title) list.appendChild(div('blockr-select__menu-title', config.title));
+      // One sticky element holds the title, the tags and the filter box, so
+      // a long list scrolls under all three (design system, Menus). Three
+      // separately sticky elements would pile up at the top edge instead.
+      const head = div('blockr-select__head');
+      if (config.title) head.appendChild(div('blockr-select__menu-title', config.title));
       // A multi menu carries its picks in the panel's own head, above the
       // filter box, where the control has them relative to the list. The
       // class goes on the tags element, not on an ancestor: the panel is
@@ -269,14 +273,15 @@
       // stop matching the moment the panel is on screen.
       if (multi) {
         tagsEl.classList.add('blockr-select__tags--menu');
-        list.appendChild(tagsEl);
+        head.appendChild(tagsEl);
       }
       // Always mounted, because focus is what makes the arrows, Enter and
       // type-ahead work; shown only once the list is long enough to need
       // filtering (render() decides).
       input.classList.add('blockr-select__search--menu');
       input.setAttribute('placeholder', config.searchPlaceholder || 'Filter');
-      list.appendChild(input);
+      head.appendChild(input);
+      list.appendChild(head);
     }
     list.appendChild(headEnd);
 
@@ -519,8 +524,11 @@
       if (list.parentElement !== document.body) document.body.appendChild(list);
       render();
       placed = Blockr.place(list, anchor || root, {
-        // A word is not a control: the menu sizes to its own content.
-        width: headless ? { min: 190, max: 320 } : 'anchor',
+        // A field dropdown is the control's width, at least 190px; a word
+        // is not a control, so its menu sizes to its own content within
+        // 180 to 320px (design system, Menus).
+        width: headless ? { min: 180, max: 320 } : 'anchor',
+        minWidth: 190,
         onFlip: (above) => root.classList.toggle('blockr-select--above', above)
       });
       syncDocClick();

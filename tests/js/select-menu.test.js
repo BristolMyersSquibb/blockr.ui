@@ -78,6 +78,28 @@ test('the option leads with the half the sentence printed', (newWindow) => {
   byLabel.close();
 });
 
+test('title, tags and filter box share one head, in that order, before the rows', (newWindow) => {
+  const win = newWindow();
+  const many = Array.from({ length: 12 }, (_, i) => `COL${i}`);
+  const m = win.Blockr.Select.menu(anchorIn(win), {
+    mode: 'multi', title: 'Rows', options: many, selected: ['COL1']
+  });
+  const head = dropdown(win).querySelector('.blockr-select__head');
+  assert.ok(head, 'one element to make sticky');
+  assert.strictEqual(head.parentElement, dropdown(win));
+  assert.deepStrictEqual(
+    [...head.children].map((c) => c.className.split(' ')[0]),
+    ['blockr-select__menu-title', 'blockr-select__tags', 'blockr-select__search']
+  );
+  // The rows come after the head, never inside it: a re-render rebuilds only
+  // what follows, so the box being typed into is never touched.
+  const first = dropdown(win).querySelector('.blockr-select__option');
+  assert.ok(head.compareDocumentPosition(first) & win.Node.DOCUMENT_POSITION_FOLLOWING);
+  assert.ok(!head.contains(first));
+  m.close();
+  win.close();
+});
+
 test('the current option is marked, the same way every select marks it', (newWindow) => {
   const win = newWindow();
   const m = win.Blockr.Select.menu(anchorIn(win), { options: COLS, selected: 'CHG' });
@@ -116,7 +138,7 @@ test('typing filters without losing the input', (newWindow) => {
   // COL1, COL10, COL11 -- and the input is still in the panel, which is what
   // clearing only the options below the head buys.
   assert.deepStrictEqual(optionTexts(win), ['COL1', 'COL10', 'COL11']);
-  assert.strictEqual(input.parentElement, dropdown(win));
+  assert.ok(dropdown(win).contains(input));
   m.close();
   win.close();
 });
@@ -195,10 +217,7 @@ test('a multi menu carries its picks in the panel head', (newWindow) => {
   // One box: the tags are inside the panel, not in a control beside it.
   assert.strictEqual(win.document.querySelectorAll('.blockr-select__control').length, 0);
   assert.deepStrictEqual(tagValues(win), ['AESOC', 'AEDECOD']);
-  assert.strictEqual(
-    win.document.querySelector('.blockr-select__tags').parentElement,
-    dropdown(win)
-  );
+  assert.ok(dropdown(win).contains(win.document.querySelector('.blockr-select__tags')));
   // And the list offers only what is not picked.
   assert.deepStrictEqual(optionTexts(win), ['AETOXGR']);
   m.close();
@@ -262,7 +281,7 @@ test('the filter prompt survives a pick', (newWindow) => {
   // renderTags() writes the CONTROL's placeholder; in a menu that would wipe
   // the caller's prompt the moment the first tag appears.
   assert.strictEqual(input.getAttribute('placeholder'), 'Filter columns');
-  assert.strictEqual(input.parentElement, dropdown(win), 'and it stays in the head');
+  assert.ok(dropdown(win).contains(input), 'and it stays in the head');
   m.close();
   win.close();
 });
