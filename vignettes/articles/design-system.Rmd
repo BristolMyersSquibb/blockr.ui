@@ -524,7 +524,9 @@ selected row, the active group's front tab.
 - Numbers use the same field. The input keeps `type=number` for the keyboard,
   hides the spinner arrows, and commits like text; arrow keys still step. A
   Bootstrap override brings Shiny's `numericInput` to the same look.
-- dplyr's 30px inputs move to the 42px field.
+- dplyr's 30px inputs move to the 42px field when they stand on their own.
+  Inside a row, a number or text input has no frame of its own: the 42px row
+  is its field, as it is for a Select in a row.
 
 ### Select
 
@@ -653,7 +655,9 @@ There is no solid accent button. Bootstrap's `btn-primary`, `btn-danger` and
 | xs | 26px | 12px | 9px | 4px | a header strip, next to the gear |
 
 The crossfilter reset, the patient-profile drill reset and dplyr's Enter
-button are instances of the main style and take these numbers.
+button are instances of the main style. The two resets take these sizes;
+the Enter button keeps the field's 24px (see [Text and number
+fields](#text-and-number-fields)), since it sits inside a 42px field.
 
 ### Icon buttons (tools)
 
@@ -754,6 +758,8 @@ there is no room below, follows scroll, stays 8px from the viewport edge.
 A menu lines up with the trigger's left edge, or its right edge when the
 trigger is in the header row. Height up to 320px, then the list scrolls under
 its sticky titles and filter box. A filter box (30px) appears above 8 options.
+It is part of the menu, not a field: 13px, and no focus ring, since it holds
+focus the whole time the menu is open.
 A `Select.menu` names the role it sets in its title, because the word that
 opened it names only the value.
 
@@ -788,8 +794,12 @@ Escape hides it.
 - No native `title` tooltips remain.
 - It matches the chart's data tooltip (see [Special blocks](#special)), so
   blockr has one floating style.
-- It shows after the pointer rests 800ms, above the element; it flips below
+- It shows after the pointer rests 300ms, and at once on keyboard focus or
+  while warm (within 400ms of another card leaving, so moving along a row of
+  icons does not wait at each one). It sits above the element and flips below
   only where there is no room above.
+- `Blockr.tooltip` (blockr-ui.js) draws it; controls set it in place of
+  `title`.
 
 ### Picking a block
 
@@ -910,7 +920,12 @@ names, an exhibit in labels.
 
 - No label, or a label equal to the name: the name alone. Never "unset",
   never the name twice.
-- A tooltip that shows both reads `AGE · Age`.
+- A menu opened from a word that prints labels (a slot in a chart's title or
+  subtitle, "Colour by Actual Treatment") leads with the label and mutes the
+  name, so the row reads like the word that was clicked (Select's
+  `labelFirst`). The word belongs to the exhibit, which speaks in labels.
+- A tooltip that shows both has the name, then the label muted, like the
+  control. The "+N" chip's lists the hidden tags that way, one per line.
 - An aggregate reads "Mean of Age", on a chart, in a table and in a rank
   table header.
 - Code and decode pairs (PARAMCD and PARAM) follow the same rule: where one is

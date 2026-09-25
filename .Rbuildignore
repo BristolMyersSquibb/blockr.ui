@@ -12,3 +12,6 @@
 ^\.Rproj\.user$
 ^\.lintr$
 ^vignettes/articles$
+^tsconfig\.json$
+^node_modules$
+^package(-lock)?\.json$
