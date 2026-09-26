@@ -766,6 +766,9 @@ Every menu, dropdown and list that floats uses one surface:
 | menu from a button, an icon or a word | 34px | 6px |
 - The dock "…" menu, the download menus, the add menu and the @ menu move to
   it. The beak belongs to the gear tray only.
+- A menu of actions (downloads, the "…" menu) is `action_menu()`: its rows
+  run once and close it, and nothing is remembered. A menu that sets a value
+  is `Blockr.Select.menu()`. The two share the surface and the placement.
 
 **Row states.**
 
@@ -1131,7 +1134,8 @@ blockr.ui owns the tokens (`inst/assets/css/blockr-tokens.css`,
 from blockr.extra), `Blockr.Select` and its placement routine,
 `Blockr.checkbox`, the badge, tag, pill and count classes, the slot and offer
 rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
-`crossfilter-block.css`), the gear button, the chevron (`Blockr.icons.chevron`), and the column-label reader. blockr.dock owns the dock
+`crossfilter-block.css`), the gear button, the tool button and the action
+menu (`tool_button()`, `action_menu()`), the chevron (`Blockr.icons.chevron`), and the column-label reader. blockr.dock owns the dock
 header, the "…" menu, the block status dot, the category colours
 (`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
 rule that hides the gear in simplified mode. blockr.theme owns data colours.
