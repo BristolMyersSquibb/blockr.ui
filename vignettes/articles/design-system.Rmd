@@ -1033,6 +1033,20 @@ names, an exhibit in labels.
   never a banner.
 - Syntax and validation text: `text-danger`.
 - Empty and loading states in lists: centred, italic, `text-muted`.
+- A panel or block with nothing to draw says so in one line of italic
+  `text-muted`, 13px, where the content would be and left-aligned with it
+  (`.blockr-empty`, `--panel` or `--block` for the padding). The italic marks
+  the line as standing in for content. No icon, no second line. A link in it
+  is a [slot](#the-sentence-and-its-slots) and stays upright. There are two
+  kinds, and the words differ:
+  - **Waiting:** a choice is missing (no patient picked, a required input
+    unset). Say what is missing; when the place to choose it is in the
+    block, a slot takes you there: "No patient selected. Search for one".
+  - **Empty:** the answer is none (no records in the window, a filter that
+    keeps no rows). Say what was looked for and where, so the reader can
+    tell none from broken: "No medication records between D-30 and D189".
+  A panel keeps its title and sentence above the line; the panel does not
+  change size to hold it.
 - A block-level error or warning (a failed expression, dropped rows) uses the
   message style, above the output: `text-<status>` on `bg-<status>` with a
   `border-<status>-subtle` edge, 13px, radius 6. Danger for errors, the amber set for

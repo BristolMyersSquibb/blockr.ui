@@ -812,3 +812,30 @@
   outline: var(--blockr-focus-outline);
   outline-offset: var(--blockr-focus-offset);
 }
+
+/* --- Empty state (design system, "Messages") ---
+   What a panel or a whole block says when it has nothing to draw: one line
+   of italic muted text where the content would be, left-aligned with it.
+   The italic is what marks it as standing in for content; a regular grey
+   line reads as a stray sentence. The text is the caller's; a link in it is
+   a .blockr-slot and stays upright. A list or menu row has its own
+   (.blockr-select__empty), the same look centred. */
+.blockr-empty {
+  margin: 0;
+  font-size: var(--blockr-font-size-sm);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-empty .blockr-slot {
+  font-style: normal;
+}
+
+.blockr-empty--panel {
+  padding: 18px 0 14px;
+}
+
+.blockr-empty--block {
+  padding: 28px 0 32px;
+}
