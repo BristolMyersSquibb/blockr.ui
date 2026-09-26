@@ -177,3 +177,13 @@ test('a block removed while its menu is open takes the menu with it', async (new
   assert.strictEqual(win.Blockr.actionMenu.current(), null);
   win.close();
 });
+
+test('a row the page has hidden is skipped by the keyboard', (newWindow) => {
+  const win = newWindow();
+  const { trigger, panel } = build(win);
+  panel.querySelector('#html').hidden = true;
+  click(win, trigger, 0);
+  key(win, win.document.activeElement, 'ArrowDown');
+  assert.strictEqual(win.document.activeElement.id, 'rm');
+  win.close();
+});

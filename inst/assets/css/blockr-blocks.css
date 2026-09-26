@@ -552,7 +552,9 @@
   outline: none;
 }
 
-.blockr-menu[hidden] {
+.blockr-menu[hidden],
+.blockr-menu > [hidden],
+.blockr-action-menu[hidden] {
   display: none;
 }
 
