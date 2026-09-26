@@ -811,7 +811,7 @@ opened it names only the value.
 
 **Content.** Long lists render up to 200 options and end with a count row that
 asks you to type; server-searched lists say how many values there are. Empty
-and loading rows are centred, `text-muted` ("No matches", "No
+and loading rows are centred, italic, `text-muted` ("No matches", "No
 options", "Loading…").
 
 **Behaviour.** Arrows move, Enter picks, typing filters. Escape closes and
@@ -989,15 +989,16 @@ names, an exhibit in labels.
 - Required and empty: the amber cue on the field ([Controls](#controls)),
   never a banner.
 - Syntax and validation text: `text-danger`.
-- Empty and loading states in lists: centred, `text-muted`.
-- A panel or block with nothing to draw says so in one line of `text-muted`,
-  13px, where the content would be and left-aligned with it
-  (`.blockr-empty`, `--panel` or `--block` for the padding). No icon, no
-  second line, no italic. There are two kinds, and the words differ:
+- Empty and loading states in lists: centred, italic, `text-muted`.
+- A panel or block with nothing to draw says so in one line of italic
+  `text-muted`, 13px, where the content would be and left-aligned with it
+  (`.blockr-empty`, `--panel` or `--block` for the padding). The italic marks
+  the line as standing in for content. No icon, no second line. A link in it
+  is a [slot](#the-sentence-and-its-slots) and stays upright. There are two
+  kinds, and the words differ:
   - **Waiting:** a choice is missing (no patient picked, a required input
-    unset). Say what to pick. When the thing to pick is in the block, the
-    words that name it are a [slot](#the-sentence-and-its-slots) that opens
-    it: "Choose a patient".
+    unset). Say what is missing; when the place to choose it is in the
+    block, a slot takes you there: "No patient selected. Search for one".
   - **Empty:** the answer is none (no records in the window, a filter that
     keeps no rows). Say what was looked for and where, so the reader can
     tell none from broken: "No medication records between D-30 and D189".

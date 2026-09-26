@@ -512,5 +512,6 @@
 .blockr-select__empty {
   padding: 8px 10px;
   color: var(--blockr-color-text-muted);
+  font-style: italic;
   text-align: center;
 }
