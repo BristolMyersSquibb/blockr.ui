@@ -25,6 +25,14 @@
 }
 
 /* --- Typography --- */
+/* Grayscale antialiasing. macOS otherwise draws text with subpixel
+   antialiasing, which thickens and softens Open Sans; every design-system
+   mockup was drawn with this setting. No effect on Linux or Windows. */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   font-size: var(--blockr-font-size-base);
 }

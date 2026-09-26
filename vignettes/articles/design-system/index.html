@@ -316,13 +316,32 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .ctip .r b, .ctip-s .r b { margin-left: auto; font-weight: 500; font-variant-numeric: tabular-nums; }
 
 .tbl { width: 100%; border-collapse: collapse; font-size: var(--blockr-font-size-base); font-variant-numeric: tabular-nums; }
-.tbl th { text-align: left; padding: 4px 12px 6px; font-weight: 500; vertical-align: bottom; border-bottom: 1px solid var(--blockr-color-border-default); white-space: nowrap; }
-.tbl th .ty { display: block; font-size: var(--blockr-font-size-xs); font-weight: 400; color: var(--blockr-color-text-muted); }
-.tbl td { padding: 5px 12px; border-bottom: 1px solid var(--blockr-color-border-default); }
-.tbl tr:last-child td { border-bottom: 0; }
-.tbl .rn { width: 36px; padding-left: 0; text-align: right; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); }
-.tbl .na { color: var(--blockr-color-text-muted); }
-.tbl .r { text-align: right; }
+.tbl th { text-align: left; padding: 7px 12px; font-size: var(--blockr-font-size-sm); font-weight: 600; vertical-align: bottom; white-space: nowrap;
+  background-image: linear-gradient(var(--blockr-color-border-strong), var(--blockr-color-border-strong)); background-repeat: no-repeat;
+  background-size: calc(100% - 12px) 1px; background-position: left bottom; }
+.tbl th .ty { display: block; font-size: 11px; font-weight: 400; color: var(--blockr-color-text-muted); }
+.tbl th .lb { display: block; font-size: var(--blockr-font-size-xs); font-weight: 400; color: var(--blockr-color-text-muted); }
+.tbl th .bn { display: block; font-size: var(--blockr-font-size-xs); font-weight: 600; color: var(--blockr-color-text-muted); }
+.tbl td { padding: 5px 12px; line-height: 20px; }
+.tbl tbody tr:hover td { background: var(--blockr-color-bg-hover); }
+.tbl .rn { width: 44px; padding-left: 0; padding-right: 10px; text-align: right; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); background-image: none; }
+.tbl .na { color: var(--blockr-color-text-muted); font-size: var(--blockr-font-size-xs); }
+.tbl .r, .tbl.num th:not(.rn), .tbl.num td:not(.rn) { text-align: right; }
+.tbl th.r, .tbl.num th:not(.rn) { background-position: right bottom; }
+/* an output table: groups with the fold chevron in the gutter, space between groups */
+.xtbl td.st { padding-left: 33px; }
+.xtbl td.st.i1 { padding-left: 49px; }
+.xtbl tr.gh td { padding-top: 11px; font-weight: 600; }
+.xtbl tr.ge td { padding-bottom: 7px; }
+.xtbl tr.gh:first-child td { padding-top: 8px; }
+.xtbl .fg { display: inline-flex; align-items: center; justify-content: center; width: 12px; height: 20px; margin: 0 9px 0 -21px; padding: 0;
+  border: 0; background: none; color: var(--blockr-color-text-muted); cursor: pointer; vertical-align: top; }
+.xtbl .fg:hover { color: var(--blockr-color-text-default); }
+.xtbl .fg svg { transition: transform var(--blockr-transition); }
+.xtbl .shut .fg svg, .xtbl .fg.shut svg { transform: rotate(-90deg); }
+.xtbl th.stub { background-image: none; padding-left: 33px; font-weight: 400; }
+.xtbl td.on, .xtbl th.on, .xtbl th.on .bn { background-color: var(--blockr-color-bg-selected); color: var(--blockr-color-text-accent); }
+.xtbl td.on.x { background: var(--blockr-color-bg-accent-subtle-hover); font-weight: 600; }
 
 /* messages */
 .msg { display: flex; gap: 10px; align-items: flex-start; font-size: var(--blockr-font-size-sm); padding: 10px 12px; border-radius: var(--blockr-radius-md); border: 1px solid; }
@@ -759,7 +778,7 @@ with live words. Both keep the rest behind the gear, which opens the tray in flo
       </div></div>
     </div>
     <div class="out">
-      <table class="tbl">
+      <table class="tbl num">
         <thead><tr><th class="rn"></th><th>Ozone<span class="ty">int</span></th><th>Solar.R<span class="ty">int</span></th><th>Wind<span class="ty">dbl</span></th><th>Month<span class="ty">int</span></th></tr></thead>
         <tbody>
           <tr><td class="rn">1</td><td>71</td><td>291</td><td>13.8</td><td>6</td></tr>
@@ -1552,6 +1571,33 @@ the section-title style. Exports (PNG, pptx) take the light values.</p>
   <div class="o-foot"><span>62 of 153 rows</span></div>
 </div></div>
 
+
+<h3 class="sh" id="tables">Tables</h3>
+<p class="note">One style for the preview (above, in the transform block) and every output table. 30px rows, no rules in the body, a rule
+under each column header with a 12px gap, names 13px 600, the second header line 12px muted (a label; the Big N at 600). Numbers and
+their headers right-aligned, a spanner centred. Groups carry the fold chevron in the gutter and are set apart by space instead of a rule. The
+chevron top left folds or opens every group; a first-column title stays the producer's text beside it. Hover a row; the Mean cell under
+High dose shows a drilled cell (row and column tinted, the crossing a step stronger).</p>
+<div class="dock" style="max-width:760px"><div class="face">
+  <div class="hd"><div class="tt"><p class="o-title">Demographics</p><p class="o-sub">Summary of <button class="slot" data-menu="m-cols" data-value="AGE">AGE, SEX</button> by <button class="slot" data-menu="m-cols" data-value="ARM">ARM</button></p></div>
+    <button class="tool" data-tip="Search" aria-label="Search"><svg width="14" height="14"><use href="#i-search"/></svg></button>
+    <button class="tool" data-tip="Download" aria-label="Download"><svg width="14" height="14"><use href="#i-dl"/></svg></button></div>
+  <table class="tbl xtbl" style="margin-top:12px" id="xtbl">
+    <thead><tr><th class="stub"><button class="fg" data-tip="Collapse all groups" aria-label="Collapse all groups" data-foldall><svg width="12" height="12"><use href="#i-chev"/></svg></button>Characteristic</th>
+      <th class="r">Placebo<span class="bn">N = 86</span></th><th class="r">Low dose<span class="bn">N = 84</span></th><th class="r on">High dose<span class="bn">N = 84</span></th></tr></thead>
+    <tbody>
+      <tr class="gh"><td class="st"><button class="fg" aria-label="Fold Age (years)"><svg width="12" height="12"><use href="#i-chev"/></svg></button>Age (years)</td><td></td><td></td><td></td></tr>
+      <tr><td class="st on">Mean</td><td class="r on">75.2</td><td class="r on">75.7</td><td class="r on x">74.4</td></tr>
+      <tr><td class="st">SD</td><td class="r">8.6</td><td class="r">8.3</td><td class="r on">7.9</td></tr>
+      <tr class="ge"><td class="st">Min, Max</td><td class="r">52.0, 89.0</td><td class="r">51.0, 88.0</td><td class="r on">56.0, 88.0</td></tr>
+      <tr class="gh"><td class="st"><button class="fg" aria-label="Fold Sex"><svg width="12" height="12"><use href="#i-chev"/></svg></button>Sex</td><td></td><td></td><td></td></tr>
+      <tr><td class="st">F</td><td class="r">53 (61.6%)</td><td class="r">50 (59.5%)</td><td class="r on">40 (47.6%)</td></tr>
+      <tr><td class="st">M</td><td class="r">33 (38.4%)</td><td class="r">34 (40.5%)</td><td class="r on">44 (52.4%)</td></tr>
+    </tbody>
+  </table>
+  <div class="o-foot"><span>254 subjects</span></div>
+</div></div>
+
 <h3 class="sh" id="crossfilter">Crossfilter</h3>
 <p class="note">The standard header row, with Reset above every filter it clears. "Group by" labels a field; "Filter by" titles
 a section. Inside a card: search 30px, 26px icons always shown, rows 30px, a 200px scroll area (about six rows). The bars are
@@ -2116,6 +2162,23 @@ document.getElementById('xf-days').innerHTML = Array.from({ length: 31 }, (_, i)
   const dark = stored === 'dark' ||
     (stored !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
   if (dark) document.querySelector('#scheme button[data-scheme="dark"]').click();
+})();
+
+// Tables: fold a group, or all of them from the top-left chevron.
+(() => {
+  const t = document.getElementById('xtbl'); if (!t) return;
+  const heads = () => [...t.querySelectorAll('tr.gh')];
+  const setG = (tr, shut) => { tr.classList.toggle('shut', shut);
+    for (let n = tr.nextElementSibling; n && !n.classList.contains('gh'); n = n.nextElementSibling) n.style.display = shut ? 'none' : ''; };
+  const sync = () => { const open = heads().every(h => !h.classList.contains('shut')); const b = t.querySelector('[data-foldall]');
+    b.classList.toggle('shut', !open); b.dataset.tip = open ? 'Collapse all groups' : 'Expand all groups'; };
+  t.addEventListener('click', e => {
+    const b = e.target.closest('.fg'); if (!b) return;
+    if (b.hasAttribute('data-foldall')) { const open = heads().every(h => !h.classList.contains('shut')); heads().forEach(h => setG(h, open)); }
+    else { const tr = b.closest('tr'), shut = !tr.classList.contains('shut');
+      if (e.altKey) heads().forEach(h => setG(h, shut)); else setG(tr, shut); }
+    sync();
+  });
 })();
 </script>
 </body>

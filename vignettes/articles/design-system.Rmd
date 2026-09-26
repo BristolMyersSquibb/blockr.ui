@@ -210,6 +210,11 @@ The body face is Open Sans, as bslib's Shiny preset ships it, set in one place:
 `--bs-body-font-family`. There is no `--blockr-font-sans`. The chart canvas
 takes its face from the body.
 
+Text is drawn with grayscale antialiasing (`-webkit-font-smoothing:
+antialiased`, `-moz-osx-font-smoothing: grayscale`), set once on `html` in the
+theme layer. macOS otherwise uses subpixel antialiasing, which draws Open Sans
+heavier and softer than the design; Linux and Windows are unaffected.
+
 | Token | Size | Use |
 |---|---|---|
 | `--blockr-font-size-xs` | 12px (0.75rem) | field labels, section titles, captions, status lines, tooltips, offers |
@@ -723,6 +728,13 @@ the tip, stroked at 1.4px with round caps and joins and no fill.
   a split button) points down and flips up (180°) while its menu is open.
 - A "go to" arrow (an options page, back, the next page of rows) points right
   or left and does not rotate.
+- A sort cue points up for ascending and down for descending, in
+  `text-accent` on the sorted column; a hollow dot above it means missing
+  values first. The sorted header names its sort in the light tooltip
+  ("Missing values first, then ascending"). An unsorted column shows the
+  ascending chevron in
+  `text-muted` on hover. It sits on the name's line: after the name, or before
+  it when the column is right-aligned, so the name stays over its numbers.
 - Every rotation uses `--blockr-transition`.
 - No other glyph does this job: no Bootstrap Icons chevrons, no Bootstrap's
   own select and accordion arrows, no border triangles, no ▾ ▸ ‹ ›
@@ -1060,6 +1072,53 @@ Drawn in the [design system page](design-system/index.html#labels).
   during a drag.
 - **Data colours:** blockr.theme palettes.
 
+### Tables
+
+One style for the table preview and for every output table (the table block
+and the composer table, which render annotated data frames).
+
+- **Rows:** 30px, 14px text on a 20px line with 5px above and below, 12px side
+  padding. No rules in the body; the hover wash (`bg-hover`) carries the eye
+  along a row.
+- **Header:** names 13px (`font-size-sm`), weight 600, `text-default`. A second
+  line, 12px `text-muted`, holds the column label (weight 400) in the preview
+  and the Big N (weight 600: bold, but lighter than the name) in an output
+  table. When some columns have a label, a column without one keeps the empty
+  line so every name sits level. The preview adds the type (`dbl`, 11px muted)
+  below.
+- **Header rules:** a 1px `border-strong` rule under each column header, 12px
+  short of the next column, instead of one rule across the header. None under
+  the row-label or row-number column.
+- **Alignment:** numbers right-aligned in tabular figures, with their header
+  right-aligned over them; text left. There is no centred option. A spanner is
+  centred over its columns. Exports (PPTX, XLSX, HTML) take the same alignment.
+- **Row labels** (the first column of an output table) in `text-default`.
+  Missing values in `text-muted`: `NA` at 12px in the preview, an em dash in a
+  summary table.
+- **Groups** (an output table's sections, and rows with deeper-indented
+  children): the heading at weight 600 with the fold chevron (see
+  [Chevrons](#actions)) in the gutter left of its text; each indent level adds
+  16px. Groups are set apart by space, not by a rule: a group's last row has
+  7px below it and the next heading 11px above.
+- **Fold all:** the chevron in the top-left header cell, in the same gutter as
+  the group chevrons. A first-column title (composer's `column_header_left`)
+  stays the producer's text, line breaks and weight included, beside it; only
+  the chevron is the button. Without a title it reads "All". It points down
+  while every group is open and right otherwise. Alt+click on a group heading
+  folds or opens every group. Exports never carry it.
+- **Hover and drill** (output tables with a drill): the hover previews what a
+  click claims. A column header lights its column, a row label its row, a
+  value the crossing (row and column at 3% of the text colour, the cell at 9%).
+  A drill takes the same shape in `bg-selected` with `text-accent`, with no
+  accent bars; the crossing cell takes `bg-accent-subtle-hover` at weight 600.
+- **Sorting:** the preview sorts on a header click, and the sorted header
+  shows the sort cue (see [Chevrons](#actions)) and carries `aria-sort`. An
+  output table of an annotated data frame does not sort: its row order is its
+  structure.
+- **Preview footer:** the row range (12px muted) left, the pager right as 26px
+  tools with the chevron pointing left and right, one `border-default` rule
+  above. Row numbers are a 44px right-aligned gutter, 12px muted.
+
 ### Crossfilter
 
 - **Header row:** the standard one. Row count, "Reset all" and the gear sit on
@@ -1213,8 +1272,7 @@ variables and reads the blockr tokens.
 
 ### Not specified yet
 
-Tables (header, row height, number alignment, selected row, sort cue),
-dialogs (surface, width, title, button order), dock tabs beyond their selected
+Dialogs (surface, width, title, button order), dock tabs beyond their selected
 state, the DAG view, notifications (Shiny's `showNotification`), and the icon
 set with its sizes (the chevron is specified under [Actions](#actions)).
 

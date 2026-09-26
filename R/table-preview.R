@@ -117,6 +117,19 @@ format_column_inner <- function(x, max_chars = 50) {
   }
 }
 
+#' The design system's chevron, pointing down; CSS turns it (design system,
+#' "Chevrons"). 12px, a 1.4px stroke that does not scale.
+#' @noRd
+chevron_svg <- function() {
+  shiny::HTML(paste0(
+    '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" ',
+    'stroke="currentColor" stroke-width="1.4" stroke-linecap="round" ',
+    'stroke-linejoin="round" aria-hidden="true">',
+    '<polyline points="3 4.5 6 7.5 9 4.5" vector-effect="non-scaling-stroke">',
+    '</polyline></svg>'
+  ))
+}
+
 #' Build the HTML table preview for one page
 #'
 #' Pure presentation: renders an already-materialized page of data as the
@@ -201,17 +214,22 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
             )
           )
         ),
-        table_preview_dep()
+        c(list(table_preview_dep()), table_preview_tooltip_dep())
       )
     )
   }
 
   col_names <- names(dat)
 
-  # Extract column labels (e.g. from ADaM datasets)
-  col_labels <- vapply(dat, function(x) {
-    lbl <- attr(x, "label")
-    if (is.null(lbl)) "" else lbl
+  # Column labels (e.g. from ADaM datasets). `exact = TRUE`: without it a
+  # column carrying haven value labels but no variable label returns those
+  # (`attr(x, "label")` partial-matches `labels`) and vapply() errors. A label
+  # equal to the column name adds nothing and is dropped.
+  col_labels <- vapply(seq_along(dat), function(j) {
+    lbl <- attr(dat[[j]], "label", exact = TRUE)
+    ok <- is.character(lbl) && length(lbl) == 1L && !is.na(lbl) &&
+      nzchar(lbl) && !identical(lbl, names(dat)[j])
+    if (ok) lbl else ""
   }, character(1))
   has_labels <- any(nzchar(col_labels))
 
@@ -285,35 +303,64 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
       sort_icon_class <- paste0(sort_icon_class, icon_class_suffix)
     }
 
+    # The label sits under the name and is cut by the layout (CSS ellipsis),
+    # with the whole label as its tooltip.
+    # A column without a label keeps an empty line when others have one, so
+    # every name sits level.
     label_tag <- if (has_labels && nzchar(col_labels[j])) {
-      is_truncated <- nchar(col_labels[j]) > 20
-      display_text <- if (is_truncated) {
-        paste0(substr(col_labels[j], 1, 18), "\u2026")
-      } else {
-        col_labels[j]
-      }
-      label_args <- list(
+      shiny::tags$span(
         class = "blockr-col-label",
-        display_text
+        title = col_labels[j],
+        col_labels[j]
       )
-      if (is_truncated) {
-        label_args[["title"]] <- col_labels[j]
-      }
-      do.call(shiny::tags$span, label_args)
+    } else if (has_labels) {
+      shiny::tags$span(
+        class = "blockr-col-label blockr-col-label--empty",
+        `aria-hidden` = "true",
+        shiny::HTML("&nbsp;")
+      )
     }
 
     th_style <- sprintf("width: %dpx;", col_widths_px[j])
+
+    # A numeric column's header follows its numbers to the right.
+    if (col_is_numeric[j]) header_class <- paste(header_class, "blockr-th-numeric")
+
+    # The sort cue (the chevron, up or down) sits on the name's line: after
+    # the name, or before it on a right-aligned numeric column so the name
+    # stays flush over its numbers. Hidden at rest on an unsorted column,
+    # shown muted on hover as what a click would do.
+    aria_sort <- if (!is.null(sort_col) && sort_col == col_name) {
+      switch(sort_dir, asc = , na = "ascending", desc = "descending", NULL)
+    }
+    # The sorted header says in words what the cue shows (the light tooltip,
+    # registered by blockr-table-preview.js): the dot for missing values
+    # first does not say "missing" by itself.
+    sort_tip <- if (!is.null(sort_col) && sort_col == col_name) {
+      switch(
+        sort_dir,
+        asc = "Sorted ascending, missing values last",
+        desc = "Sorted descending, missing values last",
+        na = "Missing values first, then ascending",
+        NULL
+      )
+    }
 
     header_cells[[j + 1L]] <- shiny::tags$th(
       class = header_class,
       style = th_style,
       `data-column` = col_name,
-      shiny::tags$span(class = "blockr-col-name", col_name),
+      `aria-sort` = aria_sort,
+      `data-sort-tip` = sort_tip,
+      shiny::tags$span(
+        class = "blockr-col-head",
+        shiny::tags$span(class = "blockr-col-name", col_name),
+        shiny::tags$span(class = sort_icon_class, `aria-hidden` = "true")
+      ),
       label_tag,
       shiny::tags$span(
         class = "blockr-type-row",
-        shiny::tags$span(class = "blockr-type-label", col_types[j]),
-        shiny::tags$span(class = sort_icon_class)
+        shiny::tags$span(class = "blockr-type-label", col_types[j])
       )
     )
   }
@@ -432,13 +479,15 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         class = paste0("blockr-nav-btn", if (page == 1L) " disabled"),
         disabled = if (page == 1L) "disabled" else NULL,
         `data-direction` = "prev",
-        shiny::HTML("&#x2039;")
+        `aria-label` = "Previous page",
+        chevron_svg()
       ),
       shiny::tags$button(
         class = paste0("blockr-nav-btn", if (next_disabled) " disabled"),
         disabled = if (next_disabled) "disabled" else NULL,
         `data-direction` = "next",
-        shiny::HTML("&#x203A;")
+        `aria-label` = "Next page",
+        chevron_svg()
       )
     )
   )
@@ -470,7 +519,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         footer
       )
     ),
-    table_preview_dep()
+    c(list(table_preview_dep()), table_preview_tooltip_dep())
   )
 }
 
@@ -494,6 +543,15 @@ table_preview_dep <- function() {
     stylesheet = "css/blockr-table-preview.css",
     script = "js/blockr-table-preview.js",
     all_files = FALSE
+  )
+}
+
+# The shared tooltip (Blockr.tooltip) and its card style, for the sorted
+# header's tooltip.
+table_preview_tooltip_dep <- function() {
+  list(
+    controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
+    controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css")
   )
 }
 
