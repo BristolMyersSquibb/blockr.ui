@@ -603,16 +603,13 @@ pick is readable without a click.
 ### A pill that opens a menu
 
 For four or more values inside a row: the filter operator, the join key
-operator, viz's `.dd-func-btn` (n, N, %, Σ).
+operator.
 
 - 24px inside a 42px row, radius 4, 1px `border-default`, `bg-surface`, 12px
   weight 500 `text-muted`, with the 10px chevron so it reads as a choice. Hover:
   `border-strong`, `text-default`.
 - A click opens `Blockr.Select.menu()` anchored on the pill, listing every
   value.
-- In a header row (the chart's n, N, %, Σ) the pill sits among the 26px tools
-  and its menu lines up with the pill's right edge (`align: 'end'`). The
-  menu's rows lead with the name, the pill's symbol muted after it.
 - The click-to-cycle pill is retired. Join type, outside a row, is a Select
   field in the grid.
 
