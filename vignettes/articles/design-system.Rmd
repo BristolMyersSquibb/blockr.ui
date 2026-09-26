@@ -220,12 +220,12 @@ heavier and softer than the design; Linux and Windows are unaffected.
 | `--blockr-font-size-xs` | 12px (0.75rem) | field labels, section titles, captions, status lines, tooltips, offers |
 | `--blockr-font-size-sm` | 13px (0.8125rem) | output subtitle and sentence, code, menu meta text, tags |
 | `--blockr-font-size-base` | 14px (0.875rem) | body, field values, menu rows, buttons at 42px |
-| `--blockr-font-size-lg` | 16px (1rem) | output title, the one heading on an output block |
+| `--blockr-font-size-lg` | 16px (1rem) | the block title, output title, the one heading on an output block |
 | `--blockr-font-size-xl` | 20px (1.25rem) | page titles outside the board |
 
 There is no `md` step. Two sizes sit off the scale on purpose: badges,
-counts and the block name in the dock header at 11px, and text on a chart
-canvas at `--blockr-mark-font-size` (11px).
+counts and the block name in the compact dock header at 11px, and text on a
+chart canvas at `--blockr-mark-font-size` (11px).
 
 | Weight token | Value | Use |
 |---|---|---|
@@ -309,13 +309,16 @@ Drawn in the [design system page](design-system/index.html#foundations).
 
 ### Anatomy, top to bottom
 
-1. **Dock header.** One eyebrow line over the block's content: the block's
-   mark (a 20px tinted square in its category colour, glyph 12px, carrying
-   the status dot), the block name at 11px, weight 600, uppercase, 0.06em tracking,
-   `text-muted`, on one line with an ellipsis, and on the right the "…" menu
-   (with a block's own control, such as the AI assistant, left of it). No
-   subtitle: the block type and package are the mark's tooltip ("filter
-   block · blockr.dplyr"). 6px below it the content starts.
+1. **Dock header.** One row: the block's mark (a 32px tinted square in its
+   category colour, carrying the status dot), the block title at 16px
+   (`font-size-lg`) weight 600 `text-default`, wrapping to a second line and
+   cut after it, and on the right the "…" menu (with a block's own control,
+   such as the AI assistant, left of it). No subtitle: the block type and
+   package are the mark's tooltip ("filter block · blockr.dplyr").
+   **Compact** (a board option, off by default) turns the row into an
+   eyebrow over the block's content: the mark at 20px (glyph 12px), the name
+   at 11px, weight 600, uppercase, 0.06em tracking, `text-muted`, on one line
+   with an ellipsis, 6px above the content.
 2. **Header row.** Output blocks put the output title and the sentence on the
    left and the tools on the right, gear last. Transform blocks have the tools
    only.
@@ -710,7 +713,7 @@ is `border-strong` grey, on hover `text-disabled` on the `bg-hover` wash, so
 the header reads as the block's name. The section toggles (Controls, Preview)
 are the menu's first group: each a row with its familiar icon and a check
 when on, then a rule, then the block's actions. The header has one size at every
-card width. The accent tint's fill and frame are for the builder/code
+card width, or the compact one when the board asks for it. The accent tint's fill and frame are for the builder/code
 switch, which changes how a value is edited rather than what is shown.
 
 ### The gear button
