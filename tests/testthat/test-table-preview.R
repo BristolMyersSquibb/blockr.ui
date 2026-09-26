@@ -272,7 +272,7 @@ test_that("the sorted header names its sort in a tooltip", {
   expect_match(html, 'data-sort-tip="Missing values first, then ascending"', fixed = TRUE)
   tags <- build_html_table(df, 3L)
   deps <- vapply(htmltools::findDependencies(tags), `[[`, "", "name")
-  expect_true(all(c("blockr-table-preview", "blockr-ui-js", "blockr-blocks-css") %in% deps))
+  expect_true(all(c("blockr-table-preview", "blockr-ui-js", "blockr-tooltip-css") %in% deps))
   # Unsorted: no tooltip on any header.
   expect_no_match(render_chr(tags), "data-sort-tip", fixed = TRUE)
 })
