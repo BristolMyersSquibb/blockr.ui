@@ -495,3 +495,167 @@
   font-weight: var(--blockr-font-weight-medium);
   vertical-align: middle;
 }
+
+/* --- Tool (tool_button()) ---
+   The design system's icon button: 26px, radius 4, bare, the icon in
+   text-muted; hover washes it and the icon turns default. It stays that way
+   while the menu it opens is open. */
+.blockr-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--blockr-control-h-xs);
+  height: var(--blockr-control-h-xs);
+  padding: 0;
+  color: var(--blockr-color-text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--blockr-radius-sm);
+  cursor: pointer;
+  transition: color var(--blockr-transition), background-color var(--blockr-transition);
+}
+
+.blockr-tool:hover,
+.blockr-tool[aria-expanded="true"] {
+  color: var(--blockr-color-text-default);
+  background: var(--blockr-color-bg-hover);
+}
+
+.blockr-tool:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}
+
+/* --- Action menu (action_menu(), Blockr.actionMenu) ---
+   A menu of actions opened by a button: the design system's menu surface,
+   with the rows of a menu from a button (34px, 6px inner padding). While
+   closed the list waits, hidden, beside its trigger; open, it is on <body>
+   (Blockr.place), so no panel's overflow clips it. */
+.blockr-action-menu {
+  display: inline-flex;
+}
+
+.blockr-menu {
+  z-index: 1070;
+  box-sizing: border-box;
+  min-width: 180px;
+  max-width: 320px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--blockr-color-bg-raised);
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: var(--blockr-radius-lg);
+  box-shadow: var(--blockr-shadow-md);
+  font-size: var(--blockr-font-size-base);
+  outline: none;
+}
+
+.blockr-menu[hidden] {
+  display: none;
+}
+
+.blockr-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--blockr-radius-sm);
+  background: transparent;
+  color: var(--blockr-color-text-default);
+  font: inherit;
+  font-size: var(--blockr-font-size-base);
+  /* One line box for the label and the smaller meta, so both sit on the
+     row's middle. */
+  line-height: 20px;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Hover and the keyboard row look the same; the keyboard row is focused,
+   so it takes the hover look instead of the focus outline. */
+.blockr-menu__item:hover,
+.blockr-menu__item:focus {
+  background: var(--blockr-color-bg-hover);
+  color: var(--blockr-color-text-default);
+  text-decoration: none;
+  outline: none;
+}
+
+.blockr-menu__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.blockr-menu__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 16px;
+  justify-content: center;
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-menu__meta {
+  margin-left: auto;
+  padding-left: 16px;
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-menu__item:hover .blockr-menu__icon,
+.blockr-menu__item:focus .blockr-menu__icon,
+.blockr-menu__item:hover .blockr-menu__meta,
+.blockr-menu__item:focus .blockr-menu__meta {
+  color: var(--blockr-color-text-default);
+}
+
+.blockr-menu__item--danger,
+.blockr-menu__item--danger .blockr-menu__icon,
+.blockr-menu__item--danger:hover,
+.blockr-menu__item--danger:focus,
+.blockr-menu__item--danger:hover .blockr-menu__icon,
+.blockr-menu__item--danger:focus .blockr-menu__icon {
+  color: var(--blockr-color-text-danger);
+}
+
+/* Listed, not usable: no hover, the reason in its tooltip. */
+.blockr-menu__item--disabled,
+.blockr-menu__item--disabled .blockr-menu__icon,
+.blockr-menu__item--disabled .blockr-menu__meta,
+.blockr-menu__item[aria-disabled="true"],
+.blockr-menu__item[aria-disabled="true"] .blockr-menu__icon,
+.blockr-menu__item[aria-disabled="true"] .blockr-menu__meta {
+  color: var(--blockr-color-text-disabled);
+  background: transparent;
+  cursor: default;
+}
+
+/* A group title: the section-title style, 8px above and 4px below, inset to
+   the row text. */
+.blockr-menu__title {
+  padding: 8px 10px 4px;
+  font-size: var(--blockr-font-size-xs);
+  font-weight: var(--blockr-font-weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-menu__title:first-child {
+  padding-top: 4px;
+}
+
+/* A divider: edge to edge, the menu's padding above and below. */
+.blockr-menu__divider {
+  height: 1px;
+  margin: 6px -6px;
+  background: var(--blockr-color-border-default);
+}

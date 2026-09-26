@@ -235,8 +235,19 @@ interface BlockrTooltip {
   text(el: Element): string;
 }
 
+/* --- Blockr.actionMenu (blockr-ui.js) --- */
+
+/** The document-level controller of the menus action_menu() builds in R. */
+interface BlockrActionMenu {
+  /** The trigger of the open menu, or null. */
+  current(): HTMLElement | null;
+  /** Close the open menu, if any. */
+  close(): void;
+}
+
 interface BlockrNamespace {
   tooltip: BlockrTooltip;
+  actionMenu: BlockrActionMenu;
   uid(prefix?: string): string;
   escapeHtml(s: string): string;
   removeNode(node: Node | null | undefined): void;
