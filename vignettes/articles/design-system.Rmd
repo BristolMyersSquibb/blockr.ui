@@ -439,7 +439,7 @@ A field says how many columns it needs.
 
 | Size | Columns | Fields |
 |---|---|---|
-| small | 1 | number, checkbox |
+| small | 1 | number, checkbox (two when its label needs them) |
 | large | 2 | select, text field, segmented control |
 | full | the whole row | tags (multi-select), expression |
 
@@ -485,6 +485,13 @@ between its parts, 6px between rows. Its operator pill is 24px.
 - Handles and remove buttons appear on hover or keyboard focus of their row
   (see [Actions](#actions)).
 - "Add condition" under the list is a quiet button.
+
+The handle belongs to these bordered rows, which are full of controls, so a
+drag has to start somewhere that is not one of them. A list of plain rows
+with a hover fill (a menu-style list, such as the patient profile's panels)
+has no handle: the whole row drags, with the grab cursor on hover, and
+Alt+Up/Down moves the keyboard row. A handle there would hang outside the
+fill.
 
 Drawn in the [design system page](design-system/index.html#layout).
 
@@ -568,7 +575,8 @@ in the board options. Core's `bslib::input_switch` calls, Shiny's
 - Disabled: box at 50% opacity, label `text-disabled`.
 - In the grid: the box and its words, with no field shell and no empty label
   row. It sits on the bottom line of its grid row (the controls' line) and
-  takes one column. On a row of its own it takes only its own height.
+  takes one column, or two when its label does not fit in one. On a row of
+  its own it takes only its own height.
 - Checkboxes that together encode one choice (core merge's `all.x`/`all.y`)
   become that choice as a Select ("Join type").
 
