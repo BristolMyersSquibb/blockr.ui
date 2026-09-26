@@ -610,6 +610,9 @@ operator, viz's `.dd-func-btn` (n, N, %, Σ).
   `border-strong`, `text-default`.
 - A click opens `Blockr.Select.menu()` anchored on the pill, listing every
   value.
+- In a header row (the chart's n, N, %, Σ) the pill sits among the 26px tools
+  and its menu lines up with the pill's right edge (`align: 'end'`). The
+  menu's rows lead with the name, the pill's symbol muted after it.
 - The click-to-cycle pill is retired. Join type, outside a row, is a Select
   field in the grid.
 
@@ -999,7 +1002,9 @@ Drawn in the [design system page](design-system/index.html#labels).
   status line follow [The block](#block). Axis titles, legend titles and
   tooltips use column labels ([Labels](#labels)); blockr.ggplot's axis titles
   move from names to labels. Header tools are 26px (the chart's
-  and composer's 30px tools move to 26px).
+  and composer's 30px tools move to 26px). The download is a tool: with one
+  format it downloads, with several it opens an action menu (`action_menu()`),
+  one row per format with the extension as meta.
 - **On the canvas:** all text at `--blockr-mark-font-size` (11px), read by
   chart.js once per render. The gutter measurement (11px), the 14px label-row
   budget and the printed charts keep their numbers.
@@ -1018,13 +1023,18 @@ Drawn in the [design system page](design-system/index.html#labels).
   Exports (PNG, pptx) take the light values. Retiring the "ECharts Theme" board
   option is a follow-up.
 - **Facet strip:** the section-title style (12px, 600, uppercase, 0.05em,
-  `text-muted`).
-- **Legend band:** HTML. Its items take the focus outline. The 25 x 14px
-  swatch stays.
+  `text-muted`), centred over its panel. No card around the panel and no band
+  behind the name; 24px between panels. Exports match.
+- **Legend band:** HTML. Chip text `text-muted`, like the axis labels. Its
+  items take the focus outline. The 25 x 14px swatch stays.
 - **Data tooltip:** the raised card (`bg-raised`, `border-default`, radius 8,
   `shadow-md`). Headline 13px weight 600 with the series swatch, which carries
   the series colour; rows 12px, labels `text-muted`, values `text-default` at
-  500 with tabular figures.
+  500 with tabular figures. A split bar shows every segment of the hovered bar
+  in one tip, so the swatch moves to the rows: the headline is the category,
+  each row a level with its swatch and the column name ("drv 4"), and a count
+  or a sum ends in a total under a hairline. Other aggregations name
+  themselves under the headline ("Mean") instead of a total.
 - **Slider bubble:** stays inverse (dark label), because it labels a thumb
   during a drag.
 - **Data colours:** blockr.theme palettes.
