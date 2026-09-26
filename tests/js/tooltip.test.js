@@ -119,3 +119,28 @@ test('a line can carry a badge after the name', (newWindow) => {
   assert.strictEqual(win.Blockr.tooltip.text(b), 'dataset block · blockr.core');
   win.close();
 });
+
+test('markup from R carries its tooltip as an attribute', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  b.setAttribute('data-blockr-tooltip', 'Download');
+  const icon = win.document.createElement('span');
+  b.appendChild(icon);
+  icon.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  assert.strictEqual(card(win).textContent, 'Download', 'found from a child');
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Download');
+  win.document.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  win.Blockr.tooltip.set(b, 'Set wins');
+  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  assert.strictEqual(card(win).textContent, 'Set wins', 'set() wins over the attribute');
+  win.close();
+});
+
+test('an empty attribute shows nothing', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  b.setAttribute('data-blockr-tooltip', '');
+  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  assert.ok(!card(win));
+  win.close();
+});
