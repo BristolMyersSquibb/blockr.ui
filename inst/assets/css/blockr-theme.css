@@ -38,15 +38,15 @@ body {
 }
 
 h4, .h4 {
-  font-size: var(--blockr-font-size-section);
+  font-size: var(--blockr-font-size-lg);
   font-weight: var(--blockr-font-weight-medium);
   font-variant-caps: all-small-caps;
-  color: var(--blockr-color-text-secondary);
+  color: var(--blockr-color-text-default);
   letter-spacing: 0.5px;
 }
 
 h5, .h5 {
-  font-size: var(--blockr-font-size-section);
+  font-size: var(--blockr-font-size-lg);
   font-weight: var(--blockr-font-weight-medium);
 }
 
@@ -64,7 +64,7 @@ label,
 .form-label,
 .shiny-input-container .control-label {
   font-size: var(--blockr-font-size-xs);
-  color: var(--blockr-color-text-secondary);
+  color: var(--blockr-color-text-muted);
   margin-bottom: 0.25rem;
 }
 
@@ -76,24 +76,24 @@ label:has(input[type="file"]) {
 .form-control,
 .form-select {
   font-size: var(--blockr-font-size-base);
-  background-color: var(--blockr-color-bg-input);
-  border: 1px solid var(--blockr-color-border);
+  background-color: var(--blockr-color-bg-field);
+  border: 1px solid var(--blockr-color-border-default);
   border-radius: 8px;
   padding: 10px 14px;
-  color: var(--blockr-color-text-primary);
+  color: var(--blockr-color-text-default);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 .form-control:focus,
 .form-select:focus {
-  background-color: #ffffff;
-  border-color: var(--blockr-color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: var(--blockr-color-bg-surface);
+  border-color: var(--blockr-color-border-accent);
+  box-shadow: var(--blockr-focus-ring);
   outline: none;
 }
 
 .form-control::placeholder {
-  color: var(--blockr-grey-400);
+  color: var(--blockr-color-text-muted);
 }
 
 .input-group-sm > .form-control,
@@ -112,8 +112,8 @@ label:has(input[type="file"]) {
 }
 
 .selectize-input {
-  background-color: var(--blockr-color-bg-input) !important;
-  border: 1px solid var(--blockr-color-border) !important;
+  background-color: var(--blockr-color-bg-field) !important;
+  border: 1px solid var(--blockr-color-border-default) !important;
   border-radius: 8px !important;
   padding: 0 12px !important;
   min-height: 42px !important;
@@ -125,13 +125,13 @@ label:has(input[type="file"]) {
 }
 
 .selectize-input.focus {
-  background-color: #ffffff !important;
-  border-color: var(--blockr-color-primary) !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  background-color: var(--blockr-color-bg-surface) !important;
+  border-color: var(--blockr-color-border-accent) !important;
+  box-shadow: var(--blockr-focus-ring) !important;
 }
 
 .selectize-dropdown {
-  border: 1px solid var(--blockr-color-border) !important;
+  border: 1px solid var(--blockr-color-border-default) !important;
   border-radius: 8px !important;
   box-shadow: var(--blockr-shadow-lg) !important;
   margin-top: 4px !important;
@@ -139,12 +139,12 @@ label:has(input[type="file"]) {
 
 .selectize-dropdown-content .option {
   padding: 10px 14px !important;
-  color: var(--blockr-color-text-primary);
+  color: var(--blockr-color-text-default);
 }
 
 .selectize-dropdown-content .option.active {
   background-color: var(--blockr-color-bg-hover) !important;
-  color: var(--blockr-color-text-primary) !important;
+  color: var(--blockr-color-text-default) !important;
 }
 
 /* --- Buttons (Figma-aligned) --- */
@@ -221,14 +221,14 @@ label:has(input[type="file"]) {
   background: transparent !important;
   border: none !important;
   border-radius: 4px !important;
-  color: var(--blockr-grey-400) !important;
+  color: var(--blockr-color-text-muted) !important;
   transition: background-color 0.15s ease, color 0.15s ease !important;
 }
 
 .btn-link.text-muted:hover,
 .btn-link.text-muted:focus {
-  background-color: var(--blockr-grey-100) !important;
-  color: var(--blockr-grey-600) !important;
+  background-color: var(--blockr-color-bg-hover) !important;
+  color: var(--blockr-color-text-default) !important;
   text-decoration: none !important;
 }
 
@@ -236,8 +236,8 @@ label:has(input[type="file"]) {
    Tooltip & Popover Styling (Figma-aligned)
    ============================================ */
 .tooltip {
-  --bs-tooltip-bg: white;
-  --bs-tooltip-color: var(--blockr-color-text-secondary);
+  --bs-tooltip-bg: var(--blockr-color-bg-raised);
+  --bs-tooltip-color: var(--blockr-color-text-default);
   --bs-tooltip-opacity: 1;
 }
 
@@ -247,24 +247,24 @@ label:has(input[type="file"]) {
   padding: 8px 12px;
   border-radius: 8px;
   box-shadow: var(--blockr-shadow-lg);
-  border: 1px solid var(--blockr-color-border);
+  border: 1px solid var(--blockr-color-border-default);
   max-width: 250px;
   text-align: left;
 }
 
 .tooltip-arrow::before {
-  border-top-color: white !important;
-  border-bottom-color: white !important;
+  border-top-color: var(--blockr-color-bg-raised) !important;
+  border-bottom-color: var(--blockr-color-bg-raised) !important;
 }
 
 /* Popover - light style matching tooltips */
 .popover {
-  --bs-popover-bg: white;
-  --bs-popover-border-color: var(--blockr-color-border);
-  --bs-popover-body-color: var(--blockr-color-text-secondary);
+  --bs-popover-bg: var(--blockr-color-bg-raised);
+  --bs-popover-border-color: var(--blockr-color-border-default);
+  --bs-popover-body-color: var(--blockr-color-text-default);
   border-radius: 12px;
   box-shadow: var(--blockr-shadow-lg);
-  border: 1px solid var(--blockr-color-border);
+  border: 1px solid var(--blockr-color-border-default);
   max-width: 280px;
 }
 
@@ -281,13 +281,13 @@ label:has(input[type="file"]) {
 }
 
 .popover-arrow::before {
-  border-top-color: var(--blockr-color-border) !important;
-  border-bottom-color: var(--blockr-color-border) !important;
+  border-top-color: var(--blockr-color-border-default) !important;
+  border-bottom-color: var(--blockr-color-border-default) !important;
 }
 
 .popover-arrow::after {
-  border-top-color: white !important;
-  border-bottom-color: white !important;
+  border-top-color: var(--blockr-color-bg-raised) !important;
+  border-bottom-color: var(--blockr-color-bg-raised) !important;
 }
 
 /* ============================================
@@ -300,7 +300,7 @@ label:has(input[type="file"]) {
 }
 
 .table {
-  border-color: var(--blockr-color-border);
+  border-color: var(--blockr-color-border-default);
 }
 
 .table > thead {
@@ -309,14 +309,14 @@ label:has(input[type="file"]) {
 
 .table > thead > tr > th {
   font-weight: var(--blockr-font-weight-medium);
-  color: var(--blockr-color-text-secondary);
-  border-bottom: 2px solid var(--blockr-color-border);
+  color: var(--blockr-color-text-default);
+  border-bottom: 2px solid var(--blockr-color-border-default);
   padding: 12px 16px;
 }
 
 .table > tbody > tr > td {
-  color: var(--blockr-color-text-primary);
-  border-bottom: 1px solid var(--blockr-grey-100);
+  color: var(--blockr-color-text-default);
+  border-bottom: 1px solid var(--blockr-color-border-default);
   padding: 12px 16px;
 }
 
