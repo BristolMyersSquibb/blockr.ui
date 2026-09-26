@@ -305,11 +305,11 @@ Drawn in the [design system page](design-system/index.html#foundations).
 ### Anatomy, top to bottom
 
 1. **Dock header.** One eyebrow line over the block's content: the block's
-   glyph at 13px in its category colour with no tile (carrying the status
-   dot), the block name at 11px, weight 600, uppercase, 0.06em tracking,
+   mark (a 20px tinted square in its category colour, glyph 12px, carrying
+   the status dot), the block name at 11px, weight 600, uppercase, 0.06em tracking,
    `text-muted`, on one line with an ellipsis, and on the right the "…" menu
    (with a block's own control, such as the AI assistant, left of it). No
-   subtitle: the block type and package are the glyph's tooltip ("filter
+   subtitle: the block type and package are the mark's tooltip ("filter
    block · blockr.dplyr"). 6px below it the content starts.
 2. **Header row.** Output blocks put the output title and the sentence on the
    left and the tools on the right, gear last. Transform blocks have the tools
