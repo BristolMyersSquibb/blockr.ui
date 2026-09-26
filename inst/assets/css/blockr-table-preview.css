@@ -169,9 +169,11 @@
       color: var(--blockr-color-negative, #F43F5E);
     }
 
+    /* line-height 1: the smaller text must not push the 20px line to 21. */
     .blockr-table .blockr-na {
       color: var(--blockr-color-text-muted, #6b7280);
       font-size: var(--blockr-font-size-xs, 0.75rem);
+      line-height: 1;
     }
 
     .blockr-table-footer {
