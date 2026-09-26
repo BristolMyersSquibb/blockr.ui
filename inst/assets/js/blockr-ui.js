@@ -352,6 +352,11 @@ Blockr.textCommit = (input, opts) => {
  * shows only while the element or a child is cut off, so a value that fits
  * has none. Blockr.tooltip.clear(el) takes it away.
  *
+ * Markup built in R cannot call `set()`, so an element can also carry its
+ * tooltip as an attribute: `data-blockr-tooltip="Download"`, plus
+ * `data-blockr-tooltip-overflow` for the cut-off-only case. A `set()` on the
+ * same element wins over the attribute.
+ *
  * One set of document listeners serves every tooltip, added when this file
  * loads (like Blockr.onDocClick's), so no instance adds or leaks its own.
  * The card shows after the pointer rests 300ms, at once on keyboard focus,
@@ -389,9 +394,28 @@ Blockr.tooltip = (() => {
   /** @param {BlockrTooltipContent} content */
   const asLines = (content) => (Array.isArray(content) ? content : [content]);
 
+  const ATTR = 'data-blockr-tooltip';
+
+  /**
+   * The tooltip `el` carries: one given by set(), else its attribute.
+   * @param {Element} el
+   */
+  const tipOf = (el) => tips.get(el) || (el.hasAttribute(ATTR)
+    ? { content: el.getAttribute(ATTR) || '', overflow: el.hasAttribute(ATTR + '-overflow') }
+    : null);
+
+  /**
+   * The nearest element, from `el` up, that has a tooltip.
+   * @param {Element | null} el
+   */
+  const owner = (el) => {
+    while (el && !tipOf(el)) el = el.parentElement;
+    return el;
+  };
+
   /** @param {Element} el */
   const contentOf = (el) => {
-    const tip = tips.get(el);
+    const tip = tipOf(el);
     if (!tip) return null;
     return typeof tip.content === 'function' ? tip.content() : tip.content;
   };
@@ -458,12 +482,10 @@ Blockr.tooltip = (() => {
 
   /** @param {Event} e */
   const enter = (e) => {
-    const target = /** @type {Element | null} */ (e.target instanceof Element ? e.target : null);
-    let el = target;
-    while (el && !tips.has(el)) el = el.parentElement;
+    const el = owner(e.target instanceof Element ? e.target : null);
     if (!el || el === current) return;
     hide();
-    const tip = /** @type {{ overflow: boolean }} */ (tips.get(el));
+    const tip = /** @type {{ overflow: boolean }} */ (tipOf(el));
     if (tip.overflow && !cutOff(el)) return;
     const found = el;
     const now = e.type === 'focusin' || Date.now() < warmUntil;
@@ -475,8 +497,7 @@ Blockr.tooltip = (() => {
   const leave = (e) => {
     if (!current && !timer) return;
     const to = e.relatedTarget;
-    let el = /** @type {Element | null} */ (e.target instanceof Element ? e.target : null);
-    while (el && !tips.has(el)) el = el.parentElement;
+    const el = owner(e.target instanceof Element ? e.target : null);
     if (!el) return;
     if (to instanceof Node && el.contains(to)) return;
     hide();
@@ -1055,4 +1076,169 @@ Blockr.menu = (() => {
   Blockr.checkbox = checkbox;
   Blockr.gearTray = gearTray;
   Blockr.segmented = segmented;
+})();
+
+/**
+ * The action menu (design system, "Menus"): a list of actions opened by a
+ * button, built in R by action_menu(). A row does one thing, a download, a
+ * rename, a removal, and the menu closes; nothing is remembered. That is the
+ * whole difference from Blockr.Select.menu, which sets a value. The two share
+ * the menu surface and Blockr.place.
+ *
+ * The markup comes from R, so one set of document listeners serves every
+ * menu on the page, including menus a uiOutput renders later. While closed,
+ * the list waits, hidden, beside its trigger. Opening moves it to <body>,
+ * where no dock panel's overflow clips it; closing moves it back, so it
+ * leaves the page with its block and Shiny's unbinding still reaches the
+ * download and action links inside it.
+ *
+ * Keys: a keyboard open focuses the first row; arrows, Home and End move;
+ * Enter or Space runs the row; Escape closes and returns focus to the
+ * trigger; Tab closes. A click outside closes. A disabled row does
+ * nothing.
+ */
+Blockr.actionMenu = (() => {
+  /** @type {{ trigger: HTMLElement, panel: HTMLElement, home: Node, next: Node | null, placement: BlockrPlaceHandle, watch: MutationObserver | null } | null} */
+  let open = null;
+
+  /** @param {Element | null} el */
+  const triggerOf = (el) => /** @type {HTMLElement | null} */ (
+    el && el.closest('.blockr-action-menu__trigger'));
+
+  /** @param {HTMLElement} panel */
+  const rows = (panel) => /** @type {HTMLElement[]} */ (Array.from(
+    panel.querySelectorAll('.blockr-menu__item')).filter((r) => !r.hidden && !isDisabled(r)));
+
+  /**
+   * Disabled by its author (the class), or a download whose handler Shiny
+   * has not bound yet (aria-disabled, which Shiny clears once it has).
+   * @param {Element} row
+   */
+  const isDisabled = (row) => row.classList.contains('blockr-menu__item--disabled') ||
+    row.getAttribute('aria-disabled') === 'true';
+
+  /** @param {boolean} [refocus] */
+  const close = (refocus) => {
+    if (!open) return;
+    const { trigger, panel, home, next, placement, watch } = open;
+    open = null;
+    placement.stop();
+    if (watch) watch.disconnect();
+    panel.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    if (home.isConnected) {
+      home.insertBefore(panel, next && next.parentNode === home ? next : null);
+    } else {
+      // The block went while the menu was open: nothing to go back to.
+      const shiny = /** @type {any} */ (window).Shiny;
+      if (shiny && shiny.unbindAll) shiny.unbindAll(panel);
+      panel.remove();
+    }
+    if (refocus && trigger.isConnected) trigger.focus();
+  };
+
+  /**
+   * @param {HTMLElement} trigger
+   * @param {boolean} [byKeyboard]
+   */
+  const show = (trigger, byKeyboard) => {
+    close();
+    const wrap = trigger.parentElement;
+    const panel = /** @type {HTMLElement | null} */ (
+      wrap && wrap.querySelector(':scope > .blockr-menu'));
+    if (!wrap || !panel) return;
+    if (!panel.id) panel.id = Blockr.uid('blockr-menu');
+    trigger.setAttribute('aria-controls', panel.id);
+    const home = wrap;
+    const next = panel.nextSibling;
+    document.body.appendChild(panel);
+    panel.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    const placement = Blockr.place(panel, trigger, {
+      width: { min: 180, max: 320 },
+      align: wrap.getAttribute('data-align') === 'start' ? 'start' : 'end'
+    });
+    /** @type {MutationObserver | null} */
+    let watch = null;
+    if (typeof MutationObserver !== 'undefined') {
+      watch = new MutationObserver(() => { if (!trigger.isConnected) close(); });
+      watch.observe(document.body, { childList: true, subtree: true });
+    }
+    open = { trigger, panel, home, next, placement, watch };
+    const first = rows(panel)[0];
+    if (byKeyboard && first) first.focus();
+    else panel.focus();
+  };
+
+  /** @param {number} step @param {'first' | 'last'} [to] */
+  const move = (step, to) => {
+    if (!open) return;
+    const all = rows(open.panel);
+    if (!all.length) return;
+    let i = all.indexOf(/** @type {HTMLElement} */ (document.activeElement));
+    if (to === 'first') i = 0;
+    else if (to === 'last') i = all.length - 1;
+    else i = i < 0 ? (step > 0 ? 0 : all.length - 1) : (i + step + all.length) % all.length;
+    all[i].focus();
+  };
+
+  document.addEventListener('click', (e) => {
+    const target = e.target instanceof Element ? e.target : null;
+    const trigger = triggerOf(target);
+    if (trigger) {
+      const same = open && open.trigger === trigger;
+      if (same) close();
+      // A click the keyboard made (Enter or Space on the button) has no
+      // pointer position: detail is 0.
+      else show(trigger, e.detail === 0);
+      return;
+    }
+    if (!open) return;
+    const item = target && target.closest('.blockr-menu__item');
+    if (item && open.panel.contains(item)) {
+      if (isDisabled(item)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return;
+      }
+      // Let the row do its job (the download, Shiny's action binding) before
+      // the list goes back beside its trigger.
+      setTimeout(() => close(true), 0);
+      return;
+    }
+    if (!(target && open.panel.contains(target))) close();
+  }, true);
+
+  document.addEventListener('keydown', (e) => {
+    if (!open) return;
+    const inside = e.target instanceof Node && open.panel.contains(e.target);
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      close(true);
+    } else if (!inside) {
+      return;
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault(); move(1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault(); move(-1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); move(0, 'first');
+    } else if (e.key === 'End') {
+      e.preventDefault(); move(0, 'last');
+    } else if (e.key === ' ' || (e.key === 'Enter' && e.target === open.panel)) {
+      // Enter on a focused <a> or <button> clicks it already.
+      const item = e.target instanceof Element && e.target.closest('.blockr-menu__item');
+      e.preventDefault();
+      if (item) /** @type {HTMLElement} */ (item).click();
+    } else if (e.key === 'Tab') {
+      close(true);
+    }
+  }, true);
+
+  return {
+    /** The trigger of the menu that is open, or null. */
+    current: () => (open ? open.trigger : null),
+    close: () => close()
+  };
 })();
