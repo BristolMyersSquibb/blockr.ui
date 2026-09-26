@@ -103,7 +103,18 @@ if (!window.blockrSortTipInit) {
       node.querySelectorAll('th[data-sort-tip]');
     for (var i = 0; i < ths.length; i++) {
       Blockr.tooltip.set(ths[i], ths[i].getAttribute('data-sort-tip'));
+      // A sort click redraws the table under a pointer that has not moved,
+      // so no pointerover follows; when the pointer is already on the
+      // sorted header, hand the tooltip the event it waits for.
+      blockrHoverTip(ths[i]);
     }
+  };
+  var blockrHoverTip = function(th) {
+    requestAnimationFrame(function() {
+      if (th.isConnected && th.matches(':hover')) {
+        th.dispatchEvent(new PointerEvent('pointerover', {bubbles: true}));
+      }
+    });
   };
   new MutationObserver(function(muts) {
     muts.forEach(function(m) { m.addedNodes.forEach(blockrSortTips); });
