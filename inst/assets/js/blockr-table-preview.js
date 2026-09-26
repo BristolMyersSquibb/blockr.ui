@@ -92,3 +92,21 @@ if (!window.blockrPaginationInit) {
     Shiny.setInputValue(inputId, newPage, {priority: 'event'});
   });
 }
+
+// The sorted header's tooltip (data-sort-tip, set by build_html_table()),
+// registered with the shared light tooltip whenever a table lands.
+if (!window.blockrSortTipInit) {
+  window.blockrSortTipInit = true;
+  var blockrSortTips = function(node) {
+    if (!window.Blockr || !Blockr.tooltip || !node || node.nodeType !== 1) return;
+    var ths = node.matches('th[data-sort-tip]') ? [node] :
+      node.querySelectorAll('th[data-sort-tip]');
+    for (var i = 0; i < ths.length; i++) {
+      Blockr.tooltip.set(ths[i], ths[i].getAttribute('data-sort-tip'));
+    }
+  };
+  new MutationObserver(function(muts) {
+    muts.forEach(function(m) { m.addedNodes.forEach(blockrSortTips); });
+  }).observe(document.documentElement, {childList: true, subtree: true});
+  blockrSortTips(document.documentElement);
+}

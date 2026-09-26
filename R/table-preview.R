@@ -214,7 +214,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
             )
           )
         ),
-        table_preview_dep()
+        c(list(table_preview_dep()), table_preview_tooltip_dep())
       )
     )
   }
@@ -333,12 +333,25 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     aria_sort <- if (!is.null(sort_col) && sort_col == col_name) {
       switch(sort_dir, asc = , na = "ascending", desc = "descending", NULL)
     }
+    # The sorted header says in words what the cue shows (the light tooltip,
+    # registered by blockr-table-preview.js): the dot for missing values
+    # first does not say "missing" by itself.
+    sort_tip <- if (!is.null(sort_col) && sort_col == col_name) {
+      switch(
+        sort_dir,
+        asc = "Sorted ascending, missing values last",
+        desc = "Sorted descending, missing values last",
+        na = "Missing values first, then ascending",
+        NULL
+      )
+    }
 
     header_cells[[j + 1L]] <- shiny::tags$th(
       class = header_class,
       style = th_style,
       `data-column` = col_name,
       `aria-sort` = aria_sort,
+      `data-sort-tip` = sort_tip,
       shiny::tags$span(
         class = "blockr-col-head",
         shiny::tags$span(class = "blockr-col-name", col_name),
@@ -506,7 +519,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         footer
       )
     ),
-    table_preview_dep()
+    c(list(table_preview_dep()), table_preview_tooltip_dep())
   )
 }
 
@@ -530,6 +543,15 @@ table_preview_dep <- function() {
     stylesheet = "css/blockr-table-preview.css",
     script = "js/blockr-table-preview.js",
     all_files = FALSE
+  )
+}
+
+# The shared tooltip (Blockr.tooltip) and its card style, for the sorted
+# header's tooltip.
+table_preview_tooltip_dep <- function() {
+  list(
+    controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
+    controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css")
   )
 }
 

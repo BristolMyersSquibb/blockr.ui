@@ -710,7 +710,9 @@ the tip, stroked at 1.4px with round caps and joins and no fill.
   or left and does not rotate.
 - A sort cue points up for ascending and down for descending, in
   `text-accent` on the sorted column; a hollow dot above it means missing
-  values first. An unsorted column shows the ascending chevron in
+  values first. The sorted header names its sort in the light tooltip
+  ("Missing values first, then ascending"). An unsorted column shows the
+  ascending chevron in
   `text-muted` on hover. It sits on the name's line: after the name, or before
   it when the column is right-aligned, so the name stays over its numbers.
 - Every rotation uses `--blockr-transition`.

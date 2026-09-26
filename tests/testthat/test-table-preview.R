@@ -264,3 +264,14 @@ test_that("the sort cue sits on the name's line and the header says its sort", {
   css <- paste(readLines(system.file("assets", "css", "blockr-table-preview.css", package = "blockr.ui")), collapse = "\n")
   expect_no_match(css, "\\\\2191|\\\\2193")
 })
+
+test_that("the sorted header names its sort in a tooltip", {
+  df <- data.frame(x = c(2, NA, 1))
+  html <- render_chr(build_html_table(df, 3L, sort_state = list(col = "x", dir = "na")))
+  expect_match(html, 'data-sort-tip="Missing values first, then ascending"', fixed = TRUE)
+  tags <- build_html_table(df, 3L)
+  deps <- vapply(htmltools::findDependencies(tags), `[[`, "", "name")
+  expect_true(all(c("blockr-table-preview", "blockr-ui-js", "blockr-blocks-css") %in% deps))
+  # Unsorted: no tooltip on any header.
+  expect_no_match(render_chr(tags), "data-sort-tip", fixed = TRUE)
+})
