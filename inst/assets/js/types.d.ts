@@ -15,6 +15,8 @@ type BlockrSelectOption = string | { value: string; label?: string };
 
 interface BlockrSelectConfigBase {
   options?: BlockrSelectOption[];
+  /** Select.menu(): find the anchor again after it was redrawn (see Blockr.place). */
+  reanchor?: () => HTMLElement | null;
   /** Shown when nothing is selected (single) / no tags (multi). */
   placeholder?: string;
   /**
@@ -211,6 +213,12 @@ interface BlockrPlaceOptions {
   gap?: number;
   /** Distance kept from the viewport edges, both ways (default 8). */
   margin?: number;
+  /**
+   * The element that now stands for the anchor, once the anchor has left
+   * the page (redrawn under the open panel). Without it, or while it returns
+   * null, the panel stays where it is.
+   */
+  reanchor?: () => HTMLElement | null;
   /** Called on every placement with whether the panel sits above the anchor. */
   onFlip?: (above: boolean) => void;
 }
