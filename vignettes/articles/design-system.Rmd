@@ -305,7 +305,7 @@ Drawn in the [design system page](design-system/index.html#foundations).
 
 1. **Dock header (compact).** One row: the block's mark (a 28px tinted square
    in its category colour, carrying the status dot), the block title at 14px
-   (`font-size-base`) weight 600 `text-default`, the "…" menu on the right. No subtitle:
+   (`font-size-base`) weight 600 `text-default`, the "…" menu on the right (with a block's own control, such as the AI assistant, left of it). No subtitle:
    the block type and package are the mark's tooltip ("filter block ·
    blockr.dplyr"). About 52px.
 2. **Header row.** Output blocks put the output title and the sentence on the
@@ -665,12 +665,13 @@ Header tools (search, download, the builder/code switch) are 26px, radius 4,
 bare, icon `text-muted`. Hover: `bg-hover`, icon `text-default`. Every
 icon-only button has a tooltip. Tools do not shrink with the panel.
 
-The dock header has one tool, the "…" menu. It is quieter than other tools:
-at rest its icon is `border-strong` grey, on hover `text-disabled` on the
-`bg-hover` wash, so the header reads as the block's name. The block's section
-toggles (Controls, Preview, and a block's own control such as the AI
-assistant) are the menu's first group: each a row with its familiar icon and
-a check when on, then a rule, then the block's actions. A narrow card (under
+The dock header has the "…" menu, and next to it a block's own control where
+the block has one (the AI assistant's sparkle, at every width, until a global
+assistant replaces it). They are quieter than other tools: at rest their icon
+is `border-strong` grey, on hover `text-disabled` on the `bg-hover` wash, so
+the header reads as the block's name. The section toggles (Controls, Preview)
+are the menu's first group: each a row with its familiar icon and a check
+when on, then a rule, then the block's actions. A narrow card (under
 about 380px) steps the header down to a 32px mark and a 16px title that may
 wrap to two lines. The accent tint's fill and frame are for the builder/code
 switch, which changes how a value is edited rather than what is shown.
