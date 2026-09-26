@@ -152,8 +152,9 @@ label:has(input[type="file"]) {
    variables so its hover, active, focus and disabled rules draw them.
    Shiny's actionButton() and downloadButton() are .btn-default, so they
    come out secondary; Shiny's modal buttons follow too, which is intended.
-   `:root` in front outranks Bootstrap's single-class rules, which bslib
-   may load after this sheet.
+   The selectors outrank Bootstrap's own, wherever bslib loads them: its
+   kinds are one class, the sizes two with `:root`, and the kinds four,
+   past bslib's `[data-bs-theme="dark"] .btn-default:not(...)`.
 
      .btn-primary                             main
      .btn-default, .btn-secondary,
@@ -193,23 +194,13 @@ label:has(input[type="file"]) {
   outline-offset: var(--blockr-focus-offset);
 }
 
-:root .btn-primary {
-  --bs-btn-color: var(--blockr-color-text-accent);
-  --bs-btn-bg: var(--blockr-color-bg-accent-subtle);
-  --bs-btn-border-color: var(--blockr-color-border-accent-subtle);
-  --bs-btn-hover-color: var(--blockr-color-text-accent);
-  --bs-btn-hover-bg: var(--blockr-color-bg-accent-subtle-hover);
-  --bs-btn-hover-border-color: var(--blockr-color-border-accent);
-  --bs-btn-active-color: var(--blockr-color-text-accent);
-  --bs-btn-active-bg: var(--blockr-color-bg-accent-subtle-hover);
-  --bs-btn-active-border-color: var(--blockr-color-border-accent);
-}
-
-:root .btn-default,
-:root .btn-secondary,
-:root .btn-outline-secondary,
-:root .btn-outline-default,
-:root .btn-light {
+/* Secondary first: Shiny's actionButton() always carries btn-default, so
+   the kind a caller adds to it has to come later to win. */
+:root:root .btn.btn-default,
+:root:root .btn.btn-secondary,
+:root:root .btn.btn-outline-secondary,
+:root:root .btn.btn-outline-default,
+:root:root .btn.btn-light {
   --bs-btn-color: var(--blockr-color-text-default);
   --bs-btn-bg: var(--blockr-color-bg-surface);
   --bs-btn-border-color: var(--blockr-color-border-default);
@@ -221,7 +212,19 @@ label:has(input[type="file"]) {
   --bs-btn-active-border-color: var(--blockr-color-border-strong);
 }
 
-:root .btn-link {
+:root:root .btn.btn-primary {
+  --bs-btn-color: var(--blockr-color-text-accent);
+  --bs-btn-bg: var(--blockr-color-bg-accent-subtle);
+  --bs-btn-border-color: var(--blockr-color-border-accent-subtle);
+  --bs-btn-hover-color: var(--blockr-color-text-accent);
+  --bs-btn-hover-bg: var(--blockr-color-bg-accent-subtle-hover);
+  --bs-btn-hover-border-color: var(--blockr-color-border-accent);
+  --bs-btn-active-color: var(--blockr-color-text-accent);
+  --bs-btn-active-bg: var(--blockr-color-bg-accent-subtle-hover);
+  --bs-btn-active-border-color: var(--blockr-color-border-accent);
+}
+
+:root:root .btn.btn-link {
   --bs-btn-padding-x: 8px;
   --bs-btn-color: var(--blockr-color-text-muted);
   --bs-btn-bg: transparent;
@@ -235,7 +238,7 @@ label:has(input[type="file"]) {
   text-decoration: none;
 }
 
-:root .btn-danger {
+:root:root .btn.btn-danger {
   --bs-btn-color: var(--blockr-color-text-danger);
   --bs-btn-bg: color-mix(in srgb, var(--blockr-color-border-danger) 6%, transparent);
   --bs-btn-border-color: var(--blockr-color-border-danger-subtle);
