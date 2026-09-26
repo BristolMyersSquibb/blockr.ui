@@ -419,13 +419,20 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
 }
 
 /* crossfilter */
+.xf-card-h .tool:disabled { color: var(--blockr-color-text-disabled); background: none; cursor: default; }
 .xf-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 16px; }
 .xf-card-h { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; min-height: 26px; }
 .xf-cl { font-size: var(--blockr-font-size-sm); font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .xf-cl small { font-size: var(--blockr-font-size-xs); font-weight: 400; color: var(--blockr-color-text-muted); margin-left: 6px; }
-.xf-srch { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; font-size: var(--blockr-font-size-sm); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-md); color: var(--blockr-color-text-muted); background: var(--blockr-color-bg-field); margin-bottom: 6px; }
+.xf-srch { display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 9px; font-size: var(--blockr-font-size-sm); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-md); color: var(--blockr-color-text-muted); background: var(--blockr-color-bg-field); margin-bottom: 6px; }
 .xf-list { max-height: 200px; overflow: auto; }
-.xf-row { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 6px; font-size: var(--blockr-font-size-sm); border-radius: var(--blockr-radius-sm); cursor: pointer; }
+.xf-row { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 12px; font-size: var(--blockr-font-size-base); border-radius: var(--blockr-radius-sm); cursor: pointer; }
+.xf-th { display: flex; justify-content: space-between; gap: 12px; padding: 0 12px 5px; font-size: var(--blockr-font-size-sm); font-weight: 600; }
+.xf-th > span { flex: 1; border-bottom: 1px solid var(--blockr-color-border-strong); padding-bottom: 5px; margin-bottom: -5px; }
+.xf-th-n { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; flex: 0 0 128px !important; }
+.xf-sort { width: 12px; height: 12px; color: var(--blockr-color-text-accent); background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M2 3h8M2 6h5.5M2 9h3'/%3E%3C/svg%3E") no-repeat center / 12px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M2 3h8M2 6h5.5M2 9h3'/%3E%3C/svg%3E") no-repeat center / 12px; }
 .xf-row:hover { background: var(--blockr-color-bg-hover); }
 .xf-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .xf-trk { width: 90px; height: 12px; flex: none; }
@@ -1553,11 +1560,12 @@ the section-title style. Exports (PNG, pptx) take the light values.</p>
 </div></div>
 
 <h3 class="sh" id="crossfilter">Crossfilter</h3>
-<p class="note">The standard header row, with Reset above every filter it clears. "Group by" labels a field; "Filter by" titles
-a section. Inside a card: search 30px, 26px icons always shown, rows 30px, a 200px scroll area (about six rows). The bars are
+<p class="note">The standard header row, with Reset (icon and count, no label) above every filter it clears. "Group by" labels a
+field; "Filter by" titles a section. A card's list is a table: headers with their rule, rows 30px, Count right-aligned with the
+sort bars before it. A card's reset is disabled while it cuts no rows; above 8 values it has a search field. The bars are
 supporting marks.</p>
 <div class="dock" style="max-width:980px"><div class="face">
-  <div class="hd end"><button class="b xs main" data-tip="Month is July"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">1</span></button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div>
+  <div class="hd end"><button class="b xs main" data-tip="Month is July"><svg width="12" height="12"><use href="#i-reset"/></svg><span class="count">1</span></button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div>
   <div class="gu" style="margin-top:4px"><div class="gB">
     <div class="fld s2"><span class="lbl">Group by</span><button class="ctl" data-menu="m-cols-opt" data-place="field" data-value="None"><span class="v ph">None</span><span class="car"></span></button></div>
   </div></div>
@@ -1565,7 +1573,7 @@ supporting marks.</p>
   <div class="xf-cards">
     <div>
       <div class="xf-card-h"><span class="xf-cl">Month<small>5 values</small></span><button class="tool" data-tip="Clear this filter" aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
-      <div class="xf-srch"><svg width="13" height="13"><use href="#i-search"/></svg>Search</div>
+      <div class="xf-th"><span>Month</span><span class="xf-th-n"><i class="xf-sort" aria-hidden="true"></i>Count</span></div>
       <div class="xf-list">
         <div class="xf-row dim"><span class="nm">May</span><span class="xf-trk"><i style="width:100%"></i></span><span class="xf-cnt">31</span></div>
         <div class="xf-row dim"><span class="nm">June</span><span class="xf-trk"><i style="width:97%"></i></span><span class="xf-cnt">30</span></div>
@@ -1574,8 +1582,8 @@ supporting marks.</p>
         <div class="xf-row dim"><span class="nm">September</span><span class="xf-trk"><i style="width:97%"></i></span><span class="xf-cnt">30</span></div>
       </div></div>
     <div>
-      <div class="xf-card-h"><span class="xf-cl">Wind<small>4 bands</small></span><button class="tool" data-tip="Clear this filter" aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
-      <div class="xf-srch"><svg width="13" height="13"><use href="#i-search"/></svg>Search</div>
+      <div class="xf-card-h"><span class="xf-cl">Wind<small>4 bands</small></span><button class="tool" disabled aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+      <div class="xf-th"><span>Wind</span><span class="xf-th-n"><i class="xf-sort" aria-hidden="true"></i>Count</span></div>
       <div class="xf-list">
         <div class="xf-row"><span class="nm">Calm (under 5)</span><span class="xf-trk"><i style="width:10%"></i></span><span class="xf-cnt">3</span></div>
         <div class="xf-row"><span class="nm">Light (5 to 10)</span><span class="xf-trk"><i style="width:100%"></i></span><span class="xf-cnt">17</span></div>
@@ -1583,8 +1591,9 @@ supporting marks.</p>
         <div class="xf-row"><span class="nm">Strong (15 and over)</span><span class="xf-trk"><i style="width:6%"></i></span><span class="xf-cnt">1</span></div>
       </div></div>
     <div>
-      <div class="xf-card-h"><span class="xf-cl">Day<small>31 values</small></span><button class="tool" data-tip="Clear this filter" aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
-      <div class="xf-srch"><svg width="13" height="13"><use href="#i-search"/></svg>Search</div>
+      <div class="xf-card-h"><span class="xf-cl">Day<small>31 values</small></span><button class="tool" disabled aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
+      <div class="xf-srch"><svg width="14" height="14"><use href="#i-search"/></svg>Search…</div>
+      <div class="xf-th"><span>Day</span><span class="xf-th-n"><i class="xf-sort" aria-hidden="true"></i>Count</span></div>
       <div class="xf-list" id="xf-days"></div></div>
   </div>
   <div class="o-foot"><span>31 of 153 rows</span></div>
