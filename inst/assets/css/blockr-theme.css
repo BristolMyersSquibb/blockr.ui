@@ -345,3 +345,14 @@ label:has(input[type="file"]) {
   box-shadow: none !important;
 }
 
+
+/* ============================================
+   Text edited in place
+   ============================================ */
+/* The text cursor says the text is editable; blockr-ui.js adds the tooltip
+   naming the gesture. Here rather than in blockr-blocks.css, whose
+   dependency name blockr.dplyr's older copy still wins on boards with dplyr
+   blocks. */
+[data-blockr-editable] {
+  cursor: text;
+}

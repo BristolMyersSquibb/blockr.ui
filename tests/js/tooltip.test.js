@@ -144,3 +144,21 @@ test('an empty attribute shows nothing', (newWindow) => {
   assert.ok(!card(win));
   win.close();
 });
+
+test('editable text names its gesture, the default or its own', (newWindow) => {
+  const win = newWindow();
+  const a = win.document.createElement('span');
+  a.textContent = 'Filter rows';
+  a.setAttribute('data-blockr-editable', '');
+  const b = win.document.createElement('span');
+  b.textContent = 'Overview';
+  b.setAttribute('data-blockr-editable', 'Click to rename');
+  win.document.body.append(a, b);
+  over(win, a);
+  assert.strictEqual(win.Blockr.tooltip.text(a), 'Double-click to edit');
+  over(win, b);
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Click to rename');
+  b.removeAttribute('data-blockr-editable');
+  assert.strictEqual(win.Blockr.tooltip.text(b), '', 'none once the attribute goes');
+  win.close();
+});
