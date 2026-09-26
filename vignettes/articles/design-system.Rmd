@@ -1082,6 +1082,12 @@ Drawn in the [design system page](design-system/index.html#labels).
   largest first; a click flips the sorted column and a click on the other
   sorts it (values A to Z, Count largest first). It has no unsorted state.
   The 200px scroll area shows about 6 rows.
+- **Pools:** the group's and the subgroup's are edited alike, and the
+  subgroup's say so ("Subgroup pools", "Add subgroup pool"). A group's pools
+  may overlap; a subgroup's may not, because tables pool only the outer
+  split. While a subgroup's pools overlap, its fields take the amber cue
+  (`border-warning`, `bg-warning`) and one 12px `text-warning` line names the
+  levels in two columns and the way out.
 - **Bars:** accent fill at `--blockr-mark-weight-supporting`, value end
   rounded by `--blockr-mark-radius`.
 - **Settings:** in the gear tray.
