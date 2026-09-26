@@ -14,7 +14,8 @@ in load order.
 The JavaScript and CSS of the controls blockr blocks are built from:
 \code{Blockr.Select} (single, multi and menu), the Enter button of a field that
 commits on Enter, the required-empty cue, the checkbox, the segmented
-control, the gear tray and the placement routine for floating panels
+control, the gear tray, the tooltip (\code{Blockr.tooltip}), the action menu
+(\code{Blockr.menu}) and the placement routine for floating panels
 (\code{Blockr.place}), all on the \code{window.Blockr} namespace, together with the
 rows, pills, labels and fields they draw.
 }

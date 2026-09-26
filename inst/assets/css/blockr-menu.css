@@ -1,0 +1,290 @@
+/* ============================================================
+   Menu (Blockr.menu)
+   ============================================================
+   The design system's "Menus": one floating surface for every menu of
+   actions. The classes also style markup that is not built by Blockr.menu
+   (a menu rendered from R with its own binding), so the look is the same
+   wherever a menu comes from. That includes a Bootstrap dropdown: the doubled
+   selectors (`.dropdown-menu.blockr-menu`) outrank Bootstrap's own, and its
+   `.active` item reads as the current one. Blockr.place makes a Blockr.menu
+   panel fixed; a Bootstrap dropdown keeps its own positioning. */
+
+.blockr-menu,
+.dropdown-menu.blockr-menu {
+  z-index: 1070;
+  min-width: 180px;
+  box-sizing: border-box;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--blockr-color-bg-raised);
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: 10px;
+  box-shadow: var(--blockr-shadow-md);
+  color: var(--blockr-color-text-default);
+  font-size: var(--blockr-font-size-base);
+  outline: none;
+}
+
+/* Rows: 34px at 14px, radius 6, 10px side padding, a little more air than a
+   Select list, which is read top to bottom where a menu is scanned for one
+   verb. Hover and the keyboard row share one look, where meta text and icons
+   turn default. */
+.blockr-menu__item,
+.dropdown-item.blockr-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--blockr-radius-md);
+  background: transparent;
+  color: var(--blockr-color-text-default);
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.blockr-menu__item:hover,
+.blockr-menu__item:active,
+.blockr-menu__item:focus-visible,
+.blockr-menu__item--active {
+  background: var(--blockr-color-bg-hover);
+  color: var(--blockr-color-text-default);
+}
+
+.blockr-menu__item--current,
+.blockr-menu__item.active {
+  font-weight: var(--blockr-font-weight-semibold);
+  color: var(--blockr-color-text-default);
+  background: transparent;
+}
+
+.blockr-menu__item.active:hover {
+  background: var(--blockr-color-bg-hover);
+}
+
+/* A destructive row is plain at rest and red only under the pointer, so the
+   menu does not shout about deleting every time it opens. */
+.blockr-menu__item--danger:hover,
+.blockr-menu__item--danger.blockr-menu__item--active {
+  background: var(--blockr-color-bg-danger);
+  color: var(--blockr-color-text-danger);
+}
+
+.blockr-menu__item.blockr-menu__item--quiet {
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-menu__item.blockr-menu__item--quiet:hover,
+.blockr-menu__item.blockr-menu__item--quiet.blockr-menu__item--active {
+  color: var(--blockr-color-text-default);
+}
+
+.blockr-menu__check {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--blockr-color-text-accent);
+}
+
+.blockr-menu__item[aria-disabled="true"] {
+  color: var(--blockr-color-text-disabled);
+  background: transparent;
+  cursor: default;
+}
+
+.blockr-menu__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 16px;
+  justify-content: center;
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-menu__icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.blockr-menu__item:hover .blockr-menu__icon,
+.blockr-menu__item--active .blockr-menu__icon,
+.blockr-menu__item:hover .blockr-menu__meta,
+.blockr-menu__item--active .blockr-menu__meta {
+  color: var(--blockr-color-text-default);
+}
+
+.blockr-menu__item--danger:hover .blockr-menu__icon,
+.blockr-menu__item--danger.blockr-menu__item--active .blockr-menu__icon {
+  color: var(--blockr-color-text-danger);
+}
+
+/* A small space between groups; `.blockr-menu__divider` is the rule. */
+.blockr-menu__gap {
+  height: 6px;
+}
+
+.blockr-menu__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.blockr-menu__meta {
+  flex-shrink: 0;
+  margin-left: 12px;
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-menu__meta--mono {
+  font-family: var(--blockr-font-mono);
+}
+
+/* A rule between groups without a title, edge to edge. */
+.blockr-menu__divider {
+  height: 1px;
+  margin: 5px -6px;
+  background: var(--blockr-color-border-default);
+}
+
+.blockr-menu .dropdown-divider {
+  margin: 5px -6px;
+  border-top-color: var(--blockr-color-border-default);
+  opacity: 1;
+}
+
+/* A group title: the section-title style, inset to the row text. */
+.blockr-menu__title {
+  padding: 8px 10px 4px;
+  font-size: var(--blockr-font-size-xs);
+  font-weight: var(--blockr-font-weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--blockr-color-text-muted);
+}
+
+/* The head: a name (with a badge) and a line of text above the rows, as the
+   block's "…" menu shows the block's name, package and description. */
+.blockr-menu__head {
+  max-width: 300px;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--blockr-color-border-default);
+  font-size: var(--blockr-font-size-xs);
+  color: var(--blockr-color-text-muted);
+  white-space: normal;
+}
+
+.blockr-menu__head-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--blockr-font-size-sm);
+  font-weight: var(--blockr-font-weight-semibold);
+  color: var(--blockr-color-text-default);
+}
+
+.blockr-menu__head-text {
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* A neutral badge: 18px capsule, 11px weight 500. */
+.blockr-menu__badge {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: var(--blockr-radius-pill);
+  background: var(--blockr-color-bg-subtle);
+  color: var(--blockr-color-text-muted);
+  font-size: 11px;
+  font-weight: var(--blockr-font-weight-medium);
+}
+
+/* One muted line on top, saying what the menu is for ("Append to Dataset"). */
+.blockr-menu__caption {
+  padding: 6px 10px 4px;
+  font-size: var(--blockr-font-size-xs);
+  color: var(--blockr-color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The filter box: part of the menu, not a field. 30px, 13px, no focus ring,
+   since it holds the focus the whole time the menu is open. It stays on top
+   while the rows scroll under it. */
+.blockr-menu__filter {
+  position: sticky;
+  top: -6px;
+  z-index: 1;
+  margin: -6px -6px 4px;
+  padding: 6px 6px 4px;
+  background: var(--blockr-color-bg-raised);
+}
+
+.blockr-menu__filter-input {
+  display: block;
+  width: 100%;
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: var(--blockr-radius-md);
+  background: var(--blockr-color-bg-field);
+  color: var(--blockr-color-text-default);
+  font: inherit;
+  font-size: var(--blockr-font-size-sm);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.blockr-menu__filter-input::placeholder {
+  color: var(--blockr-color-text-muted);
+}
+
+/* A block's mark in a list row: 24px, its glyph in the category colour on an
+   18% tint of it. */
+.blockr-menu__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--blockr-radius-md);
+  color: var(--blockr-menu-mark, var(--blockr-color-text-muted));
+  background: color-mix(in srgb, var(--blockr-menu-mark, var(--blockr-color-text-muted)) 18%, var(--blockr-color-bg-raised));
+}
+
+.blockr-menu__mark svg {
+  width: 14px;
+  height: 14px;
+}
+
+.blockr-menu__item .blockr-menu__badge {
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.blockr-menu__item[hidden],
+.blockr-menu__title[hidden],
+.blockr-menu__gap[hidden],
+.blockr-menu__divider[hidden],
+.blockr-menu__empty[hidden] {
+  display: none;
+}
+
+.blockr-menu__empty {
+  padding: 10px;
+  text-align: center;
+  font-style: italic;
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-muted);
+}

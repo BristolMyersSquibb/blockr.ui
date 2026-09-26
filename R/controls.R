@@ -3,7 +3,8 @@
 #' The JavaScript and CSS of the controls blockr blocks are built from:
 #' `Blockr.Select` (single, multi and menu), the Enter button of a field that
 #' commits on Enter, the required-empty cue, the checkbox, the segmented
-#' control, the gear tray and the placement routine for floating panels
+#' control, the gear tray, the tooltip (`Blockr.tooltip`), the action menu
+#' (`Blockr.menu`) and the placement routine for floating panels
 #' (`Blockr.place`), all on the `window.Blockr` namespace, together with the
 #' rows, pills, labels and fields they draw.
 #'
@@ -34,6 +35,7 @@ controls_dep <- function() {
     theme_dep(),
     controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
     controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css"),
+    controls_asset("blockr-menu-css", stylesheet = "css/blockr-menu.css"),
     controls_asset(
       "blockr-settings-band",
       stylesheet = "css/blockr-settings-band.css"
