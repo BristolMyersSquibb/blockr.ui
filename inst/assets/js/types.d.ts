@@ -90,6 +90,8 @@ interface BlockrSelectConfig extends BlockrSelectConfigBase {
   onChange?: (value: any) => void;
   title?: string;
   labelFirst?: boolean;
+  /** Menu only: 'end' lines it up with the anchor's right edge (header-row tools). */
+  align?: 'start' | 'end';
   searchPlaceholder?: string;
   onClose?: () => void;
 }
