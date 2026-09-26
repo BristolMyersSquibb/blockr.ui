@@ -137,3 +137,17 @@ test('editable text names its gesture, the default or its own', (newWindow) => {
   assert.strictEqual(win.Blockr.tooltip.text(b), '', 'none once the attribute goes');
   win.close();
 });
+
+test('a native title is taken over on the first hover', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  b.setAttribute('title', 'Attach file');
+  over(win, b);
+  assert.strictEqual(b.getAttribute('title'), null, 'the native title goes');
+  assert.strictEqual(b.getAttribute('aria-label'), 'Attach file', 'an icon-only button keeps it as its name');
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Attach file');
+  b.setAttribute('title', 'Send message');
+  over(win, b);
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Send message', 'a title written again is taken again');
+  win.close();
+});
