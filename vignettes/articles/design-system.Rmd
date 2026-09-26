@@ -647,6 +647,24 @@ title, an outline row, a view name, a tab (in bare mode).
   duplicate name is refused in place: the field's `border-danger` edge and a
   one-line 12px `text-danger` message under it.
 
+### Search field
+
+A field that narrows a list on a block's face: a crossfilter card, the
+patient profile's sidebar.
+
+- 30px (`control-h-sm`), radius 6 (`radius-md`), `bg-field`, 1px
+  `border-default`, 13px `text-default`. Placeholder "Search…" in
+  `text-muted`.
+- A 14px magnifier in `text-muted`, 9px from the left; the text starts at
+  30px.
+- While there is text, a 22px clear button at the right: a thin ×,
+  `text-muted`, radius 4, the hover wash. Escape clears too.
+- Focus: `bg-surface`, `border-accent` and the focus ring.
+- It filters as you type. A list shows it only above 8 entries, as a menu
+  shows its filter box.
+- Menus keep Select's filter box, which has no magnifier: the list under it
+  already says what it filters.
+
 Drawn in the [design system page](design-system/index.html#controls).
 
 ---
@@ -1130,16 +1148,35 @@ and the composer table, which render annotated data frames).
   the header row at the top. "Group by" is a field with a label; "Filter by" is
   a section title over the tags and cards. (The population filter, a block that
   joins two blocks in one, keeps its own layout.)
-- **Reset all:** the 26px main button with a count ([Labels](#labels)).
-- **Filter by tags:** 13px tags; a filtering tag wears the accent tint.
-- **Filter cards:** search 30px; reset and remove icons 26px and always shown;
-  rows 30px. The 200px scroll area shows about 6 rows.
+- **Reset all:** the 26px main button with the reset icon and the count of
+  active filters, no label; disabled when nothing is filtered. Its tooltip
+  names the clause it undoes ([Labels](#labels)).
+- **Filter by tags:** 13px tags. A tag whose card is open takes the hover wash
+  (`bg-hover`); a tag cutting rows wears the accent tint, which wins when both
+  hold.
+- **Filter cards:** the column's name with its label as meta. Reset and remove
+  are 26px tools, always shown; the reset is disabled while the card cuts no
+  rows, like Reset all. Above 8 values the card has a search field
+  ([Controls](#controls)).
+- **The card's list** is a table and follows [Tables](#special): headers 13px
+  weight 600 with the rule under each, rows 30px at 14px with 12px side
+  padding, Count right-aligned with the sort bars before it, missing and empty
+  values (`NA`, `(empty)`) in `text-muted` and last. It starts sorted by Count,
+  largest first; a click flips the sorted column and a click on the other
+  sorts it (values A to Z, Count largest first). It has no unsorted state.
+  The 200px scroll area shows about 6 rows.
+- **Pools:** the group's and the subgroup's are edited alike, and the
+  subgroup's say so ("Subgroup pools", "Add subgroup pool"). A group's pools
+  may overlap; a subgroup's may not, because tables pool only the outer
+  split. While a subgroup's pools overlap, its fields take the amber cue
+  (`border-warning`, `bg-warning`) and one 12px `text-warning` line names the
+  levels in two columns and the way out.
 - **Bars:** accent fill at `--blockr-mark-weight-supporting`, value end
   rounded by `--blockr-mark-radius`.
 - **Settings:** in the gear tray.
-- **Type badges** in the column search are neutral badges (B4).
-- Literal `#fff`, rgba accents and Bootstrap reds in its stylesheet become
-  tokens.
+- **"+ More filters"** opens a menu of every column, grouped by table, each
+  with its type as a neutral badge. A column with a card is a multi pick (the
+  tick); a click adds or removes its card.
 
 ### Code editor
 
