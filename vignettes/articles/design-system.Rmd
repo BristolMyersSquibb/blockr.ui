@@ -746,9 +746,16 @@ part of this layer.
 Every menu, dropdown and list that floats uses one surface:
 
 - `bg-raised`, 1px `border-default`, radius 8 (`radius-lg`, the same as the
-  field it opens from), `shadow-md`, 4px inner padding.
-- Rows 32px at 14px, radius 4 (`radius-sm`), 10px side padding. Meta text
-  13px.
+  field it opens from), `shadow-md`.
+- Rows at 14px, radius 4 (`radius-sm`), 10px side padding. Meta text 13px.
+- Row height and inner padding follow the trigger. A field dropdown holds a
+  list of values you scan, so it stays dense; a menu from a button, an icon or
+  a word is mostly a short list of actions and gets more room.
+
+| Menu | Rows | Inner padding |
+|---|---|---|
+| field dropdown | 32px | 4px |
+| menu from a button, an icon or a word | 34px | 6px |
 - The dock "…" menu, the download menus, the add menu and the @ menu move to
   it. The beak belongs to the gear tray only.
 
@@ -765,7 +772,7 @@ The views menu drops its blue fill for the current view.
 **Group titles and dividers.** A group title uses the section-title style
 (12px, 600, uppercase, 0.05em, `text-muted`), 8px above and 4px below, inset to
 the row text (10px). In a list that scrolls it is sticky. A divider (1px
-`border-default`, 4px above and below, edge to edge) separates groups without a
+`border-default`, the menu's inner padding above and below, edge to edge) separates groups without a
 title, such as ordinary actions from a destructive one. A destructive item is
 `text-danger`.
 

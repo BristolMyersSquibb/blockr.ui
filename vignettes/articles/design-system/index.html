@@ -260,9 +260,13 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .joined .b:last-child { border-radius: 0 var(--blockr-radius-sm) var(--blockr-radius-sm) 0; margin-left: -1px; padding: 0 7px; }
 
 /* ================================================================ floating */
-.mn { position: absolute; z-index: 40; min-width: 180px; max-width: 320px; max-height: 320px; overflow: auto; padding: 4px; background: var(--blockr-color-bg-raised); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg); box-shadow: var(--blockr-shadow-md); font-size: var(--blockr-font-size-base); }
+/* Two row sizes: a menu from a button, an icon or a word takes 34px rows and
+   6px padding; a field dropdown (.fd) keeps 32px and 4px for the lists it scans. */
+.mn { --mn-row: 34px; --mn-pad: 6px; }
+.mn.fd { --mn-row: 32px; --mn-pad: 4px; }
+.mn { position: absolute; z-index: 40; min-width: 180px; max-width: 320px; max-height: 320px; overflow: auto; padding: var(--mn-pad); background: var(--blockr-color-bg-raised); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-lg); box-shadow: var(--blockr-shadow-md); font-size: var(--blockr-font-size-base); }
 .mn.static { position: relative; z-index: auto; }
-.mr { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border-radius: var(--blockr-radius-sm); cursor: pointer; white-space: nowrap; color: var(--blockr-color-text-default); }
+.mr { display: flex; align-items: center; gap: 8px; height: var(--mn-row); padding: 0 10px; border-radius: var(--blockr-radius-sm); cursor: pointer; white-space: nowrap; color: var(--blockr-color-text-default); }
 .mr .lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .mr:hover, .mr.hi { background: var(--blockr-color-bg-hover); }
 .mr.cur { font-weight: 600; }
@@ -271,13 +275,13 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .mr.dis, .mr.dis .meta { color: var(--blockr-color-text-disabled); cursor: default; }
 .mr.dis:hover { background: none; }
 .mr.danger { color: var(--blockr-color-text-danger); }
-.mt { position: sticky; top: -4px; z-index: 1; background: var(--blockr-color-bg-raised); padding: 8px 10px 4px; font-size: var(--blockr-font-size-xs); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--blockr-color-text-muted); }
+.mt { position: sticky; top: calc(-1 * var(--mn-pad)); z-index: 1; background: var(--blockr-color-bg-raised); padding: 8px 10px 4px; font-size: var(--blockr-font-size-xs); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--blockr-color-text-muted); }
 .mn.has-filter .mt { top: 30px; }
-.mf { position: sticky; top: -4px; z-index: 2; background: var(--blockr-color-bg-raised); padding: 0 0 4px; margin-top: 0; }
+.mf { position: sticky; top: calc(-1 * var(--mn-pad)); z-index: 2; background: var(--blockr-color-bg-raised); padding: 0 0 4px; margin-top: 0; }
 .mf input { width: 100%; height: 30px; padding: 0 10px; border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-md); background: var(--blockr-color-bg-field); font: inherit; font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-default); outline: none; }
 .mf input:focus { border-color: var(--blockr-color-border-accent); background: var(--blockr-color-bg-surface); }
 .mf input::placeholder { color: var(--blockr-color-text-muted); }
-.md { height: 1px; background: var(--blockr-color-border-default); margin: 4px -4px; }
+.md { height: 1px; background: var(--blockr-color-border-default); margin: var(--mn-pad) calc(-1 * var(--mn-pad)); }
 .mh { padding: 6px 10px 8px; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); line-height: 1.5; white-space: normal; }
 .mh b { color: var(--blockr-color-text-default); font-weight: 600; font-size: var(--blockr-font-size-sm); margin-right: 4px; }
 
@@ -1369,12 +1373,13 @@ to see the flip.</p>
 <code>shadow-md</code>. blockr has no popovers. <a href="../design-system.html#floating">rules: design-system#floating</a></p>
 
 <h3 class="sh" id="menus">Menus</h3>
-<p class="note">Raised surface, 1px border, radius 8, 4px padding. Rows 32px at 14px with 10px side padding; meta 13px, muted,
+<p class="note">Raised surface, 1px border, radius 8. A field dropdown has 32px rows and 4px padding; a menu from a button, an icon or
+a word has 34px rows and 6px padding. Rows are 14px with 10px side padding; meta 13px, muted,
 turning default on the hovered row. The current pick is weight 600. Disabled rows stay listed and say why in a tooltip. Group
 titles take the section-title style, sticky while the list scrolls; a divider separates groups without a title.</p>
 <div class="cols c3">
   <div><p class="cap">A field dropdown: filter box above 8 options, groups, hovered row, current pick, disabled row</p>
-    <div class="mn static has-filter" style="max-width:260px;max-height:320px">
+    <div class="mn static fd has-filter" style="max-width:260px;max-height:320px">
       <div class="mf"><input placeholder="Filter" aria-label="Filter"></div>
       <div class="mr cur"><span class="lab">None</span></div>
       <div class="mt">Categorical</div>
@@ -1861,7 +1866,7 @@ function closeMenu() {
 function place(el, t) {
   const r = t.getBoundingClientRect();
   const kind = t.dataset.place || 'button';
-  if (kind === 'field') { el.style.width = Math.max(r.width, 190) + 'px'; el.style.maxWidth = 'none'; }
+  if (kind === 'field') { el.classList.add('fd'); el.style.width = Math.max(r.width, 190) + 'px'; el.style.maxWidth = 'none'; }
   const w = el.offsetWidth, h = el.offsetHeight;
   let left = kind === 'right' ? r.right - w : r.left;
   left = Math.max(8, Math.min(left, innerWidth - w - 8));
