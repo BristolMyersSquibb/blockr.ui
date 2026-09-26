@@ -36,6 +36,7 @@ controls_dep <- function() {
     controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
     controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css"),
     controls_asset("blockr-menu-css", stylesheet = "css/blockr-menu.css"),
+    controls_asset("blockr-tooltip-css", stylesheet = "css/blockr-tooltip.css"),
     controls_asset(
       "blockr-settings-band",
       stylesheet = "css/blockr-settings-band.css"

@@ -551,7 +551,7 @@ table_preview_dep <- function() {
 table_preview_tooltip_dep <- function() {
   list(
     controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
-    controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css")
+    controls_asset("blockr-tooltip-css", stylesheet = "css/blockr-tooltip.css")
   )
 }
 
