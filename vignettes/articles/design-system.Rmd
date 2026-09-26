@@ -532,8 +532,8 @@ selected row, the active group's front tab.
 
 `Blockr.Select` is the only dropdown, single and multi.
 
-- In the grid it is a bordered 42px field with a caret. Inside a row it is
-  bare.
+- In the grid it is a bordered 42px field with the chevron (see
+  [Chevrons](#actions)). Inside a row it is bare.
 - Options show the value first and the label after it as 13px muted meta text
   (for columns, see [Column names and their labels](#labels));
   the label is cut first when space runs out.
@@ -598,7 +598,7 @@ For four or more values inside a row: the filter operator, the join key
 operator, viz's `.dd-func-btn` (n, N, %, Σ).
 
 - 24px inside a 42px row, radius 4, 1px `border-default`, `bg-surface`, 12px
-  weight 500 `text-muted`, with a caret so it reads as a choice. Hover:
+  weight 500 `text-muted`, with the 10px chevron so it reads as a choice. Hover:
   `border-strong`, `text-default`.
 - A click opens `Blockr.Select.menu()` anchored on the pill, listing every
   value.
@@ -689,6 +689,29 @@ small dots in `text-muted`. Handles and remove buttons are hidden at rest and
 appear on hover or keyboard focus of their row; remove turns `text-danger` on
 hover. Fold arrows stay visible. The crossfilter's filter cards are the
 exception (see [Special blocks](#special)).
+
+### Chevrons
+
+One chevron does every disclosure, dropdown and "go to" arrow:
+`Blockr.icons.chevron` in blockr.ui. It is a 12px box with the path
+`M3 4.5l3 3 3-3`, half the box wide and a quarter high with a right angle at
+the tip, stroked at 1.4px with round caps and joins and no fill.
+
+- Size: 12px; 10px inside a 24px pill or a bare select in a row. The stroke
+  stays 1.4px at both sizes.
+- Colour: `text-muted` at rest; `text-default` on hover of the chevron or of
+  the row or control it belongs to; `text-disabled` when disabled.
+- A fold (something opens in place: a table section, an outline chapter, a
+  settings section) points down when open and right when closed, rotating
+  −90°.
+- A menu or select (something floats: Select, a pill, the navbar's view menu,
+  a split button) points down and flips up (180°) while its menu is open.
+- A "go to" arrow (an options page, back, the next page of rows) points right
+  or left and does not rotate.
+- Every rotation uses `--blockr-transition`.
+- No other glyph does this job: no Bootstrap Icons chevrons, no Bootstrap's
+  own select and accordion arrows, no border triangles, no ▾ ▸ ‹ ›
+  characters.
 
 ### The navbar
 
@@ -1067,6 +1090,9 @@ Drawn in the [design system page](design-system/index.html#special).
       26px. No Bootstrap solid buttons.
 - [ ] Header row: 26px tools, gear last, `.blockr-gear-btn` on the gear only.
       No gear if there are no options. Every option is in the gear.
+- [ ] Chevrons: `Blockr.icons.chevron` only, 12px (10px in a pill). Folds
+      point down open and right closed; menus flip up while open; "go to"
+      arrows point right or left.
 - [ ] Menus through `Blockr.Select` / `Select.menu()` and the shared placement
       routine. No popovers. Tooltips on icon-only buttons and cut-off labels
       only, using the light card; no native `title`.
@@ -1090,7 +1116,7 @@ blockr.ui owns the tokens (`inst/assets/css/blockr-tokens.css`,
 from blockr.extra), `Blockr.Select` and its placement routine,
 `Blockr.checkbox`, the badge, tag, pill and count classes, the slot and offer
 rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
-`crossfilter-block.css`), the gear button, and the column-label reader. blockr.dock owns the dock
+`crossfilter-block.css`), the gear button, the chevron (`Blockr.icons.chevron`), and the column-label reader. blockr.dock owns the dock
 header, the "…" menu, the block status dot, the category colours
 (`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
 rule that hides the gear in simplified mode. blockr.theme owns data colours.
@@ -1143,7 +1169,7 @@ variables and reads the blockr tokens.
 Tables (header, row height, number alignment, selected row, sort cue),
 dialogs (surface, width, title, button order), dock tabs beyond their selected
 state, the DAG view, notifications (Shiny's `showNotification`), and the icon
-set with its sizes.
+set with its sizes (the chevron is specified under [Actions](#actions)).
 
 ### Decision record
 
