@@ -287,22 +287,3 @@ test('the filter prompt survives a pick', (newWindow) => {
   m.close();
   win.close();
 });
-
-test('align: end lines the menu up with the anchor\'s right edge', (newWindow) => {
-  const win = newWindow();
-  Object.defineProperty(win.document.documentElement, 'clientWidth', { value: 1200 });
-  const place = (align) => {
-    const a = anchorIn(win, 'Download');
-    a.getBoundingClientRect = () =>
-      ({ left: 500, right: 526, top: 10, bottom: 36, width: 26, height: 26 });
-    const m = win.Blockr.Select.menu(a, { options: COLS, align });
-    const lists = win.document.querySelectorAll('.blockr-select__dropdown');
-    const left = parseFloat(lists[lists.length - 1].style.left);
-    m.close();
-    return left;
-  };
-  // happy-dom has no layout, so the menu's width is the 180px minimum.
-  assert.strictEqual(place(undefined), 500);
-  assert.strictEqual(place('end'), 526 - 180);
-  win.close();
-});

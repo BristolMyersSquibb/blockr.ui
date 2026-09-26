@@ -548,8 +548,6 @@
         // 180 to 320px (design system, Menus).
         width: headless ? { min: 180, max: 320 } : 'anchor',
         minWidth: 190,
-        // A menu from a header-row tool lines up with the tool's right edge.
-        align: config.align === 'end' ? 'end' : 'start',
         onFlip: (above) => root.classList.toggle('blockr-select--above', above)
       });
       syncDocClick();
