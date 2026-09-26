@@ -560,6 +560,9 @@
         // 180 to 320px (design system, Menus).
         width: headless ? { min: 180, max: 320 } : 'anchor',
         minWidth: 190,
+        // The word can be redrawn under an open menu (a multi pick recomposes
+        // the block); the caller says how to find it again.
+        reanchor: typeof config.reanchor === 'function' ? config.reanchor : undefined,
         onFlip: (above) => root.classList.toggle('blockr-select--above', above)
       });
       syncDocClick();
