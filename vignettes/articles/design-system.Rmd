@@ -214,9 +214,9 @@ takes its face from the body.
 |---|---|---|
 | `--blockr-font-size-xs` | 12px (0.75rem) | field labels, section titles, captions, status lines, tooltips, offers |
 | `--blockr-font-size-sm` | 13px (0.8125rem) | output subtitle and sentence, code, menu meta text, tags |
-| `--blockr-font-size-base` | 14px (0.875rem) | body, field values, menu rows, buttons at 42px, the block title |
-| `--blockr-font-size-lg` | 16px (1rem) | output title, the one heading on an output block |
-| `--blockr-font-size-xl` | 20px (1.25rem) | page titles outside the board (the block title is 14px, `base`) |
+| `--blockr-font-size-base` | 14px (0.875rem) | body, field values, menu rows, buttons at 42px |
+| `--blockr-font-size-lg` | 16px (1rem) | the block title, output title, the one heading on an output block |
+| `--blockr-font-size-xl` | 20px (1.25rem) | page titles outside the board (the block title is 16px, `lg`) |
 
 There is no `md` step. Two sizes sit off the scale on purpose: badges and
 counts at 11px, and text on a chart canvas at `--blockr-mark-font-size` (11px).
@@ -303,9 +303,10 @@ Drawn in the [design system page](design-system/index.html#foundations).
 
 ### Anatomy, top to bottom
 
-1. **Dock header (compact).** One row: the block's mark (a 28px tinted square
-   in its category colour, carrying the status dot), the block title at 14px
-   (`font-size-base`) weight 600 `text-default`, the "…" menu on the right (with a block's own control, such as the AI assistant, left of it). No subtitle:
+1. **Dock header.** One row: the block's mark (a 32px tinted square in its
+   category colour, carrying the status dot), the block title at 16px
+   (`font-size-lg`) weight 600 `text-default`, wrapping to a second line and
+   cut after it, the "…" menu on the right (with a block's own control, such as the AI assistant, left of it). No subtitle:
    the block type and package are the mark's tooltip ("filter block ·
    blockr.dplyr"). About 52px.
 2. **Header row.** Output blocks put the output title and the sentence on the
@@ -671,9 +672,8 @@ assistant replaces it). They are quieter than other tools: at rest their icon
 is `border-strong` grey, on hover `text-disabled` on the `bg-hover` wash, so
 the header reads as the block's name. The section toggles (Controls, Preview)
 are the menu's first group: each a row with its familiar icon and a check
-when on, then a rule, then the block's actions. A narrow card (under
-about 380px) steps the header down to a 32px mark and a 16px title that may
-wrap to two lines. The accent tint's fill and frame are for the builder/code
+when on, then a rule, then the block's actions. The header has one size at every
+card width. The accent tint's fill and frame are for the builder/code
 switch, which changes how a value is edited rather than what is shown.
 
 ### The gear button
