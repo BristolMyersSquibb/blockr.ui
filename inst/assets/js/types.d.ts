@@ -246,6 +246,8 @@ interface BlockrMenuItem {
   mono?: boolean;
   /** The item in use (the active view): weight 600. */
   current?: boolean;
+  /** A toggle row; true shows a check (role menuitemcheckbox). */
+  checked?: boolean;
   /** A destructive action: red under the pointer. */
   danger?: boolean;
   /** A muted row, such as "Manage pages". */

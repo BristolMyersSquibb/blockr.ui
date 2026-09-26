@@ -214,3 +214,17 @@ test('Enter takes the first row whose label matches before a keyword match', (ne
   assert.deepStrictEqual(picked, ['filter']);
   win.close();
 });
+
+test('a checked row carries a check and its state, without the current weight', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, { items: [{ label: 'Controls', checked: true }, { label: 'Preview', checked: false }] });
+  const rows = panel(win).querySelectorAll('.blockr-menu__item');
+  assert.strictEqual(rows[0].getAttribute('role'), 'menuitemcheckbox');
+  assert.strictEqual(rows[0].getAttribute('aria-checked'), 'true');
+  assert.ok(rows[0].querySelector('.blockr-menu__check'));
+  assert.ok(!rows[0].classList.contains('blockr-menu__item--current'));
+  assert.strictEqual(rows[1].getAttribute('aria-checked'), 'false');
+  assert.ok(!rows[1].querySelector('.blockr-menu__check'));
+  win.close();
+});

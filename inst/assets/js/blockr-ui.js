@@ -527,7 +527,8 @@ Blockr.tooltip = (() => {
  *   { label, icon?, meta?, mono?, current?, danger?, quiet?, disabled?,
  *     reason?, onSelect? }   a row; `meta` is grey text after the label
  *                            (`mono` sets it in the code face), `current` the
- *                            item in use (weight 600 and a check), `danger` a
+ *                            item in use (weight 600 and a check), `checked`
+ *                            a toggle that is on (a check), `danger` a
  *                            destructive action (red only under the pointer),
  *                            `quiet` a muted row such as "Manage pages",
  *                            `reason` the tooltip on a disabled row
@@ -684,11 +685,17 @@ Blockr.menu = (() => {
       label.className = 'blockr-menu__label';
       label.textContent = item.label;
       row.appendChild(label);
-      if (item.current) {
+      // `checked`: a toggle that is on (a check, no weight); `current`: the
+      // item in use (weight 600 and a check).
+      if (item.current || item.checked) {
         const check = document.createElement('span');
         check.className = 'blockr-menu__check';
         check.innerHTML = Blockr.icons.check;
         row.appendChild(check);
+      }
+      if ('checked' in item) {
+        row.setAttribute('role', 'menuitemcheckbox');
+        row.setAttribute('aria-checked', item.checked ? 'true' : 'false');
       }
       if (item.meta) {
         const meta = document.createElement('span');
