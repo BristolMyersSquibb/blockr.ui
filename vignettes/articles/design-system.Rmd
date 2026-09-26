@@ -1004,6 +1004,13 @@ names, an exhibit in labels.
     tell none from broken: "No medication records between D-30 and D189".
   A panel keeps its title and sentence above the line; the panel does not
   change size to hold it.
+- A filter that narrows what the reader sees (the population filter, a
+  drill) says so in one place: while nothing is filtered, grey 12px text
+  with the count ("306 patients"); while something is, the same place is
+  the 26px main button with the reset icon and what the filter kept ("179
+  of 306 patients"), which clears it. Count in the unit the reader thinks
+  in (patients, not rows across tables). The tooltip names the clause it
+  clears. No count of active filters: the controls that set them show that.
 - A block-level error or warning (a failed expression, dropped rows) uses the
   message style, above the output: `text-<status>` on `bg-<status>` with a
   `border-<status>-subtle` edge, 13px, radius 6. Danger for errors, the amber set for
