@@ -720,7 +720,7 @@ Blockr.actionMenu = (() => {
 
   /** @param {HTMLElement} panel */
   const rows = (panel) => /** @type {HTMLElement[]} */ (Array.from(
-    panel.querySelectorAll('.blockr-menu__item')).filter((r) => !isDisabled(r)));
+    panel.querySelectorAll('.blockr-menu__item')).filter((r) => !r.hidden && !isDisabled(r)));
 
   /**
    * Disabled by its author (the class), or a download whose handler Shiny
