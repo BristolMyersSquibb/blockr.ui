@@ -661,3 +661,29 @@
   margin: 6px -6px;
   background: var(--blockr-color-border-default);
 }
+
+/* --- Slot (design system, "The sentence and its slots") ---
+   A live word in an output's sentence: accent text, weight 500, a 1px dashed
+   underline, solid on hover or while its menu is open. The underline is a
+   border, as blockr.viz and blockr.dm draw it while they carry their own
+   copies, so a page loading both draws one line. */
+.blockr-slot {
+  padding: 0 0 1px;
+  border: 0;
+  border-bottom: 1px dashed currentColor;
+  background: none;
+  font: inherit;
+  font-weight: var(--blockr-font-weight-medium);
+  color: var(--blockr-color-text-accent);
+  cursor: pointer;
+}
+
+.blockr-slot:hover,
+.blockr-slot--open {
+  border-bottom-style: solid;
+}
+
+.blockr-slot:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}
