@@ -728,7 +728,7 @@ the account. <a href="../design-system.html#actions">rules: design-system#action
 <!-- ================================================================ OVERVIEW -->
 <section class="part" id="overview">
 <h2 class="ph">Two blocks, as decided</h2>
-<p class="rl">A transform block holds the fields that define it on its face; an output block holds its output and a sentence
+<p class="rl">A block's face holds what most uses need; an output block's face is its output and a sentence
 with live words. Both keep the rest behind the gear, which opens the tray in flow and closes on the gear or Escape.
 <a href="../design-system.html#block">rules: design-system#block</a></p>
 
@@ -868,7 +868,7 @@ with live words. Both keep the rest behind the gear, which opens the tray in flo
 <ul class="rules" style="margin:0">
   <li>Components read meaning tokens (<code>--blockr-color-text-muted</code>), never palette steps (<code>--blockr-grey-500</code>) and never a hex. A theme changes a few palette values and dark mode is a second mapping of the same ramps.</li>
   <li>Text has three colours: default for content and headings, muted for what describes it, disabled for disabled controls only.</li>
-  <li>A transform block's face holds the fields that define it and its gear holds the rest. An output block's face holds the output and its sentence. Simplified mode removes the gear button and nothing else.</li>
+  <li>A block's face holds what most uses need; the gear holds the rest. An output block's face holds the output and its sentence. Simplified mode removes the gear button and nothing else.</li>
   <li>A setting applies the moment it changes. There is no Apply button.</li>
   <li>Settings open in flow, in the gear tray. Choices and actions open in a menu on click. Names show in a tooltip on hover. There are no popovers.</li>
   <li>Accent means "on" or "the main action": the tinted main button, a ticked box, a picked segment, a live word, an active filter. A view has at most one main button.</li>
@@ -1325,8 +1325,11 @@ Icon buttons are quiet and carry a tooltip. <a href="../design-system.html#actio
 
 <h3 class="sh" id="buttons">Buttons</h3>
 <p class="note">42px beside inputs, 30px in toolbars and dialogs, 26px in a header row next to the gear. At most one main
-button per view. Destructive is only for confirming a removal. Bootstrap's <code>btn-primary</code>, <code>btn-danger</code>
-and <code>btn-success</code> go.</p>
+button per view. Destructive is only for confirming a removal. The classes are <code>.blockr-btn--main</code>,
+<code>--secondary</code>, <code>--quiet</code>, <code>--danger</code> and the sizes <code>--m</code>, <code>--s</code>,
+<code>--xs</code>. <code>blockr-theme.css</code> maps Bootstrap's button classes onto them, so Shiny's
+<code>actionButton()</code> and <code>downloadButton()</code> follow them, and so do Shiny's modal buttons.
+<code>btn-success</code> goes.</p>
 <div class="card">
 <table class="tok">
   <tr><th></th><th>42 · beside inputs</th><th>30 · toolbars, dialogs</th><th>26 · header row</th></tr>
@@ -1677,7 +1680,7 @@ the active line <code>bg-hover</code>, the input line a band mixed from the acce
   <li><span class="box"></span><span>On/off is a checkbox; two or three fixed values a segmented control; more, or data, a Select; several, tags.</span></li>
   <li><span class="box"></span><span>One gear per block, <code>.blockr-gear-btn</code>, only when there is something to configure. No Apply button.</span></li>
   <li><span class="box"></span><span>Every icon-only button and cut-off label has a tooltip; no native <code>title</code>.</span></li>
-  <li><span class="box"></span><span>Buttons: the tinted main at most once per view; no <code>btn-primary</code>, <code>btn-danger</code>, <code>btn-success</code>.</span></li>
+  <li><span class="box"></span><span>Buttons: the tinted main at most once per view; <code>.blockr-btn</code> or the Bootstrap classes mapped onto it; no <code>btn-success</code>.</span></li>
   <li><span class="box"></span><span>Badges neutral unless they state a status or that something is on.</span></li>
   <li><span class="box"></span><span>Menus through blockr.ui's surface and placement; no popovers.</span></li>
   <li><span class="box"></span><span>Chart canvas text from <code>--blockr-mark-font-size</code>, ink from the tokens at render.</span></li>
@@ -1693,7 +1696,7 @@ the active line <code>bg-hover</code>, the input line a band mixed from the acce
     <h4 class="mini" style="margin-top:0">Where the code lives</h4>
     <ul class="rules" style="margin:0">
       <li>blockr.ui owns the tokens: <code>inst/assets/css/blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>.</li>
-      <li>blockr.ui owns the shared components: badge, tag, pill and count classes, the gear button, Blockr.Select and the one menu placement routine.</li>
+      <li>blockr.ui owns the shared components: badge, tag, pill and count classes, the button classes, the gear button, Blockr.Select and the one menu placement routine, and the Shiny-side controls for blocks rendered in R (<code>select_input()</code>, <code>text_input()</code>, <code>number_input()</code>, <code>checkbox_input()</code>, <code>segmented_input()</code>, <code>gear_tray()</code>).</li>
       <li>blockr.dock owns the dock header and the block category colours (<code>blk_color()</code>).</li>
       <li>blockr.theme owns data colours (chart palettes, map markers).</li>
     </ul>

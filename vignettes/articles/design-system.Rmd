@@ -353,8 +353,7 @@ There is no 16px section heading inside a block.
 
 ### What stays on the face
 
-- A transform block's face holds the fields that define it; the gear holds
-  the rest.
+- A block's face holds what most uses need; the gear holds the rest.
 - An output block's face holds the output and its sentence. A slot in the
   sentence is the only way to put one of its arguments on the face. Its gear
   keeps a row for every argument, slotted or not.
@@ -694,8 +693,18 @@ Four kinds. All are weight 500 and show the focus outline on `:focus-visible`.
 | Destructive | `text-danger`, `border-danger` at 6% fill, `border-danger-subtle` | `border-danger` at 12% fill, `border-danger` | only to confirm a removal |
 | Disabled | `text-disabled`, transparent, `border-default` | none | |
 
-There is no solid accent button. Bootstrap's `btn-primary`, `btn-danger` and
-`btn-success` go.
+The classes are `.blockr-btn` with a kind, `.blockr-btn--main`,
+`--secondary`, `--quiet` or `--danger`, and a size, `.blockr-btn--m`, `--s` or
+`--xs` (`blockr-buttons.css`); a bare `.blockr-btn` is a secondary m.
+`blockr_button()` and `blockr_download_button()` write them for Shiny.
+
+There is no solid accent button. `blockr-theme.css` maps Bootstrap's button
+classes onto the kinds: `btn-primary` is main; `btn-default`,
+`btn-secondary`, `btn-outline-secondary` and `btn-light` are secondary;
+`btn-link` is quiet; `btn-danger` is destructive; `.btn` takes size m and
+`btn-sm` size s. Shiny's `actionButton()` and `downloadButton()` follow this
+section through it. The mapping also restyles the buttons of Shiny's own
+modals, which is intended. `btn-success` has no kind and goes.
 
 | Size | Height | Text | Side padding | Radius | Where |
 |---|---|---|---|---|---|
@@ -1297,7 +1306,11 @@ from blockr.extra), `Blockr.Select` and its placement routine,
 `Blockr.checkbox`, the badge, tag, pill and count classes, the slot and offer
 rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
 `crossfilter-block.css`), the gear button, the tool button and the action
-menu (`tool_button()`, `action_menu()`), the chevron (`Blockr.icons.chevron`), and the column-label reader. blockr.dock owns the dock
+menu (`tool_button()`, `action_menu()`), the button classes
+(`.blockr-btn`, `blockr_button()`), the Shiny-side controls for blocks
+rendered in R (`select_input()`, `text_input()`, `number_input()`,
+`checkbox_input()`, `segmented_input()`, `gear_tray()`, each with its update
+function), the chevron (`Blockr.icons.chevron`), and the column-label reader. blockr.dock owns the dock
 header, the "…" menu, the block status dot, the category colours
 (`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
 rule that hides the gear in simplified mode. blockr.theme owns data colours.
