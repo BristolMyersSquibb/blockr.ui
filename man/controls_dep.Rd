@@ -17,7 +17,9 @@ commits on Enter, the required-empty cue, the checkbox, the segmented
 control, the gear tray, the tooltip (\code{Blockr.tooltip}), the action menu
 (\code{Blockr.menu}) and the placement routine for floating panels
 (\code{Blockr.place}), all on the \code{window.Blockr} namespace, together with the
-rows, pills, labels, fields and buttons (\code{.blockr-btn}) they draw.
+rows, pills, labels, fields and buttons (\code{.blockr-btn}) they draw, and the
+Shiny input bindings of the controls rendered from R (\code{\link[=select_input]{select_input()}} and
+its siblings).
 }
 \details{
 The stylesheets read the design tokens without fallbacks, so the

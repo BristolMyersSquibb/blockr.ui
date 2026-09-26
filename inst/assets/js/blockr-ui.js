@@ -1021,10 +1021,11 @@ Blockr.menu = (() => {
    * the content below is seen moving; Escape inside it, or on the gear,
    * closes it and returns focus to the gear. The gear carries the tooltip "Settings", reports its
    * state in aria-expanded and takes the accent tint while open
-   * (.blockr-gear-active).
+   * (.blockr-gear-active). `open: true` starts it open, without the slide:
+   * a tray drawn again keeps the state it had.
    * @param {HTMLElement} band
    * @param {HTMLButtonElement} gear
-   * @param {{ label?: string }} [opts]
+   * @param {{ label?: string, open?: boolean }} [opts]
    * @returns {BlockrGearTrayHandle}
    */
   function gearTray(band, gear, opts) {
@@ -1039,6 +1040,12 @@ Blockr.menu = (() => {
     Blockr.tooltip.set(gear, 'Settings');
     gear.setAttribute('aria-label', 'Settings');
     gear.setAttribute('aria-expanded', 'false');
+    if (opts && opts.open) {
+      open = true;
+      gear.classList.add('blockr-gear-active');
+      gear.setAttribute('aria-expanded', 'true');
+      band.classList.add('blockr-settings--open');
+    }
 
     /** @param {boolean} next */
     function set(next) {
