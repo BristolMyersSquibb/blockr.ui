@@ -117,6 +117,19 @@ format_column_inner <- function(x, max_chars = 50) {
   }
 }
 
+#' The design system's chevron, pointing down; CSS turns it (design system,
+#' "Chevrons"). 12px, a 1.4px stroke that does not scale.
+#' @noRd
+chevron_svg <- function() {
+  shiny::HTML(paste0(
+    '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" ',
+    'stroke="currentColor" stroke-width="1.4" stroke-linecap="round" ',
+    'stroke-linejoin="round" aria-hidden="true">',
+    '<polyline points="3 4.5 6 7.5 9 4.5" vector-effect="non-scaling-stroke">',
+    '</polyline></svg>'
+  ))
+}
+
 #' Build the HTML table preview for one page
 #'
 #' Pure presentation: renders an already-materialized page of data as the
@@ -292,15 +305,26 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
 
     # The label sits under the name and is cut by the layout (CSS ellipsis),
     # with the whole label as its tooltip.
+    # A column without a label keeps an empty line when others have one, so
+    # every name sits level.
     label_tag <- if (has_labels && nzchar(col_labels[j])) {
       shiny::tags$span(
         class = "blockr-col-label",
         title = col_labels[j],
         col_labels[j]
       )
+    } else if (has_labels) {
+      shiny::tags$span(
+        class = "blockr-col-label blockr-col-label--empty",
+        `aria-hidden` = "true",
+        shiny::HTML("&nbsp;")
+      )
     }
 
     th_style <- sprintf("width: %dpx;", col_widths_px[j])
+
+    # A numeric column's header follows its numbers to the right.
+    if (col_is_numeric[j]) header_class <- paste(header_class, "blockr-th-numeric")
 
     header_cells[[j + 1L]] <- shiny::tags$th(
       class = header_class,
@@ -430,13 +454,15 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         class = paste0("blockr-nav-btn", if (page == 1L) " disabled"),
         disabled = if (page == 1L) "disabled" else NULL,
         `data-direction` = "prev",
-        shiny::HTML("&#x2039;")
+        `aria-label` = "Previous page",
+        chevron_svg()
       ),
       shiny::tags$button(
         class = paste0("blockr-nav-btn", if (next_disabled) " disabled"),
         disabled = if (next_disabled) "disabled" else NULL,
         `data-direction` = "next",
-        shiny::HTML("&#x203A;")
+        `aria-label` = "Next page",
+        chevron_svg()
       )
     )
   )

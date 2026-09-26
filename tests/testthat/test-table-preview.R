@@ -229,3 +229,28 @@ test_that("wrap_names leaves single-word and empty headers alone", {
   expect_equal(column_widths_px("", formatted = list("x"), wrap_names = TRUE),
                60)  # clamped to the floor, no NA/-Inf from an empty split
 })
+
+test_that("a numeric column's header is marked to follow its numbers", {
+  df <- data.frame(name = c("a", "b"), n = c(1, 2))
+  html <- render_chr(build_html_table(df, 2L))
+  expect_match(html, 'class="blockr-sortable blockr-th-numeric"[^>]*data-column="n"')
+  expect_no_match(html, 'blockr-th-numeric"[^>]*data-column="name"')
+})
+
+test_that("a column without a label keeps the label line when others have one", {
+  df <- data.frame(x = 1, y = 2)
+  attr(df$x, "label") <- "Has a label"
+  html <- render_chr(build_html_table(df, 1L))
+  expect_match(html, "blockr-col-label blockr-col-label--empty", fixed = TRUE)
+  # With no label anywhere there is no empty line to keep.
+  html0 <- render_chr(build_html_table(data.frame(x = 1, y = 2), 1L))
+  expect_no_match(html0, "blockr-col-label--empty", fixed = TRUE)
+})
+
+test_that("the pager draws the chevron, named for screen readers", {
+  html <- render_chr(build_html_table(data.frame(x = 1:12), 12L, page_size = 5L))
+  expect_match(html, 'aria-label="Previous page"', fixed = TRUE)
+  expect_match(html, 'aria-label="Next page"', fixed = TRUE)
+  expect_match(html, 'points="3 4.5 6 7.5 9 4.5"', fixed = TRUE)
+  expect_no_match(html, "&#x2039;|&#x203A;")
+})
