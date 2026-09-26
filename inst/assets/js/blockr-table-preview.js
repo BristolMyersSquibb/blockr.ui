@@ -39,6 +39,9 @@ if (!window.blockrSortInit) {
     if (e.target.closest('.blockr-col-name')) return;
     var header = e.target.closest('.blockr-sortable');
     if (!header) return;
+    // Where the sort click happened, so the redrawn header can find out
+    // whether the pointer is still on it (see blockrHoverTip).
+    window.blockrLastSortPoint = {x: e.clientX, y: e.clientY, t: Date.now()};
     e.preventDefault();
     e.stopPropagation();
     var container = header.closest('.blockr-table-container');
@@ -109,9 +112,15 @@ if (!window.blockrSortTipInit) {
       blockrHoverTip(ths[i]);
     }
   };
+  // The browser's :hover is not a test here: Safari does not update it for
+  // a node drawn under a pointer that has not moved. What is under the point
+  // of the last sort click is.
   var blockrHoverTip = function(th) {
     requestAnimationFrame(function() {
-      if (th.isConnected && th.matches(':hover')) {
+      var pt = window.blockrLastSortPoint;
+      if (!th.isConnected || !pt || Date.now() - pt.t > 10000) return;
+      var under = document.elementFromPoint(pt.x, pt.y);
+      if (under && th.contains(under)) {
         th.dispatchEvent(new PointerEvent('pointerover', {bubbles: true}));
       }
     });
