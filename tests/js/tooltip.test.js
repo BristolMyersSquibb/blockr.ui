@@ -119,3 +119,19 @@ test('a line can carry a badge after the name', (newWindow) => {
   assert.strictEqual(win.Blockr.tooltip.text(b), 'dataset block · blockr.core');
   win.close();
 });
+
+test('editable text names its gesture, the default or its own', (newWindow) => {
+  const win = newWindow();
+  const a = win.document.createElement('span');
+  a.textContent = 'Filter rows';
+  a.setAttribute('data-blockr-editable', '');
+  const b = win.document.createElement('span');
+  b.textContent = 'Overview';
+  b.setAttribute('data-blockr-editable', 'Click to rename');
+  win.document.body.append(a, b);
+  over(win, a);
+  assert.strictEqual(win.Blockr.tooltip.text(a), 'Double-click to edit');
+  over(win, b);
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Click to rename');
+  win.close();
+});

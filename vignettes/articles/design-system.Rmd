@@ -626,7 +626,15 @@ title, an outline row, a view name, a tab (in bare mode).
   menu. A single click keeps its other job (select, open).
 - At rest the name is plain text; on hover it takes the `bg-hover` wash
   (radius 6, 4px 8px padding, pulled back by the padding so the text does not
-  move). There is no pencil.
+  move) and the text cursor. There is no pencil.
+- Its tooltip names the gesture: "Double-click to edit". While the name is cut
+  off, the tooltip leads with the whole name and the gesture follows, muted.
+  Where the gesture is a single click (a name in the views menu's manage
+  mode), the tooltip says so ("Click to rename").
+- Markup: `data-blockr-editable` on the element that shows the name, with the
+  gesture as its value where it is not the double-click. blockr-ui.js and
+  blockr-theme.css give it the tooltip and the cursor; nothing else is
+  needed.
 - While editing, the text becomes a field at its own size and weight: 1px
   `border-accent`, the focus ring, `bg-surface`, the text selected. No label.
 - Enter commits, Escape restores, a click elsewhere commits. An empty or
@@ -810,10 +818,11 @@ tooltip), 12px `text-default`, padding 5px 9px.
 It shows on hover and on keyboard focus, and leaves with the pointer or focus;
 Escape hides it.
 
-- Every icon-only button and every cut-off label gets one, and so does the
+- Every icon-only button and every cut-off label gets one, and so do the
   block's mark in the dock header (its type, then the package as a neutral
-  badge). Nothing else does:
-  a button that says its name has no tooltip.
+  badge) and every name that can be renamed in place (the gesture, see
+  [Renaming in place](#renaming-in-place)). Nothing else does: a button that
+  says its name has no tooltip.
 - No native `title` tooltips remain.
 - It matches the chart's data tooltip (see [Special blocks](#special)), so
   blockr has one floating style.
