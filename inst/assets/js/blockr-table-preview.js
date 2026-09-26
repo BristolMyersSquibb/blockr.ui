@@ -115,15 +115,17 @@ if (!window.blockrSortTipInit) {
   // The browser's :hover is not a test here: Safari does not update it for
   // a node drawn under a pointer that has not moved. What is under the point
   // of the last sort click is.
+  // It waits for the scroll restore above: setting the wrapper's scrollLeft
+  // fires a scroll event, and the tooltip closes on scroll.
   var blockrHoverTip = function(th) {
-    requestAnimationFrame(function() {
+    setTimeout(function() {
       var pt = window.blockrLastSortPoint;
       if (!th.isConnected || !pt || Date.now() - pt.t > 10000) return;
       var under = document.elementFromPoint(pt.x, pt.y);
       if (under && th.contains(under)) {
         th.dispatchEvent(new PointerEvent('pointerover', {bubbles: true}));
       }
-    });
+    }, 150);
   };
   new MutationObserver(function(muts) {
     muts.forEach(function(m) { m.addedNodes.forEach(blockrSortTips); });
