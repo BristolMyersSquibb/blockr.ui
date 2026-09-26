@@ -1040,7 +1040,8 @@ and the composer table, which render annotated data frames).
 - **Groups** (an output table's sections, and rows with deeper-indented
   children): the heading at weight 600 with the fold chevron (see
   [Chevrons](#actions)) in the gutter left of its text; each indent level adds
-  16px. Groups are set apart by 20px of space above the heading, not by a rule.
+  16px. Groups are set apart by space, not by a rule: a group's last row has
+  7px below it and the next heading 11px above.
 - **Fold all:** the chevron in the top-left header cell, in the same gutter as
   the group chevrons. A first-column title (composer's `column_header_left`)
   stays the producer's text, line breaks and weight included, beside it; only
