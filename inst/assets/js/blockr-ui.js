@@ -567,6 +567,19 @@ Blockr.menu = (() => {
   /** @type {{ el: HTMLDivElement, close: () => void, anchor: HTMLElement } | null} */
   let open = null;
 
+  // The menu's own copy of the icon set, taken when this file loads: a page
+  // can also carry an older copy of this file (bundled by a package that
+  // has not moved to blockr.ui yet), and that copy replaces Blockr.icons
+  // with a set that lacks the menu's icons.
+  /** @type {Record<string, string>} */
+  const ICONS = Object.assign({}, Blockr.icons);
+  /** @param {string} name */
+  const iconFor = (name) => {
+    if (Object.prototype.hasOwnProperty.call(ICONS, name)) return ICONS[name];
+    if (Object.prototype.hasOwnProperty.call(Blockr.icons, name)) return Blockr.icons[name];
+    return name;
+  };
+
   /**
    * @param {HTMLElement} anchor
    * @param {BlockrMenuConfig} config
@@ -677,8 +690,7 @@ Blockr.menu = (() => {
       if (item.icon) {
         const ic = document.createElement('span');
         ic.className = 'blockr-menu__icon';
-        ic.innerHTML = Object.prototype.hasOwnProperty.call(Blockr.icons, item.icon)
-          ? Blockr.icons[item.icon] : item.icon;
+        ic.innerHTML = iconFor(item.icon);
         row.appendChild(ic);
       }
       const label = document.createElement('span');
@@ -690,7 +702,7 @@ Blockr.menu = (() => {
       if (item.current || item.checked) {
         const check = document.createElement('span');
         check.className = 'blockr-menu__check';
-        check.innerHTML = Blockr.icons.check;
+        check.innerHTML = iconFor('check');
         row.appendChild(check);
       }
       if ('checked' in item) {
