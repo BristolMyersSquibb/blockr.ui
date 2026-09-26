@@ -554,8 +554,12 @@ selected row, the active group's front tab.
 
 ### Select, multi, with tags
 
-- The picks sit as tags in the control. The dropdown lists only what is not
-  picked. Tags can be dragged to reorder.
+- The picks sit as tags in the control. The dropdown lists every option and
+  ticks the picks; a click on a ticked row unticks it. Tags can be dragged to
+  reorder.
+- A pick keeps the dropdown open and keeps the filter text, so one search
+  serves several picks ("blood", then each blood test). The filter clears
+  when the dropdown closes.
 - A tag's × appears on the tag under the pointer or with keyboard focus,
   never on every tag at once, and turns `text-danger` on its own hover. Its
   space stays reserved, so nothing moves.
@@ -609,16 +613,13 @@ pick is readable without a click.
 ### A pill that opens a menu
 
 For four or more values inside a row: the filter operator, the join key
-operator, viz's `.dd-func-btn` (n, N, %, Σ).
+operator.
 
 - 24px inside a 42px row, radius 4, 1px `border-default`, `bg-surface`, 12px
   weight 500 `text-muted`, with the 10px chevron so it reads as a choice. Hover:
   `border-strong`, `text-default`.
 - A click opens `Blockr.Select.menu()` anchored on the pill, listing every
   value.
-- In a header row (the chart's n, N, %, Σ) the pill sits among the 26px tools
-  and its menu lines up with the pill's right edge (`align: 'end'`). The
-  menu's rows lead with the name, the pill's symbol muted after it.
 - The click-to-cycle pill is retired. Join type, outside a row, is a Select
   field in the grid.
 
@@ -802,6 +803,7 @@ Every menu, dropdown and list that floats uses one surface:
 |---|---|
 | hover and keyboard row (same look) | `bg-hover`; meta text and icons turn `text-default` |
 | current pick | weight 600 |
+| multi pick | a tick (14px, `text-accent`) in a slot every row keeps; normal weight |
 | disabled | listed in `text-disabled`, no hover, the reason in a tooltip |
 
 The views menu drops its blue fill for the current view.
@@ -832,12 +834,12 @@ opened it names only the value.
 
 **Content.** Long lists render up to 200 options and end with a count row that
 asks you to type; server-searched lists say how many values there are. Empty
-and loading rows are centred, italic, `text-muted` ("No matches", "All
-selected", "Loading…").
+and loading rows are centred, italic, `text-muted` ("No matches", "No
+options", "Loading…").
 
 **Behaviour.** Arrows move, Enter picks, typing filters. Escape closes and
 returns focus to the trigger; Tab and an outside click close. A pick closes
-the menu; a multi pick keeps it open.
+the menu; a multi pick keeps it open and keeps the filter text.
 
 ### The block's "…" menu
 

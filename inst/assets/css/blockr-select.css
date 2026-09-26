@@ -196,9 +196,8 @@
 .blockr-select--single-line .blockr-select__tag {
   flex: 0 0 auto;
 }
-/* Clicking the chip wraps the control open so every tag is reachable — the
-   dropdown lists only what is not selected, so this is the only place a
-   hidden pick can be removed. Collapses again on the next outside click. */
+/* Clicking the chip wraps the control open so every tag is reachable.
+   Collapses again on the next outside click. */
 .blockr-select--single-line.blockr-select--expanded .blockr-select__control,
 .blockr-select--single-line.blockr-select--expanded .blockr-select__tags {
   flex-wrap: wrap;
@@ -475,6 +474,26 @@
 
 .blockr-select__option--selected {
   font-weight: var(--blockr-font-weight-semibold);
+}
+
+/* A multi list marks its picks with a tick in a slot every row keeps, so
+   the names stay in line. The tick carries the pick; the row keeps its
+   normal weight, since several rows can be picked at once. */
+.blockr-select__tick {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  vertical-align: -2px;
+  color: var(--blockr-color-text-accent);
+}
+
+.blockr-select__tick svg {
+  display: block;
+}
+
+.blockr-select__dropdown--multi .blockr-select__option--selected {
+  font-weight: inherit;
 }
 
 /* --- Option label (muted description next to value) ---
