@@ -133,5 +133,7 @@ test('editable text names its gesture, the default or its own', (newWindow) => {
   assert.strictEqual(win.Blockr.tooltip.text(a), 'Double-click to edit');
   over(win, b);
   assert.strictEqual(win.Blockr.tooltip.text(b), 'Click to rename');
+  b.removeAttribute('data-blockr-editable');
+  assert.strictEqual(win.Blockr.tooltip.text(b), '', 'none once the attribute goes');
   win.close();
 });

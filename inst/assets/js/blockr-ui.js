@@ -524,7 +524,8 @@ Blockr.tooltip = (() => {
  * tooltip leads with the whole text and the gesture follows, muted. An
  * element is taken up on its first hover or focus, in the capture phase on
  * `window`, ahead of Blockr.tooltip's listeners on `document`, so markup
- * drawn at any time needs nothing but the attribute.
+ * drawn at any time needs nothing but the attribute; removing it takes both
+ * away again.
  */
 (() => {
   const HINT = 'Double-click to edit';
@@ -541,6 +542,8 @@ Blockr.tooltip = (() => {
     if (!el || seen.has(el)) return;
     seen.add(el);
     Blockr.tooltip.set(el, () => {
+      // The attribute can go again (a name editable only in a mode).
+      if (!el.hasAttribute('data-blockr-editable')) return null;
       const hint = el.getAttribute('data-blockr-editable') || HINT;
       return cutOff(el) ? { name: (el.textContent || '').trim(), label: hint } : hint;
     });
