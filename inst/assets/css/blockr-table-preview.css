@@ -246,36 +246,72 @@
       background-color: var(--blockr-color-bg-hover, #f3f4f6);
     }
 
+    /* The sort cue: the chevron (design system, "Chevrons"), up for
+       ascending, down for descending, in the accent on the sorted column.
+       Missing values first adds a hollow dot above it. An unsorted column
+       shows the ascending chevron, muted, on hover. The chevron is drawn on
+       ::before so the dot on ::after is not masked with it. */
+    .blockr-col-head {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      max-width: 100%;
+      vertical-align: bottom;
+    }
+
+    .blockr-th-numeric .blockr-col-head {
+      flex-direction: row-reverse;
+    }
+
+    .blockr-col-head .blockr-col-name {
+      min-width: 0;
+    }
+
     .blockr-sort-icon {
-      display: inline-block;
+      position: relative;
+      flex: none;
       width: 12px;
       height: 12px;
-      font-size: 10px;
-      line-height: 12px;
-      text-align: center;
+      visibility: hidden;
+      color: var(--blockr-color-text-muted, #6b7280);
     }
 
-    .blockr-sort-icon-asc::after {
-      content: '\2191';
-      color: var(--blockr-color-text-default, #111827);
+    .blockr-sort-icon::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: currentColor;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+      transform: rotate(180deg);
     }
 
-    .blockr-sort-icon-desc::after {
-      content: '\2193';
-      color: var(--blockr-color-text-default, #111827);
+    .blockr-table th.blockr-sortable:hover .blockr-sort-icon {
+      visibility: visible;
     }
 
+    .blockr-sort-icon-asc,
+    .blockr-sort-icon-desc,
     .blockr-sort-icon-na {
-      width: auto;
+      visibility: visible;
+      color: var(--blockr-color-text-accent, #2563eb);
+    }
+
+    .blockr-sort-icon-desc::before {
+      transform: none;
     }
 
     .blockr-sort-icon-na::after {
-      content: 'NA\2191';
-      color: var(--blockr-color-text-default, #111827);
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: -0.5px;
-      white-space: nowrap;
+      content: "";
+      position: absolute;
+      top: -3px;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      margin-left: -2px;
+      box-sizing: border-box;
+      border: 1.2px solid currentColor;
+      border-radius: 50%;
     }
 
     .shiny-html-output.recalculating:has(.blockr-table-container) {

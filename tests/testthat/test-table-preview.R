@@ -254,3 +254,13 @@ test_that("the pager draws the chevron, named for screen readers", {
   expect_match(html, 'points="3 4.5 6 7.5 9 4.5"', fixed = TRUE)
   expect_no_match(html, "&#x2039;|&#x203A;")
 })
+
+test_that("the sort cue sits on the name's line and the header says its sort", {
+  df <- data.frame(name = c("b", "a"), n = c(2, 1))
+  html <- render_chr(build_html_table(df, 2L, sort_state = list(col = "n", dir = "desc")))
+  expect_match(html, 'data-column="n" aria-sort="descending"', fixed = TRUE)
+  expect_match(html, '<span class="blockr-col-head">\\s*<span class="blockr-col-name">n</span>\\s*<span class="blockr-sort-icon blockr-sort-icon-desc" aria-hidden="true"></span>')
+  # No arrow characters any more; the chevron is drawn in CSS.
+  css <- paste(readLines(system.file("assets", "css", "blockr-table-preview.css", package = "blockr.ui")), collapse = "\n")
+  expect_no_match(css, "\\\\2191|\\\\2193")
+})

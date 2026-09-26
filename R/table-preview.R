@@ -326,16 +326,28 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     # A numeric column's header follows its numbers to the right.
     if (col_is_numeric[j]) header_class <- paste(header_class, "blockr-th-numeric")
 
+    # The sort cue (the chevron, up or down) sits on the name's line: after
+    # the name, or before it on a right-aligned numeric column so the name
+    # stays flush over its numbers. Hidden at rest on an unsorted column,
+    # shown muted on hover as what a click would do.
+    aria_sort <- if (!is.null(sort_col) && sort_col == col_name) {
+      switch(sort_dir, asc = , na = "ascending", desc = "descending", NULL)
+    }
+
     header_cells[[j + 1L]] <- shiny::tags$th(
       class = header_class,
       style = th_style,
       `data-column` = col_name,
-      shiny::tags$span(class = "blockr-col-name", col_name),
+      `aria-sort` = aria_sort,
+      shiny::tags$span(
+        class = "blockr-col-head",
+        shiny::tags$span(class = "blockr-col-name", col_name),
+        shiny::tags$span(class = sort_icon_class, `aria-hidden` = "true")
+      ),
       label_tag,
       shiny::tags$span(
         class = "blockr-type-row",
-        shiny::tags$span(class = "blockr-type-label", col_types[j]),
-        shiny::tags$span(class = sort_icon_class)
+        shiny::tags$span(class = "blockr-type-label", col_types[j])
       )
     )
   }
