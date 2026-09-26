@@ -6,7 +6,7 @@
 #' control, the gear tray, the tooltip (`Blockr.tooltip`), the action menu
 #' (`Blockr.menu`) and the placement routine for floating panels
 #' (`Blockr.place`), all on the `window.Blockr` namespace, together with the
-#' rows, pills, labels and fields they draw.
+#' rows, pills, labels, fields and buttons (`.blockr-btn`) they draw.
 #'
 #' The stylesheets read the design tokens without fallbacks, so the
 #' dependency brings [theme_dep()] along. Attach it from a block's UI;
@@ -37,6 +37,7 @@ controls_dep <- function() {
     controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css"),
     controls_asset("blockr-menu-css", stylesheet = "css/blockr-menu.css"),
     controls_asset("blockr-tooltip-css", stylesheet = "css/blockr-tooltip.css"),
+    controls_asset("blockr-buttons-css", stylesheet = "css/blockr-buttons.css"),
     controls_asset(
       "blockr-settings-band",
       stylesheet = "css/blockr-settings-band.css"
