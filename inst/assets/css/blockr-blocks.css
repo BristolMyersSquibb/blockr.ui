@@ -687,3 +687,23 @@
   outline: var(--blockr-focus-outline);
   outline-offset: var(--blockr-focus-offset);
 }
+
+/* --- Empty state (design system, "Messages") ---
+   What a panel or a whole block says when it has nothing to draw: one line
+   of muted text where the content would be, left-aligned with it. The text
+   is the caller's; a setting it names is a .blockr-slot inside it. A list or
+   menu row has its own (.blockr-select__empty). */
+.blockr-empty {
+  margin: 0;
+  font-size: var(--blockr-font-size-sm);
+  line-height: 1.5;
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-empty--panel {
+  padding: 18px 0 14px;
+}
+
+.blockr-empty--block {
+  padding: 28px 0 32px;
+}
