@@ -893,7 +893,9 @@ Escape hides it.
   badge) and every name that can be renamed in place (the gesture, see
   [Renaming in place](#renaming-in-place)). Nothing else does: a button that
   says its name has no tooltip.
-- No native `title` tooltips remain.
+- No native `title` tooltips remain. Markup should not write one, and
+  blockr-ui.js takes over any that reach the page anyway (Shiny, shinychat,
+  a package's older markup) on the first hover or focus.
 - It matches the chart's data tooltip (see [Special blocks](#special)), so
   blockr has one floating style.
 - It shows after the pointer rests 300ms, and at once on keyboard focus or
