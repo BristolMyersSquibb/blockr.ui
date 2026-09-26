@@ -210,6 +210,11 @@ The body face is Open Sans, as bslib's Shiny preset ships it, set in one place:
 `--bs-body-font-family`. There is no `--blockr-font-sans`. The chart canvas
 takes its face from the body.
 
+Text is drawn with grayscale antialiasing (`-webkit-font-smoothing:
+antialiased`, `-moz-osx-font-smoothing: grayscale`), set once on `html` in the
+theme layer. macOS otherwise uses subpixel antialiasing, which draws Open Sans
+heavier and softer than the design; Linux and Windows are unaffected.
+
 | Token | Size | Use |
 |---|---|---|
 | `--blockr-font-size-xs` | 12px (0.75rem) | field labels, section titles, captions, status lines, tooltips, offers |
