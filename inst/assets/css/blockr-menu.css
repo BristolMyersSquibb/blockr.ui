@@ -207,3 +207,84 @@
   font-size: 11px;
   font-weight: var(--blockr-font-weight-medium);
 }
+
+/* One muted line on top, saying what the menu is for ("Append to Dataset"). */
+.blockr-menu__caption {
+  padding: 6px 10px 4px;
+  font-size: var(--blockr-font-size-xs);
+  color: var(--blockr-color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The filter box: part of the menu, not a field. 30px, 13px, no focus ring,
+   since it holds the focus the whole time the menu is open. It stays on top
+   while the rows scroll under it. */
+.blockr-menu__filter {
+  position: sticky;
+  top: -6px;
+  z-index: 1;
+  margin: -6px -6px 4px;
+  padding: 6px 6px 4px;
+  background: var(--blockr-color-bg-raised);
+}
+
+.blockr-menu__filter-input {
+  display: block;
+  width: 100%;
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: var(--blockr-radius-md);
+  background: var(--blockr-color-bg-field);
+  color: var(--blockr-color-text-default);
+  font: inherit;
+  font-size: var(--blockr-font-size-sm);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.blockr-menu__filter-input::placeholder {
+  color: var(--blockr-color-text-muted);
+}
+
+/* A block's mark in a list row: 24px, its glyph in the category colour on an
+   18% tint of it. */
+.blockr-menu__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--blockr-radius-md);
+  color: var(--blockr-menu-mark, var(--blockr-color-text-muted));
+  background: color-mix(in srgb, var(--blockr-menu-mark, var(--blockr-color-text-muted)) 18%, var(--blockr-color-bg-raised));
+}
+
+.blockr-menu__mark svg {
+  width: 14px;
+  height: 14px;
+}
+
+.blockr-menu__item .blockr-menu__badge {
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.blockr-menu__item[hidden],
+.blockr-menu__title[hidden],
+.blockr-menu__gap[hidden],
+.blockr-menu__divider[hidden],
+.blockr-menu__empty[hidden] {
+  display: none;
+}
+
+.blockr-menu__empty {
+  padding: 10px;
+  text-align: center;
+  font-style: italic;
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-muted);
+}

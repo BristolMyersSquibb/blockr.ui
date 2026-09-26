@@ -254,6 +254,12 @@ interface BlockrMenuItem {
   /** Tooltip on a disabled row saying why. */
   reason?: string;
   onSelect?: () => void;
+  /** A block's glyph on a tint of its category colour, before the label. */
+  mark?: { icon?: string; color?: string };
+  /** A neutral badge at the end of the row (a package). */
+  badge?: string;
+  /** More text the filter box matches. */
+  keywords?: string;
 }
 
 type BlockrMenuEntry = BlockrMenuItem | { gap: true } | { divider: true } | { title: string };
@@ -264,6 +270,12 @@ interface BlockrMenuConfig {
   head?: { title: string; badge?: string; text?: string };
   /** 'end' lines the menu up with the trigger's right edge. */
   align?: 'start' | 'end';
+  /** One muted line on top, saying what the menu is for. */
+  caption?: string;
+  /** A filter box on top (true, or its placeholder). */
+  filter?: boolean | string;
+  /** The panel's least width in px (default 180). */
+  minWidth?: number;
   onClose?: () => void;
 }
 

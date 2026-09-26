@@ -155,3 +155,43 @@ test('a gap separates groups, the current item carries a check, quiet rows are m
   assert.ok(rows[2].querySelector('.blockr-menu__icon svg'), 'icon by name from Blockr.icons');
   win.close();
 });
+
+test('a filter box narrows the rows, hides empty groups and Enter takes the first match', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const picked = [];
+  win.Blockr.menu(t, {
+    caption: 'Add a block',
+    filter: 'Search blocks',
+    items: [
+      { title: 'Transform' },
+      { label: 'Filter rows', badge: 'blockr.dplyr', keywords: 'subset', onSelect: () => picked.push('filter') },
+      { label: 'Arrange rows', badge: 'blockr.dplyr', onSelect: () => picked.push('arrange') },
+      { title: 'Plot' },
+      { label: 'Chart', badge: 'blockr.viz', mark: { icon: '<svg></svg>', color: '#E69F00' }, onSelect: () => picked.push('chart') }
+    ]
+  });
+  const p = panel(win);
+  assert.strictEqual(p.querySelector('.blockr-menu__caption').textContent, 'Add a block');
+  const input = p.querySelector('.blockr-menu__filter-input');
+  assert.strictEqual(win.document.activeElement, input, 'the filter holds the focus');
+  assert.ok(p.querySelector('.blockr-menu__mark'), 'mark drawn');
+
+  input.value = 'subset';
+  input.dispatchEvent(new win.Event('input', { bubbles: true }));
+  const visible = [...p.querySelectorAll('.blockr-menu__item')].filter((r) => !r.hidden);
+  assert.deepStrictEqual(visible.map((r) => r.querySelector('.blockr-menu__label').textContent), ['Filter rows']);
+  const titles = [...p.querySelectorAll('.blockr-menu__title')].map((x) => x.hidden);
+  assert.deepStrictEqual(titles, [false, true], 'the Plot group hides');
+
+  input.value = 'zzz';
+  input.dispatchEvent(new win.Event('input', { bubbles: true }));
+  assert.ok(!p.querySelector('.blockr-menu__empty').hidden, 'no matches shown');
+
+  input.value = 'viz';
+  input.dispatchEvent(new win.Event('input', { bubbles: true }));
+  key(win, input, 'Enter');
+  assert.deepStrictEqual(picked, ['chart']);
+  assert.ok(!panel(win), 'closed after the pick');
+  win.close();
+});

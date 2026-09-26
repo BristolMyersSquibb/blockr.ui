@@ -542,6 +542,13 @@ Blockr.tooltip = (() => {
  * after a gap or a divider, so a label with an icon never sits right under
  * one without.
  *
+ * A row may also carry `mark` ({ icon, color }: a block's glyph on a tint
+ * of its category colour), `badge` (a neutral badge at the end, as a
+ * package) and `keywords` (more text the filter matches). `config.caption`
+ * is one muted line on top ("Append to Dataset"); `config.filter` (true, or
+ * the placeholder) adds a filter box that narrows the rows as you type and
+ * holds the focus; `config.minWidth` widens the panel.
+ *
  * `config.head` ({ title, badge?, text? }) puts a block of text above the
  * rows, as the "…" menu's name, package and description. `align` is 'start'
  * (default) or 'end', for a trigger in a header row. `onClose` runs once
@@ -595,14 +602,39 @@ Blockr.menu = (() => {
       panel.appendChild(head);
     }
 
-    /** @type {{ row: HTMLButtonElement, item: BlockrMenuItem }[]} */
+    if (config.caption) {
+      const cap = document.createElement('div');
+      cap.className = 'blockr-menu__caption';
+      cap.textContent = config.caption;
+      panel.appendChild(cap);
+    }
+
+    /** @type {HTMLInputElement | null} */
+    let filterInput = null;
+    if (config.filter) {
+      const wrap = document.createElement('div');
+      wrap.className = 'blockr-menu__filter';
+      filterInput = document.createElement('input');
+      filterInput.type = 'text';
+      filterInput.className = 'blockr-menu__filter-input';
+      filterInput.placeholder = typeof config.filter === 'string' ? config.filter : 'Search';
+      filterInput.setAttribute('aria-label', filterInput.placeholder);
+      filterInput.autocomplete = 'off';
+      wrap.appendChild(filterInput);
+      panel.appendChild(wrap);
+    }
+
+    /** @type {{ row: HTMLButtonElement, item: BlockrMenuItem, search: string }[]} */
     const rows = [];
+    /** @type {{ kind: 'row' | 'title' | 'sep', el: HTMLElement, row?: number }[]} */
+    const nodes = [];
     for (const entry of config.items || []) {
       if ('gap' in entry) {
         const gap = document.createElement('div');
         gap.className = 'blockr-menu__gap';
         gap.setAttribute('role', 'separator');
         panel.appendChild(gap);
+        nodes.push({ kind: 'sep', el: gap });
         continue;
       }
       if ('divider' in entry) {
@@ -610,6 +642,7 @@ Blockr.menu = (() => {
         hr.className = 'blockr-menu__divider';
         hr.setAttribute('role', 'separator');
         panel.appendChild(hr);
+        nodes.push({ kind: 'sep', el: hr });
         continue;
       }
       if (!('label' in entry)) {
@@ -617,6 +650,7 @@ Blockr.menu = (() => {
         t.className = 'blockr-menu__title';
         t.textContent = entry.title;
         panel.appendChild(t);
+        nodes.push({ kind: 'title', el: t });
         continue;
       }
       const item = entry;
@@ -631,6 +665,13 @@ Blockr.menu = (() => {
       if (item.disabled) {
         row.setAttribute('aria-disabled', 'true');
         if (item.reason) Blockr.tooltip.set(row, item.reason);
+      }
+      if (item.mark) {
+        const mk = document.createElement('span');
+        mk.className = 'blockr-menu__mark';
+        if (item.mark.color) mk.style.setProperty('--blockr-menu-mark', item.mark.color);
+        mk.innerHTML = item.mark.icon || '';
+        row.appendChild(mk);
       }
       if (item.icon) {
         const ic = document.createElement('span');
@@ -655,9 +696,24 @@ Blockr.menu = (() => {
         meta.textContent = item.meta;
         row.appendChild(meta);
       }
-      rows.push({ row, item });
+      if (item.badge) {
+        const badge = document.createElement('span');
+        badge.className = 'blockr-menu__badge';
+        badge.textContent = item.badge;
+        row.appendChild(badge);
+      }
+      const search = [item.label, item.keywords || '', item.badge || '', item.meta || '']
+        .join(' ').toLowerCase();
+      nodes.push({ kind: 'row', el: row, row: rows.length });
+      rows.push({ row, item, search });
       panel.appendChild(row);
     }
+
+    const empty = document.createElement('div');
+    empty.className = 'blockr-menu__empty';
+    empty.textContent = 'No matches';
+    empty.hidden = true;
+    if (filterInput) panel.appendChild(empty);
 
     let active = -1;
     /** @param {number} i */
@@ -669,9 +725,13 @@ Blockr.menu = (() => {
         rows[active].row.scrollIntoView({ block: 'nearest' });
       }
     };
-    const enabled = rows.map((r, i) => (r.item.disabled ? -1 : i)).filter((i) => i >= 0);
+    // The rows that can be picked: enabled, and not filtered out.
+    const pickable = () => rows
+      .map((r, i) => (r.item.disabled || r.row.hidden ? -1 : i))
+      .filter((i) => i >= 0);
     /** @param {number} dir */
     const step = (dir) => {
+      const enabled = pickable();
       if (!enabled.length) return;
       const at = enabled.indexOf(active);
       const next = at < 0 ? (dir > 0 ? 0 : enabled.length - 1)
@@ -701,6 +761,31 @@ Blockr.menu = (() => {
       if (r.item.onSelect) r.item.onSelect();
     };
 
+    // Typing filters the rows by label, keywords, badge and meta text (every
+    // word has to match); a group title shows while one of its rows does, the
+    // gaps and rules only while nothing is typed. The first match is the
+    // keyboard row, so Enter takes it.
+    const applyFilter = () => {
+      if (!filterInput) return;
+      const terms = filterInput.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      rows.forEach((r) => {
+        r.row.hidden = terms.length > 0 && !terms.every((t) => r.search.indexOf(t) >= 0);
+      });
+      nodes.forEach((n, k) => {
+        if (n.kind === 'sep') { n.el.hidden = terms.length > 0; return; }
+        if (n.kind !== 'title') return;
+        let any = false;
+        for (let j = k + 1; j < nodes.length && nodes[j].kind !== 'title'; j++) {
+          if (nodes[j].kind === 'row' && !nodes[j].el.hidden) { any = true; break; }
+        }
+        n.el.hidden = !any;
+      });
+      const left = pickable();
+      empty.hidden = left.length > 0 || !terms.length;
+      setActive(terms.length && left.length ? left[0] : -1);
+    };
+    if (filterInput) filterInput.addEventListener('input', applyFilter);
+
     rows.forEach((r, i) => {
       r.row.addEventListener('mousemove', () => { if (!r.item.disabled && active !== i) setActive(i); });
       r.row.addEventListener('click', (e) => { e.stopPropagation(); pick(i); });
@@ -709,9 +794,15 @@ Blockr.menu = (() => {
     panel.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown') { e.preventDefault(); step(1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); step(-1); }
-      else if (e.key === 'Home') { e.preventDefault(); if (enabled.length) setActive(enabled[0]); }
-      else if (e.key === 'End') { e.preventDefault(); if (enabled.length) setActive(enabled[enabled.length - 1]); }
-      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(active); }
+      else if ((e.key === 'Home' || e.key === 'End') && e.target !== filterInput) {
+        e.preventDefault();
+        const enabled = pickable();
+        if (enabled.length) setActive(e.key === 'Home' ? enabled[0] : enabled[enabled.length - 1]);
+      }
+      else if (e.key === 'Enter' || (e.key === ' ' && e.target !== filterInput)) {
+        e.preventDefault();
+        pick(active >= 0 ? active : (filterInput && filterInput.value ? pickable()[0] : -1));
+      }
       else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
       else if (e.key === 'Tab') { close(false); }
     });
@@ -723,7 +814,7 @@ Blockr.menu = (() => {
 
     document.body.appendChild(panel);
     placed = Blockr.place(panel, anchor, {
-      width: { min: 180, max: 320 },
+      width: { min: config.minWidth || 180, max: Math.max(config.minWidth || 180, 320) },
       align: config.align || 'start'
     });
     anchor.setAttribute('aria-expanded', 'true');
@@ -734,7 +825,7 @@ Blockr.menu = (() => {
       if (t instanceof Node && (panel.contains(t) || anchor.contains(t))) return;
       close(false);
     });
-    panel.focus({ preventScroll: true });
+    (filterInput || panel).focus({ preventScroll: true });
 
     open = { el: panel, close: () => close(false), anchor };
     return { el: panel, close: () => close(false) };
