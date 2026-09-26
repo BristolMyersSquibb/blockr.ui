@@ -195,3 +195,22 @@ test('a filter box narrows the rows, hides empty groups and Enter takes the firs
   assert.ok(!panel(win), 'closed after the pick');
   win.close();
 });
+
+test('Enter takes the first row whose label matches before a keyword match', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const picked = [];
+  win.Blockr.menu(t, {
+    filter: true,
+    items: [
+      { label: 'Heatmap', keywords: 'filter by colour', onSelect: () => picked.push('heatmap') },
+      { label: 'Filter rows', onSelect: () => picked.push('filter') }
+    ]
+  });
+  const input = panel(win).querySelector('.blockr-menu__filter-input');
+  input.value = 'filter';
+  input.dispatchEvent(new win.Event('input', { bubbles: true }));
+  key(win, input, 'Enter');
+  assert.deepStrictEqual(picked, ['filter']);
+  win.close();
+});

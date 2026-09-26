@@ -782,7 +782,13 @@ Blockr.menu = (() => {
       });
       const left = pickable();
       empty.hidden = left.length > 0 || !terms.length;
-      setActive(terms.length && left.length ? left[0] : -1);
+      // The keyboard row is the first whose label matches, before one that
+      // matched on its keywords or badge only.
+      const byLabel = left.filter((i) => {
+        const label = rows[i].item.label.toLowerCase();
+        return terms.every((t) => label.indexOf(t) >= 0);
+      });
+      setActive(terms.length && left.length ? (byLabel.length ? byLabel[0] : left[0]) : -1);
     };
     if (filterInput) filterInput.addEventListener('input', applyFilter);
 
