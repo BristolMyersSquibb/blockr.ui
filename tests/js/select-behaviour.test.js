@@ -48,6 +48,9 @@ const highlighted = (win, sel) => {
 };
 const emptyTexts = (win, sel) =>
   [...dropdown(win, sel).querySelectorAll('.blockr-select__empty')].map((e) => e.textContent);
+const ticked = (win, sel) => rowsIn(dropdown(win, sel))
+  .filter((r) => r.querySelector('.blockr-select__tick svg'))
+  .map((r) => r.getAttribute('data-value'));
 const tags = (sel) =>
   [...sel.el.querySelectorAll('.blockr-select__tag')].map((t) => t.getAttribute('data-value'));
 
@@ -264,11 +267,18 @@ test('a menu is open from creation and tears itself down a tick after closing', 
 
 /* --- the list ------------------------------------------------------------- */
 
-test('a multi lists only what is not picked', (newWindow) => {
+test('a multi lists every option and ticks the picks', (newWindow) => {
   const win = newWindow();
   const sel = multi(win, { options: ABC, selected: ['b', 'd'] });
   click(win, control(sel));
-  assert.deepStrictEqual(rows(win, sel), ['a', 'c', 'e']);
+  assert.deepStrictEqual(rows(win, sel), ABC);
+  assert.deepStrictEqual(ticked(win, sel), ['b', 'd']);
+  const marked = rowsIn(dropdown(win, sel))
+    .filter((r) => r.getAttribute('aria-selected') === 'true')
+    .map((r) => r.getAttribute('data-value'));
+  assert.deepStrictEqual(marked, ['b', 'd']);
+  // Every row keeps the tick's slot, so the names line up.
+  assert.strictEqual(dropdown(win, sel).querySelectorAll('.blockr-select__tick').length, 5);
   win.close();
 });
 
@@ -385,7 +395,7 @@ test('at most 200 rows are rendered, and a row counts the rest', (newWindow) => 
   win.close();
 });
 
-test('empty states: Loading, No matches, All selected, No options', (newWindow) => {
+test('empty states: Loading, No matches, No options', (newWindow) => {
   const win = newWindow();
   const loading = single(win, { options: ABC, loading: true });
   click(win, control(loading));
@@ -396,9 +406,11 @@ test('empty states: Loading, No matches, All selected, No options', (newWindow) 
   type(win, search(loading), 'zzz');
   assert.deepStrictEqual(emptyTexts(win, loading), ['No matches']);
 
+  // A multi with everything picked still lists it all, ticked.
   const full = multi(win, { options: ['a'], selected: ['a'] });
   click(win, control(full));
-  assert.deepStrictEqual(emptyTexts(win, full), ['All selected']);
+  assert.deepStrictEqual(emptyTexts(win, full), []);
+  assert.deepStrictEqual(rows(win, full), ['a']);
 
   const none = single(win, { options: [] });
   click(win, control(none));
@@ -579,7 +591,7 @@ test('Backspace in an empty search input removes the last tag', (newWindow) => {
   press(win, search(sel), 'Backspace');
   assert.deepStrictEqual(tags(sel), ['a']);
   assert.deepStrictEqual(json(seen), [['a']]);
-  assert.deepStrictEqual(rows(win, sel), ['b', 'c', 'd', 'e'], 'the value is offered again');
+  assert.deepStrictEqual(ticked(win, sel), ['a'], 'its row is unticked');
   win.close();
 });
 
@@ -623,7 +635,7 @@ test('single: while open, the search box shows the pick as its placeholder', (ne
   win.close();
 });
 
-test('multi: a pick appends, clears the query, keeps the list open, and reports a copy', (newWindow) => {
+test('multi: a pick appends, keeps the query and the list open, and reports a copy', (newWindow) => {
   const win = newWindow();
   const seen = [];
   const sel = multi(win, { options: ABC, selected: ['a'], onChange: (v) => seen.push(v) });
@@ -631,12 +643,39 @@ test('multi: a pick appends, clears the query, keeps the list open, and reports 
   type(win, search(sel), 'c');
   clickRow(win, sel, 'c');
   assert.ok(isOpen(sel));
-  assert.strictEqual(search(sel).value, '');
-  assert.deepStrictEqual(rows(win, sel), ['b', 'd', 'e']);
+  assert.strictEqual(search(sel).value, 'c');
+  assert.deepStrictEqual(rows(win, sel), ['c']);
+  assert.deepStrictEqual(ticked(win, sel), ['c']);
   assert.deepStrictEqual(tags(sel), ['a', 'c']);
   assert.deepStrictEqual(json(seen), [['a', 'c']]);
   seen[0].push('zzz');
   assert.deepStrictEqual(values(sel), ['a', 'c'], 'the caller got a copy');
+  win.close();
+});
+
+test('multi: one search serves several picks, a ticked row unticks, closing clears the query', (newWindow) => {
+  const win = newWindow();
+  const seen = [];
+  const LAB = ['Albumin', 'Blood glucose', 'Blood urea nitrogen', 'Occult blood', 'Sodium'];
+  const sel = multi(win, { options: LAB, onChange: (v) => seen.push(v) });
+  click(win, control(sel));
+  type(win, search(sel), 'blood');
+  const matches = ['Blood glucose', 'Blood urea nitrogen', 'Occult blood'];
+  clickRow(win, sel, 'Blood glucose');
+  clickRow(win, sel, 'Occult blood');
+  // Enter picks the keyboard row, and the rows have not moved under it.
+  press(win, search(sel), 'ArrowDown');
+  press(win, search(sel), 'Enter');
+  assert.strictEqual(search(sel).value, 'blood');
+  assert.deepStrictEqual(rows(win, sel), matches);
+  assert.deepStrictEqual(values(sel), ['Blood glucose', 'Occult blood', 'Blood urea nitrogen']);
+  clickRow(win, sel, 'Occult blood');
+  assert.deepStrictEqual(values(sel), ['Blood glucose', 'Blood urea nitrogen']);
+  assert.deepStrictEqual(ticked(win, sel), ['Blood glucose', 'Blood urea nitrogen']);
+  assert.strictEqual(seen.length, 4);
+  clickOutside(win);
+  assert.ok(!isOpen(sel));
+  assert.strictEqual(search(sel).value, '');
   win.close();
 });
 
@@ -776,7 +815,8 @@ test('setOptions redraws an open list', (newWindow) => {
   const sel = multi(win, { options: ABC, selected: ['a'] });
   click(win, control(sel));
   sel.setOptions(['a', 'x', 'y']);
-  assert.deepStrictEqual(rows(win, sel), ['x', 'y']);
+  assert.deepStrictEqual(rows(win, sel), ['a', 'x', 'y']);
+  assert.deepStrictEqual(ticked(win, sel), ['a']);
   assert.deepStrictEqual(tags(sel), ['a']);
   win.close();
 });
