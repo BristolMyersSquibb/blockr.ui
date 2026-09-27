@@ -9,7 +9,8 @@
 #' for those [action_menu()] builds in R) and the placement routine for
 #' floating panels (`Blockr.place`), all on the `window.Blockr` namespace,
 #' together with the rows, pills, labels, fields and buttons (`.blockr-btn`)
-#' they draw.
+#' they draw, and the Shiny input bindings of the controls rendered from R
+#' ([select_input()] and its siblings).
 #'
 #' The stylesheets read the design tokens without fallbacks, so the
 #' dependency brings the tokens along, but not the theme layer that
@@ -63,7 +64,12 @@ controls_dep <- function() {
       controls_asset("blockr-select-js", script = "js/blockr-select.js"),
       controls_asset("blockr-select-css", stylesheet = "css/blockr-select.css"),
       controls_asset("blockr-input-js", script = "js/blockr-input.js"),
-      controls_asset("blockr-input-css", stylesheet = "css/blockr-input.css")
+      controls_asset("blockr-input-css", stylesheet = "css/blockr-input.css"),
+      controls_asset("blockr-inputs-js", script = "js/blockr-inputs.js"),
+      controls_asset(
+        "blockr-inputs-css",
+        stylesheet = "css/blockr-inputs.css"
+      )
     )
   }
 
