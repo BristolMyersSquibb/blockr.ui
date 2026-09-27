@@ -1,5 +1,27 @@
 # blockr.ui (development version)
 
+* `Blockr.menu()`, the design system's action menu, joins `controls_dep()`:
+  rows with an icon, label and meta text, dividers, group titles, a head
+  (a name with a badge and a line of text), current, disabled and
+  destructive rows, placed with `Blockr.place()` and driven from the
+  keyboard. `Blockr.menu.bind()` wires a trigger. Its classes also style
+  menus built elsewhere.
+
+* A `Blockr.tooltip` line can carry a `badge`.
+
+* `action_menu()` builds a menu of actions opened by a button: downloads,
+  Rename, Remove. Its rows are `menu_item()`s wrapping a `downloadLink()`,
+  an `actionLink()` or any link or button, with `menu_section()` titles between them. A row does one thing and the menu closes;
+  unlike `Blockr.Select.menu()` it sets no value. Open, the list sits on the
+  page body, so no panel's overflow clips it.
+
+* `tool_button()` is the design system's 26px icon button, named by a
+  tooltip.
+
+* An element built in R can carry its tooltip as a `data-blockr-tooltip`
+  attribute; `Blockr.tooltip` shows it as the light card, in place of the
+  native `title` box.
+
 * The design tokens are rewritten around the vocabulary of the design spec:
   a colour palette, meaning tokens for text, backgrounds, borders and status,
   type, radii, control heights and shadows. Every name defined before keeps
