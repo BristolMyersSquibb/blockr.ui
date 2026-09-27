@@ -35,17 +35,14 @@
       z-index: 1;
     }
 
-    /* No rule across the header: each column header carries its own, with a
-       12px gap between columns, so a header reads with its column. */
-    .blockr-table th.blockr-sortable {
+    /* One unbroken rule under the header, gutter included. Drawn on each
+       th rather than as a border: a collapsed border does not travel with
+       the sticky thead. */
+    .blockr-table thead th {
       background-image: linear-gradient(var(--blockr-color-border-strong, #d1d5db), var(--blockr-color-border-strong, #d1d5db));
       background-repeat: no-repeat;
-      background-size: calc(100% - 12px) 1px;
+      background-size: 100% 1px;
       background-position: left bottom;
-    }
-
-    .blockr-table th.blockr-sortable.blockr-th-numeric {
-      background-position: right bottom;
     }
 
     .blockr-table th {
@@ -147,8 +144,8 @@
       /* nowrap, NOT pre: rows must stay one line high no matter what the
          cell holds. pre rendered embedded newlines (free-text values, or
          any stray markup whitespace) as extra lines, so rows containing
-         such cells grew 2-3x - the "rows too high" bug. The full value
-         stays available via the cell's title tooltip. */
+         such cells grew 2-3x - the "rows too high" bug. A cut-off value
+         shows whole in its tooltip. */
       white-space: nowrap;
     }
 

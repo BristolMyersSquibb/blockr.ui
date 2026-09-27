@@ -26,7 +26,7 @@ test_that("type tags are rendered per column", {
   }
 })
 
-test_that("column labels render whole, with the label as their title", {
+test_that("column labels render whole, with the label as a cut-off-only tooltip", {
   df <- data.frame(x = 1, y = 2)
   attr(df$x, "label") <- "Short label"
   long <- trimws(strrep("Long label ", 5))
@@ -35,8 +35,16 @@ test_that("column labels render whole, with the label as their title", {
   expect_match(html, "Short label")
   expect_match(html, "blockr-col-label")
   # The layout cuts a long label (CSS ellipsis); R passes it whole.
-  expect_match(html, paste0('title="', long, '"'), fixed = TRUE)
+  expect_match(html, paste0('data-blockr-tooltip="', long, '"'), fixed = TRUE)
+  expect_match(html, "data-blockr-tooltip-overflow", fixed = TRUE)
   expect_no_match(html, "…")
+})
+
+test_that("cells carry no native title, only a cut-off-only tooltip", {
+  df <- data.frame(x = c("Placebo", NA))
+  html <- render_chr(build_html_table(df, 1L))
+  expect_no_match(html, "<td[^>]* title=")
+  expect_match(html, 'data-blockr-tooltip="Placebo" data-blockr-tooltip-overflow', fixed = TRUE)
 })
 
 test_that("haven value labels and a label equal to the name show no label", {

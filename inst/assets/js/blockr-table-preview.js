@@ -97,11 +97,16 @@ if (!window.blockrPaginationInit) {
 }
 
 // The sorted header's tooltip (data-sort-tip, set by build_html_table()),
+// and the cut-off-only tooltips of cells and labels (data-blockr-tooltip),
 // registered with the shared light tooltip whenever a table lands.
 if (!window.blockrSortTipInit) {
   window.blockrSortTipInit = true;
   var blockrSortTips = function(node) {
     if (!window.Blockr || !Blockr.tooltip || !node || node.nodeType !== 1) return;
+    var cut = node.querySelectorAll('.blockr-table [data-blockr-tooltip-overflow]');
+    for (var k = 0; k < cut.length; k++) {
+      Blockr.tooltip.set(cut[k], cut[k].getAttribute('data-blockr-tooltip'), {overflow: true});
+    }
     var ths = node.matches('th[data-sort-tip]') ? [node] :
       node.querySelectorAll('th[data-sort-tip]');
     for (var i = 0; i < ths.length; i++) {
