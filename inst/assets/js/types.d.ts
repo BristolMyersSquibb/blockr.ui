@@ -393,7 +393,11 @@ interface BlockrNamespace {
   ): BlockrGearTrayHandle;
   /** Toggle the canonical required-empty amber cue on a field wrapper. */
   setRequiredEmpty(el: Element, empty: boolean): void;
-  /** Commit-on-Enter text input with the "Enter ↵" chip (§5.5). */
+  /** Commit-on-Enter text input with the ↵ button (§5.5). */
+  /** Whether this is a Mac; decided once, with `.blockr-mac` on the root. */
+  isMac: boolean;
+  /** A shortcut written for this platform: "Mod+S" is "⌘S" or "Ctrl+S". */
+  keys(keys: string): string;
   textCommit(
     input: HTMLInputElement,
     opts: { onCommit: (value: string) => void }
