@@ -12,7 +12,8 @@ in load order.
 }
 \description{
 The JavaScript and CSS of the controls blockr blocks are built from:
-\code{Blockr.Select} (single, multi and menu), the Enter button of a field that
+\code{Blockr.Select} (single, multi and menu), \code{Blockr.Input} (the code field
+with column and function completions), the Enter button of a field that
 commits on Enter, the required-empty cue, the checkbox, the segmented
 control, the gear tray and the placement routine for floating panels
 (\code{Blockr.place}), all on the \code{window.Blockr} namespace, together with the
@@ -24,8 +25,8 @@ dependency brings \code{\link[=theme_dep]{theme_dep()}} along. Attach it from a 
 dependencies are de-duplicated by name, so any number of blocks can.
 
 The dependency names are the ones blockr.dplyr used while these files
-lived there (\code{blockr-select-js}, \code{blockr-select-css}, \code{blockr-blocks-css}),
-so a page never loads two copies of Select.
+lived there (\code{blockr-select-js}, \code{blockr-select-css}, \code{blockr-blocks-css},
+\code{blockr-input-js}, \code{blockr-input-css}), so a page never loads two copies.
 }
 \examples{
 shiny::fluidPage(

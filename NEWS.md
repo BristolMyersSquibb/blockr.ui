@@ -17,6 +17,10 @@
   dependency names are the ones blockr.dplyr used, so a page never loads two
   copies.
 
+* `controls_dep()` also carries `Blockr.Input`, the code field with column
+  and function completions, moved here from blockr.dplyr under its old
+  dependency names (`blockr-input-js`, `blockr-input-css`).
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
