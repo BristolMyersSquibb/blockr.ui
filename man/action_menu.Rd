@@ -32,7 +32,8 @@ leave the block; \code{"start"} with its left edge.}
 label.}
 
 \item{meta}{Text after the label, muted and right-aligned: the format of a
-download (".pptx"), a block ID.}
+download (".pptx"), a block ID, or a keyboard shortcut from
+\code{\link[=shortcut]{shortcut()}}.}
 
 \item{icon}{An icon before the label, as a tag or \code{\link[htmltools:HTML]{htmltools::HTML()}}.}
 

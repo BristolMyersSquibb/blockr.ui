@@ -140,7 +140,7 @@ field.
 `border-accent`. It is the main button's look, and every selected or "on"
 state borrows it: a selected segment, an icon tile, a pressed icon button, the
 open gear, a tag that is cutting rows, an "on" badge, the "+N" overflow, the
-Enter button, a selected row and the active group's front tab (these two
+↵ button, a selected row and the active group's front tab (these two
 without the edge). Hovering a selected thing keeps its look.
 
 ### Status
@@ -253,7 +253,7 @@ monospace`. Code is 13px on every code surface.
 | `--blockr-control-h-xs` | 26px | header tools, the gear, buttons in a header strip, the builder/code switch, segmented controls inside a row |
 
 No control is smaller than 26px, except what sits inside a 42px row or field
-(the 24px pill, tag and Enter button) and the 16px checkbox box, whose label is
+(the 24px pill, tag and ↵ button) and the 16px checkbox box, whose label is
 part of its target.
 
 ### Elevation
@@ -622,8 +622,9 @@ selected row, the active group's front tab.
 - Disabled: `text-disabled`.
 - Required and empty: `border-warning` (amber-500, `#f59e0b`), `bg-warning`
   fill, and a `*` after the label. The cue clears when the field has a value.
-- Commit on Enter or blur. The "Enter ↵" button (24px, 11px weight 500, the
-  accent tint) is armed while the field is dirty. Escape reverts.
+- Commit on Enter or blur. The ↵ button (24px square, the accent tint) is
+  armed while the field is dirty. Escape reverts. See [Keyboard
+  shortcuts](#keyboard-shortcuts).
 - Numbers use the same field. The input keeps `type=number` for the keyboard,
   hides the spinner arrows, and commits like text; arrow keys still step. A
   Bootstrap override brings Shiny's `numericInput` to the same look.
@@ -809,9 +810,9 @@ modals, which is intended. `btn-success` has no kind and goes.
 | s | 30px | 13px | 11px | 6px | toolbars, dialogs |
 | xs | 26px | 12px | 9px | 4px | a header strip, next to the gear |
 
-The crossfilter reset, the patient-profile drill reset and dplyr's Enter
-button are instances of the main style. The two resets take these sizes;
-the Enter button keeps the field's 24px (see [Text and number
+The crossfilter reset, the patient-profile drill reset and the ↵ button of
+a text field are instances of the main style. The two resets take these
+sizes; the ↵ button keeps the field's 24px (see [Text and number
 fields](#text-and-number-fields)), since it sits inside a 42px field.
 
 ### Icon buttons (tools)
@@ -871,6 +872,38 @@ the tip, stroked at 1.4px with round caps and joins and no fill.
 - No other glyph does this job: no Bootstrap Icons chevrons, no Bootstrap's
   own select and accordion arrows, no border triangles, no ▾ ▸ ‹ ›
   characters.
+
+### Keyboard shortcuts
+
+- **Hint only where a key does something a user would not guess.** Enter
+  committing a field, ⌘↵ running code, ⌘S saving. Keys every web page has
+  (Tab, the arrows, Escape closing a menu) get no hint.
+- **What each key means**, everywhere:
+
+  | Key | Means |
+  |---|---|
+  | ↵ | commit this one thing: a field's value, a pick in a menu, one value added to a list |
+  | ⌘↵ (Ctrl+↵) | run or send, where ↵ makes a new line: Run in the code editor |
+  | Esc | cancel: drop what is not committed, close what floats. Never saves. |
+  | Tab, a click elsewhere | leave; a field commits when you leave it |
+  | ⇧↵ | nothing of blockr's own |
+
+- **Notation.** Keys are glyphs: ↵ Enter, ⇧ Shift, ⌘ Command, ⌥ Option, and
+  "Esc". On a Mac they run together with no "+" (⌘⇧S, ⌘↵). Elsewhere
+  modifiers are words joined by "+" (Ctrl+Shift+S, Ctrl+↵). Enter is ↵ on
+  both.
+- **Only the form that applies**, never "⌘/Ctrl". blockr.ui decides once per
+  page: `.blockr-mac` on the root, `Blockr.isMac`, `Blockr.keys("Mod+S")` in
+  JavaScript and `shortcut("Mod+S")` in R, where `Mod` is Command on a Mac
+  and Ctrl elsewhere. No package checks the platform itself.
+- **Where the hint goes.** After the action's name, as muted meta text: the
+  meta slot of a menu row ("Save ⌘S"), after a button's label ("Run ⌘↵"). It
+  never replaces the name, and it is not repeated in a tooltip. The one
+  exception is a text field's ↵ button, where pressing the key is the whole
+  action: it shows ↵ alone and names itself "Apply (Enter)" to screen
+  readers.
+- **No sentences.** Where several keys need explaining, pair each key with
+  its verb: "↵ add · Esc cancel".
 
 ### The navbar
 
@@ -1384,6 +1417,9 @@ Drawn in the [design system page](design-system/index.html#special).
       (single or tags), pill with a menu, icon tiles, pressed icon button. No
       switches, radio buttons, cycle pills or shinyWidgets.
 - [ ] Text and numbers commit on Enter or blur; nothing has an Apply button.
+- [ ] Keyboard hints through `shortcut()` / `Blockr.keys()`: the platform's
+      form only, muted after the action's name, ↵ alone on a field's button.
+      No package checks for a Mac itself.
 - [ ] Buttons: main (one per view), secondary, quiet, destructive, at 42, 30 or
       26px. No Bootstrap solid buttons.
 - [ ] Header row: 26px tools, gear last, `.blockr-gear-btn` on the gear only.

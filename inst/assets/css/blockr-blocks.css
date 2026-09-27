@@ -268,17 +268,44 @@
   color: var(--blockr-color-text-disabled);
 }
 
-/* Muted keystroke glyph inside confirm chips and buttons ("Enter ↵"). */
+/* Muted keystroke glyph inside confirm chips and buttons ("Enter ↵"), for
+   the packages that still draw their own. */
 .blockr-kbd {
   opacity: 0.55;
   font-size: 0.95em;
 }
 
+/* The ↵ button of a text field (Blockr.textCommit): the key alone, in a 24px
+   square (design system, "Keyboard shortcuts") */
+.blockr-expr-confirm {
+  min-width: 24px;
+  justify-content: center;
+}
+
+.blockr-expr-confirm--key {
+  width: 24px;
+  padding: 0;
+  font-size: 13px;
+}
+
+/* Keyboard shortcut hints (shortcut() in R): each carries the Mac form and
+   the other, and blockr-ui.js puts `.blockr-mac` on the root on a Mac */
+.blockr-shortcut__mac {
+  display: none;
+}
+
+.blockr-mac .blockr-shortcut__mac {
+  display: inline;
+}
+
+.blockr-mac .blockr-shortcut__other {
+  display: none;
+}
+
 /* Standalone bordered text input + commit chip (Blockr.textCommit, §5.5).
    The chip overlays inside the field's right edge — never beside it — so it
    reads the same as the chips that sit inside a .blockr-row or inside
-   blockr.io's path input. The input reserves room for the armed
-   "Enter ↵" label, which is the chip's widest state. */
+   blockr.io's path input. The input reserves room for the 24px ↵ button. */
 .blockr-commit-field {
   position: relative;
   display: flex;
@@ -289,7 +316,7 @@
 .blockr-commit-field > input {
   flex: 1 1 auto;
   min-width: 0;
-  padding-right: 78px;
+  padding-right: 40px;
 }
 
 .blockr-commit-field > .blockr-expr-confirm {
