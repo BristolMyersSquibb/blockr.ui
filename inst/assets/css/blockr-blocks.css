@@ -52,6 +52,7 @@
 }
 
 .blockr-pill__caret svg { width: 10px; height: 10px; }
+.blockr-pill:hover .blockr-pill__caret { color: var(--blockr-color-text-default); }
 
 /* --- Segmented control: a fixed choice of two or three values. ---
    In the grid 42px; inside a row or a bar 26px (--xs). The selected segment
