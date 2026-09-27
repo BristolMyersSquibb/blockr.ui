@@ -20,9 +20,9 @@
 #' #9ca3af)`, with a literal fallback for hosts that do not attach this
 #' dependency.
 #'
-#' The body face is Bootstrap's (Open Sans in bslib's Shiny preset). Setting
-#' the `blockr.font` option, or the `BLOCKR_FONT` environment variable, to
-#' `"inter"` adds Inter, served from the package, as a trial.
+#' The body face is Bootstrap's (Open Sans in bslib's Shiny preset). Inter,
+#' served from the package, takes over while `<html>` carries
+#' `data-blockr-font="inter"` (blockr.dock's Font board option sets it).
 #'
 #' @return An [htmltools::htmlDependency].
 #'
@@ -36,11 +36,6 @@
 #' @export
 theme_dep <- function() {
 
-  inter <- identical(
-    tolower(as.character(blockr.core::blockr_option("font", ""))),
-    "inter"
-  )
-
   htmltools::htmlDependency(
     name = "blockr-theme",
     version = utils::packageVersion("blockr.ui"),
@@ -50,9 +45,9 @@ theme_dep <- function() {
       "css/blockr-tokens.css",
       "css/blockr-tokens-dark.css",
       "css/blockr-theme.css",
-      if (inter) "fonts/inter/blockr-font-inter.css"
+      "fonts/inter/blockr-font-inter.css"
     ),
-    attachment = if (inter) "fonts/inter/inter-latin.woff2",
+    attachment = "fonts/inter/inter-latin.woff2",
     all_files = FALSE
   )
 }

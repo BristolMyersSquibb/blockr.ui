@@ -1,7 +1,8 @@
 /* =========================================================================
    blockr-font-inter.css: Inter as the body face, a trial beside the default
-   Open Sans (bslib's Shiny preset). Loaded by theme_dep() when the
-   `blockr.font` option (or BLOCKR_FONT) is "inter".
+   Open Sans (bslib's Shiny preset). Always loaded by theme_dep(); it applies
+   while <html> carries data-blockr-font="inter", which blockr.dock's Font
+   board option sets. The browser fetches the font only once a rule uses it.
 
    The file is Inter's latin subset as a variable font (wght 100-900, opsz
    14-32), SIL OFL, served from the package: no Google request.
@@ -18,7 +19,7 @@
   src: url("inter-latin.woff2") format("woff2");
 }
 
-:root:root {
+:root:root[data-blockr-font="inter"] {
   --bs-body-font-family: "Inter", system-ui, -apple-system, "Segoe UI",
     Roboto, sans-serif;
   --bs-font-sans-serif: var(--bs-body-font-family);
@@ -27,11 +28,11 @@
 /* Inter's opsz axis draws 20px and up in its display cut, tighter than the
    rest. The text cut at every size is what the 2026-09-23 comparison
    settled on. */
-body {
+[data-blockr-font="inter"] body {
   font-optical-sizing: none;
 }
 
 /* blockr.viz's older viz-block layout names Open Sans itself. */
-:root:root .vd-layout {
+:root:root[data-blockr-font="inter"] .vd-layout {
   font-family: var(--bs-body-font-family);
 }
