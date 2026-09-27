@@ -88,8 +88,15 @@ body {
   font-size: 0.875em;
 }
 
+/* verbatimTextOutput() and printed previews: a faint box, as Bootstrap and
+   bslib's Shiny preset draw it. */
 :where(pre) {
   overflow: auto;
+  padding: 8px;
+  color: var(--blockr-color-text-default);
+  background-color: color-mix(in srgb, var(--blockr-color-text-default) 4%, transparent);
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: 3px;
 }
 
 :where(img, svg) {
@@ -217,13 +224,18 @@ textarea.form-control {
   margin-bottom: 0.5rem;
 }
 
+/* The label beside a box reads as text, not as a field's label: the theme
+   layer's small grey `label` rule is for the label above a field. */
 .checkbox label,
 .radio label,
 .checkbox-inline,
 .radio-inline {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  margin-bottom: 0;
+  font-size: var(--blockr-font-size-base);
+  color: var(--blockr-color-text-default);
   cursor: pointer;
 }
 
