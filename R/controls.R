@@ -32,6 +32,15 @@
 #'
 #' @export
 controls_dep <- function() {
+  # Built once: every control attaches this list, and building its thirteen
+  # dependencies took 12 ms per control.
+  if (is.null(pkg_cache$controls_dep)) {
+    pkg_cache$controls_dep <- build_controls_dep()
+  }
+  pkg_cache$controls_dep
+}
+
+build_controls_dep <- function() {
   tagList(
     theme_dep(),
     controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
@@ -53,7 +62,7 @@ controls_dep <- function() {
 controls_asset <- function(name, ...) {
   htmltools::htmlDependency(
     name = name,
-    version = utils::packageVersion("blockr.ui"),
+    version = ui_version(),
     package = "blockr.ui",
     src = "assets",
     ...,

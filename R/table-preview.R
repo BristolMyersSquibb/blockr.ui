@@ -541,7 +541,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
 table_preview_dep <- function() {
   htmltools::htmlDependency(
     name = "blockr-table-preview",
-    version = utils::packageVersion("blockr.ui"),
+    version = ui_version(),
     package = "blockr.ui",
     src = "assets",
     stylesheet = "css/blockr-table-preview.css",

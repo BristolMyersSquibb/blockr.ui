@@ -33,7 +33,7 @@
 theme_dep <- function() {
   htmltools::htmlDependency(
     name = "blockr-theme",
-    version = utils::packageVersion("blockr.ui"),
+    version = ui_version(),
     package = "blockr.ui",
     src = "assets",
     stylesheet = c(
@@ -90,7 +90,7 @@ theme_dep <- function() {
 shiny_has_perf_dep <- function() {
   htmltools::htmlDependency(
     name = "blockr-shiny-has-perf",
-    version = utils::packageVersion("blockr.ui"),
+    version = ui_version(),
     package = "blockr.ui",
     src = "assets",
     script = "js/shiny-has-perf.js",
