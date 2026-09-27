@@ -30,9 +30,9 @@ defining a custom property.
 Consuming packages reference the tokens as \verb{var(--blockr-grey-400, #9ca3af)}, with a literal fallback for hosts that do not attach this
 dependency.
 
-The body face is Bootstrap's (Open Sans in bslib's Shiny preset). Inter,
-served from the package, takes over while \verb{<html>} carries
-\code{data-blockr-font="inter"} (blockr.dock's Font board option sets it).
+The body face is Bootstrap's (Open Sans in bslib's Shiny preset). Setting
+the \code{blockr.font} option, or the \code{BLOCKR_FONT} environment variable, to
+\code{"inter"} adds Inter, served from the package, as a trial.
 }
 \examples{
 shiny::fluidPage(
