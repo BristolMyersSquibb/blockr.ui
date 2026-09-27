@@ -810,6 +810,25 @@ Rename, Duplicate, Copy block ID (the ID as mono meta text), and Remove after a
 divider in `text-danger`. The dock header has no subtitle; the block type is
 the tooltip on its mark.
 
+### The preview lip
+
+The preview has a toggle of its own outside the "…" menu, where the preview
+appears: a lip hanging from a line under the block's content, like a drawer
+pull at the card's edge.
+
+- At rest nothing shows. While the pointer is over the block, the line
+  (`border-default`) and the lip appear: 24px, `bg-surface`, 1px
+  `border-default` on three sides, radius 8 at the bottom, 12px
+  `text-muted`, "Preview" with a chevron, or "Hide preview" with the chevron
+  turned up. Hover: `text-default`.
+- Keyboard focus shows it too; on a touch screen it is always there.
+- It opens the preview inside the card, on the card's own surface: for some
+  blocks the output is what the dashboard shows (a ggplot), so it must not
+  read as a tray hung under the block.
+- When the content runs past the panel it sticks to the bottom of what is
+  visible, so "Hide preview" never needs a scroll to the end.
+- Locked and simplified boards have no lip, like the other builder chrome.
+
 ### Tooltips
 
 One style for every name shown on hover: a small light card. `bg-raised`, 1px
