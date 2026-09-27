@@ -7,7 +7,9 @@
 #' control, the gear tray, the tooltip (`Blockr.tooltip`), the action menu
 #' (`Blockr.menu`) and the placement routine for floating panels
 #' (`Blockr.place`), all on the `window.Blockr` namespace, together with the
-#' rows, pills, labels and fields they draw.
+#' rows, pills, labels, fields and buttons (`.blockr-btn`) they draw, and the
+#' Shiny input bindings of the controls rendered from R ([select_input()] and
+#' its siblings).
 #'
 #' The stylesheets read the design tokens without fallbacks, so the
 #' dependency brings [theme_dep()] along. Attach it from a block's UI;
@@ -38,6 +40,7 @@ controls_dep <- function() {
     controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css"),
     controls_asset("blockr-menu-css", stylesheet = "css/blockr-menu.css"),
     controls_asset("blockr-tooltip-css", stylesheet = "css/blockr-tooltip.css"),
+    controls_asset("blockr-buttons-css", stylesheet = "css/blockr-buttons.css"),
     controls_asset(
       "blockr-settings-band",
       stylesheet = "css/blockr-settings-band.css"
@@ -45,7 +48,9 @@ controls_dep <- function() {
     controls_asset("blockr-select-js", script = "js/blockr-select.js"),
     controls_asset("blockr-select-css", stylesheet = "css/blockr-select.css"),
     controls_asset("blockr-input-js", script = "js/blockr-input.js"),
-    controls_asset("blockr-input-css", stylesheet = "css/blockr-input.css")
+    controls_asset("blockr-input-css", stylesheet = "css/blockr-input.css"),
+    controls_asset("blockr-inputs-js", script = "js/blockr-inputs.js"),
+    controls_asset("blockr-inputs-css", stylesheet = "css/blockr-inputs.css")
   )
 }
 

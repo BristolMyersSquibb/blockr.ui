@@ -38,15 +38,15 @@ body {
 }
 
 h4, .h4 {
-  font-size: var(--blockr-font-size-section);
+  font-size: var(--blockr-font-size-lg);
   font-weight: var(--blockr-font-weight-medium);
   font-variant-caps: all-small-caps;
-  color: var(--blockr-color-text-secondary);
+  color: var(--blockr-color-text-default);
   letter-spacing: 0.5px;
 }
 
 h5, .h5 {
-  font-size: var(--blockr-font-size-section);
+  font-size: var(--blockr-font-size-lg);
   font-weight: var(--blockr-font-weight-medium);
 }
 
@@ -64,7 +64,7 @@ label,
 .form-label,
 .shiny-input-container .control-label {
   font-size: var(--blockr-font-size-xs);
-  color: var(--blockr-color-text-secondary);
+  color: var(--blockr-color-text-muted);
   margin-bottom: 0.25rem;
 }
 
@@ -76,24 +76,24 @@ label:has(input[type="file"]) {
 .form-control,
 .form-select {
   font-size: var(--blockr-font-size-base);
-  background-color: var(--blockr-color-bg-input);
-  border: 1px solid var(--blockr-color-border);
+  background-color: var(--blockr-color-bg-field);
+  border: 1px solid var(--blockr-color-border-default);
   border-radius: 8px;
   padding: 10px 14px;
-  color: var(--blockr-color-text-primary);
+  color: var(--blockr-color-text-default);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 .form-control:focus,
 .form-select:focus {
-  background-color: #ffffff;
-  border-color: var(--blockr-color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: var(--blockr-color-bg-surface);
+  border-color: var(--blockr-color-border-accent);
+  box-shadow: var(--blockr-focus-ring);
   outline: none;
 }
 
 .form-control::placeholder {
-  color: var(--blockr-grey-400);
+  color: var(--blockr-color-text-muted);
 }
 
 .input-group-sm > .form-control,
@@ -112,8 +112,8 @@ label:has(input[type="file"]) {
 }
 
 .selectize-input {
-  background-color: var(--blockr-color-bg-input) !important;
-  border: 1px solid var(--blockr-color-border) !important;
+  background-color: var(--blockr-color-bg-field) !important;
+  border: 1px solid var(--blockr-color-border-default) !important;
   border-radius: 8px !important;
   padding: 0 12px !important;
   min-height: 42px !important;
@@ -125,13 +125,13 @@ label:has(input[type="file"]) {
 }
 
 .selectize-input.focus {
-  background-color: #ffffff !important;
-  border-color: var(--blockr-color-primary) !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  background-color: var(--blockr-color-bg-surface) !important;
+  border-color: var(--blockr-color-border-accent) !important;
+  box-shadow: var(--blockr-focus-ring) !important;
 }
 
 .selectize-dropdown {
-  border: 1px solid var(--blockr-color-border) !important;
+  border: 1px solid var(--blockr-color-border-default) !important;
   border-radius: 8px !important;
   box-shadow: var(--blockr-shadow-lg) !important;
   margin-top: 4px !important;
@@ -139,26 +139,115 @@ label:has(input[type="file"]) {
 
 .selectize-dropdown-content .option {
   padding: 10px 14px !important;
-  color: var(--blockr-color-text-primary);
+  color: var(--blockr-color-text-default);
 }
 
 .selectize-dropdown-content .option.active {
   background-color: var(--blockr-color-bg-hover) !important;
-  color: var(--blockr-color-text-primary) !important;
+  color: var(--blockr-color-text-default) !important;
 }
 
-/* --- Buttons (Figma-aligned) --- */
-.btn {
-  font-size: var(--blockr-font-size-base);
-  font-weight: var(--blockr-font-weight-medium);
-  border-radius: 6px;
-  padding: 8px 16px;
-  transition: all 0.15s ease;
+/* --- Buttons: Bootstrap's classes onto the design system's kinds ---
+   The values of blockr-buttons.css, set through Bootstrap's own button
+   variables so its hover, active, focus and disabled rules draw them.
+   Shiny's actionButton() and downloadButton() are .btn-default, so they
+   come out secondary; Shiny's modal buttons follow too, which is intended.
+   The selectors outrank Bootstrap's own, wherever bslib loads them: its
+   kinds are one class, the sizes two with `:root`, and the kinds four,
+   past bslib's `[data-bs-theme="dark"] .btn-default:not(...)`.
+
+     .btn-primary                             main
+     .btn-default, .btn-secondary,
+     .btn-outline-secondary, .btn-light       secondary
+     .btn-link                                quiet
+     .btn-danger                              destructive
+     .btn                                     size m (42px)
+     .btn-sm                                  size s (30px)             */
+:root .btn {
+  --bs-btn-padding-x: 16px;
+  --bs-btn-padding-y: 10px;
+  --bs-btn-font-size: var(--blockr-font-size-base);
+  --bs-btn-font-weight: var(--blockr-font-weight-medium);
+  --bs-btn-line-height: 20px;
+  --bs-btn-border-radius: var(--blockr-radius-lg);
+  --bs-btn-box-shadow: none;
+  --bs-btn-focus-box-shadow: none;
+  --bs-btn-disabled-color: var(--blockr-color-text-disabled);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--blockr-color-border-default);
+  --bs-btn-disabled-opacity: 1;
+  transition: color var(--blockr-transition),
+    background-color var(--blockr-transition),
+    border-color var(--blockr-transition);
 }
 
-.btn-sm {
-  font-size: var(--blockr-font-size-sm);
-  padding: 6px 12px;
+:root .btn-sm {
+  --bs-btn-padding-x: 11px;
+  --bs-btn-padding-y: 5px;
+  --bs-btn-font-size: var(--blockr-font-size-sm);
+  --bs-btn-line-height: 18px;
+  --bs-btn-border-radius: var(--blockr-radius-md);
+}
+
+:root .btn:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}
+
+/* Secondary first: Shiny's actionButton() always carries btn-default, so
+   the kind a caller adds to it has to come later to win. */
+:root:root .btn.btn-default,
+:root:root .btn.btn-secondary,
+:root:root .btn.btn-outline-secondary,
+:root:root .btn.btn-outline-default,
+:root:root .btn.btn-light {
+  --bs-btn-color: var(--blockr-color-text-default);
+  --bs-btn-bg: var(--blockr-color-bg-surface);
+  --bs-btn-border-color: var(--blockr-color-border-default);
+  --bs-btn-hover-color: var(--blockr-color-text-default);
+  --bs-btn-hover-bg: var(--blockr-color-bg-hover);
+  --bs-btn-hover-border-color: var(--blockr-color-border-strong);
+  --bs-btn-active-color: var(--blockr-color-text-default);
+  --bs-btn-active-bg: var(--blockr-color-bg-hover);
+  --bs-btn-active-border-color: var(--blockr-color-border-strong);
+}
+
+:root:root .btn.btn-primary {
+  --bs-btn-color: var(--blockr-color-text-accent);
+  --bs-btn-bg: var(--blockr-color-bg-accent-subtle);
+  --bs-btn-border-color: var(--blockr-color-border-accent-subtle);
+  --bs-btn-hover-color: var(--blockr-color-text-accent);
+  --bs-btn-hover-bg: var(--blockr-color-bg-accent-subtle-hover);
+  --bs-btn-hover-border-color: var(--blockr-color-border-accent);
+  --bs-btn-active-color: var(--blockr-color-text-accent);
+  --bs-btn-active-bg: var(--blockr-color-bg-accent-subtle-hover);
+  --bs-btn-active-border-color: var(--blockr-color-border-accent);
+}
+
+:root:root .btn.btn-link {
+  --bs-btn-padding-x: 8px;
+  --bs-btn-color: var(--blockr-color-text-muted);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: var(--blockr-color-text-default);
+  --bs-btn-hover-bg: var(--blockr-color-bg-hover);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-color: var(--blockr-color-text-default);
+  --bs-btn-active-bg: var(--blockr-color-bg-hover);
+  --bs-btn-active-border-color: transparent;
+  text-decoration: none;
+}
+
+:root:root .btn.btn-danger {
+  --bs-btn-color: var(--blockr-color-text-danger);
+  --bs-btn-bg: color-mix(in srgb, var(--blockr-color-border-danger) 6%, transparent);
+  --bs-btn-border-color: var(--blockr-color-border-danger-subtle);
+  --bs-btn-hover-color: var(--blockr-color-text-danger);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--blockr-color-border-danger) 12%, transparent);
+  --bs-btn-hover-border-color: var(--blockr-color-border-danger);
+  --bs-btn-active-color: var(--blockr-color-text-danger);
+  --bs-btn-active-bg: color-mix(in srgb, var(--blockr-color-border-danger) 12%, transparent);
+  --bs-btn-active-border-color: var(--blockr-color-border-danger);
 }
 
 /* File input: stretch button to match form-control height */
@@ -166,69 +255,19 @@ label:has(input[type="file"]) {
   display: flex;
 }
 
-/* Primary button - blue */
-.btn-primary {
-  background-color: var(--blockr-color-primary);
-  border-color: var(--blockr-color-primary);
-  color: #ffffff;
-}
-
-.btn-primary:hover,
-.btn-primary:focus {
-  background-color: var(--blockr-color-primary-hover);
-  border-color: var(--blockr-color-primary-hover);
-  color: #ffffff;
-}
-
-/* Secondary/Outline button - gray */
-.btn-secondary,
-.btn-outline-secondary,
-.btn-light {
-  background-color: var(--blockr-grey-100);
-  border: 1px solid var(--blockr-color-border);
-  color: var(--blockr-color-text-primary);
-}
-
-.btn-secondary:hover,
-.btn-secondary:focus,
-.btn-outline-secondary:hover,
-.btn-outline-secondary:focus,
-.btn-light:hover,
-.btn-light:focus {
-  background-color: var(--blockr-color-border);
-  border-color: var(--blockr-color-border-hover);
-  color: var(--blockr-color-text-primary);
-}
-
-/* Default/outline button */
-.btn-default,
-.btn-outline-default {
-  background-color: var(--blockr-grey-100);
-  border: 1px solid var(--blockr-color-border);
-  color: var(--blockr-color-text-primary);
-}
-
-.btn-default:hover,
-.btn-default:focus,
-.btn-outline-default:hover,
-.btn-outline-default:focus {
-  background-color: var(--blockr-color-border);
-  border-color: var(--blockr-color-border-hover);
-}
-
 /* Icon-only action buttons (remove row, etc.) */
 .btn-link.text-muted {
   background: transparent !important;
   border: none !important;
   border-radius: 4px !important;
-  color: var(--blockr-grey-400) !important;
+  color: var(--blockr-color-text-muted) !important;
   transition: background-color 0.15s ease, color 0.15s ease !important;
 }
 
 .btn-link.text-muted:hover,
 .btn-link.text-muted:focus {
-  background-color: var(--blockr-grey-100) !important;
-  color: var(--blockr-grey-600) !important;
+  background-color: var(--blockr-color-bg-hover) !important;
+  color: var(--blockr-color-text-default) !important;
   text-decoration: none !important;
 }
 
@@ -236,8 +275,8 @@ label:has(input[type="file"]) {
    Tooltip & Popover Styling (Figma-aligned)
    ============================================ */
 .tooltip {
-  --bs-tooltip-bg: white;
-  --bs-tooltip-color: var(--blockr-color-text-secondary);
+  --bs-tooltip-bg: var(--blockr-color-bg-raised);
+  --bs-tooltip-color: var(--blockr-color-text-default);
   --bs-tooltip-opacity: 1;
 }
 
@@ -247,24 +286,24 @@ label:has(input[type="file"]) {
   padding: 8px 12px;
   border-radius: 8px;
   box-shadow: var(--blockr-shadow-lg);
-  border: 1px solid var(--blockr-color-border);
+  border: 1px solid var(--blockr-color-border-default);
   max-width: 250px;
   text-align: left;
 }
 
 .tooltip-arrow::before {
-  border-top-color: white !important;
-  border-bottom-color: white !important;
+  border-top-color: var(--blockr-color-bg-raised) !important;
+  border-bottom-color: var(--blockr-color-bg-raised) !important;
 }
 
 /* Popover - light style matching tooltips */
 .popover {
-  --bs-popover-bg: white;
-  --bs-popover-border-color: var(--blockr-color-border);
-  --bs-popover-body-color: var(--blockr-color-text-secondary);
+  --bs-popover-bg: var(--blockr-color-bg-raised);
+  --bs-popover-border-color: var(--blockr-color-border-default);
+  --bs-popover-body-color: var(--blockr-color-text-default);
   border-radius: 12px;
   box-shadow: var(--blockr-shadow-lg);
-  border: 1px solid var(--blockr-color-border);
+  border: 1px solid var(--blockr-color-border-default);
   max-width: 280px;
 }
 
@@ -281,13 +320,13 @@ label:has(input[type="file"]) {
 }
 
 .popover-arrow::before {
-  border-top-color: var(--blockr-color-border) !important;
-  border-bottom-color: var(--blockr-color-border) !important;
+  border-top-color: var(--blockr-color-border-default) !important;
+  border-bottom-color: var(--blockr-color-border-default) !important;
 }
 
 .popover-arrow::after {
-  border-top-color: white !important;
-  border-bottom-color: white !important;
+  border-top-color: var(--blockr-color-bg-raised) !important;
+  border-bottom-color: var(--blockr-color-bg-raised) !important;
 }
 
 /* ============================================
@@ -300,7 +339,7 @@ label:has(input[type="file"]) {
 }
 
 .table {
-  border-color: var(--blockr-color-border);
+  border-color: var(--blockr-color-border-default);
 }
 
 .table > thead {
@@ -309,14 +348,14 @@ label:has(input[type="file"]) {
 
 .table > thead > tr > th {
   font-weight: var(--blockr-font-weight-medium);
-  color: var(--blockr-color-text-secondary);
-  border-bottom: 2px solid var(--blockr-color-border);
+  color: var(--blockr-color-text-default);
+  border-bottom: 2px solid var(--blockr-color-border-default);
   padding: 12px 16px;
 }
 
 .table > tbody > tr > td {
-  color: var(--blockr-color-text-primary);
-  border-bottom: 1px solid var(--blockr-grey-100);
+  color: var(--blockr-color-text-default);
+  border-bottom: 1px solid var(--blockr-color-border-default);
   padding: 12px 16px;
 }
 
