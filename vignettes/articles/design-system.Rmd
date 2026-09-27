@@ -504,6 +504,49 @@ has no handle: the whole row drags, with the grab cursor on hover, and
 Alt+Up/Down moves the keyboard row. A handle there would hang outside the
 fill.
 
+### Block lists
+
+A list of blocks on a panel: the outline, the report, the deck. Every one
+uses the same row, and it is the row of the "+" menu the block was picked
+from ([Picking a block](#floating)).
+
+- **Row:** 34px, radius 6, 8px between its parts, no space between rows.
+  From the left: the order number where there is one, the block's 24px mark,
+  the name at 14px `text-default` on one line, then the row's end. A cut name
+  is named in full by the tooltip. A text item (a paragraph in the report)
+  wraps to two lines.
+- **Order numbers** only where the order is the product: the report and the
+  deck. 12px `text-muted`, tabular figures, right-aligned in a 14px column.
+  The outline's order comes from the links and has none.
+- **The row's end at rest** holds state the reader needs without opening
+  anything. In the report, code and output are two 24px pressed icon
+  buttons, always shown: pressed (the accent tint) means shown in the
+  document, and a click toggles it. In the outline, the views a block is on,
+  as 13px `text-muted` meta text: the first view, then "+N" in
+  `text-accent`. Views show only on a board with two or more views and a
+  panel of 360px or more.
+- **Hover and keyboard focus:** `bg-hover`, and a 24px "…" tool appears
+  last. It opens the row's action menu (`action_menu()`) with the actions
+  that are not on the row, and Remove last after a divider. There is no ×
+  on the row. Meta text gives way to the "…"; a tool never covers the name.
+- **The current row:** the block open in the dock is `bg-selected` with
+  `text-accent`, in every list.
+- **Gestures:** a click opens the block. A double-click renames it
+  ([Renaming in place](#controls)). The whole row drags, with the grab cursor
+  and a 2px `border-accent` line where it will land. Alt+Up/Down moves the
+  keyboard row.
+- **Stacks** (the outline): a tinted band with no border, the stack's colour
+  at 7% on the surface, radius 8, 2px padding. Its header is a row: the
+  stack's 24px mark in the stack colour, the name at weight 600, the member
+  count in 13px `text-muted`, the fold chevron at the end. The pointer on the
+  header deepens the whole band to 14%, because a click, a drag or a rename
+  on the header acts on the stack. The stack colour is the board's, like a
+  block category colour.
+- **The end of the list:** a quiet button named for what lands in it, "Add
+  block" or "Add slide", 30px, aligned with the marks. It opens the
+  [Picking a block](#floating) menu. An empty list is one `.blockr-empty`
+  line.
+
 Drawn in the [design system page](design-system/index.html#layout).
 
 ---
