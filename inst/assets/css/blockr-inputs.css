@@ -1,0 +1,40 @@
+/* =========================================================================
+   blockr-inputs.css: what the Shiny-side controls (select_input(),
+   number_input(), gear_tray(), ...) need beyond the fields, the checkbox and
+   the tray they share with the JS-built blocks. Its own dependency, for the
+   same reason as blockr-buttons.css.
+   ========================================================================= */
+
+/* A number uses the text field and hides the spinner arrows: a click on
+   them would change a value that still waits for Enter. The arrow keys
+   still step. */
+.blockr-ui-number {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.blockr-ui-number::-webkit-inner-spin-button,
+.blockr-ui-number::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* A tray section switched on by a checkbox: the checkbox stands before the
+   title and the title is its label, so it reads as a section title. Its
+   fields show only while it is checked. */
+.blockr-settings__title--toggle .blockr-checkbox {
+  min-height: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.blockr-settings__title--toggle:has(input:not(:checked)) + .blockr-settings__grid {
+  display: none;
+}
+
+/* In the grid a segmented control fills its field, and its segments share
+   the width. The 26px one stays as wide as its segments. */
+.blockr-ui-segmented > .blockr-segmented:not(.blockr-segmented--xs) {
+  display: flex;
+}

@@ -383,12 +383,15 @@ interface BlockrNamespace {
   ): BlockrSegmentedHandle;
   /** The gear tray behaviour (blockr-ui.js): the gear toggles the band,
    *  which slides open and closed; Escape inside the band or on the gear
-   *  closes it. */
+   *  closes it. `open` starts it open, without the slide. */
   gearTray(
     band: HTMLElement,
     gear: HTMLButtonElement,
-    opts?: { label?: string }
+    opts?: { label?: string; open?: boolean }
   ): BlockrGearTrayHandle;
+  /** The Shiny input bindings' mount, value and update steps
+   *  (blockr-inputs.js), keyed by control. */
+  inputs?: Record<string, BlockrInputSpec>;
   /** Toggle the canonical required-empty amber cue on a field wrapper. */
   setRequiredEmpty(el: Element, empty: boolean): void;
   /** Commit-on-Enter text input with the ↵ button (§5.5). */
@@ -414,6 +417,16 @@ interface BlockrSegmentedHandle {
   el: HTMLDivElement;
   set(value: string): void;
   get(): string;
+}
+
+/** One control's part of a Shiny input binding (blockr-inputs.js). */
+interface BlockrInputSpec {
+  selector: string;
+  type?: string;
+  mount(el: HTMLElement): void;
+  value(el: HTMLElement): any;
+  receive(el: HTMLElement, data: Record<string, any>): void;
+  unmount?(el: HTMLElement): void;
 }
 
 /** Handle returned by Blockr.gearTray (blockr-ui.js). */
