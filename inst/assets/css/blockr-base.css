@@ -1,0 +1,329 @@
+/* ============================================================
+   Base layer, for a page without Bootstrap
+   ============================================================
+   What Bootstrap gave a blockr page that nothing else does: the reset of the
+   browser's defaults (Reboot), the body face, and the look of the markup
+   Shiny's own inputs emit, which carries Bootstrap's class names whatever the
+   page loads (`form-group`, `form-control`, `control-label`, `checkbox`,
+   `btn btn-default`). A page that loads Bootstrap must not load this sheet;
+   base_dep() is for the others.
+
+   The button rules read the `--bs-btn-*` properties blockr-theme.css sets
+   for each kind, the same properties Bootstrap's own `.btn` reads, so the
+   kinds are defined once, in the theme layer, for both kinds of page.
+   Everything is inside :where() or a single class, so any component rule
+   outranks it. */
+
+/* --- Reset --- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--blockr-font-size-base);
+  font-weight: var(--blockr-font-weight-normal);
+  line-height: 1.5;
+  color: var(--blockr-color-text-default);
+  background-color: var(--blockr-color-bg-surface);
+}
+
+:where(h1, h2, h3, h4, h5, h6) {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: var(--blockr-font-weight-medium);
+  line-height: 1.2;
+}
+
+:where(h1) { font-size: 2rem; }
+:where(h2) { font-size: 1.6rem; }
+:where(h3) { font-size: 1.35rem; }
+:where(h4) { font-size: 1.15rem; }
+:where(h5) { font-size: 1rem; }
+:where(h6) { font-size: var(--blockr-font-size-base); }
+
+:where(p, ul, ol, dl, pre, blockquote, figure) {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+:where(ul, ol) {
+  padding-left: 2rem;
+}
+
+:where(ul ul, ul ol, ol ul, ol ol) {
+  margin-bottom: 0;
+}
+
+:where(b, strong) {
+  font-weight: var(--blockr-font-weight-semibold);
+}
+
+:where(small) {
+  font-size: var(--blockr-font-size-sm);
+}
+
+:where(a) {
+  color: var(--blockr-color-text-accent);
+}
+
+:where(hr) {
+  margin: 1rem 0;
+  border: 0;
+  border-top: 1px solid var(--blockr-color-border-default);
+}
+
+:where(code, kbd, samp, pre) {
+  font-family: var(--blockr-font-mono);
+  font-size: 0.875em;
+}
+
+:where(pre) {
+  overflow: auto;
+}
+
+:where(img, svg) {
+  vertical-align: middle;
+}
+
+:where(table) {
+  border-collapse: collapse;
+  caption-side: bottom;
+}
+
+:where(th) {
+  text-align: inherit;
+}
+
+:where(label) {
+  display: inline-block;
+}
+
+:where(button, input, optgroup, select, textarea) {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+:where(button, select) {
+  text-transform: none;
+}
+
+:where(button, [type="button"], [type="reset"], [type="submit"]) {
+  -webkit-appearance: button;
+  appearance: button;
+}
+
+:where(button:not(:disabled), [role="button"]) {
+  cursor: pointer;
+}
+
+:where(textarea) {
+  resize: vertical;
+}
+
+:where(fieldset) {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+:where([hidden]) {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* --- Shiny's inputs ---
+   textInput(), selectInput(), numericInput() and the rest: a
+   `.form-group.shiny-input-container` holding a `.control-label` and a
+   `.form-control`. Shiny's own sheet sets the container's width. */
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: var(--blockr-control-h);
+  padding: 10px 14px;
+  font-size: var(--blockr-font-size-base);
+  line-height: 20px;
+  color: var(--blockr-color-text-default);
+  background-color: var(--blockr-color-bg-field);
+  background-clip: padding-box;
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: var(--blockr-radius-lg);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.form-control:disabled {
+  color: var(--blockr-color-text-disabled);
+  background-color: var(--blockr-color-bg-subtle);
+}
+
+select.form-control {
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m4 6 4 4 4-4'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px 14px;
+}
+
+textarea.form-control {
+  min-height: calc(var(--blockr-control-h) * 2);
+}
+
+.control-label {
+  margin-bottom: 0.25rem;
+}
+
+.help-block {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-muted);
+}
+
+/* checkboxInput(), checkboxGroupInput(), radioButtons(): a `.checkbox` or
+   `.radio` holding a label around the box and a span. */
+.checkbox,
+.radio {
+  margin-bottom: 0.5rem;
+}
+
+.checkbox label,
+.radio label,
+.checkbox-inline,
+.radio-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.checkbox-inline,
+.radio-inline {
+  margin-right: 1rem;
+}
+
+.checkbox input,
+.radio input,
+.checkbox-inline input,
+.radio-inline input {
+  margin: 0;
+  accent-color: var(--blockr-color-border-accent);
+}
+
+/* fileInput(): the button and the file name side by side. */
+.input-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.input-group > .form-control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.input-group > :not(:first-child) {
+  margin-left: -1px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.input-group > :not(:last-child),
+.input-group > :not(:last-child) > .btn {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.progress {
+  display: flex;
+  height: 6px;
+  overflow: hidden;
+  background-color: var(--blockr-color-bg-subtle);
+  border-radius: var(--blockr-radius-pill);
+}
+
+.progress-bar {
+  background-color: var(--blockr-color-border-accent);
+}
+
+/* --- Buttons ---
+   actionButton() and downloadButton() are `.btn.btn-default`. The kind and
+   size values come from blockr-theme.css. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: var(--bs-btn-padding-y, 10px) var(--bs-btn-padding-x, 16px);
+  font-family: inherit;
+  font-size: var(--bs-btn-font-size, var(--blockr-font-size-base));
+  font-weight: var(--bs-btn-font-weight, var(--blockr-font-weight-medium));
+  line-height: var(--bs-btn-line-height, 20px);
+  color: var(--bs-btn-color, var(--blockr-color-text-default));
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-color: var(--bs-btn-bg, var(--blockr-color-bg-surface));
+  border: 1px solid var(--bs-btn-border-color, var(--blockr-color-border-default));
+  border-radius: var(--bs-btn-border-radius, var(--blockr-radius-lg));
+}
+
+.btn:hover {
+  color: var(--bs-btn-hover-color, var(--bs-btn-color));
+  background-color: var(--bs-btn-hover-bg, var(--bs-btn-bg));
+  border-color: var(--bs-btn-hover-border-color, var(--bs-btn-border-color));
+}
+
+.btn:active,
+.btn.active {
+  color: var(--bs-btn-active-color, var(--bs-btn-color));
+  background-color: var(--bs-btn-active-bg, var(--bs-btn-bg));
+  border-color: var(--bs-btn-active-border-color, var(--bs-btn-border-color));
+}
+
+.btn:disabled,
+.btn.disabled {
+  color: var(--bs-btn-disabled-color);
+  background-color: var(--bs-btn-disabled-bg);
+  border-color: var(--bs-btn-disabled-border-color);
+  pointer-events: none;
+}
+
+.btn-block {
+  display: flex;
+  width: 100%;
+}

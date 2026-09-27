@@ -66,6 +66,52 @@ tokens_dep <- function() {
   )
 }
 
+#' Base stylesheet for a page without Bootstrap
+#'
+#' What a blockr page needs from Bootstrap when it does not load it: the
+#' reset of the browser's defaults, the body face (Open Sans, bundled), and
+#' the look of the markup Shiny's own inputs emit, which keeps Bootstrap's
+#' class names (`form-group`, `form-control`, `checkbox`, `btn`) whatever
+#' the page loads. The button rules read the `--bs-btn-*` properties that
+#' [theme_dep()] sets per kind, so a button looks the same on either kind of
+#' page.
+#'
+#' Attach it once, from a page that does not load Bootstrap, before
+#' [theme_dep()]. On a page that does load Bootstrap it restyles what
+#' Bootstrap already styles and must be left out.
+#'
+#' @return An [htmltools::tagList()] of two [htmltools::htmlDependency]
+#'   objects: the font and the base sheet.
+#'
+#' @examples
+#' htmltools::tagList(
+#'   base_dep(),
+#'   theme_dep(),
+#'   shiny::textInput("name", "Name")
+#' )
+#'
+#' @export
+base_dep <- function() {
+  htmltools::tagList(
+    htmltools::htmlDependency(
+      name = "blockr-font",
+      version = utils::packageVersion("blockr.ui"),
+      package = "blockr.ui",
+      src = "assets/fonts",
+      stylesheet = "open-sans.css",
+      all_files = TRUE
+    ),
+    htmltools::htmlDependency(
+      name = "blockr-base",
+      version = utils::packageVersion("blockr.ui"),
+      package = "blockr.ui",
+      src = "assets",
+      stylesheet = "css/blockr-base.css",
+      all_files = FALSE
+    )
+  )
+}
+
 #' Strip a redundant `:has(> *)` guard from Shiny's recalculating fade
 #'
 #' Shiny 1.8.1 styles `uiOutput()` and `conditionalPanel()` containers

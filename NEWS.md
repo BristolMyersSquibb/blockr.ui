@@ -1,5 +1,17 @@
 # blockr.ui (development version)
 
+* `base_dep()` is the stylesheet for a page that does not load Bootstrap
+  (#85): a reset of the browser's defaults, Open Sans (bundled: latin,
+  latin-ext, greek, symbols and math), and the look of the markup Shiny's
+  own inputs emit (`form-group`, `form-control`, `checkbox`, `btn`). Buttons
+  read the same `--bs-btn-*` values `theme_dep()` sets, so they look the
+  same with or without Bootstrap.
+
+* `Blockr.dropdown`, in `controls_dep()`, is a panel under its toggle that
+  stays open while it is worked in (a search field, a list edited in
+  place), for the navbar menus that were Bootstrap dropdowns. The markup is
+  `.blockr-dropdown` > `.blockr-dropdown__toggle` + `.blockr-dropdown__panel`.
+
 * `small_icon()` has `"eye"`, `"dots"`, `"minus"`, `"info"`, `"warning"`,
   `"maximize"` and `"restore"`, the icons blockr.dock and blockr.extra still
   took from Font Awesome, through `shiny::icon()` or dockViewR's defaults

@@ -369,6 +369,18 @@ interface BlockrActionMenu {
   close(): void;
 }
 
+/* --- Blockr.dropdown (blockr-ui.js) --- */
+
+/** The document-level controller of the .blockr-dropdown panels. */
+interface BlockrDropdown {
+  /** Close the dropdown holding `el`, or whichever is open when `el` is omitted. */
+  hide(el?: Element): void;
+  /** Open the dropdown that is, or holds, `el`. */
+  show(el: Element): void;
+  /** The open dropdown's wrapper, or null. */
+  current(): HTMLElement | null;
+}
+
 /* --- Blockr.Input (blockr-input.js) --- */
 
 interface BlockrInputConfig {
@@ -416,6 +428,7 @@ interface BlockrNamespace {
   menu: BlockrMenu;
 
   actionMenu: BlockrActionMenu;
+  dropdown: BlockrDropdown;
   uid(prefix?: string): string;
   /** Whether `el`, or anything in it, is cut off by its box. */
   cutOff(el: Element): boolean;

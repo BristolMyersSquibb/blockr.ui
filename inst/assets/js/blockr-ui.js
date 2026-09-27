@@ -1417,3 +1417,102 @@ Blockr.tooltip = (() => {
   Blockr.gearTray = gearTray;
   Blockr.segmented = segmented;
 })();
+
+/**
+ * Blockr.dropdown: a panel that opens under its toggle and stays open while
+ * it is worked in, for a menu that holds more than rows to pick (a search
+ * field, a list that is edited in place, a checkbox). A click outside,
+ * Escape or opening another dropdown closes it; a click inside does not.
+ * Blockr.actionMenu is the other kind, a list of rows that closes on a pick.
+ *
+ * The markup comes from R:
+ *
+ *   <div class="blockr-dropdown" data-align="end">
+ *     <button class="blockr-dropdown__toggle" aria-expanded="false">...</button>
+ *     <div class="blockr-dropdown__panel">...</div>
+ *   </div>
+ *
+ * The panel stays where it is in the page, positioned by blockr-menu.css
+ * under the toggle, so Shiny inputs and outputs inside it keep their
+ * bindings. Open, the wrapper carries `.is-open`. The wrapper fires
+ * `blockr:dropdown-shown` and `blockr:dropdown-hidden`, which bubble.
+ */
+Blockr.dropdown = (() => {
+  /** @type {HTMLElement | null} */
+  let open = null;
+
+  /** @param {Element | null} el */
+  const wrapOf = (el) => /** @type {HTMLElement | null} */ (
+    el && el.closest('.blockr-dropdown'));
+
+  /** @param {HTMLElement} wrap */
+  const toggleOf = (wrap) => /** @type {HTMLElement | null} */ (
+    wrap.querySelector(':scope > .blockr-dropdown__toggle'));
+
+  /** @param {HTMLElement} wrap @param {string} name */
+  const fire = (wrap, name) => {
+    wrap.dispatchEvent(new CustomEvent(name, { bubbles: true }));
+  };
+
+  /** @param {boolean} [refocus] */
+  const hide = (refocus) => {
+    if (!open) return;
+    const wrap = open;
+    open = null;
+    wrap.classList.remove('is-open');
+    const toggle = toggleOf(wrap);
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    if (refocus && toggle && toggle.isConnected) toggle.focus();
+    fire(wrap, 'blockr:dropdown-hidden');
+  };
+
+  /** @param {HTMLElement} wrap */
+  const show = (wrap) => {
+    if (open === wrap) return;
+    hide();
+    open = wrap;
+    wrap.classList.add('is-open');
+    const toggle = toggleOf(wrap);
+    if (toggle) toggle.setAttribute('aria-expanded', 'true');
+    fire(wrap, 'blockr:dropdown-shown');
+  };
+
+  // Capture phase: a click inside the panel that re-renders the element it
+  // hit (a uiOutput row) would otherwise read as a click outside by the time
+  // it bubbles up.
+  document.addEventListener('click', (e) => {
+    const target = e.target instanceof Element ? e.target : null;
+    const toggle = target && target.closest('.blockr-dropdown__toggle');
+    const wrap = toggle ? wrapOf(toggle) : null;
+    if (wrap && toggle && toggle.parentElement === wrap) {
+      if (open === wrap) hide();
+      else show(wrap);
+      return;
+    }
+    if (open && !(target && open.contains(target))) hide();
+  }, true);
+
+  document.addEventListener('keydown', (e) => {
+    if (open && e.key === 'Escape') {
+      e.preventDefault();
+      hide(true);
+    }
+  });
+
+  return {
+    /**
+     * Close the dropdown that holds `el` (or is `el`), or whichever is open.
+     * @param {Element} [el]
+     */
+    hide: (el) => {
+      if (!el || (open && (open === el || open.contains(el)))) hide();
+    },
+    /** @param {Element} el the dropdown, or anything inside it */
+    show: (el) => {
+      const wrap = wrapOf(el);
+      if (wrap) show(wrap);
+    },
+    /** The dropdown that is open, or null. */
+    current: () => open
+  };
+})();

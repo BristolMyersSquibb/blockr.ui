@@ -323,3 +323,31 @@
   font-size: var(--blockr-font-size-sm);
   color: var(--blockr-color-text-muted);
 }
+
+/* ============================================================
+   Dropdown (Blockr.dropdown)
+   ============================================================
+   A panel under its toggle that stays open while it is worked in. It stays
+   in the page's flow of elements, absolutely placed against the wrapper, so
+   its Shiny bindings are untouched. The panel takes the menu surface when it
+   also carries `.blockr-menu`. */
+
+.blockr-dropdown {
+  position: relative;
+}
+
+.blockr-dropdown__panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1070;
+}
+
+.blockr-dropdown[data-align="end"] > .blockr-dropdown__panel {
+  left: auto;
+  right: 0;
+}
+
+.blockr-dropdown:not(.is-open) > .blockr-dropdown__panel {
+  display: none;
+}
