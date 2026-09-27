@@ -303,14 +303,15 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
       sort_icon_class <- paste0(sort_icon_class, icon_class_suffix)
     }
 
-    # The label sits under the name and is cut by the layout (CSS ellipsis),
-    # with the whole label as its tooltip.
+    # The label sits under the name and is cut by the layout (CSS ellipsis);
+    # a cut-off label shows whole in its tooltip.
     # A column without a label keeps an empty line when others have one, so
     # every name sits level.
     label_tag <- if (has_labels && nzchar(col_labels[j])) {
       shiny::tags$span(
         class = "blockr-col-label",
-        title = col_labels[j],
+        `data-blockr-tooltip` = col_labels[j],
+        `data-blockr-tooltip-overflow` = NA,
         col_labels[j]
       )
     } else if (has_labels) {
@@ -396,10 +397,13 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         formatted[[j]][i]
       }
 
-      cell_title <- if (!is_na) formatted[[j]][i] else NULL
+      # A value cut off by the column width shows whole in the tooltip;
+      # one that fits has none.
+      cell_tip <- if (!is_na) formatted[[j]][i] else NULL
       row_cells[[j + 1L]] <- shiny::tags$td(
         class = cell_class,
-        title = cell_title,
+        `data-blockr-tooltip` = cell_tip,
+        `data-blockr-tooltip-overflow` = if (!is_na) NA,
         content
       )
     }
