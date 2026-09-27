@@ -29,6 +29,10 @@
   copies, that copy is blockr.dplyr's, as htmltools keeps the higher version
   of a name.
 
+* `controls_dep()` also carries `Blockr.Input`, the code field with column
+  and function completions, moved here from blockr.dplyr under its old
+  dependency names (`blockr-input-js`, `blockr-input-css`).
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
