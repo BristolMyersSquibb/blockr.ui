@@ -1,7 +1,8 @@
 #' Shared block controls
 #'
 #' The JavaScript and CSS of the controls blockr blocks are built from:
-#' `Blockr.Select` (single, multi and menu), the Enter button of a field that
+#' `Blockr.Select` (single, multi and menu), `Blockr.Input` (the code field
+#' with column and function completions), the Enter button of a field that
 #' commits on Enter, the required-empty cue, the checkbox, the segmented
 #' control, the gear tray and the placement routine for floating panels
 #' (`Blockr.place`), all on the `window.Blockr` namespace, together with the
@@ -12,8 +13,8 @@
 #' dependencies are de-duplicated by name, so any number of blocks can.
 #'
 #' The dependency names are the ones blockr.dplyr used while these files
-#' lived there (`blockr-select-js`, `blockr-select-css`, `blockr-blocks-css`),
-#' so a page never loads two copies of Select.
+#' lived there (`blockr-select-js`, `blockr-select-css`, `blockr-blocks-css`,
+#' `blockr-input-js`, `blockr-input-css`), so a page never loads two copies.
 #'
 #' @return An [htmltools::tagList()] of [htmltools::htmlDependency] objects,
 #'   in load order.
@@ -39,7 +40,9 @@ controls_dep <- function() {
       stylesheet = "css/blockr-settings-band.css"
     ),
     controls_asset("blockr-select-js", script = "js/blockr-select.js"),
-    controls_asset("blockr-select-css", stylesheet = "css/blockr-select.css")
+    controls_asset("blockr-select-css", stylesheet = "css/blockr-select.css"),
+    controls_asset("blockr-input-js", script = "js/blockr-input.js"),
+    controls_asset("blockr-input-css", stylesheet = "css/blockr-input.css")
   )
 }
 
