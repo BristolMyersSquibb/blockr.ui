@@ -17,6 +17,8 @@ interface BlockrSelectConfigBase {
   options?: BlockrSelectOption[];
   /** The field's label, as screen readers announce the select. A menu falls back to its title. */
   label?: string;
+  /** Select.menu(): find the anchor again after it was redrawn (see Blockr.place). */
+  reanchor?: () => HTMLElement | null;
   /** Shown when nothing is selected (single) / no tags (multi). */
   placeholder?: string;
   /**
@@ -213,6 +215,12 @@ interface BlockrPlaceOptions {
   gap?: number;
   /** Distance kept from the viewport edges, both ways (default 8). */
   margin?: number;
+  /**
+   * The element that now stands for the anchor, once the anchor has left
+   * the page (redrawn under the open panel). Without it, or while it returns
+   * null, the panel stays where it is.
+   */
+  reanchor?: () => HTMLElement | null;
   /** Called on every placement with whether the panel sits above the anchor. */
   onFlip?: (above: boolean) => void;
 }
@@ -235,6 +243,68 @@ interface BlockrTooltip {
   clear(el: Element): void;
   /** Plain text of `el`'s tooltip ("AGE · Age", lines joined by newlines), '' if none. */
   text(el: Element): string;
+}
+
+/** A row of Blockr.menu(). */
+interface BlockrMenuItem {
+  label: string;
+  /** Drawn before the label: a Blockr.icons name ('trash') or an SVG/HTML string. */
+  icon?: string;
+  /** Grey text after the label (a block ID, a shortcut). */
+  meta?: string;
+  /** Set `meta` in the code face. */
+  mono?: boolean;
+  /** The item in use (the active view): weight 600. */
+  current?: boolean;
+  /** A toggle row; true shows a check (role menuitemcheckbox). */
+  checked?: boolean;
+  /** A destructive action: red under the pointer. */
+  danger?: boolean;
+  /** A muted row, such as "Manage pages". */
+  quiet?: boolean;
+  disabled?: boolean;
+  /** Tooltip on a disabled row saying why. */
+  reason?: string;
+  onSelect?: () => void;
+  /** A block's glyph on a tint of its category colour, before the label. */
+  mark?: { icon?: string; color?: string };
+  /** A neutral badge at the end of the row (a package). */
+  badge?: string;
+  /** More text the filter box matches. */
+  keywords?: string;
+}
+
+type BlockrMenuEntry = BlockrMenuItem | { gap: true } | { divider: true } | { title: string };
+
+interface BlockrMenuConfig {
+  items: BlockrMenuEntry[];
+  /** Text above the rows: a title with an optional badge, then a line. */
+  head?: { title: string; badge?: string; text?: string };
+  /** 'end' lines the menu up with the trigger's right edge. */
+  align?: 'start' | 'end';
+  /** One muted line on top, saying what the menu is for. */
+  caption?: string;
+  /** A filter box on top (true, or its placeholder). */
+  filter?: boolean | string;
+  /** The panel's least width in px (default 180). */
+  minWidth?: number;
+  onClose?: () => void;
+}
+
+interface BlockrMenu {
+  (anchor: HTMLElement, config: BlockrMenuConfig): { el: HTMLDivElement; close: () => void };
+  /** Wire `trigger` to open and close its menu; a function config is read on each open. */
+  bind(trigger: HTMLElement, config: BlockrMenuConfig | (() => BlockrMenuConfig)): void;
+}
+
+/* --- Blockr.actionMenu (blockr-ui.js) --- */
+
+/** The document-level controller of the menus action_menu() builds in R. */
+interface BlockrActionMenu {
+  /** The trigger of the open menu, or null. */
+  current(): HTMLElement | null;
+  /** Close the open menu, if any. */
+  close(): void;
 }
 
 /* --- Blockr.Input (blockr-input.js) --- */
@@ -279,6 +349,9 @@ interface BlockrInputStatic {
 
 interface BlockrNamespace {
   tooltip: BlockrTooltip;
+  menu: BlockrMenu;
+
+  actionMenu: BlockrActionMenu;
   uid(prefix?: string): string;
   escapeHtml(s: string): string;
   removeNode(node: Node | null | undefined): void;
