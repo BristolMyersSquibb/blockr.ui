@@ -11,7 +11,8 @@ test_that("controls_dep ships the controls after the tokens", {
     c("blockr-tokens", "blockr-icons", "blockr-ui-js", "blockr-blocks-css",
       "blockr-menu-css", "blockr-tooltip-css", "blockr-buttons-css",
       "blockr-settings-band", "blockr-select-js", "blockr-select-css",
-      "blockr-input-js", "blockr-input-css")
+      "blockr-input-js", "blockr-input-css", "blockr-inputs-js",
+      "blockr-inputs-css")
   )
 
   assets <- system.file("assets", package = "blockr.ui")
@@ -69,6 +70,15 @@ test_that("the controls read only meaning tokens this package defines", {
                          "stylesheet")
   )
   sheets <- basename(sheets[!grepl("tokens", sheets)])
+  # A sheet that only lays things out (blockr-inputs.css) reads no token.
+  reads <- vapply(
+    sheets,
+    function(x) {
+      css <- system.file("assets", "css", x, package = "blockr.ui")
+      any(grepl("var(--", readLines(css, warn = FALSE), fixed = TRUE))
+    },
+    logical(1L)
+  )
 
   sites <- token_references("blockr.ui")
   controls <- sites[
@@ -77,7 +87,7 @@ test_that("the controls read only meaning tokens this package defines", {
   stray <- grepl(palette_token, controls$token) |
     controls$token %in% names(legacy_tokens())
 
-  expect_setequal(unique(basename(controls$file)), sheets)
+  expect_setequal(unique(basename(controls$file)), sheets[reads])
   expect_identical(unique(controls$token[is.na(controls$value)]), character())
   expect_identical(unique(controls$token[stray]), character())
 })
