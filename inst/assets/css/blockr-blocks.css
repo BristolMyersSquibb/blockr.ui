@@ -275,8 +275,9 @@
   font-size: 0.95em;
 }
 
-/* The ↵ button of a text field (Blockr.textCommit): the key alone, in a 24px
-   square (design system, "Keyboard shortcuts") */
+/* The ↵ button of a text field (Blockr.textCommit and the packages' own):
+   the key alone, then the ✓ once applied, in a 24px square (design system,
+   "Keyboard shortcuts") */
 .blockr-expr-confirm {
   min-width: 24px;
   justify-content: center;
