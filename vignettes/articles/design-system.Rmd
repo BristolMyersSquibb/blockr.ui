@@ -547,6 +547,45 @@ from ([Picking a block](#floating)).
   [Picking a block](#floating) menu. An empty list is one `.blockr-empty`
   line.
 
+### Links in the outline
+
+The outline draws the board's links on its rail. A link is a thing you
+point at, as a row is: it lights up under the pointer and a click opens its
+menu. Adding a link starts from a block.
+
+- **A link under the pointer** thickens in `border-accent`, and the tooltip
+  names it: "Two species → Sepal ratio", then "into data" in `text-muted`.
+  Nothing is drawn on the link.
+- **A click on a link** opens its action menu. The head names the link (from
+  → to, and the input). Then: Insert a block here; Rename input, where the
+  target takes any number of inputs (the name turns into a field in place,
+  Enter commits, a name already taken is refused in place); or Move to
+  input, where the target has another free named input; then Remove link
+  after a divider.
+- **Adding a link:** drag a row's dot onto another row; the row it would
+  land on takes the accent tint, and a target with several free inputs asks
+  which in a menu. Or click a free-input marker and pick the block that
+  feeds it. Or "Connect to…" in the row's "…" menu. A dot dragged into empty
+  space adds a new block below, linked, through the
+  [Picking a block](#floating) menu.
+- **Input markers** sit after the name: an 8px open circle (1.5px
+  `border-strong`) for each named input with nothing linked into it, and
+  "∞" (13px `text-muted`) for a block that takes any number of inputs. Each
+  is a 16px target with a tooltip ("y: not connected", "Takes any number of
+  inputs"). A click opens "Connect a block to y", listing the board's blocks
+  that can feed it. A linked input draws nothing: the rail shows it.
+- **A click on a row's dot** lists the block's connections, inputs then
+  outputs, with the input as meta text. A click on one opens that link's
+  menu.
+- **The row's "…" menu** carries Insert a block before (into the block's
+  input link; with several, a list of them), Append a block and Connect to…,
+  so every link gesture has a keyboard path.
+- **Removing a block** with exactly one input bridges it: its parent takes
+  each of its output links, into the same inputs. A block with two or more
+  inputs is not bridged, and its Remove row says so as meta text ("its links
+  are dropped"). The rule lives in blockr.dock's remove action, so the
+  outline, the DAG and the dock header behave alike.
+
 Drawn in the [design system page](design-system/index.html#layout).
 
 ---
