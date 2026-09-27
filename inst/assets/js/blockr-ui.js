@@ -521,6 +521,45 @@ Blockr.tooltip = (() => {
   };
 })();
 
+/* --- Text edited in place ---------------------------------------------- */
+
+/**
+ * Text the user edits in place (design system, "Text edited in place"): an
+ * element marked `data-blockr-editable` shows the text cursor (CSS) and a
+ * tooltip naming the gesture, "Double-click to edit" unless the attribute's
+ * value names another ("Click to rename"). While the text is cut off, the
+ * tooltip leads with the whole text and the gesture follows, muted. An
+ * element is taken up on its first hover or focus, in the capture phase on
+ * `window`, ahead of Blockr.tooltip's listeners on `document`, so markup
+ * drawn at any time needs nothing but the attribute; removing it takes both
+ * away again.
+ */
+(() => {
+  const HINT = 'Double-click to edit';
+  const seen = new WeakSet();
+
+  /** @param {Element} el */
+  const cutOff = (el) => [el, ...Array.from(el.querySelectorAll('*'))].some(
+    (n) => n.clientWidth > 0 && n.scrollWidth > n.clientWidth + 1
+  );
+
+  /** @param {Event} e */
+  const take = (e) => {
+    const el = e.target instanceof Element ? e.target.closest('[data-blockr-editable]') : null;
+    if (!el || seen.has(el)) return;
+    seen.add(el);
+    Blockr.tooltip.set(el, () => {
+      // The attribute can go again (a name editable only in a mode).
+      if (!el.hasAttribute('data-blockr-editable')) return null;
+      const hint = el.getAttribute('data-blockr-editable') || HINT;
+      return cutOff(el) ? { name: (el.textContent || '').trim(), label: hint } : hint;
+    });
+  };
+
+  window.addEventListener('pointerover', take, true);
+  window.addEventListener('focusin', take, true);
+})();
+
 /* --- Native titles ------------------------------------------------------ */
 
 /**
