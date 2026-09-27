@@ -305,6 +305,46 @@ interface BlockrActionMenu {
   close(): void;
 }
 
+/* --- Blockr.Input (blockr-input.js) --- */
+
+interface BlockrInputConfig {
+  /** Initial field value. */
+  value?: string;
+  /** Column names offered as completions (backticked when non-syntactic). */
+  columns?: string[];
+  /**
+   * Function completions: category label (shown as meta) -> function names.
+   * Functions insert with trailing "()", cursor between the parens.
+   */
+  categories?: Record<string, string[]>;
+  placeholder?: string;
+  /** Render a <textarea> instead of <input>; disables Enter -> onConfirm. */
+  multiline?: boolean;
+  /** Fires on every edit and on completion insert (no arguments). */
+  onChange?: () => void;
+  /**
+   * Single-line only: fires with the trimmed value on Enter while the
+   * completion popup is closed.
+   */
+  onConfirm?: (value: string) => void;
+}
+
+interface BlockrInputHandle {
+  /** Root element (already appended to the container). */
+  el: HTMLDivElement;
+  /** Trimmed field value. */
+  getValue(): string;
+  setValue(v: string | null | undefined): void;
+  /** Replace the column completions (function categories are fixed). */
+  setColumns(cols: string[] | null | undefined): void;
+  focus(): void;
+  destroy(): void;
+}
+
+interface BlockrInputStatic {
+  create(container: HTMLElement, config: BlockrInputConfig): BlockrInputHandle;
+}
+
 interface BlockrNamespace {
   tooltip: BlockrTooltip;
   menu: BlockrMenu;
@@ -326,6 +366,8 @@ interface BlockrNamespace {
   _docClick: Set<{ el: Element; cb: (e: MouseEvent) => void }>;
   /** Blockr.Select (blockr-select.js). */
   Select?: BlockrSelectStatic;
+  /** Blockr.Input, the code field with completions (blockr-input.js). */
+  Input?: BlockrInputStatic;
   /** Design-system checkbox factory (blockr-ui.js). */
   checkbox(
     label: string,

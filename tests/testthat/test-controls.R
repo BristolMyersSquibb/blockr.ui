@@ -9,7 +9,8 @@ test_that("controls_dep ships the controls after the tokens", {
     names,
     c("blockr-theme", "blockr-ui-js", "blockr-blocks-css", "blockr-menu-css",
       "blockr-tooltip-css",
-      "blockr-settings-band", "blockr-select-js", "blockr-select-css")
+      "blockr-settings-band", "blockr-select-js", "blockr-select-css",
+      "blockr-input-js", "blockr-input-css")
   )
 
   assets <- system.file("assets", package = "blockr.ui")
@@ -23,7 +24,8 @@ test_that("the controls' stylesheets read only tokens this package defines", {
   sites <- token_references("blockr.ui")
   controls <- sites[
     basename(sites$file) %in%
-      c("blockr-blocks.css", "blockr-select.css", "blockr-settings-band.css"),
+      c("blockr-blocks.css", "blockr-select.css", "blockr-settings-band.css",
+        "blockr-input.css"),
   ]
 
   expect_gt(nrow(controls), 0L)
