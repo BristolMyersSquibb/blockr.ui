@@ -332,6 +332,11 @@ Blockr.textCommit = (input, opts) => {
  * shows only while the element or a child is cut off, so a value that fits
  * has none. Blockr.tooltip.clear(el) takes it away.
  *
+ * Markup built in R cannot call `set()`, so an element can also carry its
+ * tooltip as an attribute: `data-blockr-tooltip="Download"`, plus
+ * `data-blockr-tooltip-overflow` for the cut-off-only case. A `set()` on the
+ * same element wins over the attribute.
+ *
  * One set of document listeners serves every tooltip, added when this file
  * loads (like Blockr.onDocClick's), so no instance adds or leaks its own.
  * The card shows after the pointer rests 300ms, at once on keyboard focus,
@@ -369,9 +374,28 @@ Blockr.tooltip = (() => {
   /** @param {BlockrTooltipContent} content */
   const asLines = (content) => (Array.isArray(content) ? content : [content]);
 
+  const ATTR = 'data-blockr-tooltip';
+
+  /**
+   * The tooltip `el` carries: one given by set(), else its attribute.
+   * @param {Element} el
+   */
+  const tipOf = (el) => tips.get(el) || (el.hasAttribute(ATTR)
+    ? { content: el.getAttribute(ATTR) || '', overflow: el.hasAttribute(ATTR + '-overflow') }
+    : null);
+
+  /**
+   * The nearest element, from `el` up, that has a tooltip.
+   * @param {Element | null} el
+   */
+  const owner = (el) => {
+    while (el && !tipOf(el)) el = el.parentElement;
+    return el;
+  };
+
   /** @param {Element} el */
   const contentOf = (el) => {
-    const tip = tips.get(el);
+    const tip = tipOf(el);
     if (!tip) return null;
     return typeof tip.content === 'function' ? tip.content() : tip.content;
   };
@@ -438,12 +462,11 @@ Blockr.tooltip = (() => {
 
   /** @param {Event} e */
   const enter = (e) => {
-    const target = /** @type {Element | null} */ (e.target instanceof Element ? e.target : null);
-    let el = target;
-    while (el && !tips.has(el)) el = el.parentElement;
+    const target = e.target instanceof Element ? e.target : null;
+    const el = owner(target);
     if (!el || el === current) return;
     hide();
-    const tip = /** @type {{ overflow: boolean }} */ (tips.get(el));
+    const tip = /** @type {{ overflow: boolean }} */ (tipOf(el));
     if (tip.overflow && !cutOff(el)) return;
     // A click focuses a button too, right after its pointerdown hid the
     // card; only keyboard focus brings the card at once.
@@ -458,8 +481,7 @@ Blockr.tooltip = (() => {
   const leave = (e) => {
     if (!current && !timer) return;
     const to = e.relatedTarget;
-    let el = /** @type {Element | null} */ (e.target instanceof Element ? e.target : null);
-    while (el && !tips.has(el)) el = el.parentElement;
+    const el = owner(e.target instanceof Element ? e.target : null);
     if (!el) return;
     if (to instanceof Node && el.contains(to)) return;
     hide();
@@ -497,6 +519,39 @@ Blockr.tooltip = (() => {
       return content ? asLines(content).map(lineText).join('\n') : '';
     }
   };
+})();
+
+/* --- Native titles ------------------------------------------------------ */
+
+/**
+ * No native `title` tooltips remain (design system, "Tooltips"). A `title`
+ * that reaches the page anyway, from Shiny, a package's markup or a
+ * third-party widget, is taken over on the first hover or focus, in the
+ * capture phase on `window` (ahead of the browser's own delay): the
+ * attribute goes and its text becomes the element's Blockr.tooltip. An
+ * icon-only element keeps the text as its `aria-label`. A title written
+ * again later (a status that changes) is taken over again on the next
+ * hover. Text marked `data-blockr-editable` keeps the gesture as its
+ * tooltip.
+ */
+(() => {
+  /** @param {Event} e */
+  const take = (e) => {
+    let el = e.target instanceof Element ? e.target : null;
+    while (el && !el.hasAttribute('title')) el = el.parentElement;
+    if (!el || el === document.documentElement || el === document.body) return;
+    const title = el.getAttribute('title') || '';
+    el.removeAttribute('title');
+    if (!title) return;
+    if (!el.hasAttribute('aria-label') && !(el.textContent || '').trim()) {
+      el.setAttribute('aria-label', title);
+    }
+    if (el.hasAttribute('data-blockr-editable')) return;
+    Blockr.tooltip.set(el, title);
+  };
+
+  window.addEventListener('pointerover', take, true);
+  window.addEventListener('focusin', take, true);
 })();
 
 /* --- Controls ----------------------------------------------------------- */
