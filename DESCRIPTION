@@ -1,6 +1,6 @@
 Package: blockr.ui
 Title: User Interface Components for the 'blockr' Ecosystem
-Version: 0.0.1.9001
+Version: 0.0.1.9002
 Authors@R:
     person(given = "David",
            family = "Granjon",
@@ -28,6 +28,7 @@ Suggests:
     dbplyr,
     RSQLite,
     testthat (>= 3.0.0),
+    V8,
     withr
 Remotes:
     BristolMyersSquibb/blockr.core
