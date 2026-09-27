@@ -340,7 +340,7 @@ Blockr.keys = (keys) => {
 Blockr.textCommit = (input, opts) => {
   const chip = document.createElement('button');
   chip.type = 'button';
-  chip.className = 'blockr-expr-confirm';
+  chip.className = 'blockr-expr-confirm blockr-expr-confirm--key';
   // The key is the whole action, so the button shows it and has no tooltip;
   // screen readers get its name.
   chip.setAttribute('aria-label', 'Apply (Enter)');
@@ -351,12 +351,10 @@ Blockr.textCommit = (input, opts) => {
     if (input.value !== committed) {
       chip.style.display = '';
       chip.classList.remove('confirmed');
-      chip.classList.add('blockr-expr-confirm--key');
       chip.textContent = '↵';
     } else if (everCommitted) {
       chip.style.display = '';
       chip.classList.add('confirmed');
-      chip.classList.remove('blockr-expr-confirm--key');
       chip.innerHTML = Blockr.icons.confirm;
     } else {
       chip.style.display = 'none';
