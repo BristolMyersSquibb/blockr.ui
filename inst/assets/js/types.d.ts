@@ -220,7 +220,7 @@ interface BlockrPlaceOptions {
 /* --- Blockr.tooltip (blockr-ui.js) --- */
 
 /** One tooltip line: plain text, or a column shown as its name, then its label muted. */
-type BlockrTooltipLine = string | { name: string; label?: string };
+type BlockrTooltipLine = string | { name: string; label?: string; badge?: string };
 
 /** A tooltip's content: one line, or several (the "+N" chip lists its hidden tags). */
 type BlockrTooltipContent = BlockrTooltipLine | BlockrTooltipLine[];
