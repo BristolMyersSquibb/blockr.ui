@@ -291,18 +291,46 @@ Blockr.setRequiredEmpty = (el, empty) => {
 };
 
 /**
+ * Keyboard shortcuts (design system, "Keyboard shortcuts"). The platform is
+ * decided here, once per page: on a Mac `.blockr-mac` goes on the root,
+ * which shows the Mac form of every hint R drew with shortcut(), and
+ * `Blockr.keys()` writes a hint for JavaScript-built UI.
+ */
+Blockr.isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+
+if (Blockr.isMac) document.documentElement.classList.add('blockr-mac');
+
+/**
+ * A shortcut written for this platform: keys joined by "+", `Mod` for
+ * Command on a Mac and Ctrl elsewhere. "Mod+Shift+S" is "⌘⇧S" on a Mac and
+ * "Ctrl+Shift+S" elsewhere; Enter is ↵ on both.
+ *
+ * @param {string} keys
+ * @returns {string}
+ */
+Blockr.keys = (keys) => {
+  const mac = { Mod: '⌘', Shift: '⇧', Alt: '⌥', Ctrl: '⌃', Enter: '↵', Esc: 'Esc' };
+  const other = { Mod: 'Ctrl', Shift: 'Shift', Alt: 'Alt', Ctrl: 'Ctrl', Enter: '↵', Esc: 'Esc' };
+  const names = Blockr.isMac ? mac : other;
+  const parts = keys.split('+').map((k) =>
+    names[k] || (k.length === 1 ? k.toUpperCase() : k));
+  return parts.join(Blockr.isMac ? '' : '+');
+};
+
+/**
  * Commit-on-Enter text input (design-system §5.5): typing never submits —
- * a chip arms with "Enter ↵" while the value is dirty, the value commits on
- * Enter, blur or the chip (which then fades to the ✓ icon), and Escape
- * reverts to the last committed value.
+ * a ↵ button arms while the value is dirty, the value commits on Enter,
+ * blur or the button (which then fades to the ✓ icon), and Escape reverts
+ * to the last committed value.
  *
  * The input must already sit in its parent: the chip is inserted directly
  * after it. Programmatic value changes (setState restores, mode switches)
  * go through the returned `sync(value)`, which resets the committed
  * baseline so a restored value never shows an armed chip.
  *
- * The chip always reads "Enter ↵" — a bare glyph is not self-evident, and
- * one label everywhere beats saving a few pixels in tight rows.
+ * The button shows ↵ alone: it appears as you type, at the end of the
+ * field, so the key's own symbol is enough, and the field keeps the room
+ * (design system, "Keyboard shortcuts").
  *
  * @param {HTMLInputElement} input
  * @param {{ onCommit: (value: string) => void }} opts
@@ -312,18 +340,18 @@ Blockr.setRequiredEmpty = (el, empty) => {
 Blockr.textCommit = (input, opts) => {
   const chip = document.createElement('button');
   chip.type = 'button';
-  chip.className = 'blockr-expr-confirm';
-  // The button says its name ("Enter ↵"), so it has no tooltip.
+  chip.className = 'blockr-expr-confirm blockr-expr-confirm--key';
+  // The key is the whole action, so the button shows it and has no tooltip;
+  // screen readers get its name.
   chip.setAttribute('aria-label', 'Apply (Enter)');
   chip.style.display = 'none';
   let committed = input.value;
   let everCommitted = false;
-  const armed = 'Enter <span class="blockr-kbd">↵</span>';
   const syncChip = () => {
     if (input.value !== committed) {
       chip.style.display = '';
       chip.classList.remove('confirmed');
-      chip.innerHTML = armed;
+      chip.textContent = '↵';
     } else if (everCommitted) {
       chip.style.display = '';
       chip.classList.add('confirmed');
