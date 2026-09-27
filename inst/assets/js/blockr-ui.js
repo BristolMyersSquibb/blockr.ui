@@ -182,10 +182,12 @@ Blockr.place = (panel, anchor, opts) => {
 };
 
 Blockr.icons = {
+  // The one chevron (design system, "Chevrons"): 1.4px at every size, so the
+  // stroke does not scale when a pill draws it at 10px.
   chevron:
     '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" ' +
-    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
-    '<polyline points="3 4.5 6 7.5 9 4.5"></polyline></svg>',
+    'stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">' +
+    '<polyline points="3 4.5 6 7.5 9 4.5" vector-effect="non-scaling-stroke"></polyline></svg>',
   // A tag's x: a thin stroke, like every small icon (design system, "Small
   // icons"); at 1.5 it read bold beside the row's remove button.
   remove:

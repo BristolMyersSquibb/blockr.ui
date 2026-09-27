@@ -117,6 +117,10 @@
   transform: rotate(180deg);
 }
 
+.blockr-select:not(.blockr-select--disabled):hover .blockr-select__arrow {
+  color: var(--blockr-color-text-default);
+}
+
 /* --- Search input --- */
 .blockr-select__search {
   flex: 1;
