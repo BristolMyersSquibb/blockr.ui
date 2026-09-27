@@ -119,3 +119,60 @@ test('a line can carry a badge after the name', (newWindow) => {
   assert.strictEqual(win.Blockr.tooltip.text(b), 'dataset block · blockr.core');
   win.close();
 });
+
+test('markup from R carries its tooltip as an attribute', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  b.setAttribute('data-blockr-tooltip', 'Download');
+  const icon = win.document.createElement('span');
+  b.appendChild(icon);
+  icon.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  assert.strictEqual(card(win).textContent, 'Download', 'found from a child');
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Download');
+  win.document.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  win.Blockr.tooltip.set(b, 'Set wins');
+  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  assert.strictEqual(card(win).textContent, 'Set wins', 'set() wins over the attribute');
+  win.close();
+});
+
+test('an empty attribute shows nothing', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  b.setAttribute('data-blockr-tooltip', '');
+  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  assert.ok(!card(win));
+  win.close();
+});
+
+test('editable text names its gesture, the default or its own', (newWindow) => {
+  const win = newWindow();
+  const a = win.document.createElement('span');
+  a.textContent = 'Filter rows';
+  a.setAttribute('data-blockr-editable', '');
+  const b = win.document.createElement('span');
+  b.textContent = 'Overview';
+  b.setAttribute('data-blockr-editable', 'Click to rename');
+  win.document.body.append(a, b);
+  over(win, a);
+  assert.strictEqual(win.Blockr.tooltip.text(a), 'Double-click to edit');
+  over(win, b);
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Click to rename');
+  b.removeAttribute('data-blockr-editable');
+  assert.strictEqual(win.Blockr.tooltip.text(b), '', 'none once the attribute goes');
+  win.close();
+});
+
+test('a native title is taken over on the first hover', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  b.setAttribute('title', 'Attach file');
+  over(win, b);
+  assert.strictEqual(b.getAttribute('title'), null, 'the native title goes');
+  assert.strictEqual(b.getAttribute('aria-label'), 'Attach file', 'an icon-only button keeps it as its name');
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Attach file');
+  b.setAttribute('title', 'Send message');
+  over(win, b);
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Send message', 'a title written again is taken again');
+  win.close();
+});
