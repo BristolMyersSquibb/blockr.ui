@@ -1033,9 +1033,18 @@ and the composer table, which render annotated data frames).
   table. When some columns have a label, a column without one keeps the empty
   line so every name sits level. The preview adds the type (`dbl`, 11px muted)
   below.
-- **Header rules:** a 1px `border-strong` rule under each column header, 12px
-  short of the next column, instead of one rule across the header. None under
-  the row-label or row-number column.
+- **Header rule:** one unbroken 1px `border-default` rule under the whole
+  header, row-label and row-number columns included. The card's rule above the
+  preview and the footer rule are the same grey, so a table has one line
+  weight.
+- **Spanners** (a header over several columns) keep a tile: a 5% wash of the
+  text colour, radius 7px at the top, 5px short of the columns at each side,
+  so two spanners side by side read as two.
+- **In a block card** a table runs to the card edges: it pulls itself out by
+  the card's side inset (`--blockr-card-inset`, set by blockr.dock) and pads
+  its first and last columns and its footer back in by as much. The rules, the
+  hover wash and the scroll area reach the edges; every text keeps the card's
+  alignment. Plots and diagrams stay inset.
 - **Alignment:** numbers right-aligned in tabular figures, with their header
   right-aligned over them; text left. There is no centred option. A spanner is
   centred over its columns. Exports (PPTX, XLSX, HTML) take the same alignment.

@@ -313,17 +313,16 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
 .tbl { width: 100%; border-collapse: collapse; font-size: var(--blockr-font-size-base); font-variant-numeric: tabular-nums; }
 .tbl th { text-align: left; padding: 7px 12px; font-size: var(--blockr-font-size-sm); font-weight: 600; vertical-align: bottom; white-space: nowrap;
-  background-image: linear-gradient(var(--blockr-color-border-strong), var(--blockr-color-border-strong)); background-repeat: no-repeat;
-  background-size: calc(100% - 12px) 1px; background-position: left bottom; }
+  background-image: linear-gradient(var(--blockr-color-border-default), var(--blockr-color-border-default)); background-repeat: no-repeat;
+  background-size: 100% 1px; background-position: left bottom; }
 .tbl th .ty { display: block; font-size: 11px; font-weight: 400; color: var(--blockr-color-text-muted); }
 .tbl th .lb { display: block; font-size: var(--blockr-font-size-xs); font-weight: 400; color: var(--blockr-color-text-muted); }
 .tbl th .bn { display: block; font-size: var(--blockr-font-size-xs); font-weight: 600; color: var(--blockr-color-text-muted); }
 .tbl td { padding: 5px 12px; line-height: 20px; }
 .tbl tbody tr:hover td { background: var(--blockr-color-bg-hover); }
-.tbl .rn { width: 44px; padding-left: 0; padding-right: 10px; text-align: right; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); background-image: none; }
+.tbl .rn { width: 44px; padding-left: 0; padding-right: 10px; text-align: right; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); }
 .tbl .na { color: var(--blockr-color-text-muted); font-size: var(--blockr-font-size-xs); }
 .tbl .r, .tbl.num th:not(.rn), .tbl.num td:not(.rn) { text-align: right; }
-.tbl th.r, .tbl.num th:not(.rn) { background-position: right bottom; }
 /* an output table: groups with the fold chevron in the gutter, space between groups */
 .xtbl td.st { padding-left: 33px; }
 .xtbl td.st.i1 { padding-left: 49px; }

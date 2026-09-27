@@ -3,6 +3,20 @@
       width: 100%;
     }
 
+    /* In a block card the table runs to the card edges: it pulls itself out
+       by the card's inset (--blockr-card-inset, set by blockr.dock) and pads
+       its first and last columns and its footer back in by as much, so the
+       rules, the hover wash and the scroll area reach the edges and every
+       text keeps its place. Outside a card the inset is 0. */
+    .blockr-table-container {
+      margin: 0 calc(-1 * var(--blockr-card-inset, 0px));
+      width: calc(100% + 2 * var(--blockr-card-inset, 0px));
+    }
+
+    .blockr-table tr > :last-child {
+      padding-right: calc(12px + var(--blockr-card-inset, 0px));
+    }
+
     .blockr-table-wrapper {
       max-height: 400px;
       overflow-y: auto;
@@ -39,7 +53,7 @@
        th rather than as a border: a collapsed border does not travel with
        the sticky thead. */
     .blockr-table thead th {
-      background-image: linear-gradient(var(--blockr-color-border-strong, #d1d5db), var(--blockr-color-border-strong, #d1d5db));
+      background-image: linear-gradient(var(--blockr-color-border-default, #e5e7eb), var(--blockr-color-border-default, #e5e7eb));
       background-repeat: no-repeat;
       background-size: 100% 1px;
       background-position: left bottom;
@@ -65,7 +79,7 @@
 
     /* Row numbers: a narrow right-aligned gutter. */
     .blockr-table th.blockr-row-number {
-      width: 44px;
+      width: calc(44px + var(--blockr-card-inset, 0px));
     }
 
     .blockr-col-name {
@@ -177,7 +191,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 12px;
+      padding: 6px calc(12px + var(--blockr-card-inset, 0px));
       border-top: 1px solid var(--blockr-color-border-default, #e5e7eb);
       gap: 8px;
     }
