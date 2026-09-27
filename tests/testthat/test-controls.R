@@ -7,7 +7,8 @@ test_that("controls_dep ships the controls after the tokens", {
   # read the tokens, so the order is part of the contract.
   expect_identical(
     names,
-    c("blockr-theme", "blockr-ui-js", "blockr-blocks-css", "blockr-tooltip-css",
+    c("blockr-theme", "blockr-ui-js", "blockr-blocks-css", "blockr-menu-css",
+      "blockr-tooltip-css",
       "blockr-settings-band", "blockr-select-js", "blockr-select-css")
   )
 
