@@ -312,8 +312,8 @@ Drawn in the [design system page](design-system/index.html#foundations).
 1. **Dock header.** One row: the block's mark (a 32px tinted square in its
    category colour, carrying the status dot), the block title at 16px
    (`font-size-lg`) weight 600 `text-default`, wrapping to a second line and
-   cut after it, and on the right the "…" menu (with a block's own control,
-   such as the AI assistant, left of it). No subtitle: the block type and
+   cut after it, and on the right the preview's eye, a block's own control
+   (such as the AI assistant) and the "…" menu. No subtitle: the block type and
    package are the mark's tooltip ("filter block · blockr.dplyr").
    **Compact** (a board option, off by default) turns the row into an
    eyebrow over the block's content: the mark at 20px (glyph 12px), the name
@@ -824,9 +824,10 @@ The dock header has the "…" menu, and next to it a block's own control where
 the block has one (the AI assistant's sparkle, at every width, until a global
 assistant replaces it). They are quieter than other tools: at rest their icon
 is `border-strong` grey, on hover `text-disabled` on the `bg-hover` wash, so
-the header reads as the block's name. The section toggles (Controls, Preview)
-are the menu's first group: each a row with its familiar icon and a check
-when on, then a rule, then the block's actions. The header has one size at every
+the header reads as the block's name. The preview's eye stays in the header
+too, left of the block's own control: while building, the preview is what
+gets switched most. Controls is the menu's first row, with its familiar icon
+and a check when on, then a rule, then the block's actions. The header has one size at every
 card width, or the compact one when the board asks for it. The accent tint's fill and frame are for the builder/code
 switch, which changes how a value is edited rather than what is shown.
 
@@ -985,25 +986,6 @@ the name in `text-default` weight 600), above a divider. Then the actions:
 Rename, Duplicate, Copy block ID (the ID as mono meta text), and Remove after a
 divider in `text-danger`. The dock header has no subtitle; the block type is
 the tooltip on its mark.
-
-### The preview lip
-
-The preview has a toggle of its own outside the "…" menu, where the preview
-appears: a lip hanging from a line under the block's content, like a drawer
-pull at the card's edge.
-
-- At rest nothing shows. While the pointer is over the block, the line
-  (`border-default`) and the lip appear: 24px, `bg-surface`, 1px
-  `border-default` on three sides, radius 8 at the bottom, 12px
-  `text-muted`, "Preview" with a chevron, or "Hide preview" with the chevron
-  turned up. Hover: `text-default`.
-- Keyboard focus shows it too; on a touch screen it is always there.
-- It opens the preview inside the card, on the card's own surface: for some
-  blocks the output is what the dashboard shows (a ggplot), so it must not
-  read as a tray hung under the block.
-- When the content runs past the panel it sticks to the bottom of what is
-  visible, so "Hide preview" never needs a scroll to the end.
-- Locked and simplified boards have no lip, like the other builder chrome.
 
 ### Tooltips
 
