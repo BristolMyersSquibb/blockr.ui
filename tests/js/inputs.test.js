@@ -147,7 +147,7 @@ test('text: the value changes on Enter or blur only, and Escape reverts', (newWi
   typeIn(win, t.el, 'b.csv');
   assert.strictEqual(t.value(), 'a.csv', 'typing reports nothing');
   assert.strictEqual(t.calls.n, 0);
-  assert.match(t.el.nextSibling.textContent, /Enter/);
+  assert.equal(t.el.nextSibling.textContent, '↵');
 
   key(win, t.el, 'Enter');
   assert.strictEqual(t.value(), 'b.csv');
@@ -269,4 +269,15 @@ test('gear: opens its tray, reports the state, and stays open when drawn again',
   assert.strictEqual(again.value(), false);
   assert.strictEqual(again.calls.n, 1);
   win.close();
+});
+
+test('Blockr.keys writes the platform form', (newWindow) => {
+  const win = newWindow();
+  const B = win.Blockr;
+  B.isMac = true;
+  assert.equal(B.keys('Mod+Shift+S'), '⌘⇧S');
+  assert.equal(B.keys('Mod+Enter'), '⌘↵');
+  B.isMac = false;
+  assert.equal(B.keys('Mod+Shift+S'), 'Ctrl+Shift+S');
+  assert.equal(B.keys('Mod+Enter'), 'Ctrl+↵');
 });

@@ -1,6 +1,6 @@
 Package: blockr.ui
 Title: User Interface Components for the 'blockr' Ecosystem
-Version: 0.0.1.9039
+Version: 0.0.1.9040
 Authors@R:
     person(given = "David",
            family = "Granjon",

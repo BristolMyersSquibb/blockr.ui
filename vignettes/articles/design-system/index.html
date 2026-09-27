@@ -171,8 +171,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .hint { font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); margin-top: 4px; }
 .err { font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-danger); margin-top: 4px; }
-.enter { display: none; align-items: center; gap: 3px; flex: none; height: 24px; padding: 0 8px; border-radius: var(--blockr-radius-sm); font-size: 11px; font-weight: 500; color: var(--blockr-color-text-accent); background: var(--blockr-color-bg-accent-subtle); border: 1px solid var(--blockr-color-border-accent-subtle); cursor: pointer; }
-.enter b { font-weight: 500; opacity: .6; }
+.enter { display: none; align-items: center; justify-content: center; flex: none; width: 24px; height: 24px; padding: 0; border-radius: var(--blockr-radius-sm); font-size: 13px; color: var(--blockr-color-text-accent); background: var(--blockr-color-bg-accent-subtle); border: 1px solid var(--blockr-color-border-accent-subtle); cursor: pointer; }
 .ctl.dirty .enter { display: inline-flex; }
 
 /* checkbox: bare box and its words; in the grid it sits on the controls' line */
@@ -823,7 +822,7 @@ with live words. Both keep the rest behind the gear, which opens the tray in flo
       <div class="gu"><div class="gB">
         <div class="fld sf"><span class="lbl">Keep columns</span><div class="ctl multi" tabindex="0" data-menu="m-cols" data-multi data-place="field" data-value="Ozone|Solar.R|Wind|Month"><span class="car"></span></div></div>
         <div class="fld s2"><span class="lbl">Keep rows that match</span><div class="seg" role="radiogroup"><button class="on" role="radio" aria-checked="true">All</button><button role="radio" aria-checked="false">Any</button></div></div>
-        <div class="fld s1"><span class="lbl">Maximum number of rows</span><div class="ctl" data-commit><input type="number" value="100" aria-label="Maximum number of rows"><span class="enter">Enter <b>↵</b></span></div></div>
+        <div class="fld s1"><span class="lbl">Maximum number of rows</span><div class="ctl" data-commit><input type="number" value="100" aria-label="Maximum number of rows"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
         <label class="ck s1"><input type="checkbox" checked><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Drop NA</span></label>
       </div></div>
     </div>
@@ -874,7 +873,7 @@ with live words. Both keep the rest behind the gear, which opens the tray in flo
         <div class="gu"><div class="gB">
           <div class="fld s2"><span class="lbl">Orientation</span><div class="seg" role="radiogroup"><button class="on" role="radio" aria-checked="true">Vertical</button><button role="radio" aria-checked="false">Horizontal</button></div></div>
           <div class="fld s2"><span class="lbl">Sort</span><button class="ctl" data-menu="m-sort" data-place="field" data-value="As in data"><span class="v">As in data</span><span class="car"></span></button></div>
-          <div class="fld s1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter">Enter <b>↵</b></span></div></div>
+          <div class="fld s1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
           <label class="ck s1"><input type="checkbox" checked data-labels="chart-main"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Labels</span></label>
           <label class="ck s1"><input type="checkbox"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Legend</span></label>
         </div></div>
@@ -1083,7 +1082,7 @@ caption, status line). Its output title and sentence belong to the output and ex
         <div class="sec">Presentation</div>
         <div class="gu"><div class="gB">
           <div class="fld s2"><span class="lbl">Sort</span><button class="ctl" data-menu="m-sort" data-place="field" data-value="By value"><span class="v">By value</span><span class="car"></span></button></div>
-          <div class="fld s1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter">Enter <b>↵</b></span></div></div>
+          <div class="fld s1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
           <label class="ck s1"><input type="checkbox" checked data-labels="chart-anat"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Labels</span></label>
         </div></div>
       </div></div></div>
@@ -1201,19 +1200,19 @@ a short section leaves room on the right. "Show columns" draws the tracks and ea
     <div class="fld s2" data-size="2"><span class="lbl">Category</span><button class="ctl" data-menu="m-cols" data-place="field" data-value="Month"><span class="v">Month</span><span class="car"></span></button></div>
     <div class="fld s2" data-size="2"><span class="lbl">Value</span><button class="ctl" data-menu="m-cols" data-place="field" data-value="Ozone"><span class="v">Ozone</span><span class="car"></span></button></div>
     <div class="fld s2" data-size="2"><span class="lbl">Aggregate</span><button class="ctl" data-menu="m-agg" data-place="field" data-value="Mean"><span class="v">Mean</span><span class="car"></span></button></div>
-    <div class="fld s2" data-size="2"><span class="lbl">Title</span><div class="ctl" data-commit><input value="Mean ozone by month" aria-label="Title"><span class="enter">Enter <b>↵</b></span></div></div>
+    <div class="fld s2" data-size="2"><span class="lbl">Title</span><div class="ctl" data-commit><input value="Mean ozone by month" aria-label="Title"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
   </div></div>
   <div class="sec">Presentation</div>
   <div class="gu"><div class="gB">
-    <div class="fld s1" data-size="1"><span class="lbl">Bins</span><div class="ctl" data-commit><input type="number" value="30" aria-label="Bins"><span class="enter">Enter <b>↵</b></span></div></div>
-    <div class="fld s1" data-size="1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter">Enter <b>↵</b></span></div></div>
+    <div class="fld s1" data-size="1"><span class="lbl">Bins</span><div class="ctl" data-commit><input type="number" value="30" aria-label="Bins"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
+    <div class="fld s1" data-size="1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
     <label class="ck s1"><input type="checkbox" checked><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Labels</span></label>
     <label class="ck s1"><input type="checkbox"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Legend</span></label>
     <div class="fld s2" data-size="2"><span class="lbl">Palette</span><button class="ctl" data-menu="m-pal" data-place="field" data-value="Okabe-Ito"><span class="v">Okabe-Ito</span><span class="car"></span></button></div>
   </div></div>
   <div class="sec">Filter</div>
   <div class="gu"><div class="gB">
-    <div class="fld sf" data-size="full"><span class="lbl">Expression</span><div class="ctl mono" data-commit><input value="Ozone &gt; 40 &amp; Month %in% c(6, 7, 8)" aria-label="Expression"><span class="enter">Enter <b>↵</b></span></div></div>
+    <div class="fld sf" data-size="full"><span class="lbl">Expression</span><div class="ctl mono" data-commit><input value="Ozone &gt; 40 &amp; Month %in% c(6, 7, 8)" aria-label="Expression"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
   </div></div>
 </div></div>
 <p class="w-read" id="gread"></p>
@@ -1281,16 +1280,16 @@ bare checkbox; two or three short fixed values a segmented control; four or more
 from a list, tags. <a href="../design-system.html#controls">rules: design-system#controls</a></p>
 
 <h3 class="sh" id="inputs">Text and number inputs</h3>
-<p class="note">Text and numbers commit on Enter or blur; while a field holds an uncommitted change the <code>Enter ↵</code>
+<p class="note">Text and numbers commit on Enter or blur; while a field holds an uncommitted change the ↵
 button shows, and Escape reverts. Number fields keep <code>type=number</code> and hide the arrows. Type in any of them.</p>
 <div class="cols c4">
-  <div class="fld"><span class="lbl">Empty, with placeholder</span><div class="ctl" data-commit><input placeholder="e.g. week_" aria-label="Prefix"><span class="enter">Enter <b>↵</b></span></div><div class="hint">Leave empty to keep the names</div></div>
-  <div class="fld"><span class="lbl">Filled</span><div class="ctl" data-commit><input value="value" aria-label="Values to"><span class="enter">Enter <b>↵</b></span></div></div>
-  <div class="fld"><span class="lbl">Changed, not committed</span><div class="ctl dirty" data-commit><input value="values" aria-label="Values to"><span class="enter">Enter <b>↵</b></span></div></div>
-  <div class="fld"><span class="lbl">Number</span><div class="ctl" data-commit><input type="number" value="12" aria-label="Number of rows"><span class="enter">Enter <b>↵</b></span></div></div>
+  <div class="fld"><span class="lbl">Empty, with placeholder</span><div class="ctl" data-commit><input placeholder="e.g. week_" aria-label="Prefix"><span class="enter" aria-label="Apply (Enter)">↵</span></div><div class="hint">Leave empty to keep the names</div></div>
+  <div class="fld"><span class="lbl">Filled</span><div class="ctl" data-commit><input value="value" aria-label="Values to"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
+  <div class="fld"><span class="lbl">Changed, not committed</span><div class="ctl dirty" data-commit><input value="values" aria-label="Values to"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
+  <div class="fld"><span class="lbl">Number</span><div class="ctl" data-commit><input type="number" value="12" aria-label="Number of rows"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
   <div class="fld"><span class="lbl">Focused</span><div class="ctl f-focus"><input value="value" aria-label="Focused example"></div></div>
   <div class="fld"><span class="lbl">Group by <span class="req">*</span></span><button class="ctl req" data-menu="m-cols" data-place="field"><span class="v ph">Select a column</span><span class="car"></span></button><div class="hint">Required, still empty</div></div>
-  <div class="fld"><span class="lbl">Number of rows</span><div class="ctl bad" data-commit><input type="number" value="-3" aria-label="Number of rows"><span class="enter">Enter <b>↵</b></span></div><div class="err">Must be a positive number</div></div>
+  <div class="fld"><span class="lbl">Number of rows</span><div class="ctl bad" data-commit><input type="number" value="-3" aria-label="Number of rows"><span class="enter" aria-label="Apply (Enter)">↵</span></div><div class="err">Must be a positive number</div></div>
   <div class="fld"><span class="lbl">Disabled</span><div class="ctl dis"><input value="12" disabled aria-label="Disabled"></div></div>
 </div>
 
@@ -1310,7 +1309,7 @@ hidden until it opens. Only the hovered tag shows its ×.</p>
 of its row and takes one column; on a row of its own it takes only its own height. Click them.</p>
 <div class="cols c2">
   <div class="card"><div class="gu"><div class="gB">
-    <div class="fld s1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter">Enter <b>↵</b></span></div></div>
+    <div class="fld s1"><span class="lbl">Height</span><div class="ctl" data-commit><input type="number" value="400" aria-label="Height"><span class="enter" aria-label="Apply (Enter)">↵</span></div></div>
     <label class="ck s1"><input type="checkbox" checked><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Labels</span></label>
     <label class="ck s1"><input type="checkbox"><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Legend</span></label>
     <label class="ck s1 dis"><input type="checkbox" disabled><span class="box"><svg width="10" height="10"><use href="#i-check"/></svg></span><span class="t">Stack</span></label>
@@ -1355,7 +1354,7 @@ grid; its tooltip names the other state and it sets <code>aria-pressed</code>. C
 <div class="dock formula" id="formula" style="max-width:600px"><div class="face">
   <span class="lbl">Formula</span>
   <div class="row as-build" style="padding-left:8px"><span class="tag" style="padding-right:8px">Ozone</span><span class="m">~</span><span class="tag" style="padding-right:8px">Temp</span><span class="m">+</span><span class="tag" style="padding-right:8px">Wind</span></div>
-  <div class="ctl as-code dirty mono" data-commit><input value="Ozone ~ Temp + Wind + Temp:Wind" aria-label="Formula"><span class="enter">Enter <b>↵</b></span></div>
+  <div class="ctl as-code dirty mono" data-commit><input value="Ozone ~ Temp + Wind + Temp:Wind" aria-label="Formula"><span class="enter" aria-label="Apply (Enter)">↵</span></div>
   <div class="foot"><button class="b s quiet as-build-add"><svg width="12" height="12"><use href="#i-plus"/></svg>Term</button><button class="tool" id="mode" aria-pressed="false" data-tip="Edit as formula text" aria-label="Edit as formula text"><svg width="14" height="14"><use href="#i-code"/></svg></button></div>
 </div></div>
 

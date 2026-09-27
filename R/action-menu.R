@@ -89,7 +89,8 @@ action_menu <- function(trigger, ..., align = c("end", "start")) {
 #'   [shiny::actionLink()], or any `<a>` or `<button>`. Its text is the row's
 #'   label.
 #' @param meta Text after the label, muted and right-aligned: the format of a
-#'   download (".pptx"), a block ID.
+#'   download (".pptx"), a block ID, or a keyboard shortcut from
+#'   [shortcut()].
 #' @param icon An icon before the label, as a tag or [htmltools::HTML()].
 #' @param danger Draw the row in red. Only for a removal.
 #' @param disabled `NULL` for a usable row, or the reason it is not usable:
@@ -106,7 +107,8 @@ menu_item <- function(x, meta = NULL, icon = NULL, danger = FALSE,
   }
 
   stopifnot(
-    is.null(meta) || (is.character(meta) && length(meta) == 1L),
+    is.null(meta) || (is.character(meta) && length(meta) == 1L) ||
+      inherits(meta, "shiny.tag"),
     isTRUE(danger) || isFALSE(danger),
     is.null(disabled) || (is.character(disabled) && length(disabled) == 1L)
   )
