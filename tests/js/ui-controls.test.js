@@ -162,11 +162,11 @@ test('textCommit: Escape on a clean field goes through, and closes the tray', (n
   win.close();
 });
 
-test('textCommit: the Enter button reads "Enter" while dirty and is marked confirmed after', (newWindow) => {
+test('textCommit: the button shows ↵ while dirty and is marked confirmed after', (newWindow) => {
   const win = newWindow();
   const f = fieldInTray(win);
   type(win, f.input, 'SEX');
-  assert.ok(f.chip.textContent.startsWith('Enter'));
+  assert.strictEqual(f.chip.textContent, '↵');
   assert.ok(!f.chip.classList.contains('confirmed'));
   press(win, f.input, 'Enter');
   assert.deepStrictEqual(f.committed, ['SEX']);
