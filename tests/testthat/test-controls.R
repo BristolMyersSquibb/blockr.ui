@@ -9,7 +9,8 @@ test_that("controls_dep ships the controls after the tokens", {
   expect_identical(
     names,
     c("blockr-tokens", "blockr-ui-js", "blockr-blocks-css",
-      "blockr-settings-band", "blockr-select-js", "blockr-select-css")
+      "blockr-settings-band", "blockr-select-js", "blockr-select-css",
+      "blockr-input-js", "blockr-input-css")
   )
 
   assets <- system.file("assets", package = "blockr.ui")
@@ -28,7 +29,8 @@ test_that("the controls read only meaning tokens this package defines", {
   sites <- token_references("blockr.ui")
   controls <- sites[
     basename(sites$file) %in%
-      c("blockr-blocks.css", "blockr-select.css", "blockr-settings-band.css"),
+      c("blockr-blocks.css", "blockr-select.css", "blockr-settings-band.css",
+        "blockr-input.css"),
   ]
   stray <- grepl(palette_token, controls$token) |
     controls$token %in% names(legacy_tokens())
