@@ -124,7 +124,24 @@ Blockr.place = (panel, anchor, opts) => {
   const minWidth = o.minWidth || 0;
   const align = o.align || 'start';
 
+  // The anchor can leave the page while the panel is open: a block that
+  // redraws its band on every pick replaces the word a multi menu hangs off.
+  // A detached element measures 0x0 at 0,0, which threw the panel to the top
+  // left corner. `reanchor` returns the element that now stands for the
+  // anchor; without one, or while it finds none, the panel stays put.
+  /** @type {ResizeObserver | null} */
+  let obs = null;
+  const current = () => {
+    if (anchor.isConnected) return true;
+    const next = o.reanchor ? o.reanchor() : null;
+    if (!next || !next.isConnected) return false;
+    if (obs) { obs.unobserve(anchor); obs.observe(next); }
+    anchor = next;
+    return true;
+  };
+
   const update = () => {
+    if (!current()) return;
     const r = anchor.getBoundingClientRect();
     // Not laid out yet on the first call after display: block; a guess is
     // better than 0, which would never flip.
@@ -158,8 +175,6 @@ Blockr.place = (panel, anchor, opts) => {
   window.addEventListener('scroll', update, { capture: true, passive: true });
   window.addEventListener('resize', update, { passive: true });
 
-  /** @type {ResizeObserver | null} */
-  let obs = null;
   let frame = 0;
   if (typeof ResizeObserver !== 'undefined') {
     obs = new ResizeObserver(() => {
@@ -170,12 +185,27 @@ Blockr.place = (panel, anchor, opts) => {
     obs.observe(panel);
   }
 
+  // Removing the anchor fires nothing the panel listens to (no scroll, no
+  // resize, and a ResizeObserver does not reliably report a node leaving
+  // the page), so with `reanchor` the page is watched while the panel is
+  // open, and the panel moves on the next frame after its anchor is gone.
+  /** @type {MutationObserver | null} */
+  let mut = null;
+  if (o.reanchor && typeof MutationObserver !== 'undefined') {
+    mut = new MutationObserver(() => {
+      if (frame || anchor.isConnected) return;
+      frame = requestAnimationFrame(() => { frame = 0; update(); });
+    });
+    mut.observe(document.body, { childList: true, subtree: true });
+  }
+
   return {
     update,
     stop: () => {
       window.removeEventListener('scroll', update, { capture: true });
       window.removeEventListener('resize', update);
       if (obs) { obs.disconnect(); obs = null; }
+      if (mut) { mut.disconnect(); mut = null; }
       if (frame) { cancelAnimationFrame(frame); frame = 0; }
     }
   };
@@ -206,6 +236,26 @@ Blockr.icons = {
     '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" ' +
     'viewBox="0 0 16 16"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 ' +
     '0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/></svg>',
+  // Menu icons, drawn at 1.25 stroke so the few rows that carry one read as
+  // one set: the bin of a destructive row, the sliders of a row that opens a
+  // mode ("Manage pages").
+  trash:
+    '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M2.5 4.5h11M6.5 4.5V3h3v1.5M4 4.5l.7 9h6.6l.7-9"></path></svg>',
+  sliders:
+    '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.25" stroke-linecap="round">' +
+    '<path d="M2 4h12M2 8h12M2 12h12"></path>' +
+    '<circle cx="5" cy="4" r="1.6" fill="var(--blockr-color-bg-raised)"></circle>' +
+    '<circle cx="10" cy="8" r="1.6" fill="var(--blockr-color-bg-raised)"></circle>' +
+    '<circle cx="6" cy="12" r="1.6" fill="var(--blockr-color-bg-raised)"></circle></svg>',
+  // The current item's mark in a menu: a thin check, like the other small
+  // icons.
+  check:
+    '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M3.5 8.5l3 3 6-7"></path></svg>',
   confirm:
     '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" ' +
     'viewBox="0 0 16 16"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 ' +
@@ -593,6 +643,373 @@ Blockr.tooltip = (() => {
   window.addEventListener('focusin', take, true);
 })();
 
+/* --- Menu --------------------------------------------------------------- */
+
+/**
+ * The action menu (design system, "Menus"): one floating surface for every
+ * menu of actions -- a block's "…" menu, the views menu, a user menu.
+ * Blockr.Select.menu() is the other kind, a list of values to pick from.
+ *
+ * Blockr.menu(anchor, config) opens a menu under `anchor` and returns
+ * `{ el, close }`. `config.items` is a list of entries:
+ *
+ *   { label, icon?, meta?, mono?, current?, danger?, quiet?, disabled?,
+ *     reason?, onSelect? }   a row; `meta` is grey text after the label
+ *                            (`mono` sets it in the code face), `current` the
+ *                            item in use (weight 600 and a check), `checked`
+ *                            a toggle that is on (a check), `danger` a
+ *                            destructive action (red only under the pointer),
+ *                            `quiet` a muted row such as "Manage pages",
+ *                            `reason` the tooltip on a disabled row
+ *   { gap: true }            a small space between groups
+ *   { divider: true }        a rule between groups
+ *   { title }                a group title
+ *
+ * Rows have no icon unless `icon` is given, either the name of one of
+ * Blockr.icons ('trash', 'sliders') or an SVG/HTML string, and only a
+ * row that is more than a plain action gets one: it opens a mode or another
+ * surface, or it destroys something. Such a row sits in a group of its own,
+ * after a gap or a divider, so a label with an icon never sits right under
+ * one without.
+ *
+ * A row may also carry `mark` ({ icon, color }: a block's glyph on a tint
+ * of its category colour), `badge` (a neutral badge at the end, as a
+ * package) and `keywords` (more text the filter matches). `config.caption`
+ * is one muted line on top ("Append to Dataset"); `config.filter` (true, or
+ * the placeholder) adds a filter box that narrows the rows as you type and
+ * holds the focus; `config.minWidth` widens the panel.
+ *
+ * `config.head` ({ title, badge?, text? }) puts a block of text above the
+ * rows, as the "…" menu's name, package and description. `align` is 'start'
+ * (default) or 'end', for a trigger in a header row. `onClose` runs once
+ * whichever way the menu closes.
+ *
+ * The panel is portalled to <body> and placed with Blockr.place: 4px under
+ * the trigger, above when there is no room below, 180 to 320px wide. Arrows
+ * move, Home/End jump, Enter and Space pick, Escape closes and hands focus
+ * back to the trigger; Tab, a click outside and a pick close it.
+ *
+ * Blockr.menu.bind(trigger, config) wires a button to open and close its
+ * menu; `config` may be a function, read on each open.
+ */
+Blockr.menu = (() => {
+  /** @type {{ el: HTMLDivElement, close: () => void, anchor: HTMLElement } | null} */
+  let open = null;
+
+  // The menu's own copy of the icon set, taken when this file loads: a page
+  // can also carry an older copy of this file (bundled by a package that
+  // has not moved to blockr.ui yet), and that copy replaces Blockr.icons
+  // with a set that lacks the menu's icons.
+  /** @type {Record<string, string>} */
+  const ICONS = Object.assign({}, Blockr.icons);
+  /** @param {string} name */
+  const iconFor = (name) => {
+    if (Object.prototype.hasOwnProperty.call(ICONS, name)) return ICONS[name];
+    if (Object.prototype.hasOwnProperty.call(Blockr.icons, name)) return Blockr.icons[name];
+    return name;
+  };
+
+  /**
+   * @param {HTMLElement} anchor
+   * @param {BlockrMenuConfig} config
+   * @returns {{ el: HTMLDivElement, close: () => void }}
+   */
+  const menu = (anchor, config) => {
+    if (open) open.close();
+
+    const panel = document.createElement('div');
+    panel.className = 'blockr-menu';
+    panel.id = Blockr.uid('blockr-menu');
+    panel.setAttribute('role', 'menu');
+    panel.tabIndex = -1;
+
+    if (config.head) {
+      const head = document.createElement('div');
+      head.className = 'blockr-menu__head';
+      const line = document.createElement('div');
+      line.className = 'blockr-menu__head-title';
+      line.textContent = config.head.title;
+      if (config.head.badge) {
+        const badge = document.createElement('span');
+        badge.className = 'blockr-menu__badge';
+        badge.textContent = config.head.badge;
+        line.append(' ', badge);
+      }
+      head.appendChild(line);
+      if (config.head.text) {
+        const text = document.createElement('div');
+        text.className = 'blockr-menu__head-text';
+        text.textContent = config.head.text;
+        head.appendChild(text);
+      }
+      panel.appendChild(head);
+    }
+
+    if (config.caption) {
+      const cap = document.createElement('div');
+      cap.className = 'blockr-menu__caption';
+      cap.textContent = config.caption;
+      panel.appendChild(cap);
+    }
+
+    /** @type {HTMLInputElement | null} */
+    let filterInput = null;
+    if (config.filter) {
+      const wrap = document.createElement('div');
+      wrap.className = 'blockr-menu__filter';
+      filterInput = document.createElement('input');
+      filterInput.type = 'text';
+      filterInput.className = 'blockr-menu__filter-input';
+      filterInput.placeholder = typeof config.filter === 'string' ? config.filter : 'Search';
+      filterInput.setAttribute('aria-label', filterInput.placeholder);
+      filterInput.autocomplete = 'off';
+      wrap.appendChild(filterInput);
+      panel.appendChild(wrap);
+    }
+
+    /** @type {{ row: HTMLButtonElement, item: BlockrMenuItem, search: string }[]} */
+    const rows = [];
+    /** @type {{ kind: 'row' | 'title' | 'sep', el: HTMLElement, row?: number }[]} */
+    const nodes = [];
+    for (const entry of config.items || []) {
+      if ('gap' in entry) {
+        const gap = document.createElement('div');
+        gap.className = 'blockr-menu__gap';
+        gap.setAttribute('role', 'separator');
+        panel.appendChild(gap);
+        nodes.push({ kind: 'sep', el: gap });
+        continue;
+      }
+      if ('divider' in entry) {
+        const hr = document.createElement('div');
+        hr.className = 'blockr-menu__divider';
+        hr.setAttribute('role', 'separator');
+        panel.appendChild(hr);
+        nodes.push({ kind: 'sep', el: hr });
+        continue;
+      }
+      if (!('label' in entry)) {
+        const t = document.createElement('div');
+        t.className = 'blockr-menu__title';
+        t.textContent = entry.title;
+        panel.appendChild(t);
+        nodes.push({ kind: 'title', el: t });
+        continue;
+      }
+      const item = entry;
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.tabIndex = -1;
+      row.className = 'blockr-menu__item' +
+        (item.current ? ' blockr-menu__item--current' : '') +
+        (item.danger ? ' blockr-menu__item--danger' : '') +
+        (item.quiet ? ' blockr-menu__item--quiet' : '');
+      row.setAttribute('role', 'menuitem');
+      if (item.disabled) {
+        row.setAttribute('aria-disabled', 'true');
+        if (item.reason) Blockr.tooltip.set(row, item.reason);
+      }
+      if (item.mark) {
+        const mk = document.createElement('span');
+        mk.className = 'blockr-menu__mark';
+        if (item.mark.color) mk.style.setProperty('--blockr-menu-mark', item.mark.color);
+        mk.innerHTML = item.mark.icon || '';
+        row.appendChild(mk);
+      }
+      if (item.icon) {
+        const ic = document.createElement('span');
+        ic.className = 'blockr-menu__icon';
+        ic.innerHTML = iconFor(item.icon);
+        row.appendChild(ic);
+      }
+      const label = document.createElement('span');
+      label.className = 'blockr-menu__label';
+      label.textContent = item.label;
+      row.appendChild(label);
+      // `checked`: a toggle that is on (a check, no weight); `current`: the
+      // item in use (weight 600 and a check).
+      if (item.current || item.checked) {
+        const check = document.createElement('span');
+        check.className = 'blockr-menu__check';
+        check.innerHTML = iconFor('check');
+        row.appendChild(check);
+      }
+      if ('checked' in item) {
+        row.setAttribute('role', 'menuitemcheckbox');
+        row.setAttribute('aria-checked', item.checked ? 'true' : 'false');
+      }
+      if (item.meta) {
+        const meta = document.createElement('span');
+        meta.className = 'blockr-menu__meta' + (item.mono ? ' blockr-menu__meta--mono' : '');
+        meta.textContent = item.meta;
+        row.appendChild(meta);
+      }
+      if (item.badge) {
+        const badge = document.createElement('span');
+        badge.className = 'blockr-menu__badge';
+        badge.textContent = item.badge;
+        row.appendChild(badge);
+      }
+      const search = [item.label, item.keywords || '', item.badge || '', item.meta || '']
+        .join(' ').toLowerCase();
+      nodes.push({ kind: 'row', el: row, row: rows.length });
+      rows.push({ row, item, search });
+      panel.appendChild(row);
+    }
+
+    const empty = document.createElement('div');
+    empty.className = 'blockr-menu__empty';
+    empty.textContent = 'No matches';
+    empty.hidden = true;
+    if (filterInput) panel.appendChild(empty);
+
+    let active = -1;
+    /** @param {number} i */
+    const setActive = (i) => {
+      if (active >= 0 && rows[active]) rows[active].row.classList.remove('blockr-menu__item--active');
+      active = i;
+      if (active >= 0 && rows[active]) {
+        rows[active].row.classList.add('blockr-menu__item--active');
+        rows[active].row.scrollIntoView({ block: 'nearest' });
+      }
+    };
+    // The rows that can be picked: enabled, and not filtered out.
+    const pickable = () => rows
+      .map((r, i) => (r.item.disabled || r.row.hidden ? -1 : i))
+      .filter((i) => i >= 0);
+    /** @param {number} dir */
+    const step = (dir) => {
+      const enabled = pickable();
+      if (!enabled.length) return;
+      const at = enabled.indexOf(active);
+      const next = at < 0 ? (dir > 0 ? 0 : enabled.length - 1)
+        : (at + dir + enabled.length) % enabled.length;
+      setActive(enabled[next]);
+    };
+
+    let closed = false;
+    /** @type {BlockrPlaceHandle | null} */
+    let placed = null;
+    /** @param {boolean} [refocus] */
+    const close = (refocus) => {
+      if (closed) return;
+      closed = true;
+      if (placed) placed.stop();
+      panel.remove();
+      anchor.setAttribute('aria-expanded', 'false');
+      if (open && open.el === panel) open = null;
+      if (refocus) anchor.focus();
+      if (config.onClose) config.onClose();
+    };
+    /** @param {number} i */
+    const pick = (i) => {
+      const r = rows[i];
+      if (!r || r.item.disabled) return;
+      close(true);
+      if (r.item.onSelect) r.item.onSelect();
+    };
+
+    // Typing filters the rows by label, keywords, badge and meta text (every
+    // word has to match); a group title shows while one of its rows does, the
+    // gaps and rules only while nothing is typed. The first match is the
+    // keyboard row, so Enter takes it.
+    const applyFilter = () => {
+      if (!filterInput) return;
+      const terms = filterInput.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      rows.forEach((r) => {
+        r.row.hidden = terms.length > 0 && !terms.every((t) => r.search.indexOf(t) >= 0);
+      });
+      nodes.forEach((n, k) => {
+        if (n.kind === 'sep') { n.el.hidden = terms.length > 0; return; }
+        if (n.kind !== 'title') return;
+        let any = false;
+        for (let j = k + 1; j < nodes.length && nodes[j].kind !== 'title'; j++) {
+          if (nodes[j].kind === 'row' && !nodes[j].el.hidden) { any = true; break; }
+        }
+        n.el.hidden = !any;
+      });
+      const left = pickable();
+      empty.hidden = left.length > 0 || !terms.length;
+      // The keyboard row is the first whose label matches, before one that
+      // matched on its keywords or badge only.
+      const byLabel = left.filter((i) => {
+        const label = rows[i].item.label.toLowerCase();
+        return terms.every((t) => label.indexOf(t) >= 0);
+      });
+      setActive(terms.length && left.length ? (byLabel.length ? byLabel[0] : left[0]) : -1);
+    };
+    if (filterInput) filterInput.addEventListener('input', applyFilter);
+
+    rows.forEach((r, i) => {
+      r.row.addEventListener('mousemove', () => { if (!r.item.disabled && active !== i) setActive(i); });
+      r.row.addEventListener('click', (e) => { e.stopPropagation(); pick(i); });
+    });
+    panel.addEventListener('mouseleave', () => setActive(-1));
+    panel.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); step(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); step(-1); }
+      else if ((e.key === 'Home' || e.key === 'End') && e.target !== filterInput) {
+        e.preventDefault();
+        const enabled = pickable();
+        if (enabled.length) setActive(e.key === 'Home' ? enabled[0] : enabled[enabled.length - 1]);
+      }
+      else if (e.key === 'Enter' || (e.key === ' ' && e.target !== filterInput)) {
+        e.preventDefault();
+        pick(active >= 0 ? active : (filterInput && filterInput.value ? pickable()[0] : -1));
+      }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
+      else if (e.key === 'Tab') { close(false); }
+    });
+    panel.addEventListener('focusout', (e) => {
+      const to = e.relatedTarget;
+      if (to instanceof Node && (panel.contains(to) || anchor.contains(to))) return;
+      if (to) close(false);
+    });
+
+    document.body.appendChild(panel);
+    placed = Blockr.place(panel, anchor, {
+      width: { min: config.minWidth || 180, max: Math.max(config.minWidth || 180, 320) },
+      align: config.align || 'start'
+    });
+    anchor.setAttribute('aria-expanded', 'true');
+    anchor.setAttribute('aria-haspopup', 'menu');
+    // A click outside closes it; the trigger's own click is its binding's.
+    Blockr.onDocClick(panel, (e) => {
+      const t = e.target;
+      if (t instanceof Node && (panel.contains(t) || anchor.contains(t))) return;
+      close(false);
+    });
+    (filterInput || panel).focus({ preventScroll: true });
+
+    open = { el: panel, close: () => close(false), anchor };
+    return { el: panel, close: () => close(false) };
+  };
+
+  /**
+   * @param {HTMLElement} trigger
+   * @param {BlockrMenuConfig | (() => BlockrMenuConfig)} config
+   */
+  menu.bind = (trigger, config) => {
+    const read = () => (typeof config === 'function' ? config() : config);
+    /** @param {boolean} keyboard */
+    const toggle = (keyboard) => {
+      if (open && open.anchor === trigger) { open.close(); return; }
+      const m = menu(trigger, read());
+      if (keyboard) {
+        m.el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+      }
+    };
+    trigger.setAttribute('aria-haspopup', 'menu');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.addEventListener('click', (e) => { e.preventDefault(); toggle(false); });
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); toggle(true); }
+    });
+  };
+
+  return menu;
+})();
+
 /* --- Controls ----------------------------------------------------------- */
 
 (function () {
@@ -771,4 +1188,169 @@ Blockr.tooltip = (() => {
   Blockr.checkbox = checkbox;
   Blockr.gearTray = gearTray;
   Blockr.segmented = segmented;
+})();
+
+/**
+ * The action menu (design system, "Menus"): a list of actions opened by a
+ * button, built in R by action_menu(). A row does one thing, a download, a
+ * rename, a removal, and the menu closes; nothing is remembered. That is the
+ * whole difference from Blockr.Select.menu, which sets a value. The two share
+ * the menu surface and Blockr.place.
+ *
+ * The markup comes from R, so one set of document listeners serves every
+ * menu on the page, including menus a uiOutput renders later. While closed,
+ * the list waits, hidden, beside its trigger. Opening moves it to <body>,
+ * where no dock panel's overflow clips it; closing moves it back, so it
+ * leaves the page with its block and Shiny's unbinding still reaches the
+ * download and action links inside it.
+ *
+ * Keys: a keyboard open focuses the first row; arrows, Home and End move;
+ * Enter or Space runs the row; Escape closes and returns focus to the
+ * trigger; Tab closes. A click outside closes. A disabled row does
+ * nothing.
+ */
+Blockr.actionMenu = (() => {
+  /** @type {{ trigger: HTMLElement, panel: HTMLElement, home: Node, next: Node | null, placement: BlockrPlaceHandle, watch: MutationObserver | null } | null} */
+  let open = null;
+
+  /** @param {Element | null} el */
+  const triggerOf = (el) => /** @type {HTMLElement | null} */ (
+    el && el.closest('.blockr-action-menu__trigger'));
+
+  /** @param {HTMLElement} panel */
+  const rows = (panel) => /** @type {HTMLElement[]} */ (Array.from(
+    panel.querySelectorAll('.blockr-menu__item')).filter((r) => !r.hidden && !isDisabled(r)));
+
+  /**
+   * Disabled by its author (the class), or a download whose handler Shiny
+   * has not bound yet (aria-disabled, which Shiny clears once it has).
+   * @param {Element} row
+   */
+  const isDisabled = (row) => row.classList.contains('blockr-menu__item--disabled') ||
+    row.getAttribute('aria-disabled') === 'true';
+
+  /** @param {boolean} [refocus] */
+  const close = (refocus) => {
+    if (!open) return;
+    const { trigger, panel, home, next, placement, watch } = open;
+    open = null;
+    placement.stop();
+    if (watch) watch.disconnect();
+    panel.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    if (home.isConnected) {
+      home.insertBefore(panel, next && next.parentNode === home ? next : null);
+    } else {
+      // The block went while the menu was open: nothing to go back to.
+      const shiny = /** @type {any} */ (window).Shiny;
+      if (shiny && shiny.unbindAll) shiny.unbindAll(panel);
+      panel.remove();
+    }
+    if (refocus && trigger.isConnected) trigger.focus();
+  };
+
+  /**
+   * @param {HTMLElement} trigger
+   * @param {boolean} [byKeyboard]
+   */
+  const show = (trigger, byKeyboard) => {
+    close();
+    const wrap = trigger.parentElement;
+    const panel = /** @type {HTMLElement | null} */ (
+      wrap && wrap.querySelector(':scope > .blockr-menu'));
+    if (!wrap || !panel) return;
+    if (!panel.id) panel.id = Blockr.uid('blockr-menu');
+    trigger.setAttribute('aria-controls', panel.id);
+    const home = wrap;
+    const next = panel.nextSibling;
+    document.body.appendChild(panel);
+    panel.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    const placement = Blockr.place(panel, trigger, {
+      width: { min: 180, max: 320 },
+      align: wrap.getAttribute('data-align') === 'start' ? 'start' : 'end'
+    });
+    /** @type {MutationObserver | null} */
+    let watch = null;
+    if (typeof MutationObserver !== 'undefined') {
+      watch = new MutationObserver(() => { if (!trigger.isConnected) close(); });
+      watch.observe(document.body, { childList: true, subtree: true });
+    }
+    open = { trigger, panel, home, next, placement, watch };
+    const first = rows(panel)[0];
+    if (byKeyboard && first) first.focus();
+    else panel.focus();
+  };
+
+  /** @param {number} step @param {'first' | 'last'} [to] */
+  const move = (step, to) => {
+    if (!open) return;
+    const all = rows(open.panel);
+    if (!all.length) return;
+    let i = all.indexOf(/** @type {HTMLElement} */ (document.activeElement));
+    if (to === 'first') i = 0;
+    else if (to === 'last') i = all.length - 1;
+    else i = i < 0 ? (step > 0 ? 0 : all.length - 1) : (i + step + all.length) % all.length;
+    all[i].focus();
+  };
+
+  document.addEventListener('click', (e) => {
+    const target = e.target instanceof Element ? e.target : null;
+    const trigger = triggerOf(target);
+    if (trigger) {
+      const same = open && open.trigger === trigger;
+      if (same) close();
+      // A click the keyboard made (Enter or Space on the button) has no
+      // pointer position: detail is 0.
+      else show(trigger, e.detail === 0);
+      return;
+    }
+    if (!open) return;
+    const item = target && target.closest('.blockr-menu__item');
+    if (item && open.panel.contains(item)) {
+      if (isDisabled(item)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return;
+      }
+      // Let the row do its job (the download, Shiny's action binding) before
+      // the list goes back beside its trigger.
+      setTimeout(() => close(true), 0);
+      return;
+    }
+    if (!(target && open.panel.contains(target))) close();
+  }, true);
+
+  document.addEventListener('keydown', (e) => {
+    if (!open) return;
+    const inside = e.target instanceof Node && open.panel.contains(e.target);
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      close(true);
+    } else if (!inside) {
+      return;
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault(); move(1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault(); move(-1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); move(0, 'first');
+    } else if (e.key === 'End') {
+      e.preventDefault(); move(0, 'last');
+    } else if (e.key === ' ' || (e.key === 'Enter' && e.target === open.panel)) {
+      // Enter on a focused <a> or <button> clicks it already.
+      const item = e.target instanceof Element && e.target.closest('.blockr-menu__item');
+      e.preventDefault();
+      if (item) /** @type {HTMLElement} */ (item).click();
+    } else if (e.key === 'Tab') {
+      close(true);
+    }
+  }, true);
+
+  return {
+    /** The trigger of the menu that is open, or null. */
+    current: () => (open ? open.trigger : null),
+    close: () => close()
+  };
 })();
