@@ -28,6 +28,7 @@ Suggests:
     dbplyr,
     RSQLite,
     testthat (>= 3.0.0),
+    V8,
     withr
 Remotes:
     BristolMyersSquibb/blockr.core
