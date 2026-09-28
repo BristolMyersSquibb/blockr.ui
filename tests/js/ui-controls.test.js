@@ -157,6 +157,20 @@ test('textCommit: the Enter button reads "Enter" while dirty and is marked confi
   win.close();
 });
 
+test('segmented: an icon-only segment is named by its title', (newWindow) => {
+  const win = newWindow();
+  const seg = win.Blockr.segmented(
+    [{ value: 'asc', label: '', title: 'Sort ascending' }, { value: 'desc', label: 'Desc' }],
+    'asc', () => {}
+  );
+  host(win).appendChild(seg.el);
+  const [icon, word] = seg.el.querySelectorAll('button');
+  assert.strictEqual(icon.getAttribute('aria-label'), 'Sort ascending');
+  assert.strictEqual(win.Blockr.tooltip.text(icon), 'Sort ascending');
+  assert.strictEqual(word.getAttribute('aria-label'), null, 'a segment that says its name');
+  win.close();
+});
+
 test('gear tray: the gear toggles it and Escape on the gear closes it', (newWindow) => {
   const win = newWindow();
   const f = fieldInTray(win);
