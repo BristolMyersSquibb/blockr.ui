@@ -245,6 +245,20 @@ expand_hex <- function(hex) {
   tolower(hex)
 }
 
+# The selectors a stylesheet styles, one per comma-separated part, with the
+# rules inside an at-rule read like any other.
+css_selectors <- function(file) {
+
+  css <- read_css(file)
+  rules <- regmatches(
+    css,
+    gregexpr("[^{}@;]+\\{[^{}]*\\}", css, perl = TRUE)
+  )[[1L]]
+  selectors <- strsplit(sub("\\{[\\s\\S]*$", "", rules, perl = TRUE), ",")
+
+  unique(trimws(gsub("\\s+", " ", blockr.core::unlst(selectors))))
+}
+
 read_css <- function(file) {
   mask_css(paste(readLines(file, warn = FALSE), collapse = "\n"), FALSE)
 }
