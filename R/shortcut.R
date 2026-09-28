@@ -35,11 +35,11 @@ shortcut <- function(keys) {
 shortcut_text <- function(parts, mac) {
 
   names <- if (mac) {
-    c(Mod = "⌘", Shift = "⇧", Alt = "⌥", Ctrl = "⌃",
-      Enter = "↵", Esc = "Esc")
+    c(Mod = "\u2318", Shift = "\u21e7", Alt = "\u2325", Ctrl = "\u2303",
+      Enter = "\u21b5", Esc = "Esc")
   } else {
     c(Mod = "Ctrl", Shift = "Shift", Alt = "Alt", Ctrl = "Ctrl",
-      Enter = "↵", Esc = "Esc")
+      Enter = "\u21b5", Esc = "Esc")
   }
 
   keys <- vapply(
