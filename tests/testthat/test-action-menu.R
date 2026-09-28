@@ -94,6 +94,18 @@ test_that("a disabled row keeps its place and says why", {
   expect_identical(htmltools::tagGetAttribute(row, "data-blockr-tooltip"),
                    "Needs the openxlsx package")
 
+  # Shiny would enable the link, and its row, once the handler is ready.
+  # The row opts out, and drops Shiny's `disabled` class, which takes the
+  # pointer events its tooltip needs.
+  expect_true(htmltools::tagHasAttribute(row, "data-shiny-disable-auto-enable"))
+  classes <- strsplit(htmltools::tagGetAttribute(row, "class"), " ")[[1L]]
+  expect_false("disabled" %in% classes)
+
+  live <- menu_item(shiny::downloadLink("pptx", "PowerPoint"))
+  expect_false(
+    htmltools::tagHasAttribute(live, "data-shiny-disable-auto-enable")
+  )
+
   ok <- menu_item(shiny::actionLink("go", "Go"))
   expect_null(htmltools::tagGetAttribute(ok, "aria-disabled"))
   expect_null(htmltools::tagGetAttribute(ok, "data-blockr-tooltip"))
