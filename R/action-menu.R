@@ -77,11 +77,7 @@ action_menu <- function(trigger, ..., align = c("end", "start")) {
     )
   )
 
-  htmltools::attachDependencies(
-    menu,
-    htmltools::findDependencies(controls_dep()),
-    append = TRUE
-  )
+  with_controls(menu)
 }
 
 #' @param x The row's element: a [shiny::downloadLink()], an
@@ -191,7 +187,7 @@ tool_button <- function(icon, tooltip, ...) {
 
   stopifnot(is.character(tooltip), length(tooltip) == 1L, nzchar(tooltip))
 
-  htmltools::attachDependencies(
+  with_controls(
     tags$button(
       type = "button",
       class = "blockr-tool",
@@ -199,9 +195,7 @@ tool_button <- function(icon, tooltip, ...) {
       `data-blockr-tooltip` = tooltip,
       ...,
       icon
-    ),
-    htmltools::findDependencies(controls_dep()),
-    append = TRUE
+    )
   )
 }
 
