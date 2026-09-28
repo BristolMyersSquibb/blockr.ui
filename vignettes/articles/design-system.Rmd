@@ -533,7 +533,7 @@ from ([Picking a block](#floating)).
   that are not on the row, and Remove last after a divider. There is no ×
   on the row. Meta text gives way to the "…"; a tool never covers the name.
 - **The current row:** the block open in the dock is `bg-selected` with
-  `text-accent`, in every list.
+  `text-accent-strong`, in every list.
 - **Gestures:** a click opens the block. A double-click renames it
   ([Renaming in place](#controls)). The whole row drags, with the grab cursor
   and a 2px `border-accent` line where it will land. Alt+Up/Down moves the
@@ -738,9 +738,9 @@ title, an outline row, a view name, a tab (in bare mode).
   Where the gesture is a single click (a name in the views menu's manage
   mode), the tooltip says so ("Click to rename").
 - Markup: `data-blockr-editable` on the element that shows the name, with the
-  gesture as its value where it is not the double-click. blockr-ui.js and
-  blockr-theme.css give it the tooltip and the cursor; nothing else is
-  needed.
+  gesture as its value where it is not the double-click. blockr-ui.js gives
+  it the tooltip and blockr-tooltip.css the cursor, both loaded wherever
+  blockr-ui.js is; nothing else is needed.
 - While editing, the text becomes a field at its own size and weight: 1px
   `border-accent`, the focus ring, `bg-surface`, the text selected. No label.
 - Enter commits, Escape restores, a click elsewhere commits. An empty or
@@ -1457,9 +1457,10 @@ Drawn in the [design system page](design-system/index.html#special).
 - [ ] Chevrons: `Blockr.icons.chevron` only, 12px (10px in a pill). Folds
       point down open and right closed; menus flip up while open; "go to"
       arrows point right or left.
-- [ ] Menus through `Blockr.Select` / `Select.menu()` and the shared placement
-      routine. No popovers. Tooltips on icon-only buttons and cut-off labels
-      only, using the light card; no native `title`.
+- [ ] Value pickers through `Blockr.Select` / `Select.menu()`, menus of
+      actions through `Blockr.menu` or `action_menu()`, all placed by the
+      shared routine. No popovers. Tooltips on icon-only buttons and cut-off
+      labels only, using the light card; no native `title`.
 - [ ] Badges are capsules and neutral unless they state status or "on".
 - [ ] Columns: the name with its label as meta where a column is picked, the
       label alone in an exhibit; read labels with the shared reader.
