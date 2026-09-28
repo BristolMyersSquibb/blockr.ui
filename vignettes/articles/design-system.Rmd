@@ -1337,8 +1337,9 @@ and the composer table, which render annotated data frames).
 - **Hover and drill** (output tables with a drill): the hover previews what a
   click claims. A column header lights its column, a row label its row, a
   value the crossing (row and column at 3% of the text colour, the cell at 9%).
-  A drill takes the same shape in `bg-selected` with `text-accent`, with no
-  accent bars; the crossing cell takes `bg-accent-subtle-hover` at weight 600.
+  A drill takes the same shape in `bg-selected` with `text-accent-strong`,
+  with no accent bars; the crossing cell takes `bg-accent-subtle-hover` at
+  weight 600.
 - **Sorting:** the preview sorts on a header click: ascending, descending,
   missing values first (then ascending), off. Ascending and descending put
   missing values last. An output table of an annotated data frame does not

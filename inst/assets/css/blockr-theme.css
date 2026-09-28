@@ -213,13 +213,13 @@ label:has(input[type="file"]) {
 }
 
 :root:root .btn.btn-primary {
-  --bs-btn-color: var(--blockr-color-text-accent);
+  --bs-btn-color: var(--blockr-color-text-accent-strong);
   --bs-btn-bg: var(--blockr-color-bg-accent-subtle);
   --bs-btn-border-color: var(--blockr-color-border-accent-subtle);
-  --bs-btn-hover-color: var(--blockr-color-text-accent);
+  --bs-btn-hover-color: var(--blockr-color-text-accent-strong);
   --bs-btn-hover-bg: var(--blockr-color-bg-accent-subtle-hover);
   --bs-btn-hover-border-color: var(--blockr-color-border-accent);
-  --bs-btn-active-color: var(--blockr-color-text-accent);
+  --bs-btn-active-color: var(--blockr-color-text-accent-strong);
   --bs-btn-active-bg: var(--blockr-color-bg-accent-subtle-hover);
   --bs-btn-active-border-color: var(--blockr-color-border-accent);
 }

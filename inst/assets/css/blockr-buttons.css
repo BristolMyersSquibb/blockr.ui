@@ -74,15 +74,17 @@
 /* --- Kinds. After the sizes, so the quiet button's 8px side padding holds
    at every size. --- */
 
-/* Main: the accent tint, at most one per view. */
+/* Main: the accent tint, at most one per view. Its text is
+   text-accent-strong, as all text on the tint: text-accent falls below
+   4.5:1 there. */
 .blockr-btn--main {
-  color: var(--blockr-color-text-accent);
+  color: var(--blockr-color-text-accent-strong);
   background: var(--blockr-color-bg-accent-subtle);
   border-color: var(--blockr-color-border-accent-subtle);
 }
 
 .blockr-btn--main:hover {
-  color: var(--blockr-color-text-accent);
+  color: var(--blockr-color-text-accent-strong);
   background: var(--blockr-color-bg-accent-subtle-hover);
   border-color: var(--blockr-color-border-accent);
 }
