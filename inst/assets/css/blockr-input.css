@@ -44,14 +44,11 @@
   box-shadow: var(--blockr-focus-ring);
 }
 
-/* --- Autocomplete popup --- */
+/* --- Autocomplete popup ---
+   On document.body while open, placed there by Blockr.place, which sets its
+   position, width and offset. */
 .blockr-input__popup {
   display: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  margin-top: 2px;
   max-height: 200px;
   overflow-y: auto;
   background: var(--blockr-color-bg-surface);
@@ -61,10 +58,6 @@
   z-index: var(--blockr-z-menu);
   font-family: inherit;
   font-size: var(--blockr-font-size-base);
-}
-
-.blockr-input--popup-open .blockr-input__popup {
-  display: block;
 }
 
 /* --- Completion items --- */

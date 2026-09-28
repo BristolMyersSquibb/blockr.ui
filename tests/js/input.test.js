@@ -128,3 +128,22 @@ test('Input: Escape on an open list closes the list and stops there', (win) => {
   key(win, field, 'Escape');
   assert.ok(!tray.isOpen(), 'a closed list lets the next Escape through');
 });
+
+test('Input: listens for outside clicks only while its list is open', (win) => {
+  // A document listener per field for the whole page life would hold the
+  // field and its block after they leave the page.
+  const doc = win.document;
+  const live = new Set();
+  const add = doc.addEventListener.bind(doc);
+  const remove = doc.removeEventListener.bind(doc);
+  doc.addEventListener = (type, fn, opts) => { if (type === 'click') live.add(fn); add(type, fn, opts); };
+  doc.removeEventListener = (type, fn, opts) => { if (type === 'click') live.delete(fn); remove(type, fn, opts); };
+  const { h, field } = mount(win, { columns: ['AGE', 'AGEGR1'] });
+  assert.strictEqual(live.size, 0, 'none at rest');
+  type(win, field, 'AG');
+  assert.strictEqual(live.size, 1, 'one while the list is open');
+  doc.body.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  assert.ok(!h.el.classList.contains('blockr-input--popup-open'), 'a click outside closes it');
+  assert.strictEqual(live.size, 0, 'and takes the listener with it');
+});
+

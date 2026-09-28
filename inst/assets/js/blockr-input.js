@@ -81,29 +81,14 @@
     root.appendChild(field);
     container.appendChild(root);
 
-    // Portal: popup lives on document.body while open so it escapes any
-    // clipping / paint-containment / stacking-context ancestors (Dockview
-    // panels, offcanvas, modals, …). Same pattern as Blockr.Select.
-
-    const computePopupPosition = () => {
-      const r = root.getBoundingClientRect();
-      const popupH = popup.offsetHeight || 200;
-      const spaceBelow = window.innerHeight - r.bottom - 8;
-      const flipAbove = spaceBelow < popupH && r.top > popupH;
-
-      popup.style.position = 'fixed';
-      popup.style.width    = r.width + 'px';
-      popup.style.left     = r.left + 'px';
-      popup.style.bottom   = 'auto';
-
-      if (flipAbove) {
-        popup.style.top = (r.top - popupH - 2) + 'px';
-      } else {
-        popup.style.top = (r.bottom + 2) + 'px';
-      }
-    };
-
-    const onScrollOrResize = () => { if (popupOpen) computePopupPosition(); };
+    // Portal: the popup lives on document.body while open, so no clipping,
+    // paint-containment or stacking-context ancestor (dock panels,
+    // offcanvas, modals) cuts it off. Blockr.place holds it against the
+    // field, as it does Blockr.Select's list: above where there is no room
+    // below, and following scroll, resize and the list's own height, which
+    // shrinks as typing narrows it.
+    /** @type {BlockrPlaceHandle | null} */
+    let placement = null;
 
     // --- Completion list building ---
 
@@ -219,17 +204,18 @@
       popup.style.display = 'block';
 
       root.classList.add('blockr-input--popup-open');
-      computePopupPosition();
-      window.addEventListener('scroll', onScrollOrResize, { capture: true, passive: true });
-      window.addEventListener('resize', onScrollOrResize, { passive: true });
+      placement = Blockr.place(popup, root, { gap: 2 });
+      // Only while open: a listener per field for the whole life of the page
+      // would hold the field and its block after they leave it.
+      document.addEventListener('click', onDocumentClick, true);
     };
 
     const closePopup = () => {
       if (!popupOpen) return;
       popupOpen = false;
 
-      window.removeEventListener('scroll', onScrollOrResize, { capture: true });
-      window.removeEventListener('resize', onScrollOrResize);
+      if (placement) { placement.stop(); placement = null; }
+      document.removeEventListener('click', onDocumentClick, true);
 
       popup.style.display = '';
       root.classList.remove('blockr-input--popup-open');
@@ -349,7 +335,6 @@
     field.addEventListener('blur', onFieldBlur);
     popup.addEventListener('mousedown', (e) => e.preventDefault());
     popup.addEventListener('click', onPopupClick);
-    document.addEventListener('click', onDocumentClick, true);
 
     // --- Public API ---
 
@@ -382,7 +367,6 @@
         /** @type {HTMLElement} */ (field).removeEventListener('keydown', onFieldKeydown);
         field.removeEventListener('blur', onFieldBlur);
         popup.removeEventListener('click', onPopupClick);
-        document.removeEventListener('click', onDocumentClick, true);
         Blockr.removeNode(root);
       }
     };
