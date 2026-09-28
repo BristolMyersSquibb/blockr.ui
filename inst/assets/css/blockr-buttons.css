@@ -5,10 +5,6 @@
 
    blockr-theme.css maps Bootstrap's button classes onto the same values, so
    Shiny's actionButton() and downloadButton() follow them too.
-
-   Its own dependency (blockr-buttons-css): a rule added to
-   blockr-blocks.css never reaches a board with blockr.dplyr blocks, whose
-   older copy of that file wins by name.
    ========================================================================= */
 
 .blockr-btn {
