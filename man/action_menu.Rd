@@ -4,6 +4,7 @@
 \alias{action_menu}
 \alias{menu_item}
 \alias{menu_section}
+\alias{menu_divider}
 \title{Action menu}
 \usage{
 action_menu(trigger, ..., align = c("end", "start"))
@@ -11,13 +12,16 @@ action_menu(trigger, ..., align = c("end", "start"))
 menu_item(x, meta = NULL, icon = NULL, danger = FALSE, disabled = NULL)
 
 menu_section(title)
+
+menu_divider()
 }
 \arguments{
 \item{trigger}{The button that opens the menu, typically a
 \code{\link[=tool_button]{tool_button()}}.}
 
-\item{...}{Rows: \code{\link[=menu_item]{menu_item()}}s and \code{\link[=menu_section]{menu_section()}} titles, in order.
-\code{NULL}s are dropped, so a row can be conditional.}
+\item{...}{Rows: \code{\link[=menu_item]{menu_item()}}s, \code{\link[=menu_section]{menu_section()}} titles and
+\code{\link[=menu_divider]{menu_divider()}} rules, in order. \code{NULL}s are dropped, so a row can be
+conditional.}
 
 \item{align}{\code{"end"} lines the menu up with the trigger's right edge, for a
 trigger in a block's header row, where a menu opening to the right would
@@ -63,6 +67,9 @@ the menu first shows, so for a moment on that first open the row is still
 inert. To have it ready from the start, set
 \code{shiny::outputOptions(output, "<id>", suspendWhenHidden = FALSE)} for its
 output.
+
+\code{menu_divider()} draws a rule between groups that have no title,
+such as the ordinary actions and a destructive one after them.
 }
 \examples{
 action_menu(

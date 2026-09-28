@@ -86,6 +86,7 @@ test('the menus pass axe while open, with a head, a filter and every kind of row
         <a class="blockr-menu__item" role="menuitem" tabindex="-1" href="#">PowerPoint</a>
         <a class="blockr-menu__item blockr-menu__item--disabled" role="menuitem" tabindex="-1"
            aria-disabled="true" href="#">Excel</a>
+        <div class="blockr-menu__divider" role="separator"></div>
         <button class="blockr-menu__item blockr-menu__item--danger" role="menuitem" tabindex="-1"
                 type="button">Remove</button>
       </div>
