@@ -1,7 +1,7 @@
 test_that("controls_dep ships the controls after the tokens", {
 
   deps <- htmltools::findDependencies(controls_dep())
-  names <- vapply(deps, `[[`, character(1L), "name")
+  names <- blockr.core::chr_xtr(deps, "name")
 
   # blockr-ui.js defines the namespace Select builds on, and the stylesheets
   # read the tokens, so the order is part of the contract.
@@ -12,7 +12,12 @@ test_that("controls_dep ships the controls after the tokens", {
   )
 
   assets <- system.file("assets", package = "blockr.ui")
-  files <- unlist(lapply(deps, function(d) c(d$script, d$stylesheet)))
+  files <- blockr.core::unlst(
+    c(
+      blockr.core::lst_xtr(deps, "script"),
+      blockr.core::lst_xtr(deps, "stylesheet")
+    )
+  )
 
   expect_true(all(file.exists(file.path(assets, files))))
 })

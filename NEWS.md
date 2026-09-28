@@ -19,8 +19,9 @@
   built from, moved here from blockr.dplyr: `Blockr.Select`, the Enter
   button, the required-empty cue, the checkbox, the segmented control, the
   gear tray and `Blockr.place`, with the stylesheets they draw with. The
-  dependency names are the ones blockr.dplyr used, so a page never loads two
-  copies.
+  dependency names are the ones blockr.dplyr used, so a page carries one copy
+  of each; while blockr.dplyr still ships its own copies, that copy is
+  blockr.dplyr's, as htmltools keeps the higher version of a name.
 
 # blockr.ui 0.0.1
 

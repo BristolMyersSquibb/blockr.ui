@@ -56,11 +56,12 @@ The second word of a token's name says what kind it is.
 | | `--blockr-font-<aspect>-<step>` | `--blockr-font-size-sm` | |
 | | `--blockr-radius-<step>`, `--blockr-control-h[-<step>]`, `--blockr-shadow-<step>` | `--blockr-radius-lg` | |
 | | `--blockr-focus-<aspect>`, `--blockr-transition`, `--blockr-mark-<aspect>` | `--blockr-focus-outline` | |
+| | `--blockr-z-<layer>` | `--blockr-z-menu` | anything positioned against the page ([Stacking](#floating)) |
 | Local | `--blockr-<owner>-<thing>` | `--blockr-dock-spinner-delay` | its owner's stylesheet only |
 
 A global token's second word is one of `color`, `font`, `radius`, `control`,
-`shadow`, `focus`, `transition`, `mark`, or a palette hue. Anything else is
-local. For colour, `<property>` is `text`, `bg` or `border` and comes first,
+`shadow`, `focus`, `transition`, `mark`, `z`, or a palette hue. Anything else
+is local. For colour, `<property>` is `text`, `bg` or `border` and comes first,
 because a colour chosen for text is not automatically right as a fill.
 
 ### Palette
@@ -951,7 +952,7 @@ names, an exhibit in labels.
   name, so the row reads like the word that was clicked (Select's
   `labelFirst`). The word belongs to the exhibit, which speaks in labels.
 - A tooltip that shows both has the name, then the label muted, like the
-  control. The "+N" chip's lists the hidden tags that way, one per line.
+  control. The "+N" chip lists the hidden tags that way, one per line.
 - An aggregate reads "Mean of Age", on a chart, in a table and in a rank
   table header.
 - Code and decode pairs (PARAMCD and PARAM) follow the same rule: where one is

@@ -25,7 +25,9 @@ dependencies are de-duplicated by name, so any number of blocks can.
 
 The dependency names are the ones blockr.dplyr used while these files
 lived there (\code{blockr-select-js}, \code{blockr-select-css}, \code{blockr-blocks-css}),
-so a page never loads two copies of Select.
+so a page carries one copy of each. Of two dependencies with one name,
+htmltools keeps the higher version, so while blockr.dplyr still ships its
+own copies, a page that has both uses blockr.dplyr's.
 }
 \examples{
 shiny::fluidPage(
