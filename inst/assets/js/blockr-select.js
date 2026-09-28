@@ -273,6 +273,9 @@
     listbox.id = listId;
     listbox.setAttribute('role', 'listbox');
     if (label) listbox.setAttribute('aria-label', label);
+    // A multi keeps its picks in the list, each aria-selected, which a
+    // listbox allows only when it says it takes several.
+    if (multi) listbox.setAttribute('aria-multiselectable', 'true');
     if (headless) {
       // One sticky element holds the title, the tags and the filter box, so
       // a long list scrolls under all three (design system, Menus). Three
