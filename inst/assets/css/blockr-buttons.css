@@ -171,3 +171,20 @@
   outline: var(--blockr-focus-outline);
   outline-offset: var(--blockr-focus-offset);
 }
+
+/* --- Keyboard shortcut hints (shortcut() in R) ---
+   Each hint carries the Mac form and the other, and blockr-ui.js puts
+   `.blockr-mac` on the root on a Mac. Here rather than in blockr-blocks.css
+   for the reason above: where blockr.dplyr's copy of that file wins, both
+   forms showed side by side. */
+.blockr-shortcut__mac {
+  display: none;
+}
+
+.blockr-mac .blockr-shortcut__mac {
+  display: inline;
+}
+
+.blockr-mac .blockr-shortcut__other {
+  display: none;
+}

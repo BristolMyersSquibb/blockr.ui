@@ -40,3 +40,27 @@ test_that("the controls read only meaning tokens this package defines", {
   expect_identical(unique(controls$token[is.na(controls$value)]), character())
   expect_identical(unique(controls$token[stray]), character())
 })
+
+test_that("text edited in place gets its cursor wherever blockr-ui.js goes", {
+
+  sheets_of <- function(x) {
+    deps <- htmltools::findDependencies(x)
+    blockr.core::unlst(
+      lapply(deps, function(d) {
+        file.path(system.file(d$src$file, package = "blockr.ui"), d$stylesheet)
+      })
+    )
+  }
+  cursor <- function(sheets) {
+    any(grepl(
+      "[data-blockr-editable]",
+      blockr.core::chr_ply(sheets, read_css),
+      fixed = TRUE
+    ))
+  }
+
+  expect_true(cursor(sheets_of(controls_dep())))
+  expect_true(
+    cursor(sheets_of(build_html_table(data.frame(a = 1), total_rows = 1L)))
+  )
+})
