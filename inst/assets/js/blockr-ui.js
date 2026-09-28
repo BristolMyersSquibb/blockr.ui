@@ -876,12 +876,6 @@ Blockr.menu = (() => {
       row.appendChild(label);
       // `checked`: a toggle that is on (a check, no weight); `current`: the
       // item in use (weight 600 and a check).
-      if (item.current || item.checked) {
-        const check = document.createElement('span');
-        check.className = 'blockr-menu__check';
-        check.innerHTML = iconFor('check');
-        row.appendChild(check);
-      }
       if ('checked' in item) {
         row.setAttribute('role', 'menuitemcheckbox');
         row.setAttribute('aria-checked', item.checked ? 'true' : 'false');
@@ -897,6 +891,14 @@ Blockr.menu = (() => {
         badge.className = 'blockr-menu__badge';
         badge.textContent = item.badge;
         row.appendChild(badge);
+      }
+      // The check of the current item or a toggle that is on: at the end of
+      // the row (design system, "Menus"), after its meta text and badge.
+      if (item.current || item.checked) {
+        const check = document.createElement('span');
+        check.className = 'blockr-menu__check';
+        check.innerHTML = iconFor('check');
+        row.appendChild(check);
       }
       const search = [item.label, item.keywords || '', item.badge || '', item.meta || '']
         .join(' ').toLowerCase();
