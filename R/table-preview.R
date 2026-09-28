@@ -275,33 +275,45 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     }
   }
 
+  # What each sort direction puts on its header: the order screen readers
+  # get (aria-sort) and the tooltip that says in words what the cue shows,
+  # since the dot for missing values first does not say "missing" by itself.
+  # The classes are named after the direction.
+  sort_states <- list(
+    asc = list(
+      aria = "ascending",
+      tip = "Sorted ascending, missing values last"
+    ),
+    desc = list(
+      aria = "descending",
+      tip = "Sorted descending, missing values last"
+    ),
+    na = list(
+      aria = "ascending",
+      tip = "Missing values first, then ascending"
+    )
+  )
+
   # Build header row
   header_cells <- vector("list", n_cols + 1L)
   header_cells[[1L]] <- shiny::tags$th(class = "blockr-row-number", "")
   for (j in seq_along(col_names)) {
     col_name <- col_names[j]
 
-    # Determine sort class for this column
-    header_class <- "blockr-sortable"
-    sort_icon_class <- "blockr-sort-icon"
-    if (!is.null(sort_col) && sort_col == col_name && sort_dir != "none") {
-      sort_class_suffix <- switch(
-        sort_dir,
-        asc = " blockr-sort-asc",
-        desc = " blockr-sort-desc",
-        na = " blockr-sort-na",
-        ""
-      )
-      header_class <- paste0(header_class, sort_class_suffix)
-      icon_class_suffix <- switch(
-        sort_dir,
-        asc = " blockr-sort-icon-asc",
-        desc = " blockr-sort-icon-desc",
-        na = " blockr-sort-icon-na",
-        ""
-      )
-      sort_icon_class <- paste0(sort_icon_class, icon_class_suffix)
+    # NULL unless this column is the sorted one ("none" has no state)
+    sorted <- if (!is.null(sort_col) && sort_col == col_name) {
+      sort_states[[sort_dir]]
     }
+    header_class <- paste(
+      c("blockr-sortable",
+        if (!is.null(sorted)) paste0("blockr-sort-", sort_dir)),
+      collapse = " "
+    )
+    sort_icon_class <- paste(
+      c("blockr-sort-icon",
+        if (!is.null(sorted)) paste0("blockr-sort-icon-", sort_dir)),
+      collapse = " "
+    )
 
     # The label sits under the name and is cut by the layout (CSS ellipsis);
     # a cut-off label shows whole in its tooltip.
@@ -333,28 +345,12 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     # name's line: after the name, or before it on a right-aligned numeric
     # column so the name stays flush over its numbers. Hidden at rest on an
     # unsorted column, shown muted on hover as what a click would do.
-    aria_sort <- if (!is.null(sort_col) && sort_col == col_name) {
-      switch(sort_dir, asc = , na = "ascending", desc = "descending", NULL)
-    }
-    # The sorted header says in words what the cue shows, in the light
-    # tooltip: the dot for missing values first does not say "missing" by
-    # itself.
-    sort_tip <- if (!is.null(sort_col) && sort_col == col_name) {
-      switch(
-        sort_dir,
-        asc = "Sorted ascending, missing values last",
-        desc = "Sorted descending, missing values last",
-        na = "Missing values first, then ascending",
-        NULL
-      )
-    }
-
     header_cells[[j + 1L]] <- shiny::tags$th(
       class = header_class,
       style = th_style,
       `data-column` = col_name,
-      `aria-sort` = aria_sort,
-      `data-blockr-tooltip` = sort_tip,
+      `aria-sort` = sorted$aria,
+      `data-blockr-tooltip` = sorted$tip,
       shiny::tags$span(
         class = "blockr-col-head",
         shiny::tags$span(class = "blockr-col-name", col_name),
