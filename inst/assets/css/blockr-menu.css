@@ -20,7 +20,7 @@
   padding: 6px;
   background: var(--blockr-color-bg-raised);
   border: 1px solid var(--blockr-color-border-default);
-  border-radius: 10px;
+  border-radius: var(--blockr-radius-lg);
   box-shadow: var(--blockr-shadow-md);
   color: var(--blockr-color-text-default);
   font-size: var(--blockr-font-size-base);
@@ -53,13 +53,6 @@
 .blockr-menu__item:focus .blockr-menu__icon,
 .blockr-menu__item:focus .blockr-menu__meta {
   color: var(--blockr-color-text-default);
-}
-
-.blockr-menu__item--danger,
-.blockr-menu__item--danger .blockr-menu__icon,
-.blockr-menu__item--danger:focus,
-.blockr-menu__item--danger:focus .blockr-menu__icon {
-  color: var(--blockr-color-text-danger);
 }
 
 /* Listed, not usable: no hover, the reason in its tooltip. */
@@ -123,9 +116,12 @@
   background: var(--blockr-color-bg-hover);
 }
 
-/* A destructive row is plain at rest and red only under the pointer, so the
-   menu does not shout about deleting every time it opens. */
+/* A destructive row is plain at rest and red only under the pointer or as
+   the keyboard row, so the menu does not shout about deleting every time it
+   opens. The keyboard row is focused in a menu built in R and marked active
+   in Blockr.menu. */
 .blockr-menu__item--danger:hover,
+.blockr-menu__item--danger:focus,
 .blockr-menu__item--danger.blockr-menu__item--active {
   background: var(--blockr-color-bg-danger);
   color: var(--blockr-color-text-danger);
@@ -173,6 +169,7 @@
 }
 
 .blockr-menu__item--danger:hover .blockr-menu__icon,
+.blockr-menu__item--danger:focus .blockr-menu__icon,
 .blockr-menu__item--danger.blockr-menu__item--active .blockr-menu__icon {
   color: var(--blockr-color-text-danger);
 }
@@ -204,12 +201,12 @@
 /* A rule between groups without a title, edge to edge. */
 .blockr-menu__divider {
   height: 1px;
-  margin: 5px -6px;
+  margin: 6px -6px;
   background: var(--blockr-color-border-default);
 }
 
 .blockr-menu .dropdown-divider {
-  margin: 5px -6px;
+  margin: 6px -6px;
   border-top-color: var(--blockr-color-border-default);
   opacity: 1;
 }

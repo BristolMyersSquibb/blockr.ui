@@ -660,7 +660,8 @@ Blockr.tooltip = (() => {
  *                            (`mono` sets it in the code face), `current` the
  *                            item in use (weight 600 and a check), `checked`
  *                            a toggle that is on (a check), `danger` a
- *                            destructive action (red only under the pointer),
+ *                            destructive action (red only under the pointer
+ *                            or as the keyboard row),
  *                            `quiet` a muted row such as "Manage pages",
  *                            `reason` the tooltip on a disabled row
  *   { gap: true }            a small space between groups
