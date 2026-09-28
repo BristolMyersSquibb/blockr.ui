@@ -109,3 +109,22 @@ test('Input: Escape closes the list and destroy removes the popup', (win) => {
   h.destroy();
   assert.strictEqual(win.document.querySelectorAll('.blockr-input__popup').length, 0);
 });
+
+test('Input: Escape on an open list closes the list and stops there', (win) => {
+  const doc = win.document;
+  const band = doc.createElement('div');
+  const gear = doc.createElement('button');
+  doc.body.append(band, gear);
+  const tray = win.Blockr.gearTray(band, gear);
+  const h = win.Blockr.Input.create(band, { columns: ['AGE', 'AGEGR1'] });
+  const field = h.el.querySelector('input');
+  tray.set(true);
+  type(win, field, 'AG');
+  const open = () => h.el.classList.contains('blockr-input--popup-open');
+  assert.ok(open(), 'the list is open');
+  key(win, field, 'Escape');
+  assert.ok(!open(), 'the list closed');
+  assert.ok(tray.isOpen(), 'the tray did not see the Escape');
+  key(win, field, 'Escape');
+  assert.ok(!tray.isOpen(), 'a closed list lets the next Escape through');
+});

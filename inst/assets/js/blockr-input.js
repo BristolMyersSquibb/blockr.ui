@@ -296,7 +296,11 @@
             acceptCompletion(highlightIdx);
             break;
           case 'Escape':
+            // An open list owns this Escape, as an open Blockr.Select's does:
+            // it closes and the key goes no further, so the gear tray the
+            // field sits in stays open.
             e.preventDefault();
+            e.stopPropagation();
             closePopup();
             break;
         }
