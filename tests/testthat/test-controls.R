@@ -27,16 +27,25 @@ test_that("controls_dep ships the controls after the tokens", {
 
 test_that("the controls read only meaning tokens this package defines", {
 
+  # Every stylesheet controls_dep() ships, read off the dependency, so a
+  # sheet added to it is held to this at once. A property a component sets
+  # for itself (the menu mark's colour, set inline by Blockr.menu) is not a
+  # token and is named here.
+  local <- "--blockr-menu-mark"
+  sheets <- blockr.core::unlst(
+    blockr.core::lst_xtr(htmltools::findDependencies(controls_dep()),
+                         "stylesheet")
+  )
+  sheets <- basename(sheets[!grepl("tokens", sheets)])
+
   sites <- token_references("blockr.ui")
   controls <- sites[
-    basename(sites$file) %in%
-      c("blockr-blocks.css", "blockr-select.css", "blockr-settings-band.css",
-        "blockr-input.css", "blockr-buttons.css"),
+    basename(sites$file) %in% sheets & !sites$token %in% local,
   ]
   stray <- grepl(palette_token, controls$token) |
     controls$token %in% names(legacy_tokens())
 
-  expect_gt(nrow(controls), 0L)
+  expect_setequal(unique(basename(controls$file)), sheets)
   expect_identical(unique(controls$token[is.na(controls$value)]), character())
   expect_identical(unique(controls$token[stray]), character())
 })
