@@ -121,6 +121,7 @@ test('the controls set no native title', (newWindow) => {
   assert.deepStrictEqual([...doc.querySelectorAll('[title]')].map((e) => e.className), []);
   assert.strictEqual(win.Blockr.tooltip.text(gear), 'Settings', 'the gear is icon-only');
   assert.strictEqual(win.Blockr.tooltip.text(commit.chip), '', 'the Enter button says its name');
-  assert.strictEqual(win.Blockr.tooltip.text(seg.el.querySelector('button')), '', 'so does a segment');
+  assert.strictEqual(win.Blockr.tooltip.text(seg.el.querySelector('button')), 'Sort ascending',
+    'a terse segment shows its caller\'s title');
   win.close();
 });

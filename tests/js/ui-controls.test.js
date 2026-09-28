@@ -157,17 +157,24 @@ test('textCommit: the Enter button reads "Enter" while dirty and is marked confi
   win.close();
 });
 
-test('segmented: an icon-only segment is named by its title', (newWindow) => {
+test('segmented: a title names an icon-only segment and explains a terse one', (newWindow) => {
   const win = newWindow();
   const seg = win.Blockr.segmented(
-    [{ value: 'asc', label: '', title: 'Sort ascending' }, { value: 'desc', label: 'Desc' }],
+    [
+      { value: 'asc', label: '', title: 'Sort ascending' },
+      { value: 'prop', label: '%', title: 'A percentage of rows' },
+      { value: 'save', label: 'Save' }
+    ],
     'asc', () => {}
   );
   host(win).appendChild(seg.el);
-  const [icon, word] = seg.el.querySelectorAll('button');
+  const [icon, terse, full] = seg.el.querySelectorAll('button');
   assert.strictEqual(icon.getAttribute('aria-label'), 'Sort ascending');
   assert.strictEqual(win.Blockr.tooltip.text(icon), 'Sort ascending');
-  assert.strictEqual(word.getAttribute('aria-label'), null, 'a segment that says its name');
+  assert.strictEqual(terse.getAttribute('aria-description'), 'A percentage of rows');
+  assert.strictEqual(win.Blockr.tooltip.text(terse), 'A percentage of rows');
+  assert.strictEqual(full.getAttribute('aria-description'), null, 'a label that says it in full');
+  assert.strictEqual(win.Blockr.tooltip.text(full), '');
   win.close();
 });
 

@@ -641,12 +641,14 @@ Blockr.tooltip = (() => {
       b.type = 'button';
       b.className = 'blockr-segmented__seg';
       b.textContent = o.label;
-      // A segment that says its name has no tooltip; `title` names an
-      // icon-only one, to the pointer and to a screen reader: the tooltip
-      // only describes, and only while it shows.
-      if (o.title && !o.label) {
+      // A caller passes `title` where the label says too little: it explains
+      // a terse label (`%`, `All`) or names an icon-only segment. It is the
+      // tooltip either way. A screen reader gets it as the description, or,
+      // without a label, as the name: the tooltip only describes, and only
+      // while it shows.
+      if (o.title) {
         Blockr.tooltip.set(b, o.title);
-        b.setAttribute('aria-label', o.title);
+        b.setAttribute(o.label ? 'aria-description' : 'aria-label', o.title);
       }
       b.setAttribute('role', 'radio');
       b.addEventListener('click', function () {

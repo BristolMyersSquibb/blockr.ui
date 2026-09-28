@@ -42,7 +42,7 @@ const page = (win) => {
 
   host().appendChild(B.checkbox('Show totals', true, () => {}).el);
   host().appendChild(B.segmented(
-    [{ value: 'asc', label: '', title: 'Ascending' }, { value: 'desc', label: 'Desc' }],
+    [{ value: 'asc', label: '', title: 'Ascending' }, { value: 'desc', label: 'Desc', title: 'Descending' }],
     'asc', () => {}, { label: 'Sort direction' }
   ).el);
 

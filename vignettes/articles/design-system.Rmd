@@ -818,8 +818,10 @@ It shows on hover and on keyboard focus, and leaves with the pointer or focus;
 Escape hides it.
 
 - Every icon-only button and every cut-off label gets one, and so does the
-  block's mark in the dock header (its type and package). Nothing else does:
-  a button that says its name has no tooltip.
+  block's mark in the dock header (its type and package). So does a segment
+  with a terse label (`%`, `n`, `All`): it shows the title its caller passes.
+  Nothing else does: a button that names its action in full, like Save, has
+  no tooltip.
 - No native `title` tooltips remain.
 - It matches the chart's data tooltip (see [Special blocks](#special)), so
   blockr has one floating style.
