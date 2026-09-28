@@ -182,16 +182,18 @@ test('editable text names its gesture, the default or its own', (newWindow) => {
   win.close();
 });
 
-test('a native title is taken over on the first hover', (newWindow) => {
+test('a native title that reaches the page is left to its owner', (newWindow) => {
+  // Blockr markup carries data-blockr-tooltip instead. Rewriting other
+  // code's titles froze them (a title cleared later kept its old card) and
+  // hid them from code that reads them, such as a Bootstrap tooltip set up
+  // after the first hover.
   const win = newWindow();
   const b = button(win);
   b.setAttribute('title', 'Attach file');
   over(win, b);
-  assert.strictEqual(b.getAttribute('title'), null, 'the native title goes');
-  assert.strictEqual(b.getAttribute('aria-label'), 'Attach file', 'an icon-only button keeps it as its name');
-  assert.strictEqual(win.Blockr.tooltip.text(b), 'Attach file');
-  b.setAttribute('title', 'Send message');
-  over(win, b);
-  assert.strictEqual(win.Blockr.tooltip.text(b), 'Send message', 'a title written again is taken again');
+  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  assert.strictEqual(b.getAttribute('title'), 'Attach file');
+  assert.ok(!b.hasAttribute('aria-label'));
+  assert.strictEqual(win.Blockr.tooltip.text(b), '');
   win.close();
 });
