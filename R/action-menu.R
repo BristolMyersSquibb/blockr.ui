@@ -11,6 +11,12 @@
 #' `Blockr.place` so no panel's overflow clips it, and closes it again on a
 #' pick, Escape, Tab or a click outside.
 #'
+#' A download row works once Shiny has bound its handler, which it does when
+#' the menu first shows, so for a moment on that first open the row is still
+#' inert. To have it ready from the start, set
+#' `shiny::outputOptions(output, "<id>", suspendWhenHidden = FALSE)` for its
+#' output.
+#'
 #' @param trigger The button that opens the menu, typically a
 #'   [tool_button()].
 #' @param ... Rows: [menu_item()]s and [menu_section()] titles, in order.
