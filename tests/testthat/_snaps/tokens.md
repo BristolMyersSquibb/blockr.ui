@@ -130,23 +130,7 @@
       cat(sort(unique(paste0(basename(sites$file), ": ", sites$token)[stray]),
       method = "radix"), sep = "\n")
     Output
-      blockr-table-preview.css: --blockr-color-border
-      blockr-table-preview.css: --blockr-color-text-primary
-      blockr-table-preview.css: --blockr-color-text-subtle
-      blockr-table-preview.css: --blockr-grey-100
-      blockr-table-preview.css: --blockr-grey-600
-      blockr-table-preview.css: --blockr-grey-700
-      blockr-theme.css: --blockr-color-bg-input
-      blockr-theme.css: --blockr-color-border
-      blockr-theme.css: --blockr-color-border-hover
-      blockr-theme.css: --blockr-color-primary
-      blockr-theme.css: --blockr-color-primary-hover
-      blockr-theme.css: --blockr-color-text-primary
-      blockr-theme.css: --blockr-color-text-secondary
-      blockr-theme.css: --blockr-font-size-section
-      blockr-theme.css: --blockr-grey-100
-      blockr-theme.css: --blockr-grey-400
-      blockr-theme.css: --blockr-grey-600
+      
 
 # the dark scheme changes only deliberately
 
