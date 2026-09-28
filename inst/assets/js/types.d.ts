@@ -312,6 +312,8 @@ interface BlockrActionMenu {
 interface BlockrInputConfig {
   /** Initial field value. */
   value?: string;
+  /** The field's name, as screen readers announce it. */
+  label?: string;
   /** Column names offered as completions (backticked when non-syntactic). */
   columns?: string[];
   /**

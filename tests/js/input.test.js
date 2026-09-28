@@ -147,3 +147,30 @@ test('Input: listens for outside clicks only while its list is open', (win) => {
   assert.strictEqual(live.size, 0, 'and takes the listener with it');
 });
 
+test('Input: the field and its list are wired for screen readers', (win) => {
+  const { h, field } = mount(win, { columns: ['AGE', 'AGEGR1'], label: 'Expression' });
+  const popup = () => win.document.getElementById(field.getAttribute('aria-controls'));
+  assert.strictEqual(field.getAttribute('role'), 'combobox');
+  assert.strictEqual(field.getAttribute('aria-label'), 'Expression');
+  assert.strictEqual(field.getAttribute('aria-expanded'), 'false');
+  type(win, field, 'AG');
+  assert.strictEqual(field.getAttribute('aria-expanded'), 'true');
+  assert.strictEqual(popup().getAttribute('aria-label'), 'Completions');
+  const rows = [...popup().querySelectorAll('[role="option"]')];
+  assert.strictEqual(field.getAttribute('aria-activedescendant'), rows[0].id);
+  key(win, field, 'ArrowDown');
+  const now = [...popup().querySelectorAll('[role="option"]')];
+  assert.strictEqual(field.getAttribute('aria-activedescendant'), now[1].id);
+  assert.strictEqual(now[1].getAttribute('aria-selected'), 'true');
+  key(win, field, 'Escape');
+  assert.strictEqual(field.getAttribute('aria-expanded'), 'false');
+  assert.ok(!field.hasAttribute('aria-activedescendant'));
+  h.destroy();
+
+  // A textarea cannot be a combobox; it names the list it controls.
+  const multi = mount(win, { columns: ['AGE'], multiline: true });
+  assert.ok(!multi.field.hasAttribute('role'));
+  assert.ok(!multi.field.hasAttribute('aria-expanded'));
+  assert.ok(multi.field.getAttribute('aria-controls'));
+});
+

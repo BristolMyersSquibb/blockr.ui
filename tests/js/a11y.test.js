@@ -128,3 +128,33 @@ test('the menus pass axe while open, with a head, a filter and every kind of row
   );
   win.close();
 });
+
+test('the code field passes axe with its list open', async (newWindow) => {
+  const win = newWindow();
+  win.eval(fs.readFileSync(require.resolve('../../inst/assets/js/blockr-input.js'), 'utf8'));
+  const doc = win.document;
+  doc.documentElement.lang = 'en';
+  doc.title = 'Code field';
+  const host = doc.createElement('div');
+  doc.body.appendChild(host);
+  const h = win.Blockr.Input.create(host, {
+    columns: ['AGE', 'AGEGR1'], categories: { math: ['abs'] }, label: 'Expression'
+  });
+  const field = h.el.querySelector('input');
+  field.focus();
+  field.value = 'AG';
+  field.setSelectionRange(2, 2);
+  field.dispatchEvent(new win.Event('input', { bubbles: true }));
+  assert.ok(h.el.classList.contains('blockr-input--popup-open'), 'the list is open');
+  win.eval(axe);
+  const { violations } = await win.axe.run(doc, {
+    runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] },
+    rules: { 'color-contrast': { enabled: false } }
+  });
+  assert.deepStrictEqual(
+    Array.from(violations, (v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
+    []
+  );
+  win.close();
+});
+
