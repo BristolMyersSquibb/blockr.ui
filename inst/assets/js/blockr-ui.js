@@ -749,8 +749,6 @@ Blockr.menu = (() => {
     const panel = document.createElement('div');
     panel.className = 'blockr-menu';
     panel.id = Blockr.uid('blockr-menu');
-    panel.setAttribute('role', 'menu');
-    panel.tabIndex = -1;
 
     if (config.head) {
       const head = document.createElement('div');
@@ -796,6 +794,20 @@ Blockr.menu = (() => {
       panel.appendChild(wrap);
     }
 
+    // The rows sit in a list of their own that carries the menu role: a menu
+    // may hold only its items, groups and separators, so the head, the
+    // caption and the filter box stay outside it, in the panel. The keyboard
+    // row is the active descendant of whichever holds focus, the filter box
+    // or the list.
+    const list = document.createElement('div');
+    list.className = 'blockr-menu__list';
+    list.id = Blockr.uid('blockr-menu-list');
+    list.setAttribute('role', 'menu');
+    list.tabIndex = -1;
+    panel.appendChild(list);
+    const focusEl = filterInput || list;
+    if (filterInput) filterInput.setAttribute('aria-controls', list.id);
+
     /** @type {{ row: HTMLButtonElement, item: BlockrMenuItem, search: string }[]} */
     const rows = [];
     /** @type {{ kind: 'row' | 'title' | 'sep', el: HTMLElement, row?: number }[]} */
@@ -805,7 +817,7 @@ Blockr.menu = (() => {
         const gap = document.createElement('div');
         gap.className = 'blockr-menu__gap';
         gap.setAttribute('role', 'separator');
-        panel.appendChild(gap);
+        list.appendChild(gap);
         nodes.push({ kind: 'sep', el: gap });
         continue;
       }
@@ -813,7 +825,7 @@ Blockr.menu = (() => {
         const hr = document.createElement('div');
         hr.className = 'blockr-menu__divider';
         hr.setAttribute('role', 'separator');
-        panel.appendChild(hr);
+        list.appendChild(hr);
         nodes.push({ kind: 'sep', el: hr });
         continue;
       }
@@ -821,13 +833,14 @@ Blockr.menu = (() => {
         const t = document.createElement('div');
         t.className = 'blockr-menu__title';
         t.textContent = entry.title;
-        panel.appendChild(t);
+        list.appendChild(t);
         nodes.push({ kind: 'title', el: t });
         continue;
       }
       const item = entry;
       const row = document.createElement('button');
       row.type = 'button';
+      row.id = Blockr.uid('blockr-menu-item');
       row.tabIndex = -1;
       row.className = 'blockr-menu__item' +
         (item.current ? ' blockr-menu__item--current' : '') +
@@ -883,7 +896,7 @@ Blockr.menu = (() => {
         .join(' ').toLowerCase();
       nodes.push({ kind: 'row', el: row, row: rows.length });
       rows.push({ row, item, search });
-      panel.appendChild(row);
+      list.appendChild(row);
     }
 
     const empty = document.createElement('div');
@@ -900,6 +913,9 @@ Blockr.menu = (() => {
       if (active >= 0 && rows[active]) {
         rows[active].row.classList.add('blockr-menu__item--active');
         rows[active].row.scrollIntoView({ block: 'nearest' });
+        focusEl.setAttribute('aria-activedescendant', rows[active].row.id);
+      } else {
+        focusEl.removeAttribute('aria-activedescendant');
       }
     };
     // The rows that can be picked: enabled, and not filtered out.
@@ -926,6 +942,7 @@ Blockr.menu = (() => {
       if (placed) placed.stop();
       panel.remove();
       anchor.setAttribute('aria-expanded', 'false');
+      anchor.removeAttribute('aria-controls');
       if (open && open.el === panel) open = null;
       if (refocus) anchor.focus();
       if (config.onClose) config.onClose();
@@ -1004,13 +1021,14 @@ Blockr.menu = (() => {
     });
     anchor.setAttribute('aria-expanded', 'true');
     anchor.setAttribute('aria-haspopup', 'menu');
+    anchor.setAttribute('aria-controls', list.id);
     // A click outside closes it; the trigger's own click is its binding's.
     Blockr.onDocClick(panel, (e) => {
       const t = e.target;
       if (t instanceof Node && (panel.contains(t) || anchor.contains(t))) return;
       close(false);
     });
-    (filterInput || panel).focus({ preventScroll: true });
+    focusEl.focus({ preventScroll: true });
 
     open = { el: panel, close: () => close(false), anchor };
     return { el: panel, close: () => close(false) };

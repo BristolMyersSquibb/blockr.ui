@@ -73,7 +73,10 @@
   cursor: default;
 }
 
-.blockr-menu__title:first-child {
+/* The first thing in the menu: a title at the top of the panel, or at the
+   top of a Blockr.menu list that nothing sits above. */
+.blockr-menu > .blockr-menu__title:first-child,
+.blockr-menu__list:first-child > .blockr-menu__title:first-child {
   padding-top: 4px;
 }
 
