@@ -301,6 +301,9 @@ test_that("the sorted header names its sort in a tooltip", {
   expect_true(all(
     c("blockr-table-preview", "blockr-ui-js", "blockr-tooltip-css") %in% deps
   ))
+  # The card reads the tokens without fallbacks, and an app that shows the
+  # preview need not attach theme_dep().
+  expect_true(tokens_dep()$name %in% deps)
   # Unsorted: no tooltip on any header.
   expect_no_match(render_chr(tags), "data-sort-tip", fixed = TRUE)
 })
