@@ -185,6 +185,24 @@
 
   --blockr-transition: 0.15s ease;
 
+  /* ----------------------------------------------------------- layers */
+
+  /* The stacking order of what floats over the page. Only an element
+     positioned against the page (fixed, or portalled to <body>) takes one
+     of these; inside a component a z-index orders siblings and stays within
+     -1 to 3. The values are Bootstrap's stack, which bslib puts on every
+     page, so a blockr layer lands between Bootstrap's own instead of
+     guessing past them. A layer sits above everything it can open from: a
+     menu opens from a modal or a side panel, and a tooltip names a menu's
+     rows. */
+  --blockr-z-sticky: 1020;
+  --blockr-z-fixed: 1030;
+  --blockr-z-offcanvas: 1045;
+  --blockr-z-modal: 1055;
+  --blockr-z-menu: 1070;
+  --blockr-z-tooltip: 1080;
+  --blockr-z-toast: 1090;
+
   /* ------------------------------------------------------- data marks */
 
   /* Cosmetic only: keeps a bar or box from reading as a raw div. Applies to

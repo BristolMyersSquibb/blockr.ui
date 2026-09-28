@@ -1,0 +1,13 @@
+{
+  "name": "blockr.ui",
+  "private": true,
+  "description": "Tests for the shared controls in inst/assets/js (see tests/js/).",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test tests/js/*.test.js"
+  },
+  "devDependencies": {
+    "axe-core": "^4.13.0",
+    "happy-dom": "^20.11.2"
+  }
+}

@@ -14,6 +14,41 @@ test_that("every claimed token resolves to a literal", {
   expect_identical(tokens[["--blockr-grey-900"]], "#111827")
 })
 
+test_that("every claimed token follows the grammar, or is a legacy alias", {
+
+  tokens <- names(blockr_tokens())
+  fits <- Reduce(`|`, lapply(token_grammar, grepl, x = tokens))
+
+  expect_identical(setdiff(tokens[!fits], names(legacy_tokens())), character())
+})
+
+test_that("a legacy name only points at another token", {
+
+  legacy <- legacy_tokens()
+
+  expect_gt(length(legacy), 0L)
+  expect_identical(
+    names(legacy)[!grepl("^var\\(--blockr-[a-z0-9-]+\\)$", legacy)],
+    character()
+  )
+})
+
+test_that("palette and legacy reads change only deliberately", {
+
+  sites <- token_references("blockr.ui")
+  sites <- sites[!grepl("tokens", basename(sites$file)), ]
+  stray <- grepl(palette_token, sites$token) |
+    sites$token %in% names(legacy_tokens())
+
+  expect_snapshot(
+    cat(
+      sort(unique(paste0(basename(sites$file), ": ", sites$token)[stray]),
+           method = "radix"),
+      sep = "\n"
+    )
+  )
+})
+
 test_that("the dark scheme changes only deliberately", {
 
   tokens <- blockr_tokens("dark")

@@ -5,10 +5,29 @@
   type, radii, control heights and shadows. Every name defined before keeps
   its old value.
 
+* The tokens include a stacking scale, `--blockr-z-sticky` up to
+  `--blockr-z-toast`, at Bootstrap's own z-index values. Anything that floats
+  over the page takes one of these layers; inside a component, a z-index only
+  orders siblings, from -1 to 3.
+
 * The `theme_dep()` dependency also attaches `blockr-tokens-dark.css`, which
   restates the tokens under `data-bs-theme="dark"`, the attribute that
   blockr.core's dark-mode board option sets. In dark, Bootstrap's body
   background and text colour follow the tokens too.
+
+* The `theme_dep()` function returns two dependencies in a `tagList()`, the
+  tokens and the theme layer, so a component can carry the tokens without
+  restyling the rest of the page.
+
+* The `controls_dep()` dependency carries the controls blockr blocks are
+  built from, moved here from blockr.dplyr: `Blockr.Select`, the Enter
+  button, the required-empty cue, the checkbox, the segmented control, the
+  gear tray and `Blockr.place`, with the stylesheets they draw with. It
+  brings the tokens but not the theme layer, which an app attaches with
+  `theme_dep()`. The dependency names are the ones blockr.dplyr used, so a
+  page carries one copy of each; while blockr.dplyr still ships its own
+  copies, that copy is blockr.dplyr's, as htmltools keeps the higher version
+  of a name.
 
 # blockr.ui 0.0.1
 

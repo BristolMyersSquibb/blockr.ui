@@ -93,6 +93,13 @@
       --blockr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1)
       --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25)
       --blockr-transition: 0.15s ease
+      --blockr-z-sticky: 1020
+      --blockr-z-fixed: 1030
+      --blockr-z-offcanvas: 1045
+      --blockr-z-modal: 1055
+      --blockr-z-menu: 1070
+      --blockr-z-tooltip: 1080
+      --blockr-z-toast: 1090
       --blockr-mark-radius: 2px
       --blockr-mark-font-size: 11px
       --blockr-mark-weight-supporting: 0.6
@@ -116,6 +123,30 @@
       --blockr-font-size-title: 1.25rem
       --blockr-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)
       --blockr-shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.1)
+
+# palette and legacy reads change only deliberately
+
+    Code
+      cat(sort(unique(paste0(basename(sites$file), ": ", sites$token)[stray]),
+      method = "radix"), sep = "\n")
+    Output
+      blockr-table-preview.css: --blockr-color-border
+      blockr-table-preview.css: --blockr-color-text-primary
+      blockr-table-preview.css: --blockr-color-text-subtle
+      blockr-table-preview.css: --blockr-grey-100
+      blockr-table-preview.css: --blockr-grey-600
+      blockr-table-preview.css: --blockr-grey-700
+      blockr-theme.css: --blockr-color-bg-input
+      blockr-theme.css: --blockr-color-border
+      blockr-theme.css: --blockr-color-border-hover
+      blockr-theme.css: --blockr-color-primary
+      blockr-theme.css: --blockr-color-primary-hover
+      blockr-theme.css: --blockr-color-text-primary
+      blockr-theme.css: --blockr-color-text-secondary
+      blockr-theme.css: --blockr-font-size-section
+      blockr-theme.css: --blockr-grey-100
+      blockr-theme.css: --blockr-grey-400
+      blockr-theme.css: --blockr-grey-600
 
 # the dark scheme changes only deliberately
 
@@ -177,6 +208,13 @@
       --blockr-control-h-sm: 30px
       --blockr-control-h-xs: 26px
       --blockr-transition: 0.15s ease
+      --blockr-z-sticky: 1020
+      --blockr-z-fixed: 1030
+      --blockr-z-offcanvas: 1045
+      --blockr-z-modal: 1055
+      --blockr-z-menu: 1070
+      --blockr-z-tooltip: 1080
+      --blockr-z-toast: 1090
       --blockr-mark-radius: 2px
       --blockr-mark-font-size: 11px
       --blockr-mark-weight-supporting: 0.6

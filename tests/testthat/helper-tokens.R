@@ -26,6 +26,31 @@ blockr_tokens <- function(scheme = c("light", "dark")) {
   )
 }
 
+palette_token <- "^--blockr-(grey|blue|red|amber|green|accent)-[0-9]+$"
+
+token_grammar <- c(
+  palette_token,
+  "^--blockr-color-(text|bg|border)(-[a-z]+)+$",
+  "^--blockr-font-[a-z]+(-[a-z0-9]+)?$",
+  "^--blockr-(radius|shadow|focus|z)-[a-z]+$",
+  "^--blockr-control-h(-[a-z]+)?$",
+  "^--blockr-transition$",
+  "^--blockr-mark(-[a-z]+)+$"
+)
+
+legacy_tokens <- function() {
+
+  lines <- readLines(
+    system.file("assets", "css", "blockr-tokens.css", package = "blockr.ui"),
+    warn = FALSE
+  )
+  from <- grep("legacy (aliases)", lines, fixed = TRUE)
+
+  stopifnot(length(from) == 1L)
+
+  css_definitions(paste(lines[seq(from, length(lines))], collapse = "\n"))
+}
+
 token_references <- function(pkg, path = NULL) {
 
   root <- css_root(pkg, path)
@@ -93,9 +118,9 @@ expect_tokens_reachable <- function(app, pkg, path = NULL) {
   invisible(tokens)
 }
 
-expect_theme_attached <- function(ui) {
+expect_tokens_attached <- function(ui) {
 
-  name <- theme_dep()$name
+  name <- tokens_dep()$name
   attached <- blockr.core::chr_xtr(
     htmltools::renderTags(ui)$dependencies,
     "name"
@@ -105,7 +130,8 @@ expect_theme_attached <- function(ui) {
     name %in% attached,
     paste0(
       "The '", name, "' dependency is not attached, so the shared tokens ",
-      "never reach this UI. Add blockr.ui::theme_dep() to it."
+      "never reach this UI. Add blockr.ui::theme_dep() or ",
+      "blockr.ui::controls_dep() to it."
     )
   )
 
@@ -170,6 +196,17 @@ file_var_sites <- function(file, root) {
     line = css_lines(css, sites$start),
     token = sites$token,
     fallback = sites$fallback
+  )
+}
+
+file_z_values <- function(file) {
+
+  css <- read_css(file)
+  hits <- regmatches(css, gregexpr("z-index\\s*:[^;}]*", css, perl = TRUE))
+
+  blockr.core::set_names(
+    trimws(sub("!important", "", sub("^z-index\\s*:", "", hits[[1L]]))),
+    rep(basename(file), length(hits[[1L]]))
   )
 }
 

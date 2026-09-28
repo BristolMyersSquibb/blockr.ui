@@ -53,14 +53,15 @@ The second word of a token's name says what kind it is.
 |---|---|---|---|
 | Palette | `--blockr-<hue>-<step>` | `--blockr-grey-200` | other tokens only |
 | Meaning | `--blockr-color-<property>-<role>[-<state>]` | `--blockr-color-text-muted` | components |
-| | `--blockr-font-<aspect>-<step>` | `--blockr-font-size-sm` | |
+| | `--blockr-font-<aspect>[-<step>]` | `--blockr-font-size-sm`, `--blockr-font-mono` | |
 | | `--blockr-radius-<step>`, `--blockr-control-h[-<step>]`, `--blockr-shadow-<step>` | `--blockr-radius-lg` | |
 | | `--blockr-focus-<aspect>`, `--blockr-transition`, `--blockr-mark-<aspect>` | `--blockr-focus-outline` | |
+| | `--blockr-z-<layer>` | `--blockr-z-menu` | anything positioned against the page ([Stacking](#floating)) |
 | Local | `--blockr-<owner>-<thing>` | `--blockr-dock-spinner-delay` | its owner's stylesheet only |
 
 A global token's second word is one of `color`, `font`, `radius`, `control`,
-`shadow`, `focus`, `transition`, `mark`, or a palette hue. Anything else is
-local. For colour, `<property>` is `text`, `bg` or `border` and comes first,
+`shadow`, `focus`, `transition`, `mark`, `z`, or a palette hue. Anything else
+is local. For colour, `<property>` is `text`, `bg` or `border` and comes first,
 because a colour chosen for text is not automatically right as a fill.
 
 ### Palette
@@ -85,14 +86,14 @@ disabled.
 | `--blockr-color-text-muted` | grey-500 | labels, placeholders, meta, hints, counts, empty states, column types, row numbers, `NA`, status lines and footers, icons at rest |
 | `--blockr-color-text-disabled` | grey-400 | disabled controls only |
 | `--blockr-color-text-on-accent` | `#ffffff` | text on a solid accent fill |
-| `--blockr-color-text-accent` | accent-600 | accent text |
-| `--blockr-color-text-accent-strong` | accent-700 | accent text on an accent tint (a count on the main button, the avatar initial), where accent-600 is 3.9:1 |
+| `--blockr-color-text-accent` | accent-600 | accent text on a plain surface |
+| `--blockr-color-text-accent-strong` | accent-700 | text on the accent tint (every selected or "on" state, a count on the main button, the avatar initial), where accent-600 falls below 4.5:1 |
 | `--blockr-color-text-danger` / `-warning` / `-success` | red-700 / amber-700 / green-700 | status text |
 
 Muted is 4.8:1 on white, 4.6:1 on grey-50 and 4.4:1 on grey-100. Muted text
 therefore never sits on a hover or selected background: on a hovered row, meta
-text and icons turn default; on a selected row, they turn `text-accent` with
-the rest of the row. Grey-400 is 2.5:1 and serves disabled controls
+text and icons turn default; on a selected row, they turn `text-accent-strong`
+with the rest of the row. Grey-400 is 2.5:1 and serves disabled controls
 only.
 
 ### Surfaces
@@ -108,7 +109,7 @@ layer takes that layer's field and border tokens.
 | `--blockr-color-bg-subtle` | grey-50 | a quiet fill inside a surface; the gear tray |
 | `--blockr-color-bg-field` | grey-50 | an input field |
 | `--blockr-color-bg-hover` | `color-mix(in srgb, var(--blockr-color-text-default) 6%, transparent)` | hover and the keyboard row |
-| `--blockr-color-bg-selected` | `bg-accent-subtle` | the chosen thing: a selected row, the front tab of the active dock group; its text is `text-accent`, and it has no edge |
+| `--blockr-color-bg-selected` | `bg-accent-subtle` | the chosen thing: a selected row, the front tab of the active dock group; its text is `text-accent-strong`, and it has no edge |
 | `--blockr-color-bg-selected-inactive` | `color-mix(in srgb, var(--blockr-color-text-default) 10%, transparent)` | the front tab of every other dock group: selected, but not where you work; one step above hover |
 | `--blockr-color-bg-accent` | accent-600 | solid accent fill (checked checkbox) |
 | `--blockr-color-bg-accent-hover` | accent-700 | its hover |
@@ -135,7 +136,7 @@ lands on grey-100.
 Input borders stay soft (`border-default`). The focus state marks the active
 field.
 
-**The accent tint** is `text-accent` on `bg-accent-subtle` with a
+**The accent tint** is `text-accent-strong` on `bg-accent-subtle` with a
 `border-accent-subtle` edge; its hover is `bg-accent-subtle-hover` with
 `border-accent`. It is the main button's look, and every selected or "on"
 state borrows it: a selected segment, an icon tile, a pressed icon button, the
@@ -524,7 +525,9 @@ selected row, the active group's front tab.
 - Numbers use the same field. The input keeps `type=number` for the keyboard,
   hides the spinner arrows, and commits like text; arrow keys still step. A
   Bootstrap override brings Shiny's `numericInput` to the same look.
-- dplyr's 30px inputs move to the 42px field.
+- dplyr's 30px inputs move to the 42px field when they stand on their own.
+  Inside a row, a number or text input has no frame of its own: the 42px row
+  is its field, as it is for a Select in a row.
 
 ### Select
 
@@ -536,6 +539,8 @@ selected row, the active group's front tab.
   (for columns, see [Column names and their labels](#labels));
   the label is cut first when space runs out.
 - Its dropdown is a menu ([Floating layer](#floating)).
+- A screen reader names it by its field's label, which the caller passes as
+  `label`; a menu uses its title.
 
 ### Select, multi, with tags
 
@@ -637,7 +642,7 @@ Four kinds. All are weight 500 and show the focus outline on `:focus-visible`.
 
 | Kind | Rest | Hover | Use |
 |---|---|---|---|
-| Main | the accent tint: `text-accent`, `bg-accent-subtle`, `border-accent-subtle` | `bg-accent-subtle-hover`, `border-accent` | at most one per view |
+| Main | the accent tint: `text-accent-strong`, `bg-accent-subtle`, `border-accent-subtle` | `bg-accent-subtle-hover`, `border-accent` | at most one per view |
 | Secondary | `bg-surface`, `border-default`, `text-default` | `bg-hover`, `border-strong` | everything else with a frame |
 | Quiet | text only, `text-muted`, 8px side padding | `bg-hover`, `text-default` | low-weight actions; replaces the grey-400 text links |
 | Destructive | `text-danger`, `border-danger` at 6% fill, `border-danger-subtle` | `border-danger` at 12% fill, `border-danger` | only to confirm a removal |
@@ -653,7 +658,9 @@ There is no solid accent button. Bootstrap's `btn-primary`, `btn-danger` and
 | xs | 26px | 12px | 9px | 4px | a header strip, next to the gear |
 
 The crossfilter reset, the patient-profile drill reset and dplyr's Enter
-button are instances of the main style and take these numbers.
+button are instances of the main style. The two resets take these sizes;
+the Enter button keeps the field's 24px (see [Text and number
+fields](#text-and-number-fields)), since it sits inside a 42px field.
 
 ### Icon buttons (tools)
 
@@ -714,6 +721,30 @@ blockr has no popovers. Floating things are menus (choices and actions, opened
 by a click) and tooltips (names, on hover). The gear tray is in flow and not
 part of this layer.
 
+### Stacking
+
+A z-index is one of two things, and no other number is written:
+
+- **Inside a component** it orders siblings, from -1 to 3. It cannot reach
+  past the component's own stacking context, so it needs no scale.
+- **Against the page** (fixed, or portalled to `<body>`) it names a layer.
+  The layers are Bootstrap's stack, which bslib puts on every page, so a
+  blockr layer lands between Bootstrap's own instead of guessing past them.
+
+| Layer | Token | Value | Bootstrap |
+|---|---|---|---|
+| Sticky header | `--blockr-z-sticky` | 1020 | `$zindex-sticky` |
+| Fixed bar | `--blockr-z-fixed` | 1030 | `$zindex-fixed` |
+| Side panel over the page | `--blockr-z-offcanvas` | 1045 | `$zindex-offcanvas` |
+| Modal | `--blockr-z-modal` | 1055 | `$zindex-modal` |
+| Menu | `--blockr-z-menu` | 1070 | `$zindex-popover` |
+| Tooltip | `--blockr-z-tooltip` | 1080 | `$zindex-tooltip` |
+| Toast | `--blockr-z-toast` | 1090 | `$zindex-toast` |
+
+A layer sits above everything it can open from: a menu opens from a modal or a
+side panel, and a tooltip names a menu's rows. The tests in blockr.ui hold its
+stylesheets to these two forms and the layers to Bootstrap's values.
+
 ### Menus
 
 Every menu, dropdown and list that floats uses one surface:
@@ -753,7 +784,11 @@ there is no room below, follows scroll, stays 8px from the viewport edge.
 
 A menu lines up with the trigger's left edge, or its right edge when the
 trigger is in the header row. Height up to 320px, then the list scrolls under
-its sticky titles and filter box. A filter box (30px) appears above 8 options.
+its sticky titles and filter box. A multi menu's tags take up to three rows and
+scroll on their own past that, so the list keeps room under many picks. A
+filter box (30px) appears above 8 options.
+It is part of the menu, not a field: 13px, and no focus ring, since it holds
+focus the whole time the menu is open.
 A `Select.menu` names the role it sets in its title, because the word that
 opened it names only the value.
 
@@ -783,13 +818,19 @@ It shows on hover and on keyboard focus, and leaves with the pointer or focus;
 Escape hides it.
 
 - Every icon-only button and every cut-off label gets one, and so does the
-  block's mark in the dock header (its type and package). Nothing else does:
-  a button that says its name has no tooltip.
+  block's mark in the dock header (its type and package). So does a segment
+  with a terse label (`%`, `n`, `All`): it shows the title its caller passes.
+  Nothing else does: a button that names its action in full, like Save, has
+  no tooltip.
 - No native `title` tooltips remain.
 - It matches the chart's data tooltip (see [Special blocks](#special)), so
   blockr has one floating style.
-- It shows after the pointer rests 800ms, above the element; it flips below
+- It shows after the pointer rests 300ms, and at once on keyboard focus or
+  while warm (within 400ms of another card leaving, so moving along a row of
+  icons does not wait at each one). It sits above the element and flips below
   only where there is no room above.
+- `Blockr.tooltip` (blockr-ui.js) draws it; controls set it in place of
+  `title`.
 
 ### Picking a block
 
@@ -827,7 +868,7 @@ you act on, keep 4px corners.
   fill, 1px `border-default`, `text-muted`.
 - Neutral unless it states a status or that something is on:
   - **on, added, cutting rows:** the accent tint (`bg-accent-subtle`,
-    `border-accent-subtle`, `text-accent`);
+    `border-accent-subtle`, `text-accent-strong`);
   - **danger, warning, success:** `bg-<status>`, `border-<status>-subtle`,
     `text-<status>`.
 - Types, packages and significance levels are neutral; the type icon beside a
@@ -910,7 +951,12 @@ names, an exhibit in labels.
 
 - No label, or a label equal to the name: the name alone. Never "unset",
   never the name twice.
-- A tooltip that shows both reads `AGE · Age`.
+- A menu opened from a word that prints labels (a slot in a chart's title or
+  subtitle, "Colour by Actual Treatment") leads with the label and mutes the
+  name, so the row reads like the word that was clicked (Select's
+  `labelFirst`). The word belongs to the exhibit, which speaks in labels.
+- A tooltip that shows both has the name, then the label muted, like the
+  control. The "+N" chip lists the hidden tags that way, one per line.
 - An aggregate reads "Mean of Age", on a chart, in a table and in a rank
   table header.
 - Code and decode pairs (PARAMCD and PARAM) follow the same rule: where one is
@@ -1079,10 +1125,12 @@ header, the "…" menu, the block status dot, the category colours
 (`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
 rule that hides the gear in simplified mode. blockr.theme owns data colours.
 
-To do: blockr.ui's token tests check that the vocabulary changes only
-deliberately and that consumers' fallbacks agree with it. Two tests are still
-to write: one that enforces the grammar, and one that warns on every read of a
-legacy alias.
+The token tests in blockr.ui check that the vocabulary changes only
+deliberately, that every name follows the grammar or is a legacy alias, that
+the controls read meaning tokens only, and that consumers' fallbacks agree with
+the tokens. Palette and legacy reads elsewhere in blockr.ui change only
+deliberately too. To do: warn on every palette or legacy read in the packages
+that consume the tokens.
 
 ### Legacy token aliases
 
