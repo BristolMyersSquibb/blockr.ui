@@ -13,6 +13,7 @@
 .dropdown-menu.blockr-menu {
   z-index: 1070;
   min-width: 180px;
+  max-width: 320px;
   box-sizing: border-box;
   max-height: 320px;
   overflow-y: auto;
@@ -24,6 +25,56 @@
   color: var(--blockr-color-text-default);
   font-size: var(--blockr-font-size-base);
   outline: none;
+}
+
+/* A menu rendered from R (action_menu(), driven by Blockr.actionMenu) waits
+   hidden beside its trigger while closed; open, it is on <body>
+   (Blockr.place), so no panel's overflow clips it. */
+.blockr-action-menu {
+  display: inline-flex;
+}
+
+.blockr-menu[hidden],
+.blockr-menu > [hidden],
+.blockr-action-menu[hidden] {
+  display: none;
+}
+
+/* The keyboard row is focused, so it takes the hover look instead of the
+   focus outline. */
+.blockr-menu__item:hover,
+.blockr-menu__item:focus {
+  background: var(--blockr-color-bg-hover);
+  color: var(--blockr-color-text-default);
+  text-decoration: none;
+  outline: none;
+}
+
+.blockr-menu__item:focus .blockr-menu__icon,
+.blockr-menu__item:focus .blockr-menu__meta {
+  color: var(--blockr-color-text-default);
+}
+
+.blockr-menu__item--danger,
+.blockr-menu__item--danger .blockr-menu__icon,
+.blockr-menu__item--danger:focus,
+.blockr-menu__item--danger:focus .blockr-menu__icon {
+  color: var(--blockr-color-text-danger);
+}
+
+/* Listed, not usable: no hover, the reason in its tooltip. */
+.blockr-menu__item--disabled,
+.blockr-menu__item--disabled .blockr-menu__icon,
+.blockr-menu__item--disabled .blockr-menu__meta,
+.blockr-menu__item[aria-disabled="true"] .blockr-menu__icon,
+.blockr-menu__item[aria-disabled="true"] .blockr-menu__meta {
+  color: var(--blockr-color-text-disabled);
+  background: transparent;
+  cursor: default;
+}
+
+.blockr-menu__title:first-child {
+  padding-top: 4px;
 }
 
 /* Rows: 34px at 14px, radius 6, 10px side padding, a little more air than a
@@ -45,6 +96,7 @@
   color: var(--blockr-color-text-default);
   font: inherit;
   text-align: left;
+  text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -137,6 +189,7 @@
 .blockr-menu__meta {
   flex-shrink: 0;
   margin-left: 12px;
+  padding-left: 16px;
   font-size: var(--blockr-font-size-sm);
   color: var(--blockr-color-text-muted);
 }

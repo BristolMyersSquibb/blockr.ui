@@ -5,7 +5,7 @@ test_that("action_menu() hangs the rows, hidden, beside the trigger", {
     menu_section("This patient"),
     menu_item(shiny::downloadLink("pptx", "PowerPoint"), meta = ".pptx"),
     NULL,
-    menu_divider(),
+    menu_section("This block"),
     menu_item(shiny::actionLink("rm", "Remove"), danger = TRUE)
   )
 
@@ -19,8 +19,6 @@ test_that("action_menu() hangs the rows, hidden, beside the trigger", {
                fixed = TRUE)
   expect_match(html, 'class="blockr-menu__title" role="presentation">This patient',
                fixed = TRUE)
-  expect_match(html, 'class="blockr-menu__divider" role="separator"',
-               fixed = TRUE)
   expect_match(html, "blockr-menu__item blockr-menu__item--danger",
                fixed = TRUE)
 
@@ -32,7 +30,7 @@ test_that("action_menu() hangs the rows, hidden, beside the trigger", {
   expect_identical(
     htmltools::tagGetAttribute(action_menu(
       tool_button(htmltools::HTML("D"), "Download"),
-      menu_divider(),
+      menu_section("Download"),
       align = "start"
     ), "data-align"),
     "start"
@@ -47,7 +45,7 @@ test_that("action_menu() and tool_button() bring the controls along", {
 
   expect_true("blockr-ui-js" %in% names(tool_button(htmltools::HTML("D"), "D")))
   expect_true("blockr-blocks-css" %in% names(
-    action_menu(htmltools::tags$button("D"), menu_divider())
+    action_menu(htmltools::tags$button("D"), menu_section("D"))
   ))
 })
 
@@ -114,11 +112,11 @@ test_that("stray markup is refused", {
 
   trigger <- tool_button(htmltools::HTML("D"), "Download")
 
-  expect_error(action_menu("Download", menu_divider()), "must be an HTML tag")
+  expect_error(action_menu("Download", menu_section("D")), "must be an HTML tag")
   expect_error(action_menu(trigger), "at least one row")
   expect_error(
     action_menu(trigger, shiny::downloadLink("x", "X")),
-    "menu_item\\(\\), menu_section\\(\\) or menu_divider\\(\\)"
+    "menu_item\\(\\) or menu_section\\(\\)"
   )
   expect_error(menu_item(htmltools::tags$div("X")), "an <a> or a <button>")
   expect_error(menu_item("X"), "an <a> or a <button>")

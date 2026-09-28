@@ -13,8 +13,7 @@
 #'
 #' @param trigger The button that opens the menu, typically a
 #'   [tool_button()].
-#' @param ... Rows: [menu_item()]s, [menu_section()] titles and
-#'   [menu_divider()]s, in order. `NULL`s are dropped, so a row can be
+#' @param ... Rows: [menu_item()]s and [menu_section()] titles, in order. `NULL`s are dropped, so a row can be
 #'   conditional.
 #' @param align `"end"` lines the menu up with the trigger's right edge, for a
 #'   trigger in a block's header row, where a menu opening to the right would
@@ -31,7 +30,7 @@
 #'   menu_section("This patient"),
 #'   menu_item(shiny::downloadLink("dl_pptx", "PowerPoint"), meta = ".pptx"),
 #'   menu_item(shiny::downloadLink("dl_html", "Web page"), meta = ".html"),
-#'   menu_divider(),
+#'   menu_section("This block"),
 #'   menu_item(shiny::actionLink("remove", "Remove"), danger = TRUE)
 #' )
 #'
@@ -54,8 +53,8 @@ action_menu <- function(trigger, ..., align = c("end", "start")) {
   ok <- vapply(rows, inherits, logical(1L), "blockr_menu_row")
 
   if (!all(ok)) {
-    stop("Every row must come from menu_item(), menu_section() or ",
-         "menu_divider().", call. = FALSE)
+    stop("Every row must come from menu_item() or menu_section().",
+         call. = FALSE)
   }
 
   trigger <- htmltools::tagAppendAttributes(
@@ -160,12 +159,6 @@ menu_item <- function(x, meta = NULL, icon = NULL, danger = FALSE,
 menu_section <- function(title) {
   stopifnot(is.character(title), length(title) == 1L)
   menu_row(tags$div(class = "blockr-menu__title", role = "presentation", title))
-}
-
-#' @rdname action_menu
-#' @export
-menu_divider <- function() {
-  menu_row(tags$div(class = "blockr-menu__divider", role = "separator"))
 }
 
 #' Tool button

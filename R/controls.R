@@ -73,3 +73,13 @@ controls_asset <- function(name, ...) {
     all_files = FALSE
   )
 }
+
+# Attaches the controls to markup built in R, so a helper's output brings
+# the stylesheets and scripts it needs wherever it is placed.
+with_controls <- function(x) {
+  htmltools::attachDependencies(
+    x,
+    htmltools::findDependencies(controls_dep()),
+    append = TRUE
+  )
+}

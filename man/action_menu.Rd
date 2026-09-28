@@ -4,7 +4,6 @@
 \alias{action_menu}
 \alias{menu_item}
 \alias{menu_section}
-\alias{menu_divider}
 \title{Action menu}
 \usage{
 action_menu(trigger, ..., align = c("end", "start"))
@@ -12,15 +11,12 @@ action_menu(trigger, ..., align = c("end", "start"))
 menu_item(x, meta = NULL, icon = NULL, danger = FALSE, disabled = NULL)
 
 menu_section(title)
-
-menu_divider()
 }
 \arguments{
 \item{trigger}{The button that opens the menu, typically a
 \code{\link[=tool_button]{tool_button()}}.}
 
-\item{...}{Rows: \code{\link[=menu_item]{menu_item()}}s, \code{\link[=menu_section]{menu_section()}} titles and
-\code{\link[=menu_divider]{menu_divider()}}s, in order. \code{NULL}s are dropped, so a row can be
+\item{...}{Rows: \code{\link[=menu_item]{menu_item()}}s and \code{\link[=menu_section]{menu_section()}} titles, in order. \code{NULL}s are dropped, so a row can be
 conditional.}
 
 \item{align}{\code{"end"} lines the menu up with the trigger's right edge, for a
@@ -70,7 +66,7 @@ action_menu(
   menu_section("This patient"),
   menu_item(shiny::downloadLink("dl_pptx", "PowerPoint"), meta = ".pptx"),
   menu_item(shiny::downloadLink("dl_html", "Web page"), meta = ".html"),
-  menu_divider(),
+  menu_section("This block"),
   menu_item(shiny::actionLink("remove", "Remove"), danger = TRUE)
 )
 

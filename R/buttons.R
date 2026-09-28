@@ -96,14 +96,6 @@ button_content <- function(icon, label) {
   )
 }
 
-with_controls <- function(x) {
-  htmltools::attachDependencies(
-    x,
-    htmltools::findDependencies(controls_dep()),
-    append = TRUE
-  )
-}
-
 is_string <- function(x) {
   is.character(x) && length(x) == 1L && !is.na(x) && nzchar(x)
 }

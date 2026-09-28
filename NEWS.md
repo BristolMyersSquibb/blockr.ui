@@ -19,13 +19,20 @@
 
 * `action_menu()` builds a menu of actions opened by a button: downloads,
   Rename, Remove. Its rows are `menu_item()`s wrapping a `downloadLink()`,
-  an `actionLink()` or any link or button, with `menu_section()` titles and
-  `menu_divider()`s between them. A row does one thing and the menu closes;
+  an `actionLink()` or any link or button, with `menu_section()` titles between them. A row does one thing and the menu closes;
   unlike `Blockr.Select.menu()` it sets no value. Open, the list sits on the
   page body, so no panel's overflow clips it.
 
 * `tool_button()` is the design system's 26px icon button, named by a
   tooltip.
+
+* `select_input()`, `text_input()`, `number_input()`, `checkbox_input()` and
+  `segmented_input()`, each with an `update_*()` function, and `gear_tray()`
+  with `tray_section()` draw the design system's controls for a block whose
+  UI is written in R. An update does not echo back to `input$x`.
+
+* `blockr_button()` and `blockr_download_button()` write the `.blockr-btn`
+  kinds and sizes for Shiny's action and download buttons.
 
 * An element built in R can carry its tooltip as a `data-blockr-tooltip`
   attribute; `Blockr.tooltip` shows it as the light card, in place of the
