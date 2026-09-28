@@ -43,7 +43,7 @@ col_type_label <- function(x) {
 #' 8px/char at the 14px table font (the constant the header min-width
 #' heuristic used for years) over-estimates almost every UI font, so the
 #' estimate degrades to slightly roomy columns - or, at worst, mild
-#' ellipsis with the title tooltip - never to crushed ones.
+#' ellipsis with the tooltip - never to crushed ones.
 #'
 #' @param col_names Character vector of column header texts (plain text,
 #'   strip any HTML before calling).
@@ -451,21 +451,15 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
   table_label_tag <- NULL
   if (!is.null(table_label) && is.character(table_label) &&
         nzchar(table_label)) {
-    is_truncated <- nchar(table_label) > 60
-    display_text <- if (is_truncated) {
-      paste0(substr(table_label, 1, 58), "\u2026")
-    } else {
-      table_label
-    }
-    label_args <- list(
+    # Cut by the layout (CSS ellipsis), as a column label is; a cut-off
+    # label shows whole in its tooltip.
+    table_label_tag <- shiny::tags$span(
       class = "blockr-table-label",
+      `data-blockr-tooltip` = table_label,
+      `data-blockr-tooltip-overflow` = NA,
       shiny::HTML("&middot;&nbsp;"),
-      display_text
+      table_label
     )
-    if (is_truncated) {
-      label_args[["title"]] <- table_label
-    }
-    table_label_tag <- do.call(shiny::tags$span, label_args)
   }
 
   footer <- shiny::tags$div(
@@ -482,6 +476,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         disabled = if (page == 1L) "disabled" else NULL,
         `data-direction` = "prev",
         `aria-label` = "Previous page",
+        `data-blockr-tooltip` = "Previous page",
         chevron_svg()
       ),
       shiny::tags$button(
@@ -489,6 +484,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         disabled = if (next_disabled) "disabled" else NULL,
         `data-direction` = "next",
         `aria-label` = "Next page",
+        `data-blockr-tooltip` = "Next page",
         chevron_svg()
       )
     )

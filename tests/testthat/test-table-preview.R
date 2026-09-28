@@ -120,6 +120,14 @@ test_that("the table label shows in the footer", {
   )
   expect_match(html, "blockr-table-label")
   expect_match(html, "ADSL: Subject-Level")
+
+  # A long one is cut by the layout and shows whole in the light card, not
+  # in a native title.
+  long <- strrep("Subject-Level Analysis Dataset ", 4L)
+  html <- render_chr(build_html_table(df, 1L, table_label = long))
+  expect_no_match(html, "title=", fixed = TRUE)
+  expect_no_match(html, "\u2026", fixed = TRUE)
+  expect_match(html, paste0('data-blockr-tooltip="', long, '"'), fixed = TRUE)
 })
 
 test_that("the html dependency is attached (no inline style/script)", {
@@ -264,6 +272,9 @@ test_that("the pager draws the chevron, named for screen readers", {
   )
   expect_match(html, 'aria-label="Previous page"', fixed = TRUE)
   expect_match(html, 'aria-label="Next page"', fixed = TRUE)
+  # Icon-only buttons, so each has the light card as well.
+  expect_match(html, 'data-blockr-tooltip="Previous page"', fixed = TRUE)
+  expect_match(html, 'data-blockr-tooltip="Next page"', fixed = TRUE)
   expect_match(html, 'points="3 4.5 6 7.5 9 4.5"', fixed = TRUE)
   expect_no_match(html, "&#x2039;|&#x203A;")
 })
