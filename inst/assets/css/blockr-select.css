@@ -117,6 +117,13 @@
   transform: rotate(180deg);
 }
 
+/* A bare select sits in a row, whose field it is: its chevron is 10px, as
+   a pill's (design system, "Chevrons"). The stroke does not scale. */
+.blockr-select:not(.blockr-select--bordered) .blockr-select__arrow svg {
+  width: 10px;
+  height: 10px;
+}
+
 .blockr-select:not(.blockr-select--disabled):hover .blockr-select__arrow {
   color: var(--blockr-color-text-default);
 }
