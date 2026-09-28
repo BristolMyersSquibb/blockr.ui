@@ -182,6 +182,19 @@ test('editable text names its gesture, the default or its own', (newWindow) => {
   win.close();
 });
 
+test('a cut-off editable <input> names its value', (newWindow) => {
+  const win = newWindow();
+  const input = win.document.createElement('input');
+  input.value = 'Patients with a serious adverse event';
+  input.setAttribute('data-blockr-editable', '');
+  win.document.body.append(input);
+  Object.defineProperty(input, 'clientWidth', { value: 80 });
+  Object.defineProperty(input, 'scrollWidth', { value: 240 });
+  over(win, input);
+  assert.match(win.Blockr.tooltip.text(input), /Patients with a serious adverse event/);
+  win.close();
+});
+
 test('a native title that reaches the page is left to its owner', (newWindow) => {
   // Blockr markup carries data-blockr-tooltip instead. Rewriting other
   // code's titles froze them (a title cleared later kept its old card) and
