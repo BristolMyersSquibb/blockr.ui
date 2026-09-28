@@ -311,6 +311,7 @@ if (Blockr.isMac) document.documentElement.classList.add('blockr-mac');
 Blockr.keys = (keys) => {
   const mac = { Mod: '⌘', Shift: '⇧', Alt: '⌥', Ctrl: '⌃', Enter: '↵', Esc: 'Esc' };
   const other = { Mod: 'Ctrl', Shift: 'Shift', Alt: 'Alt', Ctrl: 'Ctrl', Enter: '↵', Esc: 'Esc' };
+  /** @type {Record<string, string>} */
   const names = Blockr.isMac ? mac : other;
   const parts = keys.split('+').map((k) =>
     names[k] || (k.length === 1 ? k.toUpperCase() : k));
@@ -1246,8 +1247,9 @@ Blockr.actionMenu = (() => {
     el && el.closest('.blockr-action-menu__trigger'));
 
   /** @param {HTMLElement} panel */
-  const rows = (panel) => /** @type {HTMLElement[]} */ (Array.from(
-    panel.querySelectorAll('.blockr-menu__item')).filter((r) => !r.hidden && !isDisabled(r)));
+  const rows = (panel) => Array.from(
+    /** @type {NodeListOf<HTMLElement>} */ (panel.querySelectorAll('.blockr-menu__item')))
+    .filter((r) => !r.hidden && !isDisabled(r));
 
   /**
    * Disabled by its author (the class), or a download whose handler Shiny
