@@ -56,6 +56,12 @@ row. \code{Blockr.actionMenu} (in \code{blockr-ui.js}, loaded by \code{\link[=co
 opens the list on a click on the trigger, places it on the page body with
 \code{Blockr.place} so no panel's overflow clips it, and closes it again on a
 pick, Escape, Tab or a click outside.
+
+A download row works once Shiny has bound its handler, which it does when
+the menu first shows, so for a moment on that first open the row is still
+inert. To have it ready from the start, set
+\code{shiny::outputOptions(output, "<id>", suspendWhenHidden = FALSE)} for its
+output.
 }
 \examples{
 action_menu(
