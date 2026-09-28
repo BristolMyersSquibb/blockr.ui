@@ -43,3 +43,13 @@
   font-weight: var(--blockr-font-weight-medium);
   vertical-align: middle;
 }
+
+/* --- Text edited in place ---
+   The text cursor says the text is editable; blockr-ui.js adds the tooltip
+   naming the gesture. In this stylesheet because it comes wherever
+   blockr-ui.js does, with controls_dep() and with the table preview: the
+   theme layer is the app's to attach, and blockr-blocks.css loses to
+   blockr.dplyr's older copy on boards with dplyr blocks. */
+[data-blockr-editable] {
+  cursor: text;
+}
