@@ -159,7 +159,7 @@ test('an empty attribute shows nothing', (newWindow) => {
   const win = newWindow();
   const b = button(win);
   b.setAttribute('data-blockr-tooltip', '');
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   assert.ok(!card(win));
   win.close();
 });
