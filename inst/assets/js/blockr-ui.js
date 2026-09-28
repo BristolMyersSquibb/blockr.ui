@@ -1266,14 +1266,21 @@ Blockr.actionMenu = (() => {
   const triggerOf = (el) => /** @type {HTMLElement | null} */ (
     el && el.closest('.blockr-action-menu__trigger'));
 
-  /** @param {HTMLElement} panel */
+  /**
+   * The rows the keyboard moves over: all but those disabled by their
+   * author. A download whose handler Shiny has not bound yet keeps its
+   * place, since it works a moment later. On the first open every download
+   * is still unbound (Shiny binds an output once it shows), and skipping
+   * them put the focus on the row after them, Remove in a block's menu.
+   * @param {HTMLElement} panel
+   */
   const rows = (panel) => Array.from(
     /** @type {NodeListOf<HTMLElement>} */ (panel.querySelectorAll('.blockr-menu__item')))
-    .filter((r) => !r.hidden && !isDisabled(r));
+    .filter((r) => !r.hidden && !r.classList.contains('blockr-menu__item--disabled'));
 
   /**
-   * Disabled by its author (the class), or a download whose handler Shiny
-   * has not bound yet (aria-disabled, which Shiny clears once it has).
+   * Inert: disabled by its author (the class), or a download whose handler
+   * Shiny has not bound yet (aria-disabled, which Shiny clears once it has).
    * @param {Element} row
    */
   const isDisabled = (row) => row.classList.contains('blockr-menu__item--disabled') ||
