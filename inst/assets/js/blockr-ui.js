@@ -434,6 +434,9 @@ Blockr.tooltip = (() => {
     hide();
     const tip = /** @type {{ overflow: boolean }} */ (tips.get(el));
     if (tip.overflow && !cutOff(el)) return;
+    // A click focuses a button too, right after its pointerdown hid the
+    // card; only keyboard focus brings the card at once.
+    if (e.type === 'focusin' && target && !target.matches(':focus-visible')) return;
     const found = el;
     const now = e.type === 'focusin' || Date.now() < warmUntil;
     if (now) show(found);

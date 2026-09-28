@@ -1,7 +1,7 @@
 /* Blockr.tooltip: the light card that replaces native `title` tooltips.
  *
  * What a caller can see: the card appears (role tooltip, aria-describedby on
- * the element), after the delay on hover and at once on focus or while warm,
+ * the element), after the delay on hover and at once on keyboard focus or while warm,
  * leaves with Escape, and stays away from an `overflow` element that is not
  * cut off. happy-dom has no layout, so nothing is ever cut off here; that
  * case is the browser check's.
@@ -28,7 +28,7 @@ test('keyboard focus shows the card at once, and Escape hides it', (newWindow) =
   const win = newWindow();
   const b = button(win);
   win.Blockr.tooltip.set(b, 'Settings');
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   const c = card(win);
   assert.ok(c, 'shown on focus');
   assert.strictEqual(c.getAttribute('role'), 'tooltip');
@@ -37,6 +37,23 @@ test('keyboard focus shows the card at once, and Escape hides it', (newWindow) =
   win.document.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   assert.ok(!card(win), 'Escape hides it');
   assert.strictEqual(b.getAttribute('aria-describedby'), null);
+  win.close();
+});
+
+test('focus from a click does not bring the card back', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  win.Blockr.tooltip.set(b, 'Settings');
+  // happy-dom counts every focus as visible; a browser does not after a
+  // click on a button, so stand in for its verdict.
+  const matches = b.matches.bind(b);
+  b.matches = (s) => (s === ':focus-visible' ? false : matches(s));
+  b.focus();
+  assert.ok(!card(win), 'a click on the gear shows nothing');
+  b.blur();
+  b.matches = matches;
+  b.focus();
+  assert.strictEqual(card(win).textContent, 'Settings', 'Tab onto it does');
   win.close();
 });
 
@@ -62,7 +79,7 @@ test('an overflow tooltip stays away while nothing is cut off', async (newWindow
   const win = newWindow();
   const b = button(win, 'AGE');
   win.Blockr.tooltip.set(b, 'AGE', { overflow: true });
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   assert.ok(!card(win));
   win.close();
 });
@@ -72,7 +89,7 @@ test('a column shows its name, then its label muted; a list shows one per line',
   const b = button(win);
   win.Blockr.tooltip.set(b, [{ name: 'AGE', label: 'Age' }, { name: 'SEX', label: '' }, 'more']);
   assert.strictEqual(win.Blockr.tooltip.text(b), 'AGE · Age\nSEX\nmore');
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   const lines = [...card(win).querySelectorAll('.blockr-tooltip__line')];
   assert.strictEqual(lines.length, 3);
   assert.strictEqual(lines[0].querySelector('.blockr-tooltip__meta').textContent, 'Age');
