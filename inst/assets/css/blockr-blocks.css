@@ -310,6 +310,20 @@
   display: none;
 }
 
+/* After a button's label the hint is muted meta text ("Run ⌘↵"). In a menu
+   row it sits in the row's meta slot, which is muted already and follows
+   the row on hover. */
+.blockr-btn .blockr-shortcut,
+.btn .blockr-shortcut {
+  color: var(--blockr-color-text-muted);
+  font-weight: var(--blockr-font-weight-normal);
+}
+
+/* A Bootstrap button is not a flex row with a gap, as .blockr-btn is. */
+.btn .blockr-shortcut {
+  margin-left: 6px;
+}
+
 /* Standalone bordered text input + commit chip (Blockr.textCommit, §5.5).
    The chip overlays inside the field's right edge — never beside it — so it
    reads the same as the chips that sit inside a .blockr-row or inside
