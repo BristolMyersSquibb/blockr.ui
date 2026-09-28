@@ -1062,9 +1062,10 @@ Escape hides it.
   [Renaming in place](#renaming-in-place)). So does a segment with a terse
   label (`%`, `n`, `All`): it shows the title its caller passes. Nothing else
   does: a button that names its action in full, like Save, has no tooltip.
-- No native `title` tooltips remain. Markup should not write one, and
-  blockr-ui.js takes over any that reach the page anyway (Shiny, shinychat,
-  a package's older markup) on the first hover or focus.
+- No native `title` tooltips remain in blockr markup: an element built in R
+  carries its tooltip as `data-blockr-tooltip`, and a control built in
+  JavaScript sets it with `Blockr.tooltip.set()`. A third-party widget's
+  titles are its own and stay native.
 - It matches the chart's data tooltip (see [Special blocks](#special)), so
   blockr has one floating style.
 - It shows after the pointer rests 300ms, and at once on keyboard focus or

@@ -23,11 +23,6 @@
   attribute; `Blockr.tooltip` shows it as the light card, in place of the
   native `title` box.
 
-* Wherever `blockr-ui.js` loads, with `controls_dep()` or the table
-  preview, it takes over native `title` tooltips: on the first hover or
-  focus the attribute goes and its text shows in the light card, and an
-  icon-only element keeps the text as its `aria-label`.
-
 * Text marked `data-blockr-editable` shows the text cursor and a tooltip
   naming the gesture, "Double-click to edit" unless the attribute names
   another.

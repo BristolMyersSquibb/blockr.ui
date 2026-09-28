@@ -643,39 +643,6 @@ Blockr.tooltip = (() => {
   window.addEventListener('focusin', take, true);
 })();
 
-/* --- Native titles ------------------------------------------------------ */
-
-/**
- * No native `title` tooltips remain (design system, "Tooltips"). A `title`
- * that reaches the page anyway, from Shiny, a package's markup or a
- * third-party widget, is taken over on the first hover or focus, in the
- * capture phase on `window` (ahead of the browser's own delay): the
- * attribute goes and its text becomes the element's Blockr.tooltip. An
- * icon-only element keeps the text as its `aria-label`. A title written
- * again later (a status that changes) is taken over again on the next
- * hover. Text marked `data-blockr-editable` keeps the gesture as its
- * tooltip.
- */
-(() => {
-  /** @param {Event} e */
-  const take = (e) => {
-    let el = e.target instanceof Element ? e.target : null;
-    while (el && !el.hasAttribute('title')) el = el.parentElement;
-    if (!el || el === document.documentElement || el === document.body) return;
-    const title = el.getAttribute('title') || '';
-    el.removeAttribute('title');
-    if (!title) return;
-    if (!el.hasAttribute('aria-label') && !(el.textContent || '').trim()) {
-      el.setAttribute('aria-label', title);
-    }
-    if (el.hasAttribute('data-blockr-editable')) return;
-    Blockr.tooltip.set(el, title);
-  };
-
-  window.addEventListener('pointerover', take, true);
-  window.addEventListener('focusin', take, true);
-})();
-
 /* --- Menu --------------------------------------------------------------- */
 
 /**
