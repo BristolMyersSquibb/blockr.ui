@@ -296,6 +296,20 @@
   font-size: var(--blockr-font-size-sm);
 }
 
+/* Keyboard shortcut hints (shortcut() in R): each carries the Mac form and
+   the other, and blockr-ui.js puts `.blockr-mac` on the root on a Mac */
+.blockr-shortcut__mac {
+  display: none;
+}
+
+.blockr-mac .blockr-shortcut__mac {
+  display: inline;
+}
+
+.blockr-mac .blockr-shortcut__other {
+  display: none;
+}
+
 /* Standalone bordered text input + commit chip (Blockr.textCommit, §5.5).
    The chip overlays inside the field's right edge — never beside it — so it
    reads the same as the chips that sit inside a .blockr-row or inside

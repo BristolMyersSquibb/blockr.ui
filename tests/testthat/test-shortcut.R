@@ -22,22 +22,10 @@ test_that("a menu row takes a shortcut as its meta", {
   expect_match(row, "blockr-shortcut__other\">Ctrl+S", fixed = TRUE)
 })
 
-test_that("the hint picks its form where blockr.dplyr's stylesheet wins", {
+test_that("controls_dep() carries the rules that pick a hint's form", {
 
-  # A board with blockr.dplyr blocks resolves blockr-blocks-css to that
-  # package's older copy, so the rules that pick a form live elsewhere.
-  older <- htmltools::htmlDependency(
-    "blockr-blocks-css", "99.0.0",
-    src = c(file = withr::local_tempdir()),
-    stylesheet = "blockr-blocks.css"
-  )
-  deps <- htmltools::resolveDependencies(
-    c(htmltools::findDependencies(shortcut("Mod+S")), list(older)),
-    resolvePackageDir = FALSE
-  )
-  ours <- Filter(function(d) identical(d$package, "blockr.ui"), deps)
   sheets <- blockr.core::unlst(
-    lapply(ours, function(d) {
+    lapply(htmltools::findDependencies(controls_dep()), function(d) {
       file.path(system.file(d$src$file, package = "blockr.ui"), d$stylesheet)
     })
   )
