@@ -1,10 +1,10 @@
-/* blockr-table-preview.js: the sorted header's tooltip.
+/* blockr-table-preview.js: the sort and page clicks, seen from Shiny.
  *
- * What a user can see: after a sort click, the redrawn header shows its
- * tooltip while the pointer still rests on it, and no later redraw of the
- * table (the next page) brings it back where the pointer no longer is.
- * happy-dom has no layout, so the page stands in for elementFromPoint();
- * Shiny and jQuery are stubs.
+ * What the server sees: a click on a sortable header sends the column and
+ * the next direction in the cycle (ascending, descending, missing values
+ * first, off); a click on a page arrow sends the page it leads to. Shiny is
+ * a stub that records what it is sent; jQuery, which the scroll restore
+ * hooks, is a stub too.
  */
 'use strict';
 
@@ -18,94 +18,79 @@ const preview = fs.readFileSync(
   'utf8'
 );
 
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const card = (win) => {
-  const c = win.document.querySelector('.blockr-tooltip');
-  return c && c.isConnected ? c.textContent : null;
-};
-
-/** A window with the preview script, the stubs it needs, and `under`, the
- * element the pointer is on as far as elementFromPoint() is concerned. */
+/** A window with the preview script and a Shiny that records its inputs,
+ * as JSON, the form they go to the server in (and out of the window's
+ * realm, whose Object prototype deepStrictEqual would count as different). */
 const load = (newWindow) => {
   const win = newWindow();
-  const at = { under: null };
+  const sent = [];
   win.$ = () => ({ on: () => {} });
-  win.Shiny = { setInputValue: () => {} };
-  win.document.elementFromPoint = () => at.under;
+  win.Shiny = {
+    setInputValue: (id, value) => sent.push([id, JSON.parse(JSON.stringify(value))])
+  };
   win.eval(preview);
-  return { win, at };
+  return { win, sent };
 };
 
-/** What build_html_table() draws for a page, sorted on `cyl` or not. */
-const draw = (win, sorted) => {
-  const old = win.document.querySelector('.blockr-table-container');
-  if (old) old.remove();
+/** What build_html_table() draws, reduced to what the clicks read. */
+const draw = (win, { dir = 'none', page = 1, maxPage = 3 } = {}) => {
   const box = win.document.createElement('div');
   box.className = 'blockr-table-container';
   box.dataset.sortInput = 'out_table_sort';
-  const tip = sorted
-    ? ' aria-sort="ascending" data-blockr-tooltip="Sorted ascending, missing values last"'
-    : '';
+  box.dataset.pageInput = 'out_table_page';
+  box.dataset.currentPage = String(page);
+  box.dataset.maxPage = String(maxPage);
+  const sorted = dir === 'none' ? '' : ` blockr-sort-${dir}`;
   box.innerHTML = `
     <table class="blockr-table"><thead><tr>
-      <th class="blockr-sortable${sorted ? ' blockr-sort-asc' : ''}" data-column="cyl"${tip}>
+      <th class="blockr-sortable${sorted}" data-column="cyl">
         <span class="blockr-col-head"><span class="blockr-col-name">cyl</span></span>
         <span class="blockr-type-row"><span class="blockr-type-label">&lt;dbl&gt;</span></span>
       </th>
     </tr></thead></table>
-    <button class="blockr-nav-btn" data-direction="next">Next</button>`;
+    <button class="blockr-nav-btn${page === 1 ? ' disabled' : ''}" data-direction="prev"></button>
+    <button class="blockr-nav-btn${page === maxPage ? ' disabled' : ''}" data-direction="next"></button>`;
   win.document.body.appendChild(box);
   return {
-    th: box.querySelector('th'),
+    box,
+    name: box.querySelector('.blockr-col-name'),
     cue: box.querySelector('.blockr-type-row'),
-    next: box.querySelector('.blockr-nav-btn')
+    prev: box.querySelector('[data-direction="prev"]'),
+    next: box.querySelector('[data-direction="next"]')
   };
 };
 
-const click = (win, el) => el.dispatchEvent(
-  new win.MouseEvent('click', { bubbles: true, cancelable: true, clientX: 10, clientY: 10 })
-);
+const click = (win, el) =>
+  el.dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true }));
 
-test('the sorted header shows its tooltip under a pointer that stayed', async (newWindow) => {
-  const { win, at } = load(newWindow);
-  const before = draw(win, false);
-  at.under = before.cue;
-  click(win, before.cue);
-  const after = draw(win, true);
-  at.under = after.cue;
-  await wait(600);
-  assert.strictEqual(card(win), 'Sorted ascending, missing values last');
+test('a header click sends the next direction in the cycle', (newWindow) => {
+  const { win, sent } = load(newWindow);
+  const cycle = [['none', 'asc'], ['asc', 'desc'], ['desc', 'na'], ['na', 'none']];
+  for (const [dir, next] of cycle) {
+    const t = draw(win, { dir });
+    click(win, t.cue);
+    t.box.remove();
+    assert.deepStrictEqual(sent.pop(), ['out_table_sort', { col: 'cyl', dir: next }], dir);
+  }
   win.close();
 });
 
-test('a later redraw of the table leaves the tooltip where the pointer went', async (newWindow) => {
-  const { win, at } = load(newWindow);
-  const before = draw(win, false);
-  at.under = before.cue;
-  click(win, before.cue);
-  let now = draw(win, true);
-  // The pointer went to Next and pressed it; the header still sits at the
-  // point of the sort click.
-  at.under = now.cue;
-  await wait(600);
-  now.next.dispatchEvent(new win.Event('pointerdown', { bubbles: true }));
-  assert.strictEqual(card(win), null, 'the press hides it');
-  now = draw(win, true);
-  at.under = now.cue;
-  await wait(600);
-  assert.strictEqual(card(win), null, 'the next page does not bring it back');
+test('a click on the column name does not sort', (newWindow) => {
+  const { win, sent } = load(newWindow);
+  click(win, draw(win).name);
+  assert.deepStrictEqual(sent, []);
   win.close();
 });
 
-test('a sort click on one table does not show the tooltip on another', async (newWindow) => {
-  const { win, at } = load(newWindow);
-  const before = draw(win, false);
-  at.under = before.cue;
-  click(win, before.cue);
-  const other = draw(win, true);
-  other.th.closest('.blockr-table-container').dataset.sortInput = 'other_table_sort';
-  at.under = other.cue;
-  await wait(600);
-  assert.strictEqual(card(win), null);
+test('a page arrow sends the page it leads to, and a disabled one nothing', (newWindow) => {
+  const { win, sent } = load(newWindow);
+  let t = draw(win, { page: 2 });
+  click(win, t.next);
+  click(win, t.prev);
+  assert.deepStrictEqual(sent, [['out_table_page', 3], ['out_table_page', 1]]);
+  t.box.remove();
+  t = draw(win, { page: 1 });
+  click(win, t.prev);
+  assert.strictEqual(sent.length, 2, 'the first page has no previous one');
   win.close();
 });
