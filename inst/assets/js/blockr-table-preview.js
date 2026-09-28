@@ -44,12 +44,6 @@ if (!window.blockrSortInit) {
     var container = header.closest('.blockr-table-container');
     var inputId = container ? container.dataset.sortInput : null;
     if (!inputId) return;
-    // Where the sort click happened, and on which table, so the header that
-    // this click redraws can find out whether the pointer is still on it
-    // (see blockrHoverTip).
-    window.blockrLastSortPoint = {
-      x: e.clientX, y: e.clientY, t: Date.now(), input: inputId
-    };
     var col = header.dataset.column;
     var wrapper = container.querySelector('.blockr-table-wrapper');
     var output = container.closest('.shiny-html-output');
@@ -97,44 +91,4 @@ if (!window.blockrPaginationInit) {
                   Math.min(maxPage, currentPage + 1);
     Shiny.setInputValue(inputId, newPage, {priority: 'event'});
   });
-}
-
-// The sorted header's tooltip, and those of cut-off cells and labels, are
-// data-blockr-tooltip attributes, which the shared light tooltip reads
-// itself. What is left here: a sort click redraws the table under a pointer
-// that has not moved, and Safari sends no pointerover for what is drawn
-// there, so when the pointer is still on the sorted header, hand the
-// tooltip the event it waits for.
-if (!window.blockrSortTipInit) {
-  window.blockrSortTipInit = true;
-  var blockrSortTips = function(node) {
-    if (!node || node.nodeType !== 1) return;
-    var ths = node.matches('th[aria-sort]') ? [node] :
-      node.querySelectorAll('th[aria-sort]');
-    for (var i = 0; i < ths.length; i++) blockrHoverTip(ths[i]);
-  };
-  // The browser's :hover is not a test here: Safari does not update it for
-  // a node drawn under a pointer that has not moved. What is under the point
-  // of the last sort click is.
-  // It waits for the scroll restore above: setting the wrapper's scrollLeft
-  // fires a scroll event, and the tooltip closes on scroll.
-  var blockrHoverTip = function(th) {
-    setTimeout(function() {
-      var pt = window.blockrLastSortPoint;
-      if (!th.isConnected || !pt || Date.now() - pt.t > 10000) return;
-      var container = th.closest('.blockr-table-container');
-      if (!container || container.dataset.sortInput !== pt.input) return;
-      // Only the render that answers the click: after it, the pointer is
-      // wherever it has gone since (on Next, say), not at the click.
-      window.blockrLastSortPoint = null;
-      var under = document.elementFromPoint(pt.x, pt.y);
-      if (under && th.contains(under)) {
-        th.dispatchEvent(new PointerEvent('pointerover', {bubbles: true}));
-      }
-    }, 150);
-  };
-  new MutationObserver(function(muts) {
-    muts.forEach(function(m) { m.addedNodes.forEach(blockrSortTips); });
-  }).observe(document.documentElement, {childList: true, subtree: true});
-  blockrSortTips(document.documentElement);
 }
