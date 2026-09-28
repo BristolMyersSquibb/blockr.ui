@@ -888,7 +888,7 @@ the tip, stroked at 1.4px with round caps and joins and no fill.
   | ↵ | commit this one thing: a field's value, a pick in a menu, one value added to a list |
   | ⌘↵ (Ctrl+↵) | run or send, where ↵ makes a new line: Run in the code editor |
   | Esc | cancel: drop what is not committed, close what floats. Never saves. |
-  | Tab, a click elsewhere | leave; a field commits when you leave it |
+  | Tab, a click elsewhere | leave; a field commits when you leave it. The code field's open completion list is the exception: Tab takes the highlighted completion, as an R editor does |
   | ⇧↵ | nothing of blockr's own |
 
 - **Notation.** Keys are glyphs: ↵ Enter, ⇧ Shift, ⌘ Command, ⌥ Option, and
