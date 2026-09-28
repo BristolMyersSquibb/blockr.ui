@@ -277,6 +277,8 @@ test('a multi lists every option and ticks the picks', (newWindow) => {
     .filter((r) => r.getAttribute('aria-selected') === 'true')
     .map((r) => r.getAttribute('data-value'));
   assert.deepStrictEqual(marked, ['b', 'd']);
+  assert.strictEqual(dropdown(win, sel).getAttribute('aria-multiselectable'), 'true',
+    'a listbox with several picks says it takes several');
   // Every row keeps the tick's slot, so the names line up.
   assert.strictEqual(dropdown(win, sel).querySelectorAll('.blockr-select__tick').length, 5);
   win.close();
@@ -288,6 +290,7 @@ test('a single lists every option and marks the pick', (newWindow) => {
   click(win, control(sel));
   const dd = dropdown(win, sel);
   assert.strictEqual(dd.getAttribute('role'), 'listbox');
+  assert.ok(!dd.hasAttribute('aria-multiselectable'));
   assert.deepStrictEqual(rows(win, sel), ABC);
   const marked = rowsIn(dd).filter((r) => r.classList.contains('blockr-select__option--selected'));
   assert.deepStrictEqual(marked.map((r) => r.getAttribute('data-value')), ['c']);
