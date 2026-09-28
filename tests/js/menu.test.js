@@ -96,6 +96,18 @@ test('Escape closes and hands focus back to the trigger', (newWindow) => {
   win.close();
 });
 
+test('Tab closes and leaves focus on the trigger, for the browser to move on', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, { filter: true, items: [{ label: 'One' }] });
+  const box = panel(win).querySelector('.blockr-menu__filter-input');
+  assert.strictEqual(win.document.activeElement, box);
+  key(win, box, 'Tab');
+  assert.ok(!panel(win));
+  assert.strictEqual(win.document.activeElement, t);
+  win.close();
+});
+
 test('a click outside closes it', (newWindow) => {
   const win = newWindow();
   const t = trigger(win);
