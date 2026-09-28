@@ -355,6 +355,8 @@ interface BlockrNamespace {
 
   actionMenu: BlockrActionMenu;
   uid(prefix?: string): string;
+  /** Whether `el`, or anything in it, is cut off by its box. */
+  cutOff(el: Element): boolean;
   escapeHtml(s: string): string;
   removeNode(node: Node | null | undefined): void;
   contentWidth(el: Element): number;

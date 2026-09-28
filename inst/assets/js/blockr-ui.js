@@ -1,9 +1,12 @@
 // @ts-check
 /**
  * blockr-ui.js — the design system's shared JS layer: the Blockr namespace,
- * DOM helpers, the icon set, and the small controls every block builds on
+ * DOM helpers, placement (Blockr.place), the icon set, keyboard hints, the
+ * tooltip, text edited in place, the menus of actions (Blockr.menu and the
+ * R-built Blockr.actionMenu), and the small controls every block builds on
  * (the Enter button, the required-empty cue, the checkbox, the segmented
- * control, the gear tray). Blockr.Select (blockr-select.js) builds on it.
+ * control, the gear tray). Blockr.Select (blockr-select.js) and
+ * Blockr.Input (blockr-input.js) build on it.
  *
  * Load it first. It holds nothing block-specific: the block protocol
  * (Blockr.registerBlock and the restore queue) is blockr.dplyr's
@@ -58,6 +61,17 @@ Blockr.contentWidth = (el) => {
   m.innerHTML = '';
   return w;
 };
+
+/**
+ * Whether `el`, or anything in it, is cut off: its content is wider than its
+ * box. A tooltip marked `overflow` shows only then.
+ *
+ * @param {Element} el
+ * @returns {boolean}
+ */
+Blockr.cutOff = (el) => [el, ...Array.from(el.querySelectorAll('*'))].some(
+  (n) => n.clientWidth > 0 && n.scrollWidth > n.clientWidth + 1
+);
 
 /**
  * Document-click registry — one document-level listener for all blocks.
@@ -406,8 +420,8 @@ Blockr.textCommit = (input, opts) => {
  * Blockr.tooltip.set(el, content, { overflow }) gives `el` a tooltip.
  * `content` is a string, a column `{ name, label }` (the label shows muted
  * after the name), a line with a `badge` (a neutral badge after the name, as
- * a block type with its package), a list of either (one per line, as the "+N" chip's), or a
- * function returning one of those at show time. With `overflow: true` it
+ * a block type with its package), a list of either (one per line, as the
+ * "+N" chip's), or a function returning one of those at show time. With `overflow: true` it
  * shows only while the element or a child is cut off, so a value that fits
  * has none. Blockr.tooltip.clear(el) takes it away.
  *
@@ -436,11 +450,6 @@ Blockr.tooltip = (() => {
   /** @type {ReturnType<typeof setTimeout> | null} */
   let timer = null;
   let warmUntil = 0;
-
-  /** @param {Element} el */
-  const cutOff = (el) => [el, ...Array.from(el.querySelectorAll('*'))].some(
-    (n) => n.clientWidth > 0 && n.scrollWidth > n.clientWidth + 1
-  );
 
   /** @param {BlockrTooltipLine} line */
   const lineText = (line) => {
@@ -546,7 +555,7 @@ Blockr.tooltip = (() => {
     if (!el || el === current) return;
     hide();
     const tip = /** @type {{ overflow: boolean }} */ (tipOf(el));
-    if (tip.overflow && !cutOff(el)) return;
+    if (tip.overflow && !Blockr.cutOff(el)) return;
     // A click focuses a button too, right after its pointerdown hid the
     // card; only keyboard focus brings the card at once.
     if (e.type === 'focusin' && target && !target.matches(':focus-visible')) return;
@@ -617,11 +626,6 @@ Blockr.tooltip = (() => {
   const HINT = 'Double-click to edit';
   const seen = new WeakSet();
 
-  /** @param {Element} el */
-  const cutOff = (el) => [el, ...Array.from(el.querySelectorAll('*'))].some(
-    (n) => n.clientWidth > 0 && n.scrollWidth > n.clientWidth + 1
-  );
-
   /** @param {Event} e */
   const take = (e) => {
     const el = e.target instanceof Element ? e.target.closest('[data-blockr-editable]') : null;
@@ -631,7 +635,7 @@ Blockr.tooltip = (() => {
       // The attribute can go again (a name editable only in a mode).
       if (!el.hasAttribute('data-blockr-editable')) return null;
       const hint = el.getAttribute('data-blockr-editable') || HINT;
-      return cutOff(el) ? { name: (el.textContent || '').trim(), label: hint } : hint;
+      return Blockr.cutOff(el) ? { name: (el.textContent || '').trim(), label: hint } : hint;
     });
   };
 
@@ -675,15 +679,17 @@ Blockr.tooltip = (() => {
 /* --- Menu --------------------------------------------------------------- */
 
 /**
- * The action menu (design system, "Menus"): one floating surface for every
- * menu of actions -- a block's "…" menu, the views menu, a user menu.
- * Blockr.Select.menu() is the other kind, a list of values to pick from.
+ * A menu of actions built in JavaScript (design system, "Menus"): a block's
+ * "…" menu, the views menu, a user menu. The menus action_menu() builds in R
+ * share its look and run on Blockr.actionMenu, below. Blockr.Select.menu()
+ * is the other kind, a list of values to pick from.
  *
  * Blockr.menu(anchor, config) opens a menu under `anchor` and returns
  * `{ el, close }`. `config.items` is a list of entries:
  *
- *   { label, icon?, meta?, mono?, current?, danger?, quiet?, disabled?,
- *     reason?, onSelect? }   a row; `meta` is grey text after the label
+ *   { label, icon?, meta?, mono?, current?, checked?, danger?, quiet?,
+ *     disabled?, reason?, onSelect? }
+ *                            a row; `meta` is grey text after the label
  *                            (`mono` sets it in the code face), `current` the
  *                            item in use (weight 600 and a check), `checked`
  *                            a toggle that is on (a check), `danger` a
