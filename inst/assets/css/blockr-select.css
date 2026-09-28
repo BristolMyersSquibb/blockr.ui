@@ -215,7 +215,7 @@
   background: var(--blockr-color-bg-accent-subtle);
   border: 1px solid var(--blockr-color-border-accent-subtle);
   font-size: var(--blockr-font-size-sm);
-  color: var(--blockr-color-text-accent);
+  color: var(--blockr-color-text-accent-strong);
   cursor: pointer;
   user-select: none;
 }

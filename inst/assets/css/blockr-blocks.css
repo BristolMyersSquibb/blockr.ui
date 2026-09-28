@@ -88,7 +88,7 @@
 
 .blockr-segmented__seg.is-selected,
 .blockr-segmented__seg.is-selected:hover {
-  color: var(--blockr-color-text-accent);
+  color: var(--blockr-color-text-accent-strong);
   background: var(--blockr-color-bg-accent-subtle);
   border-color: var(--blockr-color-border-accent-subtle);
   font-weight: var(--blockr-font-weight-medium);
@@ -239,7 +239,7 @@
   background: var(--blockr-color-bg-accent-subtle);
   border: 1px solid var(--blockr-color-border-accent-subtle);
   border-radius: var(--blockr-radius-sm);
-  color: var(--blockr-color-text-accent);
+  color: var(--blockr-color-text-accent-strong);
   cursor: pointer;
   flex-shrink: 0;
   font-size: 11px;
@@ -423,7 +423,7 @@
 }
 
 .blockr-gear-btn.blockr-gear-active {
-  color: var(--blockr-color-text-accent);
+  color: var(--blockr-color-text-accent-strong);
   border-color: var(--blockr-color-border-accent-subtle);
   background: var(--blockr-color-bg-accent-subtle);
 }

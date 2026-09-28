@@ -86,14 +86,14 @@ disabled.
 | `--blockr-color-text-muted` | grey-500 | labels, placeholders, meta, hints, counts, empty states, column types, row numbers, `NA`, status lines and footers, icons at rest |
 | `--blockr-color-text-disabled` | grey-400 | disabled controls only |
 | `--blockr-color-text-on-accent` | `#ffffff` | text on a solid accent fill |
-| `--blockr-color-text-accent` | accent-600 | accent text |
-| `--blockr-color-text-accent-strong` | accent-700 | accent text on an accent tint (a count on the main button, the avatar initial), where accent-600 is 3.9:1 |
+| `--blockr-color-text-accent` | accent-600 | accent text on a plain surface |
+| `--blockr-color-text-accent-strong` | accent-700 | text on the accent tint (every selected or "on" state, a count on the main button, the avatar initial), where accent-600 falls below 4.5:1 |
 | `--blockr-color-text-danger` / `-warning` / `-success` | red-700 / amber-700 / green-700 | status text |
 
 Muted is 4.8:1 on white, 4.6:1 on grey-50 and 4.4:1 on grey-100. Muted text
 therefore never sits on a hover or selected background: on a hovered row, meta
-text and icons turn default; on a selected row, they turn `text-accent` with
-the rest of the row. Grey-400 is 2.5:1 and serves disabled controls
+text and icons turn default; on a selected row, they turn `text-accent-strong`
+with the rest of the row. Grey-400 is 2.5:1 and serves disabled controls
 only.
 
 ### Surfaces
@@ -109,7 +109,7 @@ layer takes that layer's field and border tokens.
 | `--blockr-color-bg-subtle` | grey-50 | a quiet fill inside a surface; the gear tray |
 | `--blockr-color-bg-field` | grey-50 | an input field |
 | `--blockr-color-bg-hover` | `color-mix(in srgb, var(--blockr-color-text-default) 6%, transparent)` | hover and the keyboard row |
-| `--blockr-color-bg-selected` | `bg-accent-subtle` | the chosen thing: a selected row, the front tab of the active dock group; its text is `text-accent`, and it has no edge |
+| `--blockr-color-bg-selected` | `bg-accent-subtle` | the chosen thing: a selected row, the front tab of the active dock group; its text is `text-accent-strong`, and it has no edge |
 | `--blockr-color-bg-selected-inactive` | `color-mix(in srgb, var(--blockr-color-text-default) 10%, transparent)` | the front tab of every other dock group: selected, but not where you work; one step above hover |
 | `--blockr-color-bg-accent` | accent-600 | solid accent fill (checked checkbox) |
 | `--blockr-color-bg-accent-hover` | accent-700 | its hover |
@@ -136,7 +136,7 @@ lands on grey-100.
 Input borders stay soft (`border-default`). The focus state marks the active
 field.
 
-**The accent tint** is `text-accent` on `bg-accent-subtle` with a
+**The accent tint** is `text-accent-strong` on `bg-accent-subtle` with a
 `border-accent-subtle` edge; its hover is `bg-accent-subtle-hover` with
 `border-accent`. It is the main button's look, and every selected or "on"
 state borrows it: a selected segment, an icon tile, a pressed icon button, the
@@ -642,7 +642,7 @@ Four kinds. All are weight 500 and show the focus outline on `:focus-visible`.
 
 | Kind | Rest | Hover | Use |
 |---|---|---|---|
-| Main | the accent tint: `text-accent`, `bg-accent-subtle`, `border-accent-subtle` | `bg-accent-subtle-hover`, `border-accent` | at most one per view |
+| Main | the accent tint: `text-accent-strong`, `bg-accent-subtle`, `border-accent-subtle` | `bg-accent-subtle-hover`, `border-accent` | at most one per view |
 | Secondary | `bg-surface`, `border-default`, `text-default` | `bg-hover`, `border-strong` | everything else with a frame |
 | Quiet | text only, `text-muted`, 8px side padding | `bg-hover`, `text-default` | low-weight actions; replaces the grey-400 text links |
 | Destructive | `text-danger`, `border-danger` at 6% fill, `border-danger-subtle` | `border-danger` at 12% fill, `border-danger` | only to confirm a removal |
@@ -868,7 +868,7 @@ you act on, keep 4px corners.
   fill, 1px `border-default`, `text-muted`.
 - Neutral unless it states a status or that something is on:
   - **on, added, cutting rows:** the accent tint (`bg-accent-subtle`,
-    `border-accent-subtle`, `text-accent`);
+    `border-accent-subtle`, `text-accent-strong`);
   - **danger, warning, success:** `bg-<status>`, `border-<status>-subtle`,
     `text-<status>`.
 - Types, packages and significance levels are neutral; the type icon beside a
