@@ -13,8 +13,8 @@
 #'
 #' @param trigger The button that opens the menu, typically a
 #'   [tool_button()].
-#' @param ... Rows: [menu_item()]s and [menu_section()] titles, in order. `NULL`s are dropped, so a row can be
-#'   conditional.
+#' @param ... Rows: [menu_item()]s and [menu_section()] titles, in order.
+#'   `NULL`s are dropped, so a row can be conditional.
 #' @param align `"end"` lines the menu up with the trigger's right edge, for a
 #'   trigger in a block's header row, where a menu opening to the right would
 #'   leave the block; `"start"` with its left edge.
