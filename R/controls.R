@@ -30,18 +30,27 @@
 #'
 #' @export
 controls_dep <- function() {
-  tagList(
-    theme_dep(),
-    controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
-    controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css"),
-    controls_asset(
-      "blockr-settings-band",
-      stylesheet = "css/blockr-settings-band.css"
-    ),
-    controls_asset("blockr-select-js", script = "js/blockr-select.js"),
-    controls_asset("blockr-select-css", stylesheet = "css/blockr-select.css")
-  )
+
+  # Built once per process: every block's UI calls this, and each
+  # packageVersion() below reads the package's metadata from disk.
+  if (is.null(controls_cache$deps)) {
+    controls_cache$deps <- tagList(
+      theme_dep(),
+      controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
+      controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css"),
+      controls_asset(
+        "blockr-settings-band",
+        stylesheet = "css/blockr-settings-band.css"
+      ),
+      controls_asset("blockr-select-js", script = "js/blockr-select.js"),
+      controls_asset("blockr-select-css", stylesheet = "css/blockr-select.css")
+    )
+  }
+
+  controls_cache$deps
 }
+
+controls_cache <- new.env(parent = emptyenv())
 
 controls_asset <- function(name, ...) {
   htmltools::htmlDependency(
