@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">blockr.ui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,7 +45,10 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="blockrui-development-version">blockr.ui (development version)<a class="anchor" aria-label="anchor" href="#blockrui-development-version"></a></h2>
 <ul><li><p>The design tokens are rewritten around the vocabulary of the design spec: a colour palette, meaning tokens for text, backgrounds, borders and status, type, radii, control heights and shadows. Every name defined before keeps its old value.</p></li>
+<li><p>The tokens include a stacking scale, <code>--blockr-z-sticky</code> up to <code>--blockr-z-toast</code>, at Bootstrap’s own z-index values. Anything that floats over the page takes one of these layers; inside a component, a z-index only orders siblings, from -1 to 3.</p></li>
 <li><p>The <code><a href="../reference/theme_dep.html">theme_dep()</a></code> dependency also attaches <code>blockr-tokens-dark.css</code>, which restates the tokens under <code>data-bs-theme="dark"</code>, the attribute that blockr.core’s dark-mode board option sets. In dark, Bootstrap’s body background and text colour follow the tokens too.</p></li>
+<li><p>The <code><a href="../reference/theme_dep.html">theme_dep()</a></code> function returns two dependencies in a <code>tagList()</code>, the tokens and the theme layer, so a component can carry the tokens without restyling the rest of the page.</p></li>
+<li><p>The <code><a href="../reference/controls_dep.html">controls_dep()</a></code> dependency carries the controls blockr blocks are built from, moved here from blockr.dplyr: <code>Blockr.Select</code>, the Enter button, the required-empty cue, the checkbox, the segmented control, the gear tray and <code>Blockr.place</code>, with the stylesheets they draw with. It brings the tokens but not the theme layer, which an app attaches with <code><a href="../reference/theme_dep.html">theme_dep()</a></code>. The dependency names are the ones blockr.dplyr used, so a page carries one copy of each; while blockr.dplyr still ships its own copies, that copy is blockr.dplyr’s, as htmltools keeps the higher version of a name.</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.1" id="blockrui-001">blockr.ui 0.0.1<a class="anchor" aria-label="anchor" href="#blockrui-001"></a></h2>

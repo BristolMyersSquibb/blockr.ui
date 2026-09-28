@@ -11,6 +11,9 @@
 - [`column_widths_px()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/column_widths_px.md)
   : Estimate fixed-layout column widths
 
+- [`controls_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
+  : Shared block controls
+
 - [`html_table_render()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md)
   [`html_table_result()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md)
   [`html_table_display`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md)

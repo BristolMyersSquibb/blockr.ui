@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">blockr.ui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -149,8 +149,11 @@ system page</a>.</p>
 </tr>
 <tr class="odd">
 <td></td>
-<td><code>--blockr-font-&lt;aspect&gt;-&lt;step&gt;</code></td>
-<td><code>--blockr-font-size-sm</code></td>
+<td><code>--blockr-font-&lt;aspect&gt;[-&lt;step&gt;]</code></td>
+<td>
+<code>--blockr-font-size-sm</code>,
+<code>--blockr-font-mono</code>
+</td>
 <td></td>
 </tr>
 <tr class="even">
@@ -174,6 +177,12 @@ system page</a>.</p>
 <td></td>
 </tr>
 <tr class="even">
+<td></td>
+<td><code>--blockr-z-&lt;layer&gt;</code></td>
+<td><code>--blockr-z-menu</code></td>
+<td>anything positioned against the page (<a href="#floating">Stacking</a>)</td>
+</tr>
+<tr class="odd">
 <td>Local</td>
 <td><code>--blockr-&lt;owner&gt;-&lt;thing&gt;</code></td>
 <td><code>--blockr-dock-spinner-delay</code></td>
@@ -184,10 +193,10 @@ system page</a>.</p>
 <p>A global token’s second word is one of <code>color</code>,
 <code>font</code>, <code>radius</code>, <code>control</code>,
 <code>shadow</code>, <code>focus</code>, <code>transition</code>,
-<code>mark</code>, or a palette hue. Anything else is local. For colour,
-<code>&lt;property&gt;</code> is <code>text</code>, <code>bg</code> or
-<code>border</code> and comes first, because a colour chosen for text is
-not automatically right as a fill.</p>
+<code>mark</code>, <code>z</code>, or a palette hue. Anything else is
+local. For colour, <code>&lt;property&gt;</code> is <code>text</code>,
+<code>bg</code> or <code>border</code> and comes first, because a colour
+chosen for text is not automatically right as a fill.</p>
 </div>
 <div class="section level3">
 <h3 id="palette">Palette<a class="anchor" aria-label="anchor" href="#palette"></a>
@@ -298,13 +307,14 @@ rest</td>
 <tr class="odd">
 <td><code>--blockr-color-text-accent</code></td>
 <td>accent-600</td>
-<td>accent text</td>
+<td>accent text on a plain surface</td>
 </tr>
 <tr class="even">
 <td><code>--blockr-color-text-accent-strong</code></td>
 <td>accent-700</td>
-<td>accent text on an accent tint (a count on the main button, the
-avatar initial), where accent-600 is 3.9:1</td>
+<td>text on the accent tint (every selected or “on” state, a count on
+the main button, the avatar initial), where accent-600 falls below
+4.5:1</td>
 </tr>
 <tr class="odd">
 <td>
@@ -319,8 +329,8 @@ avatar initial), where accent-600 is 3.9:1</td>
 <p>Muted is 4.8:1 on white, 4.6:1 on grey-50 and 4.4:1 on grey-100.
 Muted text therefore never sits on a hover or selected background: on a
 hovered row, meta text and icons turn default; on a selected row, they
-turn <code>text-accent</code> with the rest of the row. Grey-400 is
-2.5:1 and serves disabled controls only.</p>
+turn <code>text-accent-strong</code> with the rest of the row. Grey-400
+is 2.5:1 and serves disabled controls only.</p>
 </div>
 <div class="section level3">
 <h3 id="surfaces">Surfaces<a class="anchor" aria-label="anchor" href="#surfaces"></a>
@@ -373,7 +383,8 @@ on a layer takes that layer’s field and border tokens.</p>
 <td><code>--blockr-color-bg-selected</code></td>
 <td><code>bg-accent-subtle</code></td>
 <td>the chosen thing: a selected row, the front tab of the active dock
-group; its text is <code>text-accent</code>, and it has no edge</td>
+group; its text is <code>text-accent-strong</code>, and it has no
+edge</td>
 </tr>
 <tr class="even">
 <td><code>--blockr-color-bg-selected-inactive</code></td>
@@ -476,15 +487,15 @@ colour</td>
 </table>
 <p>Input borders stay soft (<code>border-default</code>). The focus
 state marks the active field.</p>
-<p><strong>The accent tint</strong> is <code>text-accent</code> on
-<code>bg-accent-subtle</code> with a <code>border-accent-subtle</code>
-edge; its hover is <code>bg-accent-subtle-hover</code> with
-<code>border-accent</code>. It is the main button’s look, and every
-selected or “on” state borrows it: a selected segment, an icon tile, a
-pressed icon button, the open gear, a tag that is cutting rows, an “on”
-badge, the “+N” overflow, the Enter button, a selected row and the
-active group’s front tab (these two without the edge). Hovering a
-selected thing keeps its look.</p>
+<p><strong>The accent tint</strong> is <code>text-accent-strong</code>
+on <code>bg-accent-subtle</code> with a
+<code>border-accent-subtle</code> edge; its hover is
+<code>bg-accent-subtle-hover</code> with <code>border-accent</code>. It
+is the main button’s look, and every selected or “on” state borrows it:
+a selected segment, an icon tile, a pressed icon button, the open gear,
+a tag that is cutting rows, an “on” badge, the “+N” overflow, the Enter
+button, a selected row and the active group’s front tab (these two
+without the edge). Hovering a selected thing keeps its look.</p>
 </div>
 <div class="section level3">
 <h3 id="status">Status<a class="anchor" aria-label="anchor" href="#status"></a>
@@ -1323,7 +1334,9 @@ reverts.</li>
 for the keyboard, hides the spinner arrows, and commits like text; arrow
 keys still step. A Bootstrap override brings Shiny’s
 <code>numericInput</code> to the same look.</li>
-<li>dplyr’s 30px inputs move to the 42px field.</li>
+<li>dplyr’s 30px inputs move to the 42px field when they stand on their
+own. Inside a row, a number or text input has no frame of its own: the
+42px row is its field, as it is for a Select in a row.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -1339,6 +1352,8 @@ meta text (for columns, see <a href="#labels">Column names and their
 labels</a>); the label is cut first when space runs out.</li>
 <li>Its dropdown is a menu (<a href="#floating">Floating
 layer</a>).</li>
+<li>A screen reader names it by its field’s label, which the caller
+passes as <code>label</code>; a menu uses its title.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -1480,7 +1495,7 @@ system page</a>.</p>
 <tbody>
 <tr class="odd">
 <td>Main</td>
-<td>the accent tint: <code>text-accent</code>,
+<td>the accent tint: <code>text-accent-strong</code>,
 <code>bg-accent-subtle</code>, <code>border-accent-subtle</code>
 </td>
 <td>
@@ -1570,7 +1585,9 @@ system page</a>.</p>
 </tbody>
 </table>
 <p>The crossfilter reset, the patient-profile drill reset and dplyr’s
-Enter button are instances of the main style and take these numbers.</p>
+Enter button are instances of the main style. The two resets take these
+sizes; the Enter button keeps the field’s 24px (see <a href="#text-and-number-fields">Text and number fields</a>), since it
+sits inside a 42px field.</p>
 </div>
 <div class="section level3">
 <h3 id="icon-buttons-tools">Icon buttons (tools)<a class="anchor" aria-label="anchor" href="#icon-buttons-tools"></a>
@@ -1646,6 +1663,84 @@ page</a>.</p>
 actions, opened by a click) and tooltips (names, on hover). The gear
 tray is in flow and not part of this layer.</p>
 <div class="section level3">
+<h3 id="stacking">Stacking<a class="anchor" aria-label="anchor" href="#stacking"></a>
+</h3>
+<p>A z-index is one of two things, and no other number is written:</p>
+<ul>
+<li>
+<strong>Inside a component</strong> it orders siblings, from -1 to
+3. It cannot reach past the component’s own stacking context, so it
+needs no scale.</li>
+<li>
+<strong>Against the page</strong> (fixed, or portalled to
+<code>&lt;body&gt;</code>) it names a layer. The layers are Bootstrap’s
+stack, which bslib puts on every page, so a blockr layer lands between
+Bootstrap’s own instead of guessing past them.</li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Layer</th>
+<th>Token</th>
+<th>Value</th>
+<th>Bootstrap</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Sticky header</td>
+<td><code>--blockr-z-sticky</code></td>
+<td>1020</td>
+<td><code>$zindex-sticky</code></td>
+</tr>
+<tr class="even">
+<td>Fixed bar</td>
+<td><code>--blockr-z-fixed</code></td>
+<td>1030</td>
+<td><code>$zindex-fixed</code></td>
+</tr>
+<tr class="odd">
+<td>Side panel over the page</td>
+<td><code>--blockr-z-offcanvas</code></td>
+<td>1045</td>
+<td><code>$zindex-offcanvas</code></td>
+</tr>
+<tr class="even">
+<td>Modal</td>
+<td><code>--blockr-z-modal</code></td>
+<td>1055</td>
+<td><code>$zindex-modal</code></td>
+</tr>
+<tr class="odd">
+<td>Menu</td>
+<td><code>--blockr-z-menu</code></td>
+<td>1070</td>
+<td><code>$zindex-popover</code></td>
+</tr>
+<tr class="even">
+<td>Tooltip</td>
+<td><code>--blockr-z-tooltip</code></td>
+<td>1080</td>
+<td><code>$zindex-tooltip</code></td>
+</tr>
+<tr class="odd">
+<td>Toast</td>
+<td><code>--blockr-z-toast</code></td>
+<td>1090</td>
+<td><code>$zindex-toast</code></td>
+</tr>
+</tbody>
+</table>
+<p>A layer sits above everything it can open from: a menu opens from a
+modal or a side panel, and a tooltip names a menu’s rows. The tests in
+blockr.ui hold its stylesheets to these two forms and the layers to
+Bootstrap’s values.</p>
+</div>
+<div class="section level3">
 <h3 id="menus">Menus<a class="anchor" aria-label="anchor" href="#menus"></a>
 </h3>
 <p>Every menu, dropdown and list that floats uses one surface:</p>
@@ -1718,10 +1813,13 @@ room below, follows scroll, stays 8px from the viewport edge.</p>
 </table>
 <p>A menu lines up with the trigger’s left edge, or its right edge when
 the trigger is in the header row. Height up to 320px, then the list
-scrolls under its sticky titles and filter box. A filter box (30px)
-appears above 8 options. A <code>Select.menu</code> names the role it
-sets in its title, because the word that opened it names only the
-value.</p>
+scrolls under its sticky titles and filter box. A multi menu’s tags take
+up to three rows and scroll on their own past that, so the list keeps
+room under many picks. A filter box (30px) appears above 8 options. It
+is part of the menu, not a field: 13px, and no focus ring, since it
+holds focus the whole time the menu is open. A <code>Select.menu</code>
+names the role it sets in its title, because the word that opened it
+names only the value.</p>
 <p><strong>Content.</strong> Long lists render up to 200 options and end
 with a count row that asks you to type; server-searched lists say how
 many values there are. Empty and loading rows are centred, italic,
@@ -1751,13 +1849,21 @@ on hover and on keyboard focus, and leaves with the pointer or focus;
 Escape hides it.</p>
 <ul>
 <li>Every icon-only button and every cut-off label gets one, and so does
-the block’s mark in the dock header (its type and package). Nothing else
-does: a button that says its name has no tooltip.</li>
+the block’s mark in the dock header (its type and package). So does a
+segment with a terse label (<code>%</code>, <code>n</code>,
+<code>All</code>): it shows the title its caller passes. Nothing else
+does: a button that names its action in full, like Save, has no
+tooltip.</li>
 <li>No native <code>title</code> tooltips remain.</li>
 <li>It matches the chart’s data tooltip (see <a href="#special">Special
 blocks</a>), so blockr has one floating style.</li>
-<li>It shows after the pointer rests 800ms, above the element; it flips
-below only where there is no room above.</li>
+<li>It shows after the pointer rests 300ms, and at once on keyboard
+focus or while warm (within 400ms of another card leaving, so moving
+along a row of icons does not wait at each one). It sits above the
+element and flips below only where there is no room above.</li>
+<li>
+<code>Blockr.tooltip</code> (blockr-ui.js) draws it; controls set it
+in place of <code>title</code>.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -1844,7 +1950,7 @@ padding, <code>bg-subtle</code> fill, 1px <code>border-default</code>,
 <li>
 <strong>on, added, cutting rows:</strong> the accent tint
 (<code>bg-accent-subtle</code>, <code>border-accent-subtle</code>,
-<code>text-accent</code>);</li>
+<code>text-accent-strong</code>);</li>
 <li>
 <strong>danger, warning, success:</strong>
 <code>bg-&lt;status&gt;</code>,
@@ -2012,7 +2118,14 @@ receipts</td>
 <ul>
 <li>No label, or a label equal to the name: the name alone. Never
 “unset”, never the name twice.</li>
-<li>A tooltip that shows both reads <code>AGE · Age</code>.</li>
+<li>A menu opened from a word that prints labels (a slot in a chart’s
+title or subtitle, “Colour by Actual Treatment”) leads with the label
+and mutes the name, so the row reads like the word that was clicked
+(Select’s <code>labelFirst</code>). The word belongs to the exhibit,
+which speaks in labels.</li>
+<li>A tooltip that shows both has the name, then the label muted, like
+the control. The “+N” chip lists the hidden tags that way, one per
+line.</li>
 <li>An aggregate reads “Mean of Age”, on a chart, in a table and in a
 rank table header.</li>
 <li>Code and decode pairs (PARAMCD and PARAM) follow the same rule:
@@ -2280,10 +2393,12 @@ block status dot, the category colours (<code>blk_color()</code>), the
 status dot’s <code>--blockr-dock-status-*</code> tokens and the rule
 that hides the gear in simplified mode. blockr.theme owns data
 colours.</p>
-<p>To do: blockr.ui’s token tests check that the vocabulary changes only
-deliberately and that consumers’ fallbacks agree with it. Two tests are
-still to write: one that enforces the grammar, and one that warns on
-every read of a legacy alias.</p>
+<p>The token tests in blockr.ui check that the vocabulary changes only
+deliberately, that every name follows the grammar or is a legacy alias,
+that the controls read meaning tokens only, and that consumers’
+fallbacks agree with the tokens. Palette and legacy reads elsewhere in
+blockr.ui change only deliberately too. To do: warn on every palette or
+legacy read in the packages that consume the tokens.</p>
 </div>
 <div class="section level3">
 <h3 id="legacy-token-aliases">Legacy token aliases<a class="anchor" aria-label="anchor" href="#legacy-token-aliases"></a>
