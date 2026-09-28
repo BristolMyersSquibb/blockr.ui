@@ -73,3 +73,31 @@ test_that("text edited in place gets its cursor wherever blockr-ui.js goes", {
     cursor(sheets_of(build_html_table(data.frame(a = 1), total_rows = 1L)))
   )
 })
+
+test_that("markup built in R writes no native title", {
+
+  # The spec's rule: no native `title` tooltips; a name shows in the light
+  # card. blockr-ui.js takes over any that reach the page, but its own markup
+  # should not send one. Every helper here, at its most decorated.
+  long <- strrep("Subject-Level Analysis ", 5L)
+  df <- data.frame(x = c(-1, NA, 2), y = c("a", "b", strrep("long ", 30L)))
+  attr(df$x, "label") <- long
+
+  html <- paste(
+    htmltools::renderTags(htmltools::tagList(
+      build_html_table(
+        df, 3L,
+        sort_state = list(col = "x", dir = "desc"),
+        table_label = long
+      ),
+      action_menu(
+        tool_button(htmltools::HTML("D"), "Download"),
+        menu_section("Files"),
+        menu_item(shiny::downloadLink("csv", "CSV"), meta = shortcut("Mod+S")),
+        menu_item(shiny::downloadLink("xlsx", "Excel"), disabled = long)
+      )
+    ))$html
+  )
+
+  expect_no_match(html, "\\stitle=", perl = TRUE)
+})
