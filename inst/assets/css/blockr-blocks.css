@@ -286,7 +286,7 @@
 .blockr-expr-confirm--key {
   width: 24px;
   padding: 0;
-  font-size: 13px;
+  font-size: var(--blockr-font-size-sm);
 }
 
 /* Standalone bordered text input + commit chip (Blockr.textCommit, §5.5).

@@ -33,7 +33,7 @@
 .blockr-input--bordered .blockr-input__field {
   background-color: var(--blockr-color-bg-field);
   border: 1px solid var(--blockr-color-border-default);
-  border-radius: 8px;
+  border-radius: var(--blockr-radius-lg);
   padding: 10px 14px;
   min-height: 42px;
   box-sizing: border-box;
@@ -53,7 +53,7 @@
   overflow-y: auto;
   background: var(--blockr-color-bg-surface);
   border: 1px solid var(--blockr-color-border-default);
-  border-radius: 8px;
+  border-radius: var(--blockr-radius-lg);
   box-shadow: var(--blockr-shadow-md);
   z-index: var(--blockr-z-menu);
   font-family: inherit;
@@ -79,13 +79,13 @@
 
 .blockr-input__item-text {
   font-family: var(--blockr-font-mono);
-  font-size: 0.8125rem;
+  font-size: var(--blockr-font-size-sm);
   color: var(--blockr-color-text-default);
 }
 
 .blockr-input__item-parens {
   font-family: var(--blockr-font-mono);
-  font-size: 0.8125rem;
+  font-size: var(--blockr-font-size-sm);
   color: var(--blockr-color-text-muted);
 }
 
