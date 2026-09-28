@@ -46,3 +46,19 @@ test_that("the hint picks its form where blockr.dplyr's stylesheet wins", {
   expect_match(css, ".blockr-mac .blockr-shortcut__other", fixed = TRUE)
   expect_match(css, ".blockr-shortcut__mac {", fixed = TRUE)
 })
+
+test_that("R and blockr-ui.js write a hint the same way", {
+
+  # One table for both: tests/js/shortcut.test.js holds Blockr.keys() to it.
+  cases <- utils::read.delim(
+    test_path("fixtures", "shortcuts.tsv"),
+    colClasses = "character",
+    encoding = "UTF-8"
+  )
+
+  for (i in seq_len(nrow(cases))) {
+    parts <- strsplit(cases$keys[i], "+", fixed = TRUE)[[1L]]
+    expect_identical(shortcut_text(parts, TRUE), enc2utf8(cases$mac[i]))
+    expect_identical(shortcut_text(parts, FALSE), enc2utf8(cases$other[i]))
+  }
+})
