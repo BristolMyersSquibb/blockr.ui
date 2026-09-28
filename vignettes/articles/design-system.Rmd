@@ -53,7 +53,7 @@ The second word of a token's name says what kind it is.
 |---|---|---|---|
 | Palette | `--blockr-<hue>-<step>` | `--blockr-grey-200` | other tokens only |
 | Meaning | `--blockr-color-<property>-<role>[-<state>]` | `--blockr-color-text-muted` | components |
-| | `--blockr-font-<aspect>-<step>` | `--blockr-font-size-sm` | |
+| | `--blockr-font-<aspect>[-<step>]` | `--blockr-font-size-sm`, `--blockr-font-mono` | |
 | | `--blockr-radius-<step>`, `--blockr-control-h[-<step>]`, `--blockr-shadow-<step>` | `--blockr-radius-lg` | |
 | | `--blockr-focus-<aspect>`, `--blockr-transition`, `--blockr-mark-<aspect>` | `--blockr-focus-outline` | |
 | | `--blockr-z-<layer>` | `--blockr-z-menu` | anything positioned against the page ([Stacking](#floating)) |
@@ -1121,10 +1121,12 @@ header, the "…" menu, the block status dot, the category colours
 (`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
 rule that hides the gear in simplified mode. blockr.theme owns data colours.
 
-To do: blockr.ui's token tests check that the vocabulary changes only
-deliberately and that consumers' fallbacks agree with it. Two tests are still
-to write: one that enforces the grammar, and one that warns on every read of a
-legacy alias.
+The token tests in blockr.ui check that the vocabulary changes only
+deliberately, that every name follows the grammar or is a legacy alias, that
+the controls read meaning tokens only, and that consumers' fallbacks agree with
+the tokens. Palette and legacy reads elsewhere in blockr.ui change only
+deliberately too. To do: warn on every palette or legacy read in the packages
+that consume the tokens.
 
 ### Legacy token aliases
 

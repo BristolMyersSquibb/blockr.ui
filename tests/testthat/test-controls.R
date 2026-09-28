@@ -22,14 +22,17 @@ test_that("controls_dep ships the controls after the tokens", {
   expect_true(all(file.exists(file.path(assets, files))))
 })
 
-test_that("the controls' stylesheets read only tokens this package defines", {
+test_that("the controls read only meaning tokens this package defines", {
 
   sites <- token_references("blockr.ui")
   controls <- sites[
     basename(sites$file) %in%
       c("blockr-blocks.css", "blockr-select.css", "blockr-settings-band.css"),
   ]
+  stray <- grepl(palette_token, controls$token) |
+    controls$token %in% names(legacy_tokens())
 
   expect_gt(nrow(controls), 0L)
   expect_identical(unique(controls$token[is.na(controls$value)]), character())
+  expect_identical(unique(controls$token[stray]), character())
 })

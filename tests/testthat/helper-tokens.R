@@ -26,6 +26,31 @@ blockr_tokens <- function(scheme = c("light", "dark")) {
   )
 }
 
+palette_token <- "^--blockr-(grey|blue|red|amber|green|accent)-[0-9]+$"
+
+token_grammar <- c(
+  palette_token,
+  "^--blockr-color-(text|bg|border)(-[a-z]+)+$",
+  "^--blockr-font-[a-z]+(-[a-z0-9]+)?$",
+  "^--blockr-(radius|shadow|focus|z)-[a-z]+$",
+  "^--blockr-control-h(-[a-z]+)?$",
+  "^--blockr-transition$",
+  "^--blockr-mark(-[a-z]+)+$"
+)
+
+legacy_tokens <- function() {
+
+  lines <- readLines(
+    system.file("assets", "css", "blockr-tokens.css", package = "blockr.ui"),
+    warn = FALSE
+  )
+  from <- grep("legacy (aliases)", lines, fixed = TRUE)
+
+  stopifnot(length(from) == 1L)
+
+  css_definitions(paste(lines[seq(from, length(lines))], collapse = "\n"))
+}
+
 token_references <- function(pkg, path = NULL) {
 
   root <- css_root(pkg, path)
