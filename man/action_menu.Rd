@@ -33,7 +33,8 @@ download (".pptx"), a block ID, or a keyboard shortcut from
 
 \item{icon}{An icon before the label, as a tag or \code{\link[htmltools:HTML]{htmltools::HTML()}}.}
 
-\item{danger}{Draw the row in red. Only for a removal.}
+\item{danger}{A removal: the row turns red under the pointer or keyboard
+focus, and stays plain at rest.}
 
 \item{disabled}{\code{NULL} for a usable row, or the reason it is not usable:
 the row stays in the list, greyed, with the reason as its tooltip.}
