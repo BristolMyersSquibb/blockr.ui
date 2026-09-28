@@ -49,6 +49,13 @@
   width: 10px;
   height: 10px;
   color: var(--blockr-color-text-muted);
+  transition: transform var(--blockr-transition);
+}
+
+/* A pill opens a menu, so its chevron flips up while the menu is open, as a
+   Select's does (design system, "Chevrons"). */
+.blockr-pill[aria-expanded="true"] .blockr-pill__caret {
+  transform: rotate(180deg);
 }
 
 .blockr-pill__caret svg { width: 10px; height: 10px; }
