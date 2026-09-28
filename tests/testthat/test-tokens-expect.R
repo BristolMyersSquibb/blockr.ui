@@ -139,11 +139,12 @@ test_that("expect_tokens_reachable fails on the names the app returns", {
   )
 })
 
-test_that("expect_theme_attached sees the dependency in a rendered UI", {
+test_that("expect_tokens_attached sees the tokens in a rendered UI", {
 
-  expect_success(expect_theme_attached(htmltools::tagList(theme_dep())))
+  expect_success(expect_tokens_attached(htmltools::tagList(theme_dep())))
+  expect_success(expect_tokens_attached(htmltools::tagList(controls_dep())))
   expect_failure(
-    expect_theme_attached(htmltools::div("no tokens here")),
+    expect_tokens_attached(htmltools::div("no tokens here")),
     "is not attached"
   )
 })

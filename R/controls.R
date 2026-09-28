@@ -8,8 +8,10 @@
 #' rows, pills, labels and fields they draw.
 #'
 #' The stylesheets read the design tokens without fallbacks, so the
-#' dependency brings [theme_dep()] along. Attach it from a block's UI;
-#' dependencies are de-duplicated by name, so any number of blocks can.
+#' dependency brings the tokens along, but not the theme layer that
+#' restyles the rest of the page: an app opts into that with [theme_dep()].
+#' Attach it from a block's UI; dependencies are de-duplicated by name, so
+#' any number of blocks can.
 #'
 #' The dependency names are the ones blockr.dplyr used while these files
 #' lived there (`blockr-select-js`, `blockr-select-css`, `blockr-blocks-css`),
@@ -37,7 +39,7 @@ controls_dep <- function() {
   # packageVersion() below reads the package's metadata from disk.
   if (is.null(controls_cache$deps)) {
     controls_cache$deps <- tagList(
-      theme_dep(),
+      tokens_dep(),
       controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
       controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css"),
       controls_asset(

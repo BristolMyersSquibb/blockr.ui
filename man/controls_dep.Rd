@@ -20,8 +20,10 @@ rows, pills, labels and fields they draw.
 }
 \details{
 The stylesheets read the design tokens without fallbacks, so the
-dependency brings \code{\link[=theme_dep]{theme_dep()}} along. Attach it from a block's UI;
-dependencies are de-duplicated by name, so any number of blocks can.
+dependency brings the tokens along, but not the theme layer that
+restyles the rest of the page: an app opts into that with \code{\link[=theme_dep]{theme_dep()}}.
+Attach it from a block's UI; dependencies are de-duplicated by name, so
+any number of blocks can.
 
 The dependency names are the ones blockr.dplyr used while these files
 lived there (\code{blockr-select-js}, \code{blockr-select-css}, \code{blockr-blocks-css}),

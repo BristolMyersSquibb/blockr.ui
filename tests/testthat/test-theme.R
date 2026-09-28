@@ -20,23 +20,26 @@ css_hidden_selectors <- function(css) {
   trimws(unlist(strsplit(sub("\\{.*", "", rules), ",")))
 }
 
-test_that("theme_dep ships the token and theme stylesheets", {
+test_that("theme_dep ships the tokens, then the theme layer", {
 
-  dep <- theme_dep()
+  deps <- htmltools::findDependencies(theme_dep())
+  sheets <- blockr.core::lst_xtr(deps, "stylesheet")
 
-  expect_s3_class(dep, "html_dependency")
   expect_identical(
-    dep$stylesheet,
-    c(
-      "css/blockr-tokens.css",
-      "css/blockr-tokens-dark.css",
+    blockr.core::chr_xtr(deps, "name"),
+    c("blockr-tokens", "blockr-theme")
+  )
+  expect_identical(
+    sheets,
+    list(
+      c("css/blockr-tokens.css", "css/blockr-tokens-dark.css"),
       "css/blockr-theme.css"
     )
   )
 
   assets <- system.file("assets", package = "blockr.ui")
 
-  expect_true(all(file.exists(file.path(assets, dep$stylesheet))))
+  expect_true(all(file.exists(file.path(assets, blockr.core::unlst(sheets)))))
 })
 
 test_that("the shared stylesheet reads only names this package claims", {

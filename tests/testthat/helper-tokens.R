@@ -118,9 +118,9 @@ expect_tokens_reachable <- function(app, pkg, path = NULL) {
   invisible(tokens)
 }
 
-expect_theme_attached <- function(ui) {
+expect_tokens_attached <- function(ui) {
 
-  name <- theme_dep()$name
+  name <- tokens_dep()$name
   attached <- blockr.core::chr_xtr(
     htmltools::renderTags(ui)$dependencies,
     "name"
@@ -130,7 +130,8 @@ expect_theme_attached <- function(ui) {
     name %in% attached,
     paste0(
       "The '", name, "' dependency is not attached, so the shared tokens ",
-      "never reach this UI. Add blockr.ui::theme_dep() to it."
+      "never reach this UI. Add blockr.ui::theme_dep() or ",
+      "blockr.ui::controls_dep() to it."
     )
   )
 

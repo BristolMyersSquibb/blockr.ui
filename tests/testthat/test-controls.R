@@ -4,10 +4,11 @@ test_that("controls_dep ships the controls after the tokens", {
   names <- blockr.core::chr_xtr(deps, "name")
 
   # blockr-ui.js defines the namespace Select builds on, and the stylesheets
-  # read the tokens, so the order is part of the contract.
+  # read the tokens, so the order is part of the contract. The theme layer
+  # is the app's to attach.
   expect_identical(
     names,
-    c("blockr-theme", "blockr-ui-js", "blockr-blocks-css",
+    c("blockr-tokens", "blockr-ui-js", "blockr-blocks-css",
       "blockr-settings-band", "blockr-select-js", "blockr-select-css")
   )
 
