@@ -144,8 +144,18 @@ menu_item <- function(x, meta = NULL, icon = NULL, danger = FALSE,
   )
 
   if (!is.null(disabled)) {
+    # Shiny enables a downloadLink() once its handler is ready: it clears
+    # aria-disabled, the tabindex and its own `disabled` class, from which its
+    # stylesheet takes pointer events. A row the author disabled opts out of
+    # that, keeps its state for screen readers, and keeps the pointer for the
+    # reason's tooltip; its own class keeps it inert.
     x$attribs[["aria-disabled"]] <- NULL
-    x <- htmltools::tagAppendAttributes(x, `aria-disabled` = "true")
+    x <- htmltools::tagQuery(x)$removeClass("disabled")$allTags()
+    x <- htmltools::tagAppendAttributes(
+      x,
+      `aria-disabled` = "true",
+      `data-shiny-disable-auto-enable` = NA
+    )
   }
 
   menu_row(x)
