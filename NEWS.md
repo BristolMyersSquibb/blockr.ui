@@ -5,6 +5,11 @@
   type, radii, control heights and shadows. Every name defined before keeps
   its old value.
 
+* The tokens include a stacking scale, `--blockr-z-sticky` up to
+  `--blockr-z-toast`, at Bootstrap's own z-index values. Anything that floats
+  over the page takes one of these layers; inside a component, a z-index only
+  orders siblings, from -1 to 3.
+
 * The `theme_dep()` dependency also attaches `blockr-tokens-dark.css`, which
   restates the tokens under `data-bs-theme="dark"`, the attribute that
   blockr.core's dark-mode board option sets. In dark, Bootstrap's body

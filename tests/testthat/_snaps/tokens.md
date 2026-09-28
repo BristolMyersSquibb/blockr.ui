@@ -93,6 +93,13 @@
       --blockr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1)
       --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25)
       --blockr-transition: 0.15s ease
+      --blockr-z-sticky: 1020
+      --blockr-z-fixed: 1030
+      --blockr-z-offcanvas: 1045
+      --blockr-z-modal: 1055
+      --blockr-z-menu: 1070
+      --blockr-z-tooltip: 1080
+      --blockr-z-toast: 1090
       --blockr-mark-radius: 2px
       --blockr-mark-font-size: 11px
       --blockr-mark-weight-supporting: 0.6
@@ -177,6 +184,13 @@
       --blockr-control-h-sm: 30px
       --blockr-control-h-xs: 26px
       --blockr-transition: 0.15s ease
+      --blockr-z-sticky: 1020
+      --blockr-z-fixed: 1030
+      --blockr-z-offcanvas: 1045
+      --blockr-z-modal: 1055
+      --blockr-z-menu: 1070
+      --blockr-z-tooltip: 1080
+      --blockr-z-toast: 1090
       --blockr-mark-radius: 2px
       --blockr-mark-font-size: 11px
       --blockr-mark-weight-supporting: 0.6

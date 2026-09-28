@@ -356,7 +356,9 @@
   border: 1px solid var(--blockr-color-border-default);
   border-radius: var(--blockr-radius-lg);
   box-shadow: var(--blockr-shadow-md);
-  z-index: 9999;
+  /* Above a modal or side panel it opens from; the tooltip that names a
+     cut-off row sits one layer higher. */
+  z-index: var(--blockr-z-menu);
 }
 
 /* ===== Headless: the dropdown as a menu ===== */

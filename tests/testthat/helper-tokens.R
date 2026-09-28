@@ -173,6 +173,17 @@ file_var_sites <- function(file, root) {
   )
 }
 
+file_z_values <- function(file) {
+
+  css <- read_css(file)
+  hits <- regmatches(css, gregexpr("z-index\\s*:[^;}]*", css, perl = TRUE))
+
+  blockr.core::set_names(
+    trimws(sub("!important", "", sub("^z-index\\s*:", "", hits[[1L]]))),
+    rep(basename(file), length(hits[[1L]]))
+  )
+}
+
 css_lines <- function(css, at) {
 
   breaks <- gregexpr("\n", css, fixed = TRUE)[[1L]]

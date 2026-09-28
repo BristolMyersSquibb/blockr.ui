@@ -460,7 +460,7 @@
    shows its name, then its label muted. */
 .blockr-tooltip {
   position: fixed;
-  z-index: 1080;
+  z-index: var(--blockr-z-tooltip);
   max-width: 320px;
   padding: 5px 9px;
   background: var(--blockr-color-bg-raised);
