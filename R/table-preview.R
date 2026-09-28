@@ -126,7 +126,7 @@ chevron_svg <- function() {
     'stroke="currentColor" stroke-width="1.4" stroke-linecap="round" ',
     'stroke-linejoin="round" aria-hidden="true">',
     '<polyline points="3 4.5 6 7.5 9 4.5" vector-effect="non-scaling-stroke">',
-    '</polyline></svg>'
+    "</polyline></svg>"
   ))
 }
 
@@ -325,7 +325,9 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     th_style <- sprintf("width: %dpx;", col_widths_px[j])
 
     # A numeric column's header follows its numbers to the right.
-    if (col_is_numeric[j]) header_class <- paste(header_class, "blockr-th-numeric")
+    if (col_is_numeric[j]) {
+      header_class <- paste(header_class, "blockr-th-numeric")
+    }
 
     # The sort cue (the chevron, up or down) sits on the name's line: after
     # the name, or before it on a right-aligned numeric column so the name

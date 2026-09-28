@@ -11,19 +11,24 @@ test_that("action_menu() hangs the rows, hidden, beside the trigger", {
 
   html <- htmltools::renderTags(menu)$html
 
-  expect_match(html, 'class="blockr-action-menu" data-align="end"', fixed = TRUE)
+  expect_match(html, 'class="blockr-action-menu" data-align="end"',
+               fixed = TRUE)
   expect_match(html, 'aria-haspopup="menu"', fixed = TRUE)
   expect_match(html, 'aria-expanded="false"', fixed = TRUE)
   expect_match(html, "blockr-tool blockr-action-menu__trigger", fixed = TRUE)
   expect_match(html, 'class="blockr-menu" role="menu" tabindex="-1" hidden',
                fixed = TRUE)
-  expect_match(html, 'class="blockr-menu__title" role="presentation">This patient',
-               fixed = TRUE)
+  expect_match(
+    html,
+    'class="blockr-menu__title" role="presentation">This patient',
+    fixed = TRUE
+  )
   expect_match(html, "blockr-menu__item blockr-menu__item--danger",
                fixed = TRUE)
 
   # The row marker is for action_menu() only and never reaches the page.
-  rows <- htmltools::tagQuery(menu)$find(".blockr-menu")$children()$selectedTags()
+  rows <- htmltools::tagQuery(menu)$find(".blockr-menu")$children()
+  rows <- rows$selectedTags()
   expect_length(rows, 4L)
   expect_false(any(vapply(rows, inherits, logical(1L), "blockr_menu_row")))
 
@@ -112,7 +117,8 @@ test_that("stray markup is refused", {
 
   trigger <- tool_button(htmltools::HTML("D"), "Download")
 
-  expect_error(action_menu("Download", menu_section("D")), "must be an HTML tag")
+  expect_error(action_menu("Download", menu_section("D")),
+               "must be an HTML tag")
   expect_error(action_menu(trigger), "at least one row")
   expect_error(
     action_menu(trigger, shiny::downloadLink("x", "X")),

@@ -16,8 +16,8 @@ menu_section(title)
 \item{trigger}{The button that opens the menu, typically a
 \code{\link[=tool_button]{tool_button()}}.}
 
-\item{...}{Rows: \code{\link[=menu_item]{menu_item()}}s and \code{\link[=menu_section]{menu_section()}} titles, in order. \code{NULL}s are dropped, so a row can be
-conditional.}
+\item{...}{Rows: \code{\link[=menu_item]{menu_item()}}s and \code{\link[=menu_section]{menu_section()}} titles, in order.
+\code{NULL}s are dropped, so a row can be conditional.}
 
 \item{align}{\code{"end"} lines the menu up with the trigger's right edge, for a
 trigger in a block's header row, where a menu opening to the right would
