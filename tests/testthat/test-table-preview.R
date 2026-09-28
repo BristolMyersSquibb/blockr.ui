@@ -294,7 +294,7 @@ test_that("the sorted header names its sort in a tooltip", {
     build_html_table(df, 3L, sort_state = list(col = "x", dir = "na"))
   )
   expect_match(html,
-               'data-sort-tip="Missing values first, then ascending"',
+               'data-blockr-tooltip="Missing values first, then ascending"',
                fixed = TRUE)
   tags <- build_html_table(df, 3L)
   deps <- vapply(htmltools::findDependencies(tags), `[[`, "", "name")
@@ -305,5 +305,6 @@ test_that("the sorted header names its sort in a tooltip", {
   # preview need not attach theme_dep().
   expect_true(tokens_dep()$name %in% deps)
   # Unsorted: no tooltip on any header.
-  expect_no_match(render_chr(tags), "data-sort-tip", fixed = TRUE)
+  expect_no_match(render_chr(tags), "Sorted ascending", fixed = TRUE)
+  expect_no_match(render_chr(tags), "aria-sort", fixed = TRUE)
 })

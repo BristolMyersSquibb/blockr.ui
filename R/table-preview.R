@@ -329,16 +329,16 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
       header_class <- paste(header_class, "blockr-th-numeric")
     }
 
-    # The sort cue (the chevron, up or down) sits on the name's line: after
-    # the name, or before it on a right-aligned numeric column so the name
-    # stays flush over its numbers. Hidden at rest on an unsorted column,
-    # shown muted on hover as what a click would do.
+    # The sort cue (sort bars, see blockr-table-preview.css) sits on the
+    # name's line: after the name, or before it on a right-aligned numeric
+    # column so the name stays flush over its numbers. Hidden at rest on an
+    # unsorted column, shown muted on hover as what a click would do.
     aria_sort <- if (!is.null(sort_col) && sort_col == col_name) {
       switch(sort_dir, asc = , na = "ascending", desc = "descending", NULL)
     }
-    # The sorted header says in words what the cue shows (the light tooltip,
-    # registered by blockr-table-preview.js): the dot for missing values
-    # first does not say "missing" by itself.
+    # The sorted header says in words what the cue shows, in the light
+    # tooltip: the dot for missing values first does not say "missing" by
+    # itself.
     sort_tip <- if (!is.null(sort_col) && sort_col == col_name) {
       switch(
         sort_dir,
@@ -354,7 +354,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
       style = th_style,
       `data-column` = col_name,
       `aria-sort` = aria_sort,
-      `data-sort-tip` = sort_tip,
+      `data-blockr-tooltip` = sort_tip,
       shiny::tags$span(
         class = "blockr-col-head",
         shiny::tags$span(class = "blockr-col-name", col_name),
