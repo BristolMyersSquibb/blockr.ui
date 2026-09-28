@@ -99,26 +99,19 @@ if (!window.blockrPaginationInit) {
   });
 }
 
-// The sorted header's tooltip (data-sort-tip, set by build_html_table()),
-// and the cut-off-only tooltips of cells and labels (data-blockr-tooltip),
-// registered with the shared light tooltip whenever a table lands.
+// The sorted header's tooltip, and those of cut-off cells and labels, are
+// data-blockr-tooltip attributes, which the shared light tooltip reads
+// itself. What is left here: a sort click redraws the table under a pointer
+// that has not moved, and Safari sends no pointerover for what is drawn
+// there, so when the pointer is still on the sorted header, hand the
+// tooltip the event it waits for.
 if (!window.blockrSortTipInit) {
   window.blockrSortTipInit = true;
   var blockrSortTips = function(node) {
-    if (!window.Blockr || !Blockr.tooltip || !node || node.nodeType !== 1) return;
-    var cut = node.querySelectorAll('.blockr-table [data-blockr-tooltip-overflow]');
-    for (var k = 0; k < cut.length; k++) {
-      Blockr.tooltip.set(cut[k], cut[k].getAttribute('data-blockr-tooltip'), {overflow: true});
-    }
-    var ths = node.matches('th[data-sort-tip]') ? [node] :
-      node.querySelectorAll('th[data-sort-tip]');
-    for (var i = 0; i < ths.length; i++) {
-      Blockr.tooltip.set(ths[i], ths[i].getAttribute('data-sort-tip'));
-      // A sort click redraws the table under a pointer that has not moved,
-      // so no pointerover follows; when the pointer is already on the
-      // sorted header, hand the tooltip the event it waits for.
-      blockrHoverTip(ths[i]);
-    }
+    if (!node || node.nodeType !== 1) return;
+    var ths = node.matches('th[aria-sort]') ? [node] :
+      node.querySelectorAll('th[aria-sort]');
+    for (var i = 0; i < ths.length; i++) blockrHoverTip(ths[i]);
   };
   // The browser's :hover is not a test here: Safari does not update it for
   // a node drawn under a pointer that has not moved. What is under the point

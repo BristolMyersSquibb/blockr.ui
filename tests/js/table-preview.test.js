@@ -43,7 +43,9 @@ const draw = (win, sorted) => {
   const box = win.document.createElement('div');
   box.className = 'blockr-table-container';
   box.dataset.sortInput = 'out_table_sort';
-  const tip = sorted ? ' data-sort-tip="Sorted ascending, missing values last"' : '';
+  const tip = sorted
+    ? ' aria-sort="ascending" data-blockr-tooltip="Sorted ascending, missing values last"'
+    : '';
   box.innerHTML = `
     <table class="blockr-table"><thead><tr>
       <th class="blockr-sortable${sorted ? ' blockr-sort-asc' : ''}" data-column="cyl"${tip}>
