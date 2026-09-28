@@ -42,6 +42,25 @@ test_that("action_menu() hangs the rows, hidden, beside the trigger", {
   )
 })
 
+test_that("a divider rules off the rows after it", {
+
+  menu <- action_menu(
+    tool_button(htmltools::HTML("R"), "Row actions"),
+    menu_item(shiny::actionLink("rename", "Rename")),
+    menu_divider(),
+    menu_item(shiny::actionLink("remove", "Remove"), danger = TRUE)
+  )
+
+  rows <- htmltools::tagQuery(menu)$find(".blockr-menu")$children()
+  rows <- rows$selectedTags()
+
+  expect_length(rows, 3L)
+  expect_identical(htmltools::tagGetAttribute(rows[[2L]], "class"),
+                   "blockr-menu__divider")
+  expect_identical(htmltools::tagGetAttribute(rows[[2L]], "role"), "separator")
+  expect_false(inherits(rows[[2L]], "blockr_menu_row"))
+})
+
 test_that("action_menu() and tool_button() bring the controls along", {
 
   names <- function(x) {
@@ -134,7 +153,7 @@ test_that("stray markup is refused", {
   expect_error(action_menu(trigger), "at least one row")
   expect_error(
     action_menu(trigger, shiny::downloadLink("x", "X")),
-    "menu_item\\(\\) or menu_section\\(\\)"
+    "menu_item\\(\\), menu_section\\(\\) or menu_divider\\(\\)"
   )
   expect_error(menu_item(htmltools::tags$div("X")), "an <a> or a <button>")
   expect_error(menu_item("X"), "an <a> or a <button>")

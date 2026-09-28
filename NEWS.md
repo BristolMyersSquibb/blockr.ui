@@ -12,9 +12,10 @@
 * The new `action_menu()` builds a menu of actions opened by a button:
   downloads, Rename, Remove. Its rows are `menu_item()`s wrapping a
   `downloadLink()`, an `actionLink()` or any link or button, with
-  `menu_section()` titles between them. A row does one thing and the menu
-  closes; unlike `Blockr.Select.menu()` it sets no value. Open, the list sits
-  on the page body, so no panel's overflow clips it.
+  `menu_section()` titles and `menu_divider()` rules between them. A row
+  does one thing and the menu closes; unlike `Blockr.Select.menu()` it sets
+  no value. Open, the list sits on the page body, so no panel's overflow
+  clips it.
 
 * The new `tool_button()` is the design system's 26px icon button, named
   by a tooltip.
