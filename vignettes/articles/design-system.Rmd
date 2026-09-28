@@ -336,8 +336,9 @@ There is no 16px section heading inside a block.
   surface) with the glyph in the category colour. Sizes: 28px in the dock
   header, 24px in list rows (menus, pickers) with the package as a badge,
   16px in a tab.
-- The header's mark carries the block type and package as its tooltip; it is
-  the one tooltip on something that is not a button or a cut-off label.
+- The header's mark carries the block type and package as its tooltip, one
+  of the few on something that is not a button or a cut-off label (see
+  Tooltips).
 - Bare mode (a board option, for dashboards): the card has no header; the
   tab carries the mark and the name, the actions sit right of the tabs, and a
   double-click on the tab renames. It needs dockViewR's tab components
@@ -966,14 +967,14 @@ Every menu, dropdown and list that floats uses one surface:
 - `bg-raised`, 1px `border-default`, radius 8 (`radius-lg`, the same as the
   field it opens from), `shadow-md`.
 - Rows at 14px, radius 4 (`radius-sm`), 10px side padding. Meta text 13px.
-- Row height and inner padding follow the trigger. A field dropdown holds a
-  list of values you scan, so it stays dense; a menu from a button, an icon or
-  a word is mostly a short list of actions and gets more room.
+- Row height and inner padding follow the kind of list, wherever it opens
+  from. A list of values is scanned, so it stays dense; a menu of actions is
+  mostly a short list and gets more room.
 
-| Menu | Rows | Inner padding |
+| List | Rows | Inner padding |
 |---|---|---|
-| field dropdown | 32px | 4px |
-| menu from a button, an icon or a word | 34px | 6px |
+| a list of values (`Blockr.Select`, `Select.menu()`) | 32px | 4px |
+| a menu of actions (`Blockr.menu`, `action_menu()`) | 34px | 6px |
 - The dock "…" menu, the download menus, the add menu and the @ menu move to
   it. The beak belongs to the gear tray only.
 - Menus of actions are `Blockr.menu` (blockr.ui): rows, gaps, dividers,
@@ -1062,8 +1063,10 @@ Escape hides it.
   block's mark in the dock header (its type, then the package as a neutral
   badge) and every name that can be renamed in place (the gesture, see
   [Renaming in place](#renaming-in-place)). So does a segment with a terse
-  label (`%`, `n`, `All`): it shows the title its caller passes. Nothing else
-  does: a button that names its action in full, like Save, has no tooltip.
+  label (`%`, `n`, `All`): it shows the title its caller passes. So do a
+  table's sorted header (its order in words) and a link in the outline (the
+  blocks it joins). Nothing else does: a button that names its action in
+  full, like Save, has no tooltip.
 - No native `title` tooltips remain in blockr markup: an element built in R
   carries its tooltip as `data-blockr-tooltip`, and a control built in
   JavaScript sets it with `Blockr.tooltip.set()`. A third-party widget's
@@ -1462,8 +1465,8 @@ Drawn in the [design system page](design-system/index.html#special).
       arrows point right or left.
 - [ ] Value pickers through `Blockr.Select` / `Select.menu()`, menus of
       actions through `Blockr.menu` or `action_menu()`, all placed by the
-      shared routine. No popovers. Tooltips on icon-only buttons and cut-off
-      labels only, using the light card; no native `title`.
+      shared routine. No popovers. Tooltips only where the Tooltips section
+      gives one, using the light card; no native `title`.
 - [ ] Badges are capsules and neutral unless they state status or "on".
 - [ ] Columns: the name with its label as meta where a column is picked, the
       label alone in an exhibit; read labels with the shared reader.
