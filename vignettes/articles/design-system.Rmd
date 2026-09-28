@@ -781,7 +781,9 @@ there is no room below, follows scroll, stays 8px from the viewport edge.
 
 A menu lines up with the trigger's left edge, or its right edge when the
 trigger is in the header row. Height up to 320px, then the list scrolls under
-its sticky titles and filter box. A filter box (30px) appears above 8 options.
+its sticky titles and filter box. A multi menu's tags take up to three rows and
+scroll on their own past that, so the list keeps room under many picks. A
+filter box (30px) appears above 8 options.
 It is part of the menu, not a field: 13px, and no focus ring, since it holds
 focus the whole time the menu is open.
 A `Select.menu` names the role it sets in its title, because the word that

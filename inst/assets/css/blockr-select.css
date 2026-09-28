@@ -411,6 +411,11 @@
    as one column rather than two boxes. */
 .blockr-select__tags--menu {
   padding: 2px 9px 6px;
+  /* Three rows of 24px tags, then they scroll on their own: the head is
+     sticky and the panel stops at 320px, so uncapped picks would push every
+     row out of reach. */
+  max-height: calc(3 * 24px + 2 * 3px);
+  overflow-y: auto;
 }
 
 /* Inset by the panel's own padding again, so the box sits inside the panel
