@@ -11,19 +11,24 @@ test_that("action_menu() hangs the rows, hidden, beside the trigger", {
 
   html <- htmltools::renderTags(menu)$html
 
-  expect_match(html, 'class="blockr-action-menu" data-align="end"', fixed = TRUE)
+  expect_match(html, 'class="blockr-action-menu" data-align="end"',
+               fixed = TRUE)
   expect_match(html, 'aria-haspopup="menu"', fixed = TRUE)
   expect_match(html, 'aria-expanded="false"', fixed = TRUE)
   expect_match(html, "blockr-tool blockr-action-menu__trigger", fixed = TRUE)
   expect_match(html, 'class="blockr-menu" role="menu" tabindex="-1" hidden',
                fixed = TRUE)
-  expect_match(html, 'class="blockr-menu__title" role="presentation">This patient',
-               fixed = TRUE)
+  expect_match(
+    html,
+    'class="blockr-menu__title" role="presentation">This patient',
+    fixed = TRUE
+  )
   expect_match(html, "blockr-menu__item blockr-menu__item--danger",
                fixed = TRUE)
 
   # The row marker is for action_menu() only and never reaches the page.
-  rows <- htmltools::tagQuery(menu)$find(".blockr-menu")$children()$selectedTags()
+  rows <- htmltools::tagQuery(menu)$find(".blockr-menu")$children()
+  rows <- rows$selectedTags()
   expect_length(rows, 4L)
   expect_false(any(vapply(rows, inherits, logical(1L), "blockr_menu_row")))
 
@@ -35,6 +40,25 @@ test_that("action_menu() hangs the rows, hidden, beside the trigger", {
     ), "data-align"),
     "start"
   )
+})
+
+test_that("a divider rules off the rows after it", {
+
+  menu <- action_menu(
+    tool_button(htmltools::HTML("R"), "Row actions"),
+    menu_item(shiny::actionLink("rename", "Rename")),
+    menu_divider(),
+    menu_item(shiny::actionLink("remove", "Remove"), danger = TRUE)
+  )
+
+  rows <- htmltools::tagQuery(menu)$find(".blockr-menu")$children()
+  rows <- rows$selectedTags()
+
+  expect_length(rows, 3L)
+  expect_identical(htmltools::tagGetAttribute(rows[[2L]], "class"),
+                   "blockr-menu__divider")
+  expect_identical(htmltools::tagGetAttribute(rows[[2L]], "role"), "separator")
+  expect_false(inherits(rows[[2L]], "blockr_menu_row"))
 })
 
 test_that("action_menu() and tool_button() bring the controls along", {
@@ -89,6 +113,18 @@ test_that("a disabled row keeps its place and says why", {
   expect_identical(htmltools::tagGetAttribute(row, "data-blockr-tooltip"),
                    "Needs the openxlsx package")
 
+  # Shiny would enable the link, and its row, once the handler is ready.
+  # The row opts out, and drops Shiny's `disabled` class, which takes the
+  # pointer events its tooltip needs.
+  expect_true(htmltools::tagHasAttribute(row, "data-shiny-disable-auto-enable"))
+  classes <- strsplit(htmltools::tagGetAttribute(row, "class"), " ")[[1L]]
+  expect_false("disabled" %in% classes)
+
+  live <- menu_item(shiny::downloadLink("pptx", "PowerPoint"))
+  expect_false(
+    htmltools::tagHasAttribute(live, "data-shiny-disable-auto-enable")
+  )
+
   ok <- menu_item(shiny::actionLink("go", "Go"))
   expect_null(htmltools::tagGetAttribute(ok, "aria-disabled"))
   expect_null(htmltools::tagGetAttribute(ok, "data-blockr-tooltip"))
@@ -112,11 +148,12 @@ test_that("stray markup is refused", {
 
   trigger <- tool_button(htmltools::HTML("D"), "Download")
 
-  expect_error(action_menu("Download", menu_section("D")), "must be an HTML tag")
+  expect_error(action_menu("Download", menu_section("D")),
+               "must be an HTML tag")
   expect_error(action_menu(trigger), "at least one row")
   expect_error(
     action_menu(trigger, shiny::downloadLink("x", "X")),
-    "menu_item\\(\\) or menu_section\\(\\)"
+    "menu_item\\(\\), menu_section\\(\\) or menu_divider\\(\\)"
   )
   expect_error(menu_item(htmltools::tags$div("X")), "an <a> or a <button>")
   expect_error(menu_item("X"), "an <a> or a <button>")

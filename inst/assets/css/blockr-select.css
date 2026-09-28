@@ -117,6 +117,13 @@
   transform: rotate(180deg);
 }
 
+/* A bare select sits in a row, whose field it is: its chevron is 10px, as
+   a pill's (design system, "Chevrons"). The stroke does not scale. */
+.blockr-select:not(.blockr-select--bordered) .blockr-select__arrow svg {
+  width: 10px;
+  height: 10px;
+}
+
 .blockr-select:not(.blockr-select--disabled):hover .blockr-select__arrow {
   color: var(--blockr-color-text-default);
 }
@@ -218,7 +225,7 @@
   background: var(--blockr-color-bg-accent-subtle);
   border: 1px solid var(--blockr-color-border-accent-subtle);
   font-size: var(--blockr-font-size-sm);
-  color: var(--blockr-color-text-accent);
+  color: var(--blockr-color-text-accent-strong);
   cursor: pointer;
   user-select: none;
 }
@@ -359,7 +366,9 @@
   border: 1px solid var(--blockr-color-border-default);
   border-radius: var(--blockr-radius-lg);
   box-shadow: var(--blockr-shadow-md);
-  z-index: 9999;
+  /* Above a modal or side panel it opens from; the tooltip that names a
+     cut-off row sits one layer higher. */
+  z-index: var(--blockr-z-menu);
 }
 
 /* ===== Headless: the dropdown as a menu ===== */
@@ -412,6 +421,11 @@
    as one column rather than two boxes. */
 .blockr-select__tags--menu {
   padding: 2px 9px 6px;
+  /* Three rows of 24px tags, then they scroll on their own: the head is
+     sticky and the panel stops at 320px, so uncapped picks would push every
+     row out of reach. */
+  max-height: calc(3 * 24px + 2 * 3px);
+  overflow-y: auto;
 }
 
 /* Inset by the panel's own padding again, so the box sits inside the panel

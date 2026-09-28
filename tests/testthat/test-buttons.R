@@ -51,7 +51,7 @@ test_that("buttons bring the controls along", {
     `[[`, character(1L), "name"
   )
 
-  expect_true(all(c("blockr-theme", "blockr-buttons-css") %in% names))
+  expect_true(all(c("blockr-tokens", "blockr-buttons-css") %in% names))
 })
 
 test_that("the theme maps every Bootstrap button kind it names", {

@@ -1,7 +1,6 @@
 /* The light tooltip card, in its own stylesheet (dependency
-   blockr-tooltip-css). blockr-blocks.css shares its dependency name with
-   blockr.dplyr's older copy, and a board with dplyr blocks keeps that one,
-   so a style kept there never reached such a board. */
+   blockr-tooltip-css): the table preview brings it along with blockr-ui.js,
+   without the controls' other stylesheets. */
 
 /* --- Tooltip (Blockr.tooltip) ---
    The light card of the design system's "Tooltips": bg-raised, 1px
@@ -9,7 +8,7 @@
    shows its name, then its label muted. */
 .blockr-tooltip {
   position: fixed;
-  z-index: 1080;
+  z-index: var(--blockr-z-tooltip);
   max-width: 320px;
   padding: 5px 9px;
   background: var(--blockr-color-bg-raised);
@@ -42,4 +41,13 @@
   font-size: 11px;
   font-weight: var(--blockr-font-weight-medium);
   vertical-align: middle;
+}
+
+/* --- Text edited in place ---
+   The text cursor says the text is editable; blockr-ui.js adds the tooltip
+   naming the gesture. In this stylesheet because it comes wherever
+   blockr-ui.js does, with controls_dep() and with the table preview; the
+   theme layer is the app's to attach. */
+[data-blockr-editable] {
+  cursor: text;
 }

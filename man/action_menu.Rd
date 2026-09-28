@@ -4,6 +4,7 @@
 \alias{action_menu}
 \alias{menu_item}
 \alias{menu_section}
+\alias{menu_divider}
 \title{Action menu}
 \usage{
 action_menu(trigger, ..., align = c("end", "start"))
@@ -11,12 +12,15 @@ action_menu(trigger, ..., align = c("end", "start"))
 menu_item(x, meta = NULL, icon = NULL, danger = FALSE, disabled = NULL)
 
 menu_section(title)
+
+menu_divider()
 }
 \arguments{
 \item{trigger}{The button that opens the menu, typically a
 \code{\link[=tool_button]{tool_button()}}.}
 
-\item{...}{Rows: \code{\link[=menu_item]{menu_item()}}s and \code{\link[=menu_section]{menu_section()}} titles, in order. \code{NULL}s are dropped, so a row can be
+\item{...}{Rows: \code{\link[=menu_item]{menu_item()}}s, \code{\link[=menu_section]{menu_section()}} titles and
+\code{\link[=menu_divider]{menu_divider()}} rules, in order. \code{NULL}s are dropped, so a row can be
 conditional.}
 
 \item{align}{\code{"end"} lines the menu up with the trigger's right edge, for a
@@ -33,7 +37,8 @@ download (".pptx"), a block ID, or a keyboard shortcut from
 
 \item{icon}{An icon before the label, as a tag or \code{\link[htmltools:HTML]{htmltools::HTML()}}.}
 
-\item{danger}{Draw the row in red. Only for a removal.}
+\item{danger}{A removal: the row turns red under the pointer or keyboard
+focus, and stays plain at rest.}
 
 \item{disabled}{\code{NULL} for a usable row, or the reason it is not usable:
 the row stays in the list, greyed, with the reason as its tooltip.}
@@ -56,6 +61,15 @@ row. \code{Blockr.actionMenu} (in \code{blockr-ui.js}, loaded by \code{\link[=co
 opens the list on a click on the trigger, places it on the page body with
 \code{Blockr.place} so no panel's overflow clips it, and closes it again on a
 pick, Escape, Tab or a click outside.
+
+A download row works once Shiny has bound its handler, which it does when
+the menu first shows, so for a moment on that first open the row is still
+inert. To have it ready from the start, set
+\code{shiny::outputOptions(output, "<id>", suspendWhenHidden = FALSE)} for its
+output.
+
+\code{menu_divider()} draws a rule between groups that have no title,
+such as the ordinary actions and a destructive one after them.
 }
 \examples{
 action_menu(

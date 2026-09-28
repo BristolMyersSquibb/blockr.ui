@@ -11,9 +11,16 @@
 #' `Blockr.place` so no panel's overflow clips it, and closes it again on a
 #' pick, Escape, Tab or a click outside.
 #'
+#' A download row works once Shiny has bound its handler, which it does when
+#' the menu first shows, so for a moment on that first open the row is still
+#' inert. To have it ready from the start, set
+#' `shiny::outputOptions(output, "<id>", suspendWhenHidden = FALSE)` for its
+#' output.
+#'
 #' @param trigger The button that opens the menu, typically a
 #'   [tool_button()].
-#' @param ... Rows: [menu_item()]s and [menu_section()] titles, in order. `NULL`s are dropped, so a row can be
+#' @param ... Rows: [menu_item()]s, [menu_section()] titles and
+#'   [menu_divider()] rules, in order. `NULL`s are dropped, so a row can be
 #'   conditional.
 #' @param align `"end"` lines the menu up with the trigger's right edge, for a
 #'   trigger in a block's header row, where a menu opening to the right would
@@ -53,8 +60,8 @@ action_menu <- function(trigger, ..., align = c("end", "start")) {
   ok <- vapply(rows, inherits, logical(1L), "blockr_menu_row")
 
   if (!all(ok)) {
-    stop("Every row must come from menu_item() or menu_section().",
-         call. = FALSE)
+    stop("Every row must come from menu_item(), menu_section() or ",
+         "menu_divider().", call. = FALSE)
   }
 
   trigger <- htmltools::tagAppendAttributes(
@@ -77,11 +84,7 @@ action_menu <- function(trigger, ..., align = c("end", "start")) {
     )
   )
 
-  htmltools::attachDependencies(
-    menu,
-    htmltools::findDependencies(controls_dep()),
-    append = TRUE
-  )
+  with_controls(menu)
 }
 
 #' @param x The row's element: a [shiny::downloadLink()], an
@@ -91,7 +94,8 @@ action_menu <- function(trigger, ..., align = c("end", "start")) {
 #'   download (".pptx"), a block ID, or a keyboard shortcut from
 #'   [shortcut()].
 #' @param icon An icon before the label, as a tag or [htmltools::HTML()].
-#' @param danger Draw the row in red. Only for a removal.
+#' @param danger A removal: the row turns red under the pointer or keyboard
+#'   focus, and stays plain at rest.
 #' @param disabled `NULL` for a usable row, or the reason it is not usable:
 #'   the row stays in the list, greyed, with the reason as its tooltip.
 #'
@@ -144,8 +148,18 @@ menu_item <- function(x, meta = NULL, icon = NULL, danger = FALSE,
   )
 
   if (!is.null(disabled)) {
+    # Shiny enables a downloadLink() once its handler is ready: it clears
+    # aria-disabled, the tabindex and its own `disabled` class, from which its
+    # stylesheet takes pointer events. A row the author disabled opts out of
+    # that, keeps its state for screen readers, and keeps the pointer for the
+    # reason's tooltip; its own class keeps it inert.
     x$attribs[["aria-disabled"]] <- NULL
-    x <- htmltools::tagAppendAttributes(x, `aria-disabled` = "true")
+    x <- htmltools::tagQuery(x)$removeClass("disabled")$allTags()
+    x <- htmltools::tagAppendAttributes(
+      x,
+      `aria-disabled` = "true",
+      `data-shiny-disable-auto-enable` = NA
+    )
   }
 
   menu_row(x)
@@ -159,6 +173,15 @@ menu_item <- function(x, meta = NULL, icon = NULL, danger = FALSE,
 menu_section <- function(title) {
   stopifnot(is.character(title), length(title) == 1L)
   menu_row(tags$div(class = "blockr-menu__title", role = "presentation", title))
+}
+
+#' @details `menu_divider()` draws a rule between groups that have no title,
+#'   such as the ordinary actions and a destructive one after them.
+#'
+#' @rdname action_menu
+#' @export
+menu_divider <- function() {
+  menu_row(tags$div(class = "blockr-menu__divider", role = "separator"))
 }
 
 #' Tool button
@@ -181,7 +204,7 @@ tool_button <- function(icon, tooltip, ...) {
 
   stopifnot(is.character(tooltip), length(tooltip) == 1L, nzchar(tooltip))
 
-  htmltools::attachDependencies(
+  with_controls(
     tags$button(
       type = "button",
       class = "blockr-tool",
@@ -189,9 +212,7 @@ tool_button <- function(icon, tooltip, ...) {
       `data-blockr-tooltip` = tooltip,
       ...,
       icon
-    ),
-    htmltools::findDependencies(controls_dep()),
-    append = TRUE
+    )
   )
 }
 

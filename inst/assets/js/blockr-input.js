@@ -3,7 +3,7 @@
  * Blockr.Input — lightweight code input with autocomplete
  *
  * Replaces ACE editor in blockr blocks.
- * Depends on blockr-ui.js (Blockr.uid, Blockr.removeNode).
+ * Depends on blockr-ui.js (Blockr.uid, Blockr.removeNode, Blockr.place).
  *
  * API:
  *   Blockr.Input.create(container, config) -> { el, getValue, setValue, setColumns, focus, destroy }
@@ -72,38 +72,36 @@
     field.setAttribute('autocapitalize', 'off');
     field.setAttribute('spellcheck', 'false');
     if (config.value) field.value = config.value;
+    if (config.label) field.setAttribute('aria-label', config.label);
 
     const popup = document.createElement('div');
     popup.className = 'blockr-input__popup';
     popup.id = popupId;
     popup.setAttribute('role', 'listbox');
+    popup.setAttribute('aria-label', 'Completions');
+
+    // The field and its list, as screen readers meet them: a single-line
+    // field is a combobox, like Blockr.Select's search box, with the
+    // highlighted completion as its active descendant. A textarea cannot be
+    // a combobox, so it only names the list it controls.
+    field.setAttribute('aria-controls', popupId);
+    field.setAttribute('aria-autocomplete', 'list');
+    if (!multiline) {
+      field.setAttribute('role', 'combobox');
+      field.setAttribute('aria-expanded', 'false');
+    }
 
     root.appendChild(field);
     container.appendChild(root);
 
-    // Portal: popup lives on document.body while open so it escapes any
-    // clipping / paint-containment / stacking-context ancestors (Dockview
-    // panels, offcanvas, modals, …). Same pattern as Blockr.Select.
-
-    const computePopupPosition = () => {
-      const r = root.getBoundingClientRect();
-      const popupH = popup.offsetHeight || 200;
-      const spaceBelow = window.innerHeight - r.bottom - 8;
-      const flipAbove = spaceBelow < popupH && r.top > popupH;
-
-      popup.style.position = 'fixed';
-      popup.style.width    = r.width + 'px';
-      popup.style.left     = r.left + 'px';
-      popup.style.bottom   = 'auto';
-
-      if (flipAbove) {
-        popup.style.top = (r.top - popupH - 2) + 'px';
-      } else {
-        popup.style.top = (r.bottom + 2) + 'px';
-      }
-    };
-
-    const onScrollOrResize = () => { if (popupOpen) computePopupPosition(); };
+    // Portal: the popup lives on document.body while open, so no clipping,
+    // paint-containment or stacking-context ancestor (dock panels,
+    // offcanvas, modals) cuts it off. Blockr.place holds it against the
+    // field, as it does Blockr.Select's list: above where there is no room
+    // below, and following scroll, resize and the list's own height, which
+    // shrinks as typing narrows it.
+    /** @type {BlockrPlaceHandle | null} */
+    let placement = null;
 
     // --- Completion list building ---
 
@@ -178,9 +176,11 @@
       for (let i = 0; i < filtered.length; i++) {
         const c = filtered[i];
         const item = document.createElement('div');
+        item.id = `${popupId}-opt-${i}`;
         item.className = 'blockr-input__item';
         if (i === highlightIdx) item.className += ' blockr-input__item--highlighted';
         item.setAttribute('role', 'option');
+        item.setAttribute('aria-selected', i === highlightIdx ? 'true' : 'false');
         item.setAttribute('data-idx', /** @type {any} */ (i));
 
         const textSpan = document.createElement('span');
@@ -204,6 +204,7 @@
       }
 
       if (!popupOpen) openPopup();
+      field.setAttribute('aria-activedescendant', `${popupId}-opt-${highlightIdx}`);
       scrollHighlightIntoView();
     };
 
@@ -219,20 +220,24 @@
       popup.style.display = 'block';
 
       root.classList.add('blockr-input--popup-open');
-      computePopupPosition();
-      window.addEventListener('scroll', onScrollOrResize, { capture: true, passive: true });
-      window.addEventListener('resize', onScrollOrResize, { passive: true });
+      if (!multiline) field.setAttribute('aria-expanded', 'true');
+      placement = Blockr.place(popup, root, { gap: 2 });
+      // Only while open: a listener per field for the whole life of the page
+      // would hold the field and its block after they leave it.
+      document.addEventListener('click', onDocumentClick, true);
     };
 
     const closePopup = () => {
       if (!popupOpen) return;
       popupOpen = false;
 
-      window.removeEventListener('scroll', onScrollOrResize, { capture: true });
-      window.removeEventListener('resize', onScrollOrResize);
+      if (placement) { placement.stop(); placement = null; }
+      document.removeEventListener('click', onDocumentClick, true);
 
       popup.style.display = '';
       root.classList.remove('blockr-input--popup-open');
+      if (!multiline) field.setAttribute('aria-expanded', 'false');
+      field.removeAttribute('aria-activedescendant');
       popup.innerHTML = '';
       highlightIdx = 0;
     };
@@ -296,7 +301,11 @@
             acceptCompletion(highlightIdx);
             break;
           case 'Escape':
+            // An open list owns this Escape, as an open Blockr.Select's does:
+            // it closes and the key goes no further, so the gear tray the
+            // field sits in stays open.
             e.preventDefault();
+            e.stopPropagation();
             closePopup();
             break;
         }
@@ -345,7 +354,6 @@
     field.addEventListener('blur', onFieldBlur);
     popup.addEventListener('mousedown', (e) => e.preventDefault());
     popup.addEventListener('click', onPopupClick);
-    document.addEventListener('click', onDocumentClick, true);
 
     // --- Public API ---
 
@@ -378,7 +386,6 @@
         /** @type {HTMLElement} */ (field).removeEventListener('keydown', onFieldKeydown);
         field.removeEventListener('blur', onFieldBlur);
         popup.removeEventListener('click', onPopupClick);
-        document.removeEventListener('click', onDocumentClick, true);
         Blockr.removeNode(root);
       }
     };

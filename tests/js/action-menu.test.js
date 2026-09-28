@@ -99,6 +99,34 @@ test('the keyboard opens on the first row and moves over usable rows only', (new
   win.close();
 });
 
+test('a download Shiny has not bound yet keeps its place for the keyboard', (newWindow) => {
+  const win = newWindow();
+  const { trigger, panel, clicks } = build(win);
+  // A downloadLink() before its handler binds, as Shiny marks it; on the
+  // first open every download is still in this state.
+  for (const id of ['pptx', 'html']) {
+    const row = panel.querySelector(`#${id}`);
+    row.classList.add('shiny-download-link', 'disabled');
+    row.setAttribute('aria-disabled', 'true');
+  }
+  click(win, trigger, 0);
+  const id = () => win.document.activeElement.id;
+  assert.strictEqual(id(), 'pptx', 'the first row, not Remove');
+  key(win, win.document.activeElement, ' ');
+  assert.strictEqual(clicks.pptx, 0, 'inert until Shiny binds it');
+  key(win, win.document.activeElement, 'ArrowDown');
+  assert.strictEqual(id(), 'html', 'the row its author disabled is still skipped');
+
+  // Shiny binds the handler.
+  const pptx = panel.querySelector('#pptx');
+  pptx.classList.remove('disabled');
+  pptx.removeAttribute('aria-disabled');
+  key(win, win.document.activeElement, 'ArrowUp');
+  key(win, win.document.activeElement, ' ');
+  assert.strictEqual(clicks.pptx, 1);
+  win.close();
+});
+
 test('arrows from a mouse open start at the ends', (newWindow) => {
   const win = newWindow();
   const { trigger, panel } = build(win);

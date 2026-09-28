@@ -39,9 +39,6 @@ if (!window.blockrSortInit) {
     if (e.target.closest('.blockr-col-name')) return;
     var header = e.target.closest('.blockr-sortable');
     if (!header) return;
-    // Where the sort click happened, so the redrawn header can find out
-    // whether the pointer is still on it (see blockrHoverTip).
-    window.blockrLastSortPoint = {x: e.clientX, y: e.clientY, t: Date.now()};
     e.preventDefault();
     e.stopPropagation();
     var container = header.closest('.blockr-table-container');
@@ -94,46 +91,4 @@ if (!window.blockrPaginationInit) {
                   Math.min(maxPage, currentPage + 1);
     Shiny.setInputValue(inputId, newPage, {priority: 'event'});
   });
-}
-
-// The sorted header's tooltip (data-sort-tip, set by build_html_table()),
-// and the cut-off-only tooltips of cells and labels (data-blockr-tooltip),
-// registered with the shared light tooltip whenever a table lands.
-if (!window.blockrSortTipInit) {
-  window.blockrSortTipInit = true;
-  var blockrSortTips = function(node) {
-    if (!window.Blockr || !Blockr.tooltip || !node || node.nodeType !== 1) return;
-    var cut = node.querySelectorAll('.blockr-table [data-blockr-tooltip-overflow]');
-    for (var k = 0; k < cut.length; k++) {
-      Blockr.tooltip.set(cut[k], cut[k].getAttribute('data-blockr-tooltip'), {overflow: true});
-    }
-    var ths = node.matches('th[data-sort-tip]') ? [node] :
-      node.querySelectorAll('th[data-sort-tip]');
-    for (var i = 0; i < ths.length; i++) {
-      Blockr.tooltip.set(ths[i], ths[i].getAttribute('data-sort-tip'));
-      // A sort click redraws the table under a pointer that has not moved,
-      // so no pointerover follows; when the pointer is already on the
-      // sorted header, hand the tooltip the event it waits for.
-      blockrHoverTip(ths[i]);
-    }
-  };
-  // The browser's :hover is not a test here: Safari does not update it for
-  // a node drawn under a pointer that has not moved. What is under the point
-  // of the last sort click is.
-  // It waits for the scroll restore above: setting the wrapper's scrollLeft
-  // fires a scroll event, and the tooltip closes on scroll.
-  var blockrHoverTip = function(th) {
-    setTimeout(function() {
-      var pt = window.blockrLastSortPoint;
-      if (!th.isConnected || !pt || Date.now() - pt.t > 10000) return;
-      var under = document.elementFromPoint(pt.x, pt.y);
-      if (under && th.contains(under)) {
-        th.dispatchEvent(new PointerEvent('pointerover', {bubbles: true}));
-      }
-    }, 150);
-  };
-  new MutationObserver(function(muts) {
-    muts.forEach(function(m) { m.addedNodes.forEach(blockrSortTips); });
-  }).observe(document.documentElement, {childList: true, subtree: true});
-  blockrSortTips(document.documentElement);
 }

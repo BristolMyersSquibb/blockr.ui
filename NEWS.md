@@ -8,23 +8,25 @@
   dock's own messages waited 2 to 4 seconds behind them. Attach it once at
   the page level.
 
-* `Blockr.menu()`, the design system's action menu, joins `controls_dep()`:
-  rows with an icon, label and meta text, dividers, group titles, a head
-  (a name with a badge and a line of text), current, disabled and
-  destructive rows, placed with `Blockr.place()` and driven from the
-  keyboard. `Blockr.menu.bind()` wires a trigger. Its classes also style
-  menus built elsewhere.
+* The design system's menu of actions, `Blockr.menu()`, joins
+  `controls_dep()`: rows with an icon, label and meta text, dividers, group
+  titles, a head (a name with a badge and a line of text), current, disabled
+  and destructive rows, placed with `Blockr.place()` and driven from the
+  keyboard. A trigger is wired with `Blockr.menu.bind()`. Its classes also
+  style menus built elsewhere.
 
 * A `Blockr.tooltip` line can carry a `badge`.
 
-* `action_menu()` builds a menu of actions opened by a button: downloads,
-  Rename, Remove. Its rows are `menu_item()`s wrapping a `downloadLink()`,
-  an `actionLink()` or any link or button, with `menu_section()` titles between them. A row does one thing and the menu closes;
-  unlike `Blockr.Select.menu()` it sets no value. Open, the list sits on the
-  page body, so no panel's overflow clips it.
+* The new `action_menu()` builds a menu of actions opened by a button:
+  downloads, Rename, Remove. Its rows are `menu_item()`s wrapping a
+  `downloadLink()`, an `actionLink()` or any link or button, with
+  `menu_section()` titles and `menu_divider()` rules between them. A row
+  does one thing and the menu closes; unlike `Blockr.Select.menu()` it sets
+  no value. Open, the list sits on the page body, so no panel's overflow
+  clips it.
 
-* `tool_button()` is the design system's 26px icon button, named by a
-  tooltip.
+* The new `tool_button()` is the design system's 26px icon button, named
+  by a tooltip.
 
 * `select_input()`, `text_input()`, `number_input()`, `checkbox_input()` and
   `segmented_input()`, each with an `update_*()` function, and `gear_tray()`
@@ -38,22 +40,55 @@
   attribute; `Blockr.tooltip` shows it as the light card, in place of the
   native `title` box.
 
+* Text marked `data-blockr-editable` shows the text cursor and a tooltip
+  naming the gesture, "Double-click to edit" unless the attribute names
+  another.
+
+* The new `shortcut()` writes a keyboard hint once for every platform:
+  `shortcut("Mod+Shift+S")` reads ⌘⇧S on a Mac and Ctrl+Shift+S elsewhere.
+  It fits the meta slot of a `menu_item()`.
+
+* The table preview draws its header in the table style: the sort cue sits
+  on the name's line, a numeric column's header sits over its numbers, and
+  a sorted header states its order in a tooltip and in `aria-sort`. A label
+  or value cut off by its column shows whole in the light card rather than
+  a native `title`.
+
+* With `theme_dep()` in the page, Bootstrap's buttons take the design
+  system's kinds: `.btn-primary` is the main button, `.btn-default` (Shiny's
+  `actionButton()` and `downloadButton()`), `.btn-secondary` and
+  `.btn-light` the secondary one, `.btn-link` the quiet one and
+  `.btn-danger` the destructive one. Markup built for blockr uses the
+  `.blockr-btn` classes, in three sizes.
+
 * The design tokens are rewritten around the vocabulary of the design spec:
   a colour palette, meaning tokens for text, backgrounds, borders and status,
   type, radii, control heights and shadows. Every name defined before keeps
   its old value.
+
+* The tokens include a stacking scale, `--blockr-z-sticky` up to
+  `--blockr-z-toast`, at Bootstrap's own z-index values. Anything that floats
+  over the page takes one of these layers; inside a component, a z-index only
+  orders siblings, from -1 to 3.
 
 * The `theme_dep()` dependency also attaches `blockr-tokens-dark.css`, which
   restates the tokens under `data-bs-theme="dark"`, the attribute that
   blockr.core's dark-mode board option sets. In dark, Bootstrap's body
   background and text colour follow the tokens too.
 
+* The `theme_dep()` function returns two dependencies in a `tagList()`, the
+  tokens and the theme layer, so a component can carry the tokens without
+  restyling the rest of the page.
+
 * The `controls_dep()` dependency carries the controls blockr blocks are
   built from, moved here from blockr.dplyr: `Blockr.Select`, the Enter
   button, the required-empty cue, the checkbox, the segmented control, the
-  gear tray and `Blockr.place`, with the stylesheets they draw with. The
-  dependency names are the ones blockr.dplyr used, so a page never loads two
-  copies.
+  gear tray and `Blockr.place`, with the stylesheets they draw with. It
+  brings the tokens but not the theme layer, which an app attaches with
+  `theme_dep()`. The dependency names are the ones blockr.dplyr used, so a
+  page carries one copy of each; while blockr.dplyr still ships its own
+  copies, that copy is blockr.dplyr's, as htmltools keeps the higher version
+  of a name.
 
 * `controls_dep()` also carries `Blockr.Input`, the code field with column
   and function completions, moved here from blockr.dplyr under its old

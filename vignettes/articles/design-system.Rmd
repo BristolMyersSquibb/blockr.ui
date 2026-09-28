@@ -53,14 +53,15 @@ The second word of a token's name says what kind it is.
 |---|---|---|---|
 | Palette | `--blockr-<hue>-<step>` | `--blockr-grey-200` | other tokens only |
 | Meaning | `--blockr-color-<property>-<role>[-<state>]` | `--blockr-color-text-muted` | components |
-| | `--blockr-font-<aspect>-<step>` | `--blockr-font-size-sm` | |
+| | `--blockr-font-<aspect>[-<step>]` | `--blockr-font-size-sm`, `--blockr-font-mono` | |
 | | `--blockr-radius-<step>`, `--blockr-control-h[-<step>]`, `--blockr-shadow-<step>` | `--blockr-radius-lg` | |
 | | `--blockr-focus-<aspect>`, `--blockr-transition`, `--blockr-mark-<aspect>` | `--blockr-focus-outline` | |
+| | `--blockr-z-<layer>` | `--blockr-z-menu` | anything positioned against the page ([Stacking](#floating)) |
 | Local | `--blockr-<owner>-<thing>` | `--blockr-dock-spinner-delay` | its owner's stylesheet only |
 
 A global token's second word is one of `color`, `font`, `radius`, `control`,
-`shadow`, `focus`, `transition`, `mark`, or a palette hue. Anything else is
-local. For colour, `<property>` is `text`, `bg` or `border` and comes first,
+`shadow`, `focus`, `transition`, `mark`, `z`, or a palette hue. Anything else
+is local. For colour, `<property>` is `text`, `bg` or `border` and comes first,
 because a colour chosen for text is not automatically right as a fill.
 
 ### Palette
@@ -85,14 +86,14 @@ disabled.
 | `--blockr-color-text-muted` | grey-500 | labels, placeholders, meta, hints, counts, empty states, column types, row numbers, `NA`, status lines and footers, icons at rest |
 | `--blockr-color-text-disabled` | grey-400 | disabled controls only |
 | `--blockr-color-text-on-accent` | `#ffffff` | text on a solid accent fill |
-| `--blockr-color-text-accent` | accent-600 | accent text |
-| `--blockr-color-text-accent-strong` | accent-700 | accent text on an accent tint (a count on the main button, the avatar initial), where accent-600 is 3.9:1 |
+| `--blockr-color-text-accent` | accent-600 | accent text on a plain surface |
+| `--blockr-color-text-accent-strong` | accent-700 | text on the accent tint (every selected or "on" state, a count on the main button, the avatar initial), where accent-600 falls below 4.5:1 |
 | `--blockr-color-text-danger` / `-warning` / `-success` | red-700 / amber-700 / green-700 | status text |
 
 Muted is 4.8:1 on white, 4.6:1 on grey-50 and 4.4:1 on grey-100. Muted text
 therefore never sits on a hover or selected background: on a hovered row, meta
-text and icons turn default; on a selected row, they turn `text-accent` with
-the rest of the row. Grey-400 is 2.5:1 and serves disabled controls
+text and icons turn default; on a selected row, they turn `text-accent-strong`
+with the rest of the row. Grey-400 is 2.5:1 and serves disabled controls
 only.
 
 ### Surfaces
@@ -108,7 +109,7 @@ layer takes that layer's field and border tokens.
 | `--blockr-color-bg-subtle` | grey-50 | a quiet fill inside a surface; the gear tray |
 | `--blockr-color-bg-field` | grey-50 | an input field |
 | `--blockr-color-bg-hover` | `color-mix(in srgb, var(--blockr-color-text-default) 6%, transparent)` | hover and the keyboard row |
-| `--blockr-color-bg-selected` | `bg-accent-subtle` | the chosen thing: a selected row, the front tab of the active dock group; its text is `text-accent`, and it has no edge |
+| `--blockr-color-bg-selected` | `bg-accent-subtle` | the chosen thing: a selected row, the front tab of the active dock group; its text is `text-accent-strong`, and it has no edge |
 | `--blockr-color-bg-selected-inactive` | `color-mix(in srgb, var(--blockr-color-text-default) 10%, transparent)` | the front tab of every other dock group: selected, but not where you work; one step above hover |
 | `--blockr-color-bg-accent` | accent-600 | solid accent fill (checked checkbox) |
 | `--blockr-color-bg-accent-hover` | accent-700 | its hover |
@@ -135,7 +136,7 @@ lands on grey-100.
 Input borders stay soft (`border-default`). The focus state marks the active
 field.
 
-**The accent tint** is `text-accent` on `bg-accent-subtle` with a
+**The accent tint** is `text-accent-strong` on `bg-accent-subtle` with a
 `border-accent-subtle` edge; its hover is `bg-accent-subtle-hover` with
 `border-accent`. It is the main button's look, and every selected or "on"
 state borrows it: a selected segment, an icon tile, a pressed icon button, the
@@ -335,8 +336,9 @@ There is no 16px section heading inside a block.
   surface) with the glyph in the category colour. Sizes: 28px in the dock
   header, 24px in list rows (menus, pickers) with the package as a badge,
   16px in a tab.
-- The header's mark carries the block type and package as its tooltip; it is
-  the one tooltip on something that is not a button or a cut-off label.
+- The header's mark carries the block type and package as its tooltip, one
+  of the few on something that is not a button or a cut-off label (see
+  Tooltips).
 - Bare mode (a board option, for dashboards): the card has no header; the
   tab carries the mark and the name, the actions sit right of the tabs, and a
   double-click on the tab renames. It needs dockViewR's tab components
@@ -532,7 +534,7 @@ from ([Picking a block](#floating)).
   that are not on the row, and Remove last after a divider. There is no ×
   on the row. Meta text gives way to the "…"; a tool never covers the name.
 - **The current row:** the block open in the dock is `bg-selected` with
-  `text-accent`, in every list.
+  `text-accent-strong`, in every list.
 - **Gestures:** a click opens the block. A double-click renames it
   ([Renaming in place](#controls)). The whole row drags, with the grab cursor
   and a 2px `border-accent` line where it will land. Alt+Up/Down moves the
@@ -642,6 +644,8 @@ selected row, the active group's front tab.
   (for columns, see [Column names and their labels](#labels));
   the label is cut first when space runs out.
 - Its dropdown is a menu ([Floating layer](#floating)).
+- A screen reader names it by its field's label, which the caller passes as
+  `label`; a menu uses its title.
 
 ### Select, multi, with tags
 
@@ -735,9 +739,9 @@ title, an outline row, a view name, a tab (in bare mode).
   Where the gesture is a single click (a name in the views menu's manage
   mode), the tooltip says so ("Click to rename").
 - Markup: `data-blockr-editable` on the element that shows the name, with the
-  gesture as its value where it is not the double-click. blockr-ui.js and
-  blockr-theme.css give it the tooltip and the cursor; nothing else is
-  needed.
+  gesture as its value where it is not the double-click. blockr-ui.js gives
+  it the tooltip and blockr-tooltip.css the cursor, both loaded wherever
+  blockr-ui.js is; nothing else is needed.
 - While editing, the text becomes a field at its own size and weight: 1px
   `border-accent`, the focus ring, `bg-surface`, the text selected. No label.
 - Enter commits, Escape restores, a click elsewhere commits. An empty or
@@ -785,7 +789,7 @@ Four kinds. All are weight 500 and show the focus outline on `:focus-visible`.
 
 | Kind | Rest | Hover | Use |
 |---|---|---|---|
-| Main | the accent tint: `text-accent`, `bg-accent-subtle`, `border-accent-subtle` | `bg-accent-subtle-hover`, `border-accent` | at most one per view |
+| Main | the accent tint: `text-accent-strong`, `bg-accent-subtle`, `border-accent-subtle` | `bg-accent-subtle-hover`, `border-accent` | at most one per view |
 | Secondary | `bg-surface`, `border-default`, `text-default` | `bg-hover`, `border-strong` | everything else with a frame |
 | Quiet | text only, `text-muted`, 8px side padding | `bg-hover`, `text-default` | low-weight actions; replaces the grey-400 text links |
 | Destructive | `text-danger`, `border-danger` at 6% fill, `border-danger-subtle` | `border-danger` at 12% fill, `border-danger` | only to confirm a removal |
@@ -885,7 +889,7 @@ the tip, stroked at 1.4px with round caps and joins and no fill.
   | ↵ | commit this one thing: a field's value, a pick in a menu, one value added to a list |
   | ⌘↵ (Ctrl+↵) | run or send, where ↵ makes a new line: Run in the code editor |
   | Esc | cancel: drop what is not committed, close what floats. Never saves. |
-  | Tab, a click elsewhere | leave; a field commits when you leave it |
+  | Tab, a click elsewhere | leave; a field commits when you leave it. The code field's open completion list is the exception: Tab takes the highlighted completion, as an R editor does |
   | ⇧↵ | nothing of blockr's own |
 
 - **Notation.** Keys are glyphs: ↵ Enter, ⇧ Shift, ⌘ Command, ⌥ Option, and
@@ -933,6 +937,30 @@ blockr has no popovers. Floating things are menus (choices and actions, opened
 by a click) and tooltips (names, on hover). The gear tray is in flow and not
 part of this layer.
 
+### Stacking
+
+A z-index is one of two things, and no other number is written:
+
+- **Inside a component** it orders siblings, from -1 to 3. It cannot reach
+  past the component's own stacking context, so it needs no scale.
+- **Against the page** (fixed, or portalled to `<body>`) it names a layer.
+  The layers are Bootstrap's stack, which bslib puts on every page, so a
+  blockr layer lands between Bootstrap's own instead of guessing past them.
+
+| Layer | Token | Value | Bootstrap |
+|---|---|---|---|
+| Sticky header | `--blockr-z-sticky` | 1020 | `$zindex-sticky` |
+| Fixed bar | `--blockr-z-fixed` | 1030 | `$zindex-fixed` |
+| Side panel over the page | `--blockr-z-offcanvas` | 1045 | `$zindex-offcanvas` |
+| Modal | `--blockr-z-modal` | 1055 | `$zindex-modal` |
+| Menu | `--blockr-z-menu` | 1070 | `$zindex-popover` |
+| Tooltip | `--blockr-z-tooltip` | 1080 | `$zindex-tooltip` |
+| Toast | `--blockr-z-toast` | 1090 | `$zindex-toast` |
+
+A layer sits above everything it can open from: a menu opens from a modal or a
+side panel, and a tooltip names a menu's rows. The tests in blockr.ui hold its
+stylesheets to these two forms and the layers to Bootstrap's values.
+
 ### Menus
 
 Every menu, dropdown and list that floats uses one surface:
@@ -940,26 +968,27 @@ Every menu, dropdown and list that floats uses one surface:
 - `bg-raised`, 1px `border-default`, radius 8 (`radius-lg`, the same as the
   field it opens from), `shadow-md`.
 - Rows at 14px, radius 4 (`radius-sm`), 10px side padding. Meta text 13px.
-- Row height and inner padding follow the trigger. A field dropdown holds a
-  list of values you scan, so it stays dense; a menu from a button, an icon or
-  a word is mostly a short list of actions and gets more room.
+- Row height and inner padding follow the kind of list, wherever it opens
+  from. A list of values is scanned, so it stays dense; a menu of actions is
+  mostly a short list and gets more room.
 
-| Menu | Rows | Inner padding |
+| List | Rows | Inner padding |
 |---|---|---|
-| field dropdown | 32px | 4px |
-| menu from a button, an icon or a word | 34px | 6px |
+| a list of values (`Blockr.Select`, `Select.menu()`) | 32px | 4px |
+| a menu of actions (`Blockr.menu`, `action_menu()`) | 34px | 6px |
 - The dock "…" menu, the download menus, the add menu and the @ menu move to
   it. The beak belongs to the gear tray only.
 - Menus of actions are `Blockr.menu` (blockr.ui): rows, gaps, dividers,
   group titles and an optional head. A menu of actions is a little airier
-  than a Select list: 6px panel padding, radius 10, rows 34px at radius 6.
+  than a Select list: 6px panel padding and rows 34px at radius 6
+  (`radius-md`), in the same radius-8 panel.
 - Plain actions have no icon. A row gets one only when it is more than a
   plain action: it opens a mode or another surface ("Manage pages"), or it
   destroys something ("Remove", a bin). Such a row sits in a group of its
   own, after a gap or a divider, so a label with an icon never sits right
   under one without.
 - A destructive row is plain text at rest and turns `text-danger` on a
-  `bg-danger` wash under the pointer. The current item (the page you are on)
+  `bg-danger` wash under the pointer or as the keyboard row. The current item (the page you are on)
   is weight 600 with a check at the end, no fill. Its classes (`.blockr-menu`,
   `.blockr-menu__item`, ...) also style a menu whose markup is rendered
   elsewhere, so it looks the same.
@@ -983,8 +1012,9 @@ The views menu drops its blue fill for the current view.
 (12px, 600, uppercase, 0.05em, `text-muted`), 8px above and 4px below, inset to
 the row text (10px). In a list that scrolls it is sticky. A divider (1px
 `border-default`, the menu's inner padding above and below, edge to edge) separates groups without a
-title, such as ordinary actions from a destructive one. A destructive item is
-`text-danger`.
+title, such as ordinary actions from a destructive one. A destructive item
+is plain at rest, as above, and red only under the pointer or as the
+keyboard row.
 
 **Placement.** One routine for all of them (Select's `computePosition`, moved
 to blockr.ui): fixed position on `body`, 4px from the trigger, flips above when
@@ -997,7 +1027,9 @@ there is no room below, follows scroll, stays 8px from the viewport edge.
 
 A menu lines up with the trigger's left edge, or its right edge when the
 trigger is in the header row. Height up to 320px, then the list scrolls under
-its sticky titles and filter box. A filter box (30px) appears above 8 options.
+its sticky titles and filter box. A multi menu's tags take up to three rows and
+scroll on their own past that, so the list keeps room under many picks. A
+filter box (30px) appears above 8 options.
 It is part of the menu, not a field: 13px, and no focus ring, since it holds
 focus the whole time the menu is open.
 A `Select.menu` names the role it sets in its title, because the word that
@@ -1017,7 +1049,7 @@ the menu; a multi pick keeps it open and keeps the filter text.
 Its head holds the block's name, package and description (12px `text-muted`,
 the name in `text-default` weight 600), above a divider. Then the actions:
 Rename, Duplicate, Copy block ID (the ID as mono meta text), and Remove after a
-divider in `text-danger`. The dock header has no subtitle; the block type is
+divider, a destructive row. The dock header has no subtitle; the block type is
 the tooltip on its mark.
 
 ### Tooltips
@@ -1031,11 +1063,15 @@ Escape hides it.
 - Every icon-only button and every cut-off label gets one, and so do the
   block's mark in the dock header (its type, then the package as a neutral
   badge) and every name that can be renamed in place (the gesture, see
-  [Renaming in place](#renaming-in-place)). Nothing else does: a button that
-  says its name has no tooltip.
-- No native `title` tooltips remain. Markup should not write one, and
-  blockr-ui.js takes over any that reach the page anyway (Shiny, shinychat,
-  a package's older markup) on the first hover or focus.
+  [Renaming in place](#renaming-in-place)). So does a segment with a terse
+  label (`%`, `n`, `All`): it shows the title its caller passes. So do a
+  table's sorted header (its order in words) and a link in the outline (the
+  blocks it joins). Nothing else does: a button that names its action in
+  full, like Save, has no tooltip.
+- No native `title` tooltips remain in blockr markup: an element built in R
+  carries its tooltip as `data-blockr-tooltip`, and a control built in
+  JavaScript sets it with `Blockr.tooltip.set()`. A third-party widget's
+  titles are its own and stay native.
 - It matches the chart's data tooltip (see [Special blocks](#special)), so
   blockr has one floating style.
 - It shows after the pointer rests 300ms, and at once on keyboard focus or
@@ -1081,7 +1117,7 @@ you act on, keep 4px corners.
   fill, 1px `border-default`, `text-muted`.
 - Neutral unless it states a status or that something is on:
   - **on, added, cutting rows:** the accent tint (`bg-accent-subtle`,
-    `border-accent-subtle`, `text-accent`);
+    `border-accent-subtle`, `text-accent-strong`);
   - **danger, warning, success:** `bg-<status>`, `border-<status>-subtle`,
     `text-<status>`.
 - Types, packages and significance levels are neutral; the type icon beside a
@@ -1169,7 +1205,7 @@ names, an exhibit in labels.
   name, so the row reads like the word that was clicked (Select's
   `labelFirst`). The word belongs to the exhibit, which speaks in labels.
 - A tooltip that shows both has the name, then the label muted, like the
-  control. The "+N" chip's lists the hidden tags that way, one per line.
+  control. The "+N" chip lists the hidden tags that way, one per line.
 - An aggregate reads "Mean of Age", on a chart, in a table and in a rank
   table header.
 - Code and decode pairs (PARAMCD and PARAM) follow the same rule: where one is
@@ -1308,8 +1344,9 @@ and the composer table, which render annotated data frames).
 - **Hover and drill** (output tables with a drill): the hover previews what a
   click claims. A column header lights its column, a row label its row, a
   value the crossing (row and column at 3% of the text colour, the cell at 9%).
-  A drill takes the same shape in `bg-selected` with `text-accent`, with no
-  accent bars; the crossing cell takes `bg-accent-subtle-hover` at weight 600.
+  A drill takes the same shape in `bg-selected` with `text-accent-strong`,
+  with no accent bars; the crossing cell takes `bg-accent-subtle-hover` at
+  weight 600.
 - **Sorting:** the preview sorts on a header click: ascending, descending,
   missing values first (then ascending), off. Ascending and descending put
   missing values last. An output table of an annotated data frame does not
@@ -1427,9 +1464,10 @@ Drawn in the [design system page](design-system/index.html#special).
 - [ ] Chevrons: `Blockr.icons.chevron` only, 12px (10px in a pill). Folds
       point down open and right closed; menus flip up while open; "go to"
       arrows point right or left.
-- [ ] Menus through `Blockr.Select` / `Select.menu()` and the shared placement
-      routine. No popovers. Tooltips on icon-only buttons and cut-off labels
-      only, using the light card; no native `title`.
+- [ ] Value pickers through `Blockr.Select` / `Select.menu()`, menus of
+      actions through `Blockr.menu` or `action_menu()`, all placed by the
+      shared routine. No popovers. Tooltips only where the Tooltips section
+      gives one, using the light card; no native `title`.
 - [ ] Badges are capsules and neutral unless they state status or "on".
 - [ ] Columns: the name with its label as meta where a column is picked, the
       label alone in an exhibit; read labels with the shared reader.
@@ -1460,10 +1498,12 @@ header, the "…" menu, the block status dot, the category colours
 (`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
 rule that hides the gear in simplified mode. blockr.theme owns data colours.
 
-To do: blockr.ui's token tests check that the vocabulary changes only
-deliberately and that consumers' fallbacks agree with it. Two tests are still
-to write: one that enforces the grammar, and one that warns on every read of a
-legacy alias.
+The token tests in blockr.ui check that the vocabulary changes only
+deliberately, that every name follows the grammar or is a legacy alias, that
+the controls read meaning tokens only, and that consumers' fallbacks agree with
+the tokens. Palette and legacy reads elsewhere in blockr.ui change only
+deliberately too. To do: warn on every palette or legacy read in the packages
+that consume the tokens.
 
 ### Legacy token aliases
 

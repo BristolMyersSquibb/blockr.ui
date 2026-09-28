@@ -1,9 +1,12 @@
 // @ts-check
 /**
  * blockr-ui.js — the design system's shared JS layer: the Blockr namespace,
- * DOM helpers, the icon set, and the small controls every block builds on
+ * DOM helpers, placement (Blockr.place), the icon set, keyboard hints, the
+ * tooltip, text edited in place, the menus of actions (Blockr.menu and the
+ * R-built Blockr.actionMenu), and the small controls every block builds on
  * (the Enter button, the required-empty cue, the checkbox, the segmented
- * control, the gear tray). Blockr.Select (blockr-select.js) builds on it.
+ * control, the gear tray). Blockr.Select (blockr-select.js) and
+ * Blockr.Input (blockr-input.js) build on it.
  *
  * Load it first. It holds nothing block-specific: the block protocol
  * (Blockr.registerBlock and the restore queue) is blockr.dplyr's
@@ -58,6 +61,17 @@ Blockr.contentWidth = (el) => {
   m.innerHTML = '';
   return w;
 };
+
+/**
+ * Whether `el`, or anything in it, is cut off: its content is wider than its
+ * box. A tooltip marked `overflow` shows only then.
+ *
+ * @param {Element} el
+ * @returns {boolean}
+ */
+Blockr.cutOff = (el) => [el, ...Array.from(el.querySelectorAll('*'))].some(
+  (n) => n.clientWidth > 0 && n.scrollWidth > n.clientWidth + 1
+);
 
 /**
  * Document-click registry — one document-level listener for all blocks.
@@ -311,6 +325,7 @@ if (Blockr.isMac) document.documentElement.classList.add('blockr-mac');
 Blockr.keys = (keys) => {
   const mac = { Mod: '⌘', Shift: '⇧', Alt: '⌥', Ctrl: '⌃', Enter: '↵', Esc: 'Esc' };
   const other = { Mod: 'Ctrl', Shift: 'Shift', Alt: 'Alt', Ctrl: 'Ctrl', Enter: '↵', Esc: 'Esc' };
+  /** @type {Record<string, string>} */
   const names = Blockr.isMac ? mac : other;
   const parts = keys.split('+').map((k) =>
     names[k] || (k.length === 1 ? k.toUpperCase() : k));
@@ -405,8 +420,8 @@ Blockr.textCommit = (input, opts) => {
  * Blockr.tooltip.set(el, content, { overflow }) gives `el` a tooltip.
  * `content` is a string, a column `{ name, label }` (the label shows muted
  * after the name), a line with a `badge` (a neutral badge after the name, as
- * a block type with its package), a list of either (one per line, as the "+N" chip's), or a
- * function returning one of those at show time. With `overflow: true` it
+ * a block type with its package), a list of either (one per line, as the
+ * "+N" chip's), or a function returning one of those at show time. With `overflow: true` it
  * shows only while the element or a child is cut off, so a value that fits
  * has none. Blockr.tooltip.clear(el) takes it away.
  *
@@ -435,11 +450,6 @@ Blockr.tooltip = (() => {
   /** @type {ReturnType<typeof setTimeout> | null} */
   let timer = null;
   let warmUntil = 0;
-
-  /** @param {Element} el */
-  const cutOff = (el) => [el, ...Array.from(el.querySelectorAll('*'))].some(
-    (n) => n.clientWidth > 0 && n.scrollWidth > n.clientWidth + 1
-  );
 
   /** @param {BlockrTooltipLine} line */
   const lineText = (line) => {
@@ -540,11 +550,15 @@ Blockr.tooltip = (() => {
 
   /** @param {Event} e */
   const enter = (e) => {
-    const el = owner(e.target instanceof Element ? e.target : null);
+    const target = e.target instanceof Element ? e.target : null;
+    const el = owner(target);
     if (!el || el === current) return;
     hide();
     const tip = /** @type {{ overflow: boolean }} */ (tipOf(el));
-    if (tip.overflow && !cutOff(el)) return;
+    if (tip.overflow && !Blockr.cutOff(el)) return;
+    // A click focuses a button too, right after its pointerdown hid the
+    // card; only keyboard focus brings the card at once.
+    if (e.type === 'focusin' && target && !target.matches(':focus-visible')) return;
     const found = el;
     const now = e.type === 'focusin' || Date.now() < warmUntil;
     if (now) show(found);
@@ -612,11 +626,6 @@ Blockr.tooltip = (() => {
   const HINT = 'Double-click to edit';
   const seen = new WeakSet();
 
-  /** @param {Element} el */
-  const cutOff = (el) => [el, ...Array.from(el.querySelectorAll('*'))].some(
-    (n) => n.clientWidth > 0 && n.scrollWidth > n.clientWidth + 1
-  );
-
   /** @param {Event} e */
   const take = (e) => {
     const el = e.target instanceof Element ? e.target.closest('[data-blockr-editable]') : null;
@@ -626,43 +635,8 @@ Blockr.tooltip = (() => {
       // The attribute can go again (a name editable only in a mode).
       if (!el.hasAttribute('data-blockr-editable')) return null;
       const hint = el.getAttribute('data-blockr-editable') || HINT;
-      // An <input> holds its text in `value`, not in its content.
-      const text = el instanceof HTMLInputElement ? el.value : el.textContent;
-      return cutOff(el) ? { name: (text || '').trim(), label: hint } : hint;
+      return Blockr.cutOff(el) ? { name: (el.textContent || '').trim(), label: hint } : hint;
     });
-  };
-
-  window.addEventListener('pointerover', take, true);
-  window.addEventListener('focusin', take, true);
-})();
-
-/* --- Native titles ------------------------------------------------------ */
-
-/**
- * No native `title` tooltips remain (design system, "Tooltips"). A `title`
- * that reaches the page anyway, from Shiny, a package's markup or a
- * third-party widget, is taken over on the first hover or focus, in the
- * capture phase on `window` (ahead of the browser's own delay): the
- * attribute goes and its text becomes the element's Blockr.tooltip. An
- * icon-only element keeps the text as its `aria-label`. A title written
- * again later (a status that changes) is taken over again on the next
- * hover. Text marked `data-blockr-editable` keeps the gesture as its
- * tooltip.
- */
-(() => {
-  /** @param {Event} e */
-  const take = (e) => {
-    let el = e.target instanceof Element ? e.target : null;
-    while (el && !el.hasAttribute('title')) el = el.parentElement;
-    if (!el || el === document.documentElement || el === document.body) return;
-    const title = el.getAttribute('title') || '';
-    el.removeAttribute('title');
-    if (!title) return;
-    if (!el.hasAttribute('aria-label') && !(el.textContent || '').trim()) {
-      el.setAttribute('aria-label', title);
-    }
-    if (el.hasAttribute('data-blockr-editable')) return;
-    Blockr.tooltip.set(el, title);
   };
 
   window.addEventListener('pointerover', take, true);
@@ -672,19 +646,22 @@ Blockr.tooltip = (() => {
 /* --- Menu --------------------------------------------------------------- */
 
 /**
- * The action menu (design system, "Menus"): one floating surface for every
- * menu of actions -- a block's "…" menu, the views menu, a user menu.
- * Blockr.Select.menu() is the other kind, a list of values to pick from.
+ * A menu of actions built in JavaScript (design system, "Menus"): a block's
+ * "…" menu, the views menu, a user menu. The menus action_menu() builds in R
+ * share its look and run on Blockr.actionMenu, below. Blockr.Select.menu()
+ * is the other kind, a list of values to pick from.
  *
  * Blockr.menu(anchor, config) opens a menu under `anchor` and returns
  * `{ el, close }`. `config.items` is a list of entries:
  *
- *   { label, icon?, meta?, mono?, current?, danger?, quiet?, disabled?,
- *     reason?, onSelect? }   a row; `meta` is grey text after the label
+ *   { label, icon?, meta?, mono?, current?, checked?, danger?, quiet?,
+ *     disabled?, reason?, onSelect? }
+ *                            a row; `meta` is grey text after the label
  *                            (`mono` sets it in the code face), `current` the
  *                            item in use (weight 600 and a check), `checked`
  *                            a toggle that is on (a check), `danger` a
- *                            destructive action (red only under the pointer),
+ *                            destructive action (red only under the pointer
+ *                            or as the keyboard row),
  *                            `quiet` a muted row such as "Manage pages",
  *                            `reason` the tooltip on a disabled row
  *   { gap: true }            a small space between groups
@@ -722,18 +699,10 @@ Blockr.menu = (() => {
   /** @type {{ el: HTMLDivElement, close: () => void, anchor: HTMLElement } | null} */
   let open = null;
 
-  // The menu's own copy of the icon set, taken when this file loads: a page
-  // can also carry an older copy of this file (bundled by a package that
-  // has not moved to blockr.ui yet), and that copy replaces Blockr.icons
-  // with a set that lacks the menu's icons.
-  /** @type {Record<string, string>} */
-  const ICONS = Object.assign({}, Blockr.icons);
+  // A row's icon: the name of one of Blockr.icons, or an SVG/HTML string.
   /** @param {string} name */
-  const iconFor = (name) => {
-    if (Object.prototype.hasOwnProperty.call(ICONS, name)) return ICONS[name];
-    if (Object.prototype.hasOwnProperty.call(Blockr.icons, name)) return Blockr.icons[name];
-    return name;
-  };
+  const iconFor = (name) =>
+    (Object.prototype.hasOwnProperty.call(Blockr.icons, name) ? Blockr.icons[name] : name);
 
   /**
    * @param {HTMLElement} anchor
@@ -746,8 +715,6 @@ Blockr.menu = (() => {
     const panel = document.createElement('div');
     panel.className = 'blockr-menu';
     panel.id = Blockr.uid('blockr-menu');
-    panel.setAttribute('role', 'menu');
-    panel.tabIndex = -1;
 
     if (config.head) {
       const head = document.createElement('div');
@@ -793,6 +760,20 @@ Blockr.menu = (() => {
       panel.appendChild(wrap);
     }
 
+    // The rows sit in a list of their own that carries the menu role: a menu
+    // may hold only its items, groups and separators, so the head, the
+    // caption and the filter box stay outside it, in the panel. The keyboard
+    // row is the active descendant of whichever holds focus, the filter box
+    // or the list.
+    const list = document.createElement('div');
+    list.className = 'blockr-menu__list';
+    list.id = Blockr.uid('blockr-menu-list');
+    list.setAttribute('role', 'menu');
+    list.tabIndex = -1;
+    panel.appendChild(list);
+    const focusEl = filterInput || list;
+    if (filterInput) filterInput.setAttribute('aria-controls', list.id);
+
     /** @type {{ row: HTMLButtonElement, item: BlockrMenuItem, search: string }[]} */
     const rows = [];
     /** @type {{ kind: 'row' | 'title' | 'sep', el: HTMLElement, row?: number }[]} */
@@ -802,7 +783,7 @@ Blockr.menu = (() => {
         const gap = document.createElement('div');
         gap.className = 'blockr-menu__gap';
         gap.setAttribute('role', 'separator');
-        panel.appendChild(gap);
+        list.appendChild(gap);
         nodes.push({ kind: 'sep', el: gap });
         continue;
       }
@@ -810,7 +791,7 @@ Blockr.menu = (() => {
         const hr = document.createElement('div');
         hr.className = 'blockr-menu__divider';
         hr.setAttribute('role', 'separator');
-        panel.appendChild(hr);
+        list.appendChild(hr);
         nodes.push({ kind: 'sep', el: hr });
         continue;
       }
@@ -818,13 +799,14 @@ Blockr.menu = (() => {
         const t = document.createElement('div');
         t.className = 'blockr-menu__title';
         t.textContent = entry.title;
-        panel.appendChild(t);
+        list.appendChild(t);
         nodes.push({ kind: 'title', el: t });
         continue;
       }
       const item = entry;
       const row = document.createElement('button');
       row.type = 'button';
+      row.id = Blockr.uid('blockr-menu-item');
       row.tabIndex = -1;
       row.className = 'blockr-menu__item' +
         (item.current ? ' blockr-menu__item--current' : '') +
@@ -854,12 +836,6 @@ Blockr.menu = (() => {
       row.appendChild(label);
       // `checked`: a toggle that is on (a check, no weight); `current`: the
       // item in use (weight 600 and a check).
-      if (item.current || item.checked) {
-        const check = document.createElement('span');
-        check.className = 'blockr-menu__check';
-        check.innerHTML = iconFor('check');
-        row.appendChild(check);
-      }
       if ('checked' in item) {
         row.setAttribute('role', 'menuitemcheckbox');
         row.setAttribute('aria-checked', item.checked ? 'true' : 'false');
@@ -876,11 +852,19 @@ Blockr.menu = (() => {
         badge.textContent = item.badge;
         row.appendChild(badge);
       }
+      // The check of the current item or a toggle that is on: at the end of
+      // the row (design system, "Menus"), after its meta text and badge.
+      if (item.current || item.checked) {
+        const check = document.createElement('span');
+        check.className = 'blockr-menu__check';
+        check.innerHTML = iconFor('check');
+        row.appendChild(check);
+      }
       const search = [item.label, item.keywords || '', item.badge || '', item.meta || '']
         .join(' ').toLowerCase();
       nodes.push({ kind: 'row', el: row, row: rows.length });
       rows.push({ row, item, search });
-      panel.appendChild(row);
+      list.appendChild(row);
     }
 
     const empty = document.createElement('div');
@@ -897,6 +881,9 @@ Blockr.menu = (() => {
       if (active >= 0 && rows[active]) {
         rows[active].row.classList.add('blockr-menu__item--active');
         rows[active].row.scrollIntoView({ block: 'nearest' });
+        focusEl.setAttribute('aria-activedescendant', rows[active].row.id);
+      } else {
+        focusEl.removeAttribute('aria-activedescendant');
       }
     };
     // The rows that can be picked: enabled, and not filtered out.
@@ -923,6 +910,7 @@ Blockr.menu = (() => {
       if (placed) placed.stop();
       panel.remove();
       anchor.setAttribute('aria-expanded', 'false');
+      anchor.removeAttribute('aria-controls');
       if (open && open.el === panel) open = null;
       if (refocus) anchor.focus();
       if (config.onClose) config.onClose();
@@ -984,7 +972,9 @@ Blockr.menu = (() => {
         pick(active >= 0 ? active : (filterInput && filterInput.value ? pickable()[0] : -1));
       }
       else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
-      else if (e.key === 'Tab') { close(false); }
+      // Back on the trigger first, so the browser's Tab moves on from there;
+      // from the removed panel it would start over at the top of the page.
+      else if (e.key === 'Tab') { close(true); }
     });
     panel.addEventListener('focusout', (e) => {
       const to = e.relatedTarget;
@@ -999,13 +989,14 @@ Blockr.menu = (() => {
     });
     anchor.setAttribute('aria-expanded', 'true');
     anchor.setAttribute('aria-haspopup', 'menu');
+    anchor.setAttribute('aria-controls', list.id);
     // A click outside closes it; the trigger's own click is its binding's.
     Blockr.onDocClick(panel, (e) => {
       const t = e.target;
       if (t instanceof Node && (panel.contains(t) || anchor.contains(t))) return;
       close(false);
     });
-    (filterInput || panel).focus({ preventScroll: true });
+    focusEl.focus({ preventScroll: true });
 
     open = { el: panel, close: () => close(false), anchor };
     return { el: panel, close: () => close(false) };
@@ -1196,9 +1187,15 @@ Blockr.menu = (() => {
       b.type = 'button';
       b.className = 'blockr-segmented__seg';
       b.textContent = o.label;
-      // A segment that says its name has no tooltip; `title` names an
-      // icon-only one.
-      if (o.title && !o.label) Blockr.tooltip.set(b, o.title);
+      // A caller passes `title` where the label says too little: it explains
+      // a terse label (`%`, `All`) or names an icon-only segment. It is the
+      // tooltip either way. A screen reader gets it as the description, or,
+      // without a label, as the name: the tooltip only describes, and only
+      // while it shows.
+      if (o.title) {
+        Blockr.tooltip.set(b, o.title);
+        b.setAttribute(o.label ? 'aria-description' : 'aria-label', o.title);
+      }
       b.setAttribute('role', 'radio');
       b.addEventListener('click', function () {
         if (current === o.value) return;
@@ -1244,13 +1241,21 @@ Blockr.actionMenu = (() => {
   const triggerOf = (el) => /** @type {HTMLElement | null} */ (
     el && el.closest('.blockr-action-menu__trigger'));
 
-  /** @param {HTMLElement} panel */
-  const rows = (panel) => /** @type {HTMLElement[]} */ (Array.from(
-    panel.querySelectorAll('.blockr-menu__item')).filter((r) => !r.hidden && !isDisabled(r)));
+  /**
+   * The rows the keyboard moves over: all but those disabled by their
+   * author. A download whose handler Shiny has not bound yet keeps its
+   * place, since it works a moment later. On the first open every download
+   * is still unbound (Shiny binds an output once it shows), and skipping
+   * them put the focus on the row after them, Remove in a block's menu.
+   * @param {HTMLElement} panel
+   */
+  const rows = (panel) => Array.from(
+    /** @type {NodeListOf<HTMLElement>} */ (panel.querySelectorAll('.blockr-menu__item')))
+    .filter((r) => !r.hidden && !r.classList.contains('blockr-menu__item--disabled'));
 
   /**
-   * Disabled by its author (the class), or a download whose handler Shiny
-   * has not bound yet (aria-disabled, which Shiny clears once it has).
+   * Inert: disabled by its author (the class), or a download whose handler
+   * Shiny has not bound yet (aria-disabled, which Shiny clears once it has).
    * @param {Element} row
    */
   const isDisabled = (row) => row.classList.contains('blockr-menu__item--disabled') ||

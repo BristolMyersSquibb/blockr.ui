@@ -162,6 +162,24 @@ test('textCommit: Escape on a clean field goes through, and closes the tray', (n
   win.close();
 });
 
+test('Select: Escape on an open list closes the list and stops there', (newWindow) => {
+  const win = newWindow();
+  const band = host(win);
+  const gear = win.document.createElement('button');
+  win.document.body.appendChild(gear);
+  const tray = win.Blockr.gearTray(band, gear);
+  const sel = win.Blockr.Select.single(band, { options: ['AGE', 'SEX'], selected: 'AGE' });
+  tray.set(true);
+  sel.el.querySelector('.blockr-select__control').click();
+  const input = sel.el.querySelector('.blockr-select__search');
+  press(win, input, 'Escape');
+  assert.ok(!sel.el.classList.contains('blockr-select--open'), 'the list closed');
+  assert.ok(tray.isOpen(), 'the tray did not see the Escape');
+  press(win, input, 'Escape');
+  assert.ok(!tray.isOpen(), 'a closed select lets the next Escape through');
+  win.close();
+});
+
 test('textCommit: the button shows ↵ while dirty and is marked confirmed after', (newWindow) => {
   const win = newWindow();
   const f = fieldInTray(win);
@@ -172,6 +190,27 @@ test('textCommit: the button shows ↵ while dirty and is marked confirmed after
   assert.deepStrictEqual(f.committed, ['SEX']);
   assert.ok(f.chip.classList.contains('confirmed'));
   assert.strictEqual(f.chip.style.display, '', 'stays, as the confirmed mark');
+  win.close();
+});
+
+test('segmented: a title names an icon-only segment and explains a terse one', (newWindow) => {
+  const win = newWindow();
+  const seg = win.Blockr.segmented(
+    [
+      { value: 'asc', label: '', title: 'Sort ascending' },
+      { value: 'prop', label: '%', title: 'A percentage of rows' },
+      { value: 'save', label: 'Save' }
+    ],
+    'asc', () => {}
+  );
+  host(win).appendChild(seg.el);
+  const [icon, terse, full] = seg.el.querySelectorAll('button');
+  assert.strictEqual(icon.getAttribute('aria-label'), 'Sort ascending');
+  assert.strictEqual(win.Blockr.tooltip.text(icon), 'Sort ascending');
+  assert.strictEqual(terse.getAttribute('aria-description'), 'A percentage of rows');
+  assert.strictEqual(win.Blockr.tooltip.text(terse), 'A percentage of rows');
+  assert.strictEqual(full.getAttribute('aria-description'), null, 'a label that says it in full');
+  assert.strictEqual(win.Blockr.tooltip.text(full), '');
   win.close();
 });
 

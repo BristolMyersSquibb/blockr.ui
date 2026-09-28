@@ -1,7 +1,7 @@
 /* Blockr.tooltip: the light card that replaces native `title` tooltips.
  *
  * What a caller can see: the card appears (role tooltip, aria-describedby on
- * the element), after the delay on hover and at once on focus or while warm,
+ * the element), after the delay on hover and at once on keyboard focus or while warm,
  * leaves with Escape, and stays away from an `overflow` element that is not
  * cut off. happy-dom has no layout, so nothing is ever cut off here; that
  * case is the browser check's.
@@ -28,7 +28,7 @@ test('keyboard focus shows the card at once, and Escape hides it', (newWindow) =
   const win = newWindow();
   const b = button(win);
   win.Blockr.tooltip.set(b, 'Settings');
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   const c = card(win);
   assert.ok(c, 'shown on focus');
   assert.strictEqual(c.getAttribute('role'), 'tooltip');
@@ -37,6 +37,23 @@ test('keyboard focus shows the card at once, and Escape hides it', (newWindow) =
   win.document.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   assert.ok(!card(win), 'Escape hides it');
   assert.strictEqual(b.getAttribute('aria-describedby'), null);
+  win.close();
+});
+
+test('focus from a click does not bring the card back', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  win.Blockr.tooltip.set(b, 'Settings');
+  // happy-dom counts every focus as visible; a browser does not after a
+  // click on a button, so stand in for its verdict.
+  const matches = b.matches.bind(b);
+  b.matches = (s) => (s === ':focus-visible' ? false : matches(s));
+  b.focus();
+  assert.ok(!card(win), 'a click on the gear shows nothing');
+  b.blur();
+  b.matches = matches;
+  b.focus();
+  assert.strictEqual(card(win).textContent, 'Settings', 'Tab onto it does');
   win.close();
 });
 
@@ -62,7 +79,7 @@ test('an overflow tooltip stays away while nothing is cut off', async (newWindow
   const win = newWindow();
   const b = button(win, 'AGE');
   win.Blockr.tooltip.set(b, 'AGE', { overflow: true });
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   assert.ok(!card(win));
   win.close();
 });
@@ -72,7 +89,7 @@ test('a column shows its name, then its label muted; a list shows one per line',
   const b = button(win);
   win.Blockr.tooltip.set(b, [{ name: 'AGE', label: 'Age' }, { name: 'SEX', label: '' }, 'more']);
   assert.strictEqual(win.Blockr.tooltip.text(b), 'AGE · Age\nSEX\nmore');
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   const lines = [...card(win).querySelectorAll('.blockr-tooltip__line')];
   assert.strictEqual(lines.length, 3);
   assert.strictEqual(lines[0].querySelector('.blockr-tooltip__meta').textContent, 'Age');
@@ -104,7 +121,8 @@ test('the controls set no native title', (newWindow) => {
   assert.deepStrictEqual([...doc.querySelectorAll('[title]')].map((e) => e.className), []);
   assert.strictEqual(win.Blockr.tooltip.text(gear), 'Settings', 'the gear is icon-only');
   assert.strictEqual(win.Blockr.tooltip.text(commit.chip), '', 'the Enter button says its name');
-  assert.strictEqual(win.Blockr.tooltip.text(seg.el.querySelector('button')), '', 'so does a segment');
+  assert.strictEqual(win.Blockr.tooltip.text(seg.el.querySelector('button')), 'Sort ascending',
+    'a terse segment shows its caller\'s title');
   win.close();
 });
 
@@ -112,7 +130,7 @@ test('a line can carry a badge after the name', (newWindow) => {
   const win = newWindow();
   const b = button(win);
   win.Blockr.tooltip.set(b, { name: 'dataset block', badge: 'blockr.core' });
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   const badge = card(win).querySelector('.blockr-tooltip__badge');
   assert.ok(badge, 'badge drawn');
   assert.strictEqual(badge.textContent, 'blockr.core');
@@ -120,18 +138,19 @@ test('a line can carry a badge after the name', (newWindow) => {
   win.close();
 });
 
-test('markup from R carries its tooltip as an attribute', (newWindow) => {
+test('markup from R carries its tooltip as an attribute', async (newWindow) => {
   const win = newWindow();
   const b = button(win);
   b.setAttribute('data-blockr-tooltip', 'Download');
   const icon = win.document.createElement('span');
   b.appendChild(icon);
-  icon.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  over(win, icon);
+  await wait(350);
   assert.strictEqual(card(win).textContent, 'Download', 'found from a child');
   assert.strictEqual(win.Blockr.tooltip.text(b), 'Download');
   win.document.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   win.Blockr.tooltip.set(b, 'Set wins');
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   assert.strictEqual(card(win).textContent, 'Set wins', 'set() wins over the attribute');
   win.close();
 });
@@ -140,7 +159,7 @@ test('an empty attribute shows nothing', (newWindow) => {
   const win = newWindow();
   const b = button(win);
   b.setAttribute('data-blockr-tooltip', '');
-  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  b.focus();
   assert.ok(!card(win));
   win.close();
 });
@@ -163,16 +182,18 @@ test('editable text names its gesture, the default or its own', (newWindow) => {
   win.close();
 });
 
-test('a native title is taken over on the first hover', (newWindow) => {
+test('a native title that reaches the page is left to its owner', (newWindow) => {
+  // Blockr markup carries data-blockr-tooltip instead. Rewriting other
+  // code's titles froze them (a title cleared later kept its old card) and
+  // hid them from code that reads them, such as a Bootstrap tooltip set up
+  // after the first hover.
   const win = newWindow();
   const b = button(win);
   b.setAttribute('title', 'Attach file');
   over(win, b);
-  assert.strictEqual(b.getAttribute('title'), null, 'the native title goes');
-  assert.strictEqual(b.getAttribute('aria-label'), 'Attach file', 'an icon-only button keeps it as its name');
-  assert.strictEqual(win.Blockr.tooltip.text(b), 'Attach file');
-  b.setAttribute('title', 'Send message');
-  over(win, b);
-  assert.strictEqual(win.Blockr.tooltip.text(b), 'Send message', 'a title written again is taken again');
+  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  assert.strictEqual(b.getAttribute('title'), 'Attach file');
+  assert.ok(!b.hasAttribute('aria-label'));
+  assert.strictEqual(win.Blockr.tooltip.text(b), '');
   win.close();
 });

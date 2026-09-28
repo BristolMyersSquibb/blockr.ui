@@ -1,6 +1,6 @@
 Package: blockr.ui
 Title: User Interface Components for the 'blockr' Ecosystem
-Version: 0.0.1.9045
+Version: 0.0.1
 Authors@R:
     person(given = "David",
            family = "Granjon",
@@ -23,7 +23,7 @@ Imports:
     jsonlite,
     pillar,
     rlang,
-    shiny
+    shiny (>= 1.14.0)
 Suggests:
     DBI,
     dbplyr,

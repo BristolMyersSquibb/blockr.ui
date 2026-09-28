@@ -213,13 +213,13 @@ label:has(input[type="file"]) {
 }
 
 :root:root .btn.btn-primary {
-  --bs-btn-color: var(--blockr-color-text-accent);
+  --bs-btn-color: var(--blockr-color-text-accent-strong);
   --bs-btn-bg: var(--blockr-color-bg-accent-subtle);
   --bs-btn-border-color: var(--blockr-color-border-accent-subtle);
-  --bs-btn-hover-color: var(--blockr-color-text-accent);
+  --bs-btn-hover-color: var(--blockr-color-text-accent-strong);
   --bs-btn-hover-bg: var(--blockr-color-bg-accent-subtle-hover);
   --bs-btn-hover-border-color: var(--blockr-color-border-accent);
-  --bs-btn-active-color: var(--blockr-color-text-accent);
+  --bs-btn-active-color: var(--blockr-color-text-accent-strong);
   --bs-btn-active-bg: var(--blockr-color-bg-accent-subtle-hover);
   --bs-btn-active-border-color: var(--blockr-color-border-accent);
 }
@@ -384,14 +384,3 @@ label:has(input[type="file"]) {
   box-shadow: none !important;
 }
 
-
-/* ============================================
-   Text edited in place
-   ============================================ */
-/* The text cursor says the text is editable; blockr-ui.js adds the tooltip
-   naming the gesture. Here rather than in blockr-blocks.css, whose
-   dependency name blockr.dplyr's older copy still wins on boards with dplyr
-   blocks. */
-[data-blockr-editable] {
-  cursor: text;
-}

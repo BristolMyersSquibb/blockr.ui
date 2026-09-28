@@ -109,3 +109,68 @@ test('Input: Escape closes the list and destroy removes the popup', (win) => {
   h.destroy();
   assert.strictEqual(win.document.querySelectorAll('.blockr-input__popup').length, 0);
 });
+
+test('Input: Escape on an open list closes the list and stops there', (win) => {
+  const doc = win.document;
+  const band = doc.createElement('div');
+  const gear = doc.createElement('button');
+  doc.body.append(band, gear);
+  const tray = win.Blockr.gearTray(band, gear);
+  const h = win.Blockr.Input.create(band, { columns: ['AGE', 'AGEGR1'] });
+  const field = h.el.querySelector('input');
+  tray.set(true);
+  type(win, field, 'AG');
+  const open = () => h.el.classList.contains('blockr-input--popup-open');
+  assert.ok(open(), 'the list is open');
+  key(win, field, 'Escape');
+  assert.ok(!open(), 'the list closed');
+  assert.ok(tray.isOpen(), 'the tray did not see the Escape');
+  key(win, field, 'Escape');
+  assert.ok(!tray.isOpen(), 'a closed list lets the next Escape through');
+});
+
+test('Input: listens for outside clicks only while its list is open', (win) => {
+  // A document listener per field for the whole page life would hold the
+  // field and its block after they leave the page.
+  const doc = win.document;
+  const live = new Set();
+  const add = doc.addEventListener.bind(doc);
+  const remove = doc.removeEventListener.bind(doc);
+  doc.addEventListener = (type, fn, opts) => { if (type === 'click') live.add(fn); add(type, fn, opts); };
+  doc.removeEventListener = (type, fn, opts) => { if (type === 'click') live.delete(fn); remove(type, fn, opts); };
+  const { h, field } = mount(win, { columns: ['AGE', 'AGEGR1'] });
+  assert.strictEqual(live.size, 0, 'none at rest');
+  type(win, field, 'AG');
+  assert.strictEqual(live.size, 1, 'one while the list is open');
+  doc.body.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  assert.ok(!h.el.classList.contains('blockr-input--popup-open'), 'a click outside closes it');
+  assert.strictEqual(live.size, 0, 'and takes the listener with it');
+});
+
+test('Input: the field and its list are wired for screen readers', (win) => {
+  const { h, field } = mount(win, { columns: ['AGE', 'AGEGR1'], label: 'Expression' });
+  const popup = () => win.document.getElementById(field.getAttribute('aria-controls'));
+  assert.strictEqual(field.getAttribute('role'), 'combobox');
+  assert.strictEqual(field.getAttribute('aria-label'), 'Expression');
+  assert.strictEqual(field.getAttribute('aria-expanded'), 'false');
+  type(win, field, 'AG');
+  assert.strictEqual(field.getAttribute('aria-expanded'), 'true');
+  assert.strictEqual(popup().getAttribute('aria-label'), 'Completions');
+  const rows = [...popup().querySelectorAll('[role="option"]')];
+  assert.strictEqual(field.getAttribute('aria-activedescendant'), rows[0].id);
+  key(win, field, 'ArrowDown');
+  const now = [...popup().querySelectorAll('[role="option"]')];
+  assert.strictEqual(field.getAttribute('aria-activedescendant'), now[1].id);
+  assert.strictEqual(now[1].getAttribute('aria-selected'), 'true');
+  key(win, field, 'Escape');
+  assert.strictEqual(field.getAttribute('aria-expanded'), 'false');
+  assert.ok(!field.hasAttribute('aria-activedescendant'));
+  h.destroy();
+
+  // A textarea cannot be a combobox; it names the list it controls.
+  const multi = mount(win, { columns: ['AGE'], multiline: true });
+  assert.ok(!multi.field.hasAttribute('role'));
+  assert.ok(!multi.field.hasAttribute('aria-expanded'));
+  assert.ok(multi.field.getAttribute('aria-controls'));
+});
+

@@ -36,7 +36,10 @@ test('draws rows, a divider, a title and a head', (newWindow) => {
   });
   const p = panel(win);
   assert.ok(p, 'open');
-  assert.strictEqual(p.getAttribute('role'), 'menu');
+  const list = p.querySelector('[role="menu"]');
+  assert.ok(list && !p.hasAttribute('role'), 'the menu role is on the list of rows');
+  assert.ok(!list.contains(p.querySelector('.blockr-menu__head')), 'the head sits above it');
+  assert.strictEqual(t.getAttribute('aria-controls'), list.id);
   assert.strictEqual(p.parentElement, win.document.body, 'portalled to body');
   assert.strictEqual(p.querySelector('.blockr-menu__badge').textContent, 'blockr.dplyr');
   assert.strictEqual(p.querySelector('.blockr-menu__head-text').textContent, 'Keep rows that match.');
@@ -96,6 +99,40 @@ test('Escape closes and hands focus back to the trigger', (newWindow) => {
   win.close();
 });
 
+test('Tab closes and leaves focus on the trigger, for the browser to move on', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, { filter: true, items: [{ label: 'One' }] });
+  const box = panel(win).querySelector('.blockr-menu__filter-input');
+  assert.strictEqual(win.document.activeElement, box);
+  key(win, box, 'Tab');
+  assert.ok(!panel(win));
+  assert.strictEqual(win.document.activeElement, t);
+  win.close();
+});
+
+test('the keyboard row is the active descendant of what holds focus', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, { items: [{ label: 'One' }, { label: 'Two' }] });
+  const list = panel(win).querySelector('[role="menu"]');
+  assert.strictEqual(win.document.activeElement, list, 'without a filter box, the list');
+  key(win, list, 'ArrowDown');
+  key(win, list, 'ArrowDown');
+  const two = panel(win).querySelectorAll('.blockr-menu__item')[1];
+  assert.strictEqual(list.getAttribute('aria-activedescendant'), two.id);
+  key(win, list, 'Escape');
+  assert.ok(!t.hasAttribute('aria-controls'), 'no reference to a panel that is gone');
+
+  win.Blockr.menu(t, { filter: true, items: [{ label: 'One' }, { label: 'Two' }] });
+  const box = panel(win).querySelector('.blockr-menu__filter-input');
+  assert.strictEqual(box.getAttribute('aria-controls'), panel(win).querySelector('[role="menu"]').id);
+  key(win, box, 'ArrowDown');
+  const one = panel(win).querySelector('.blockr-menu__item');
+  assert.strictEqual(box.getAttribute('aria-activedescendant'), one.id, 'with one, the box');
+  win.close();
+});
+
 test('a click outside closes it', (newWindow) => {
   const win = newWindow();
   const t = trigger(win);
@@ -139,7 +176,7 @@ test('a gap separates groups, the current item carries a check, quiet rows are m
   const t = trigger(win);
   win.Blockr.menu(t, {
     items: [
-      { label: 'Overview', current: true },
+      { label: 'Overview', current: true, meta: '3 blocks' },
       { label: 'Labs' },
       { gap: true },
       { label: 'Manage pages', quiet: true, icon: 'sliders' }
@@ -149,6 +186,8 @@ test('a gap separates groups, the current item carries a check, quiet rows are m
   assert.ok(p.querySelector('.blockr-menu__gap'), 'gap drawn');
   const rows = p.querySelectorAll('.blockr-menu__item');
   assert.ok(rows[0].querySelector('.blockr-menu__check'), 'check on the current item');
+  assert.ok(rows[0].lastElementChild.classList.contains('blockr-menu__check'),
+    'at the end of the row, after its meta text');
   assert.ok(!rows[1].querySelector('.blockr-menu__check'));
   assert.ok(!rows[1].querySelector('.blockr-menu__icon'), 'no icon unless given');
   assert.ok(rows[2].classList.contains('blockr-menu__item--quiet'));

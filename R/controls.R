@@ -4,20 +4,26 @@
 #' `Blockr.Select` (single, multi and menu), `Blockr.Input` (the code field
 #' with column and function completions), the Enter button of a field that
 #' commits on Enter, the required-empty cue, the checkbox, the segmented
-#' control, the gear tray, the tooltip (`Blockr.tooltip`), the action menu
-#' (`Blockr.menu`) and the placement routine for floating panels
-#' (`Blockr.place`), all on the `window.Blockr` namespace, together with the
-#' rows, pills, labels, fields and buttons (`.blockr-btn`) they draw, and the
-#' Shiny input bindings of the controls rendered from R ([select_input()] and
-#' its siblings).
+#' control, the gear tray, the tooltip (`Blockr.tooltip`), the menus of
+#' actions (`Blockr.menu` for those built in JavaScript, `Blockr.actionMenu`
+#' for those [action_menu()] builds in R) and the placement routine for
+#' floating panels (`Blockr.place`), all on the `window.Blockr` namespace,
+#' together with the rows, pills, labels, fields and buttons (`.blockr-btn`)
+#' they draw, and the Shiny input bindings of the controls rendered from R
+#' ([select_input()] and its siblings).
 #'
 #' The stylesheets read the design tokens without fallbacks, so the
-#' dependency brings [theme_dep()] along. Attach it from a block's UI;
-#' dependencies are de-duplicated by name, so any number of blocks can.
+#' dependency brings the tokens along, but not the theme layer that
+#' restyles the rest of the page: an app opts into that with [theme_dep()].
+#' Attach it from a block's UI; dependencies are de-duplicated by name, so
+#' any number of blocks can.
 #'
 #' The dependency names are the ones blockr.dplyr used while these files
 #' lived there (`blockr-select-js`, `blockr-select-css`, `blockr-blocks-css`,
-#' `blockr-input-js`, `blockr-input-css`), so a page never loads two copies.
+#' `blockr-input-js`, `blockr-input-css`),
+#' so a page carries one copy of each. Of two dependencies with one name,
+#' htmltools keeps the higher version, so while blockr.dplyr still ships its
+#' own copies, a page that has both uses blockr.dplyr's.
 #'
 #' @return An [htmltools::tagList()] of [htmltools::htmlDependency] objects,
 #'   in load order.
@@ -34,39 +40,48 @@
 #'
 #' @export
 controls_dep <- function() {
-  # Built once: every control attaches this list, and building its thirteen
-  # dependencies took 12 ms per control.
-  if (is.null(pkg_cache$controls_dep)) {
-    pkg_cache$controls_dep <- build_controls_dep()
+
+  # Built once per process: every block's UI calls this, and each
+  # packageVersion() below reads the package's metadata from disk.
+  if (is.null(controls_cache$deps)) {
+    controls_cache$deps <- tagList(
+      tokens_dep(),
+      controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
+      controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css"),
+      controls_asset("blockr-menu-css", stylesheet = "css/blockr-menu.css"),
+      controls_asset(
+        "blockr-tooltip-css",
+        stylesheet = "css/blockr-tooltip.css"
+      ),
+      controls_asset(
+        "blockr-buttons-css",
+        stylesheet = "css/blockr-buttons.css"
+      ),
+      controls_asset(
+        "blockr-settings-band",
+        stylesheet = "css/blockr-settings-band.css"
+      ),
+      controls_asset("blockr-select-js", script = "js/blockr-select.js"),
+      controls_asset("blockr-select-css", stylesheet = "css/blockr-select.css"),
+      controls_asset("blockr-input-js", script = "js/blockr-input.js"),
+      controls_asset("blockr-input-css", stylesheet = "css/blockr-input.css"),
+      controls_asset("blockr-inputs-js", script = "js/blockr-inputs.js"),
+      controls_asset(
+        "blockr-inputs-css",
+        stylesheet = "css/blockr-inputs.css"
+      )
+    )
   }
-  pkg_cache$controls_dep
+
+  controls_cache$deps
 }
 
-build_controls_dep <- function() {
-  tagList(
-    theme_dep(),
-    controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
-    controls_asset("blockr-blocks-css", stylesheet = "css/blockr-blocks.css"),
-    controls_asset("blockr-menu-css", stylesheet = "css/blockr-menu.css"),
-    controls_asset("blockr-tooltip-css", stylesheet = "css/blockr-tooltip.css"),
-    controls_asset("blockr-buttons-css", stylesheet = "css/blockr-buttons.css"),
-    controls_asset(
-      "blockr-settings-band",
-      stylesheet = "css/blockr-settings-band.css"
-    ),
-    controls_asset("blockr-select-js", script = "js/blockr-select.js"),
-    controls_asset("blockr-select-css", stylesheet = "css/blockr-select.css"),
-    controls_asset("blockr-input-js", script = "js/blockr-input.js"),
-    controls_asset("blockr-input-css", stylesheet = "css/blockr-input.css"),
-    controls_asset("blockr-inputs-js", script = "js/blockr-inputs.js"),
-    controls_asset("blockr-inputs-css", stylesheet = "css/blockr-inputs.css")
-  )
-}
+controls_cache <- new.env(parent = emptyenv())
 
 controls_asset <- function(name, ...) {
   htmltools::htmlDependency(
     name = name,
-    version = ui_version(),
+    version = utils::packageVersion("blockr.ui"),
     package = "blockr.ui",
     src = "assets",
     ...,

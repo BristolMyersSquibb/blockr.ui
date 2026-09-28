@@ -152,6 +152,10 @@
     const allowEmpty = !multi && config.allowEmpty === true;
     const placeholder = config.placeholder || '';
     const labelFirst = config.labelFirst === true;
+    // What a screen reader calls the combobox and its list: the field's
+    // label, which the caller knows and the select does not. A menu falls
+    // back to its title.
+    const label = config.label || (headless && config.title) || '';
     // `search: false` never shows the filter box (a short fixed list such as
     // operators or join types).
     const searchAfter = config.search === false ? Infinity : SEARCH_AFTER;
@@ -245,6 +249,7 @@
     input.setAttribute('autocorrect', 'off');
     input.setAttribute('autocapitalize', 'off');
     input.setAttribute('spellcheck', 'false');
+    if (label) input.setAttribute('aria-label', label);
 
     if (multi) {
       tagsEl.appendChild(input);
@@ -258,14 +263,19 @@
       control.appendChild(arrow);
     }
 
+    // The panel is the floating surface; the listbox inside it holds the
+    // rows and nothing else, since a listbox may contain only options. Only
+    // the listbox is rebuilt on a render. A menu keeps its title, its tags
+    // and its filter box in the panel above it, so a keystroke cannot
+    // re-create (or move, which blurs) the input the user is typing into.
     const list = div(`blockr-select__dropdown blockr-select__dropdown--${mode}`);
-    list.id = listId;
-    list.setAttribute('role', 'listbox');
-    // Everything after this marker is rows, and only that part is rebuilt on
-    // a render. A menu keeps its title, its tags and its filter box before
-    // it, so a keystroke cannot re-create (or move, which blurs) the input
-    // the user is typing into.
-    const headEnd = document.createComment('rows');
+    const listbox = div('blockr-select__listbox');
+    listbox.id = listId;
+    listbox.setAttribute('role', 'listbox');
+    if (label) listbox.setAttribute('aria-label', label);
+    // A multi keeps its picks in the list, each aria-selected, which a
+    // listbox allows only when it says it takes several.
+    if (multi) listbox.setAttribute('aria-multiselectable', 'true');
     if (headless) {
       // One sticky element holds the title, the tags and the filter box, so
       // a long list scrolls under all three (design system, Menus). Three
@@ -290,7 +300,7 @@
       head.appendChild(input);
       list.appendChild(head);
     }
-    list.appendChild(headEnd);
+    list.appendChild(listbox);
 
     if (!headless) root.appendChild(control);
     container.appendChild(root);
@@ -428,7 +438,7 @@
     };
 
     const renderList = () => {
-      while (headEnd.nextSibling) list.removeChild(headEnd.nextSibling);
+      listbox.textContent = '';
       input.removeAttribute('aria-activedescendant');
       list.style.display = st.open ? 'block' : '';
       if (!st.open) { rows = []; return; }
@@ -436,11 +446,11 @@
       const f = filtered();
       rows = f.rows;
       if (st.loading) {
-        list.appendChild(div('blockr-select__empty', 'Loading…'));
+        listbox.appendChild(div('blockr-select__empty', 'Loading…'));
         return;
       }
       if (!rows.length) {
-        list.appendChild(div('blockr-select__empty',
+        listbox.appendChild(div('blockr-select__empty',
           st.query ? 'No matches' : 'No options'));
         return;
       }
@@ -467,13 +477,13 @@
           if (picked) tick.innerHTML = Blockr.icons.confirm;
           row.insertBefore(tick, row.firstChild);
         }
-        list.appendChild(row);
+        listbox.appendChild(row);
       });
       if (st.serverSearch) {
-        list.appendChild(div('blockr-select__empty',
+        listbox.appendChild(div('blockr-select__empty',
           `${st.serverTotal.toLocaleString()} values — type to search`));
       } else if (f.extra > 0) {
-        list.appendChild(div('blockr-select__empty',
+        listbox.appendChild(div('blockr-select__empty',
           `+${f.extra.toLocaleString()} more — type to narrow`));
       }
       if (st.keyboard) input.setAttribute('aria-activedescendant', `${id}-opt-${st.highlight}`);
@@ -741,6 +751,10 @@
           break;
         case 'Escape':
           e.preventDefault();
+          // An open list owns this Escape, as a dirty text field does: it
+          // closes and the key goes no further, so the gear tray or modal
+          // around the select stays open. A closed select lets it through.
+          if (st.open) e.stopPropagation();
           // Focus stays on the input, which is the combobox; a menu returns
           // it to its anchor when it tears down.
           close();

@@ -7,32 +7,44 @@
 theme_dep()
 }
 \value{
-An \link[htmltools:htmlDependency]{htmltools::htmlDependency}.
+An \code{\link[htmltools:tagList]{htmltools::tagList()}} of two \link[htmltools:htmlDependency]{htmltools::htmlDependency}
+objects: the tokens, then the theme layer.
 }
 \description{
 The \verb{--blockr-*} design tokens and the Bootstrap theme layer that the
-blockr packages style themselves from, carried as three stylesheets:
-\code{blockr-tokens.css} defines the vocabulary in a \verb{:root} block - the
-colour palette, the meaning tokens built on it (text, backgrounds,
-borders, status colours), type, radii, control heights and shadows -
-\code{blockr-tokens-dark.css} restates them under \code{data-bs-theme="dark"},
-the attribute blockr.core's dark-mode board option sets, and
-\code{blockr-theme.css} applies them to the host app.
+blockr packages style themselves from, as two dependencies. The tokens
+define the vocabulary in a \verb{:root} block: the colour palette, the meaning
+tokens built on it (text, backgrounds, borders, status colours), type,
+radii, control heights and shadows. The file \code{blockr-tokens-dark.css}
+restates them under \code{data-bs-theme="dark"}, the attribute blockr.core's
+dark-mode board option sets. On their own the tokens are inert: nothing
+is styled by defining a custom property. The theme layer,
+\code{blockr-theme.css}, applies them to the host app.
 }
 \details{
-Attach it once, from the app's UI. The theme layer is deliberately
-unscoped: it restyles Bootstrap typography, labels, form controls,
-selectize, buttons, tooltips, popovers and the DataTables chrome across
-the whole page, so an app opts into it rather than picking it up from a
-component. The token block on its own is inert - nothing is styled by
-defining a custom property.
+The theme layer is deliberately unscoped: it restyles Bootstrap
+typography, labels, form controls, selectize, buttons, tooltips, popovers
+and the DataTables chrome across the whole page. An app opts into it by
+attaching \code{theme_dep()} once, from its UI, as blockr.dock's board page
+does. A component brings only the tokens: with \code{theme_dep()} in the page
+the app gets the full look, and without it the controls of
+\code{\link[=controls_dep]{controls_dep()}} keep theirs and the app keeps its own.
 
-Consuming packages reference the tokens as \verb{var(--blockr-grey-400, #9ca3af)}, with a literal fallback for hosts that do not attach this
-dependency.
+Packages that read the tokens without attaching them write a literal
+fallback, as in \verb{var(--blockr-color-text-muted, #6b7280)}.
 }
 \examples{
+# The full look: the theme layer restyles the app's heading and field.
 shiny::fluidPage(
   theme_dep(),
+  controls_dep(),
+  shiny::h4("Section"),
+  shiny::textInput("name", "Name")
+)
+
+# The controls keep their look, and the app keeps its own.
+shiny::fluidPage(
+  controls_dep(),
   shiny::h4("Section"),
   shiny::textInput("name", "Name")
 )

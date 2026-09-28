@@ -15,6 +15,8 @@ type BlockrSelectOption = string | { value: string; label?: string };
 
 interface BlockrSelectConfigBase {
   options?: BlockrSelectOption[];
+  /** The field's label, as screen readers announce the select. A menu falls back to its title. */
+  label?: string;
   /** Select.menu(): find the anchor again after it was redrawn (see Blockr.place). */
   reanchor?: () => HTMLElement | null;
   /** Shown when nothing is selected (single) / no tags (multi). */
@@ -310,6 +312,8 @@ interface BlockrActionMenu {
 interface BlockrInputConfig {
   /** Initial field value. */
   value?: string;
+  /** The field's name, as screen readers announce it. */
+  label?: string;
   /** Column names offered as completions (backticked when non-syntactic). */
   columns?: string[];
   /**
@@ -351,6 +355,8 @@ interface BlockrNamespace {
 
   actionMenu: BlockrActionMenu;
   uid(prefix?: string): string;
+  /** Whether `el`, or anything in it, is cut off by its box. */
+  cutOff(el: Element): boolean;
   escapeHtml(s: string): string;
   removeNode(node: Node | null | undefined): void;
   contentWidth(el: Element): number;
@@ -394,11 +400,11 @@ interface BlockrNamespace {
   inputs?: Record<string, BlockrInputSpec>;
   /** Toggle the canonical required-empty amber cue on a field wrapper. */
   setRequiredEmpty(el: Element, empty: boolean): void;
-  /** Commit-on-Enter text input with the ↵ button (§5.5). */
   /** Whether this is a Mac; decided once, with `.blockr-mac` on the root. */
   isMac: boolean;
   /** A shortcut written for this platform: "Mod+S" is "⌘S" or "Ctrl+S". */
   keys(keys: string): string;
+  /** Commit-on-Enter text input with the ↵ button (§5.5). */
   textCommit(
     input: HTMLInputElement,
     opts: { onCommit: (value: string) => void }
