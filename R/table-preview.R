@@ -553,9 +553,11 @@ table_preview_dep <- function() {
 }
 
 # The shared tooltip (Blockr.tooltip) and its card style, for the sorted
-# header's tooltip.
+# header's tooltip and the cut-off cells. The card reads the tokens without
+# fallbacks, so they come along; the theme layer stays the app's to attach.
 table_preview_tooltip_dep <- function() {
   list(
+    tokens_dep(),
     controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
     controls_asset("blockr-tooltip-css", stylesheet = "css/blockr-tooltip.css")
   )
