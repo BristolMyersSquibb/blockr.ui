@@ -635,7 +635,9 @@ Blockr.tooltip = (() => {
       // The attribute can go again (a name editable only in a mode).
       if (!el.hasAttribute('data-blockr-editable')) return null;
       const hint = el.getAttribute('data-blockr-editable') || HINT;
-      return Blockr.cutOff(el) ? { name: (el.textContent || '').trim(), label: hint } : hint;
+      // An <input> holds its text in `value`, not in its content.
+      const text = el instanceof HTMLInputElement ? el.value : el.textContent;
+      return Blockr.cutOff(el) ? { name: (text || '').trim(), label: hint } : hint;
     });
   };
 
