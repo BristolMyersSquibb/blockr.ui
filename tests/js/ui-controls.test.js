@@ -126,6 +126,24 @@ test('textCommit: Escape on a clean field goes through, and closes the tray', (n
   win.close();
 });
 
+test('Select: Escape on an open list closes the list and stops there', (newWindow) => {
+  const win = newWindow();
+  const band = host(win);
+  const gear = win.document.createElement('button');
+  win.document.body.appendChild(gear);
+  const tray = win.Blockr.gearTray(band, gear);
+  const sel = win.Blockr.Select.single(band, { options: ['AGE', 'SEX'], selected: 'AGE' });
+  tray.set(true);
+  sel.el.querySelector('.blockr-select__control').click();
+  const input = sel.el.querySelector('.blockr-select__search');
+  press(win, input, 'Escape');
+  assert.ok(!sel.el.classList.contains('blockr-select--open'), 'the list closed');
+  assert.ok(tray.isOpen(), 'the tray did not see the Escape');
+  press(win, input, 'Escape');
+  assert.ok(!tray.isOpen(), 'a closed select lets the next Escape through');
+  win.close();
+});
+
 test('textCommit: the Enter button reads "Enter" while dirty and is marked confirmed after', (newWindow) => {
   const win = newWindow();
   const f = fieldInTray(win);

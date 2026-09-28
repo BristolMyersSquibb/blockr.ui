@@ -726,6 +726,10 @@
           break;
         case 'Escape':
           e.preventDefault();
+          // An open list owns this Escape, as a dirty text field does: it
+          // closes and the key goes no further, so the gear tray or modal
+          // around the select stays open. A closed select lets it through.
+          if (st.open) e.stopPropagation();
           // Focus stays on the input, which is the combobox; a menu returns
           // it to its anchor when it tears down.
           close();
