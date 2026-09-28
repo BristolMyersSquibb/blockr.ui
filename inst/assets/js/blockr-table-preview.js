@@ -39,14 +39,17 @@ if (!window.blockrSortInit) {
     if (e.target.closest('.blockr-col-name')) return;
     var header = e.target.closest('.blockr-sortable');
     if (!header) return;
-    // Where the sort click happened, so the redrawn header can find out
-    // whether the pointer is still on it (see blockrHoverTip).
-    window.blockrLastSortPoint = {x: e.clientX, y: e.clientY, t: Date.now()};
     e.preventDefault();
     e.stopPropagation();
     var container = header.closest('.blockr-table-container');
     var inputId = container ? container.dataset.sortInput : null;
     if (!inputId) return;
+    // Where the sort click happened, and on which table, so the header that
+    // this click redraws can find out whether the pointer is still on it
+    // (see blockrHoverTip).
+    window.blockrLastSortPoint = {
+      x: e.clientX, y: e.clientY, t: Date.now(), input: inputId
+    };
     var col = header.dataset.column;
     var wrapper = container.querySelector('.blockr-table-wrapper');
     var output = container.closest('.shiny-html-output');
@@ -126,6 +129,11 @@ if (!window.blockrSortTipInit) {
     setTimeout(function() {
       var pt = window.blockrLastSortPoint;
       if (!th.isConnected || !pt || Date.now() - pt.t > 10000) return;
+      var container = th.closest('.blockr-table-container');
+      if (!container || container.dataset.sortInput !== pt.input) return;
+      // Only the render that answers the click: after it, the pointer is
+      // wherever it has gone since (on Next, say), not at the click.
+      window.blockrLastSortPoint = null;
       var under = document.elementFromPoint(pt.x, pt.y);
       if (under && th.contains(under)) {
         th.dispatchEvent(new PointerEvent('pointerover', {bubbles: true}));
