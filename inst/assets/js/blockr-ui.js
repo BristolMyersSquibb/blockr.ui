@@ -987,7 +987,9 @@ Blockr.menu = (() => {
         pick(active >= 0 ? active : (filterInput && filterInput.value ? pickable()[0] : -1));
       }
       else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
-      else if (e.key === 'Tab') { close(false); }
+      // Back on the trigger first, so the browser's Tab moves on from there;
+      // from the removed panel it would start over at the top of the page.
+      else if (e.key === 'Tab') { close(true); }
     });
     panel.addEventListener('focusout', (e) => {
       const to = e.relatedTarget;
