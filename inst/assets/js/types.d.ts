@@ -15,6 +15,8 @@ type BlockrSelectOption = string | { value: string; label?: string };
 
 interface BlockrSelectConfigBase {
   options?: BlockrSelectOption[];
+  /** The field's label, as screen readers announce the select. A menu falls back to its title. */
+  label?: string;
   /** Shown when nothing is selected (single) / no tags (multi). */
   placeholder?: string;
   /**

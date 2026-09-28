@@ -539,6 +539,8 @@ selected row, the active group's front tab.
   (for columns, see [Column names and their labels](#labels));
   the label is cut first when space runs out.
 - Its dropdown is a menu ([Floating layer](#floating)).
+- A screen reader names it by its field's label, which the caller passes as
+  `label`; a menu uses its title.
 
 ### Select, multi, with tags
 

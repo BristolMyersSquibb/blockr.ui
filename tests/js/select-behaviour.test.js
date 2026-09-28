@@ -34,9 +34,11 @@ const face = (sel) => sel.el.querySelector('.blockr-select__value');
 const isOpen = (sel) => sel.el.classList.contains('blockr-select--open');
 
 /* The list is portalled to <body> while open, so find it by the id the
- * combobox input points at, not by walking down from the root. */
+ * combobox input points at, not by walking down from the root. It sits in
+ * the panel, the floating surface that is portalled and shown. */
 const dropdown = (win, sel) =>
   win.document.getElementById(search(sel).getAttribute('aria-controls'));
+const panel = (win, sel) => dropdown(win, sel).closest('.blockr-select__dropdown');
 
 const rowsIn = (dd) => [...dd.querySelectorAll('.blockr-select__option')];
 const rows = (win, sel) => rowsIn(dropdown(win, sel)).map((r) => r.getAttribute('data-value'));
@@ -94,8 +96,8 @@ test('a single select opens on a click on its control and closes on the next', (
   assert.ok(!isOpen(sel));
   click(win, control(sel));
   assert.ok(isOpen(sel));
-  assert.strictEqual(dropdown(win, sel).parentElement, win.document.body, 'portalled to body');
-  assert.strictEqual(dropdown(win, sel).style.display, 'block');
+  assert.strictEqual(panel(win, sel).parentElement, win.document.body, 'portalled to body');
+  assert.strictEqual(panel(win, sel).style.display, 'block');
   click(win, control(sel));
   assert.ok(!isOpen(sel));
   assert.strictEqual(rows(win, sel).length, 0, 'the list is emptied on close');
@@ -231,7 +233,7 @@ test('onOpen fires on every open; onClose after the DOM is settled', (newWindow)
       closedWith.push({
         open: isOpen(sel),
         rows: rows(win, sel).length,
-        display: dropdown(win, sel).style.display
+        display: panel(win, sel).style.display
       });
     }
   });
