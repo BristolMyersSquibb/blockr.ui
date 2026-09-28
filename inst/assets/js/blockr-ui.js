@@ -698,18 +698,10 @@ Blockr.menu = (() => {
   /** @type {{ el: HTMLDivElement, close: () => void, anchor: HTMLElement } | null} */
   let open = null;
 
-  // The menu's own copy of the icon set, taken when this file loads: a page
-  // can also carry an older copy of this file (bundled by a package that
-  // has not moved to blockr.ui yet), and that copy replaces Blockr.icons
-  // with a set that lacks the menu's icons.
-  /** @type {Record<string, string>} */
-  const ICONS = Object.assign({}, Blockr.icons);
+  // A row's icon: the name of one of Blockr.icons, or an SVG/HTML string.
   /** @param {string} name */
-  const iconFor = (name) => {
-    if (Object.prototype.hasOwnProperty.call(ICONS, name)) return ICONS[name];
-    if (Object.prototype.hasOwnProperty.call(Blockr.icons, name)) return Blockr.icons[name];
-    return name;
-  };
+  const iconFor = (name) =>
+    (Object.prototype.hasOwnProperty.call(Blockr.icons, name) ? Blockr.icons[name] : name);
 
   /**
    * @param {HTMLElement} anchor
