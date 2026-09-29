@@ -221,8 +221,8 @@
   color: var(--blockr-color-text-muted);
 }
 
-/* The head: a name (with a badge) and a line of text above the rows, as the
-   block's "…" menu shows the block's name, package and description. */
+/* The head: a name (with a badge) and a line of text above the rows, as a
+   link's menu in the outline names the link. */
 .blockr-menu__head {
   max-width: 300px;
   padding: 8px 10px;
