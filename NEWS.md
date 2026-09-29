@@ -1,5 +1,8 @@
 # blockr.ui (development version)
 
+* Rows in a menu of actions (`Blockr.menu`, `action_menu()`) take radius 4,
+  like the rows of a Select list, instead of 6.
+
 * A new layer, `--blockr-z-overlay` (1000, Bootstrap's `$zindex-dropdown`),
   for an overlay that belongs to the content but is fixed on `<body>`, such
   as a drag ghost or a drop line: above the content, under the navbar and

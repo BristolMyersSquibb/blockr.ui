@@ -1033,8 +1033,8 @@ Every menu, dropdown and list that floats uses one surface:
   it. The beak belongs to the gear tray only.
 - Menus of actions are `Blockr.menu` (blockr.ui): rows, gaps, dividers,
   group titles and an optional head. A menu of actions is a little airier
-  than a Select list: 6px panel padding and rows 34px at radius 6
-  (`radius-md`), in the same radius-8 panel.
+  than a Select list: 6px panel padding and rows 34px, at the same radius 4
+  in the same radius-8 panel.
 - Plain actions have no icon. A row gets one only when it is more than a
   plain action: it opens a mode or another surface ("Manage pages"), or it
   destroys something ("Remove", a bin). Such a row sits in a group of its
