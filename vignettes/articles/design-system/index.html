@@ -228,11 +228,14 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .badge.danger { color: var(--blockr-color-text-danger); background: var(--blockr-color-bg-danger); border-color: var(--blockr-color-border-danger-subtle); }
 .badge.warning { color: var(--blockr-color-text-warning); background: var(--blockr-color-bg-warning); border-color: var(--blockr-color-border-warning-subtle); }
 .badge.success { color: var(--blockr-color-text-success); background: var(--blockr-color-bg-success); border-color: var(--blockr-color-border-success-subtle); }
-.tag { display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 3px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-default); white-space: nowrap; flex: none; }
+.tag { display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 3px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-hover); font-size: var(--blockr-font-size-sm); color: color-mix(in srgb, var(--blockr-color-text-default) 80%, var(--blockr-color-bg-field)); white-space: nowrap; flex: none; }
 .tag .x { display: inline-flex; width: 16px; height: 16px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 3px; background: none; color: var(--blockr-color-text-muted); cursor: pointer; opacity: 0; }
 .tag:hover .x, .tag:focus-within .x, .tag.f-hover .x { opacity: 1; }
 .tag .x:hover { color: var(--blockr-color-text-danger); }
-.pill { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 5px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); font-size: var(--blockr-font-size-xs); font-weight: 500; color: var(--blockr-color-text-muted); cursor: pointer; white-space: nowrap; flex: none; }
+.tag.shelf { background: var(--blockr-color-bg-surface); color: var(--blockr-color-text-default); }
+.tag.shelf.open { background: var(--blockr-color-bg-hover); }
+.tag.cut { color: var(--blockr-color-text-accent); background: var(--blockr-color-bg-accent-subtle); border-color: var(--blockr-color-border-accent-subtle); }
+.pill { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 5px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-hover); font-size: var(--blockr-font-size-xs); font-weight: 500; color: var(--blockr-color-text-muted); cursor: pointer; white-space: nowrap; flex: none; }
 .pill:hover { border-color: var(--blockr-color-border-strong); color: var(--blockr-color-text-default); }
 .pill.open { border-color: var(--blockr-color-border-accent); color: var(--blockr-color-text-default); box-shadow: var(--blockr-focus-ring); }
 .count { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--blockr-radius-pill); font-size: 11px; font-weight: 600; line-height: 1; color: var(--blockr-color-text-accent-strong); background: color-mix(in srgb, var(--blockr-color-border-accent) 14%, transparent); font-variant-numeric: tabular-nums; }
@@ -758,7 +761,7 @@ like a file name), then its save state as text and one "…" workflow menu. On t
 the account. <a href="../design-system.html#actions">rules: design-system#actions</a></p>
 <div class="z-nav">
   <span class="z-logo"><svg width="18" height="18"><use href="#z-layers"/></svg></span>
-  <span class="z-nm">AE review 244</span><span class="z-meta">Saved just now</span>
+  <span class="z-nm">airquality exploration</span><span class="z-meta">Saved just now</span>
   <button class="z-ib" data-tip="Workflow menu" aria-label="Workflow menu"><svg width="15" height="15"><use href="#z-dots"/></svg></button>
   <span class="z-sp"></span>
   <button class="z-view" data-tip="Views"><svg width="13" height="13"><use href="#z-page"/></svg>Build<span class="z-car"></span></button>
@@ -1389,7 +1392,7 @@ button per view. Destructive is only for confirming a removal. The classes are <
 <div class="card">
 <table class="tok">
   <tr><th></th><th>42 · beside inputs</th><th>30 · toolbars, dialogs</th><th>26 · header row</th></tr>
-  <tr><td><b>Main</b><div class="m" style="font-size:12px">accent text, 7% fill, 35% border</div></td><td><button class="b m main">Write file</button></td><td><button class="b s main">Add block</button></td><td><button class="b xs main"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">3</span></button></td></tr>
+  <tr><td><b>Main</b><div class="m" style="font-size:12px">accent text, 7% fill, 35% border</div></td><td><button class="b m main">Write file</button></td><td><button class="b s main">Add block</button></td><td><button class="b xs main"><svg width="12" height="12"><use href="#i-reset"/></svg>31 of 153 rows</button></td></tr>
   <tr><td><b>Secondary</b><div class="m" style="font-size:12px">surface, soft border</div></td><td><button class="b m second">Cancel</button></td><td><button class="b s second">Export</button></td><td><button class="b xs second"><svg width="12" height="12"><use href="#i-dl"/></svg>Download</button></td></tr>
   <tr><td><b>Quiet</b><div class="m" style="font-size:12px">text only, muted</div></td><td><button class="b m quiet">Skip</button></td><td><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add condition</button></td><td><button class="b xs quiet">Clear</button></td></tr>
   <tr><td><b>Destructive</b><div class="m" style="font-size:12px">the main style in red</div></td><td><button class="b m danger">Delete board</button></td><td><button class="b s danger">Remove block</button></td><td><button class="b xs danger">Remove</button></td></tr>
@@ -1545,25 +1548,24 @@ their type as meta. Type to filter; arrows and Enter work.</p>
 <!-- ============================================================== 8 LABELS -->
 <section class="part" id="labels">
 <h2 class="ph"><span class="num">8</span>Labels and status</h2>
-<p class="rl">Shape tells the four small kinds apart: a badge (read only) has round ends; a tag (a value you picked), a pill (a
+<p class="rl">Shape tells the small kinds apart: a badge (read only) has round ends; a tag (a value you picked), a pill (a
 click changes a setting) and a button have 4px corners. A badge has colour only for status or "on".
 <a href="../design-system.html#labels">rules: design-system#labels</a></p>
 
-<h3 class="sh" id="badges">Badges, tags, pills, counts</h3>
+<h3 class="sh" id="badges">Badges, tags, pills</h3>
 <div class="cols c2">
   <div class="card">
     <div class="line"><span class="cap" style="margin:0;width:70px">badge</span><span class="badge">Categorical</span><span class="badge">blockr.dplyr</span><span class="badge on">Added</span><span class="badge danger">Not found</span><span class="badge warning">Stale</span><span class="badge success">Saved</span></div>
     <div class="line"><span class="cap" style="margin:0;width:70px">tag</span><span class="tag">Ozone<button class="x" data-tip="Remove Ozone" aria-label="Remove Ozone"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="tag f-hover">Month<button class="x" data-tip="Remove Month" aria-label="Remove Month"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="tag">Wind<button class="x" data-tip="Remove Wind" aria-label="Remove Wind"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="m" style="font-size:12px">Month drawn hovered</span></div>
     <div class="line"><span class="cap" style="margin:0;width:70px">pill</span><button class="pill" data-menu="m-ops" data-value="≥"><span class="v">≥</span><svg width="10" height="10"><use href="#i-car"/></svg></button><button class="pill" data-menu="m-ops" data-value="in"><span class="v">is one of</span><svg width="10" height="10"><use href="#i-car"/></svg></button></div>
-    <div class="line"><span class="cap" style="margin:0;width:70px">count</span><button class="b xs main"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">2</span></button><button class="b s second">Filters <span class="count">12</span></button></div>
   </div>
   <ul class="rules" style="margin:0">
     <li>Badge: 18px capsule, 11px weight 500, 7px side padding, <code>bg-subtle</code>, <code>border-default</code>, muted. Types, packages and significance levels are neutral.</li>
     <li>Accent tint on a badge means on, added or cutting rows. Status tints only for danger, warning and success; blue "info" becomes neutral.</li>
-    <li>Tag: 24px, 13px, <code>text-default</code>. Its × shows on the hovered tag only and turns red on its own hover.</li>
-    <li>Pill: 24px with a caret; it opens a menu. The click-to-cycle pill is retired.</li>
-    <li>Count: 16px capsule in the host's colour at 14%, text <code>accent-700</code> (4.5:1 for small text).</li>
-    <li>One class each in blockr.ui: <code>.blockr-badge</code>, <code>.blockr-tag</code>, <code>.blockr-pill</code>, <code>.blockr-count</code>. The word "chip" goes.</li>
+    <li>Tag: 24px, 13px. In a field it takes <code>bg-hover</code>, a step darker than the field, with the name at 80% <code>text-default</code>; on the surface (the crossfilter's Filter by) <code>bg-surface</code>. Its × shows on the hovered tag only and turns red on its own hover.</li>
+    <li>Pill: 24px with a caret, the tags' <code>bg-hover</code> fill; it opens a menu. The click-to-cycle pill is retired.</li>
+    <li>Count: 16px capsule in the host's colour at 14%, text <code>accent-700</code> (4.5:1 for small text). No control shows one at the moment: it never counts active filters.</li>
+    <li>In blockr.ui a tag is <code>.blockr-select__tag</code>, a pill <code>.blockr-pill</code>, a badge <code>.blockr-menu__badge</code> or <code>.blockr-tooltip__badge</code>. The word "chip" goes.</li>
   </ul>
 </div>
 
@@ -1598,13 +1600,14 @@ uses labels; the board's pills and receipts use names.</p>
 </div>
 
 <h3 class="sh" id="filtering">Showing that a block filters</h3>
-<p class="note">The control that undoes a filter wears the accent tint while a filter is on, carries the number of active
-filters and names the clauses in its tooltip. It is the 26px button. Where the count is itself a control, count and reset join
-as one segment. Dots are for block status only.</p>
+<p class="note">A block that narrows what the reader sees says so in one place on its header row: grey 12px text with the count
+while nothing is filtered, the 26px main button with the reset icon and what the filter kept while something is. The button
+clears the filter; its tooltip names the clauses. A block that sends a filter on without narrowing its own view names the
+clause in its status line, with Reset beside it. Nothing counts active filters, and dots are for block status only.</p>
 <div class="cols c3">
-  <div class="card"><p class="cap">Filters on (hover Reset)</p><div class="hd end"><button class="b xs main" data-tip="Month is July · Wind is Light (5 to 10)"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">2</span></button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div></div>
-  <div class="card"><p class="cap">No filter</p><div class="hd end"><button class="b xs main" disabled><svg width="12" height="12"><use href="#i-reset"/></svg>Reset</button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div></div>
-  <div class="card"><p class="cap">Count and reset as one segment</p><div class="hd end"><span class="joined"><button class="b xs main">Cohort <span class="count">12</span></button><button class="b xs main" data-tip="Reset the cohort" aria-label="Reset the cohort"><svg width="12" height="12"><use href="#i-reset"/></svg></button></span></div></div>
+  <div class="card"><p class="cap">Nothing filtered</p><div class="hd end" style="align-items:center"><span style="font-size:12px;color:var(--blockr-color-text-muted)">153 rows</span><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div></div>
+  <div class="card"><p class="cap">Filtered (hover the button)</p><div class="hd end"><button class="b xs main" data-tip="Month is July · Wind is Light (5 to 10)"><svg width="12" height="12"><use href="#i-reset"/></svg>8 of 153 rows</button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div></div>
+  <div class="card"><p class="cap">A drill, sent on</p><div class="o-foot" style="margin-top:0;align-items:center"><span>Drilled down to Month = July</span><button class="b xs main"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset</button></div></div>
 </div>
 </section>
 
@@ -1665,16 +1668,18 @@ High dose shows a drilled cell (row and column tinted, the crossing a step stron
 </div></div>
 
 <h3 class="sh" id="crossfilter">Crossfilter</h3>
-<p class="note">The standard header row, with Reset (icon and count, no label) above every filter it clears. "Group by" labels a
-field; "Filter by" titles a section. A card's list is a table: headers with their rule, rows 30px, Count right-aligned with the
+<p class="note">The standard header row, with Reset all saying what the filters kept, above every filter it clears. "Group by"
+labels a field; "Filter by" titles a section over the tags and cards. A tag whose card is open takes the hover wash; a tag
+cutting rows takes the accent tint. A card's list is a table: headers with their rule, rows 30px, Count right-aligned with the
 sort bars before it. A card's reset is disabled while it cuts no rows; above 8 values it has a search field. The bars are
 supporting marks.</p>
 <div class="dock" style="max-width:980px"><div class="face">
-  <div class="hd end"><button class="b xs main" data-tip="Month is July"><svg width="12" height="12"><use href="#i-reset"/></svg><span class="count">1</span></button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div>
+  <div class="hd end"><button class="b xs main" data-tip="Month is July"><svg width="12" height="12"><use href="#i-reset"/></svg>31 of 153 rows</button><button class="gear" data-tip="Settings" aria-label="Settings"><svg width="14" height="14"><use href="#i-gear"/></svg></button></div>
   <div class="gu" style="margin-top:4px"><div class="gB">
     <div class="fld s2"><span class="lbl">Group by</span><button class="ctl" data-menu="m-cols-opt" data-place="field" data-value="None"><span class="v ph">None</span><span class="car"></span></button></div>
   </div></div>
   <div class="sec" style="margin-top:24px">Filter by</div>
+  <div class="line" style="margin-bottom:12px"><span class="tag shelf cut">Month</span><span class="tag shelf open">Wind</span><span class="tag shelf open">Day</span><span class="tag shelf">Temp</span><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>More filters</button></div>
   <div class="xf-cards">
     <div>
       <div class="xf-card-h"><span class="xf-cl">Month<small>5 values</small></span><button class="tool" data-tip="Clear this filter" aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
@@ -1701,7 +1706,6 @@ supporting marks.</p>
       <div class="xf-th"><span>Day</span><span class="xf-th-n"><i class="xf-sort" aria-hidden="true"></i>Count</span></div>
       <div class="xf-list" id="xf-days"></div></div>
   </div>
-  <div class="o-foot"><span>31 of 153 rows</span></div>
 </div></div>
 
 <h3 class="sh" id="code">Code editor</h3>
