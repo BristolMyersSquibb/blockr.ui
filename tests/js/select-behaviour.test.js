@@ -119,6 +119,22 @@ test('a multi select opens on a click and keeps focus in its search input', (new
   win.close();
 });
 
+test('a multi select ends on the chevron, as a single one does', (newWindow) => {
+  const win = newWindow();
+  const one = single(win, { options: ABC });
+  const many = multi(win, { options: ABC, selected: ['a', 'b'] });
+  for (const sel of [one, many]) {
+    const last = control(sel).lastElementChild;
+    assert.ok(last.classList.contains('blockr-select__arrow'), 'the chevron comes last');
+    assert.ok(last.querySelector('svg'));
+  }
+  // A pick redraws the tags in their own row, never after the chevron.
+  click(win, control(many));
+  clickRow(win, many, 'c');
+  assert.ok(control(many).lastElementChild.classList.contains('blockr-select__arrow'));
+  win.close();
+});
+
 test('a click on a tag\'s x while closed removes it without opening', (newWindow) => {
   const win = newWindow();
   const seen = [];

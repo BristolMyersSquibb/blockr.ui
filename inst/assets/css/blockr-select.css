@@ -103,7 +103,7 @@
   display: none;
 }
 
-/* --- Arrow (single mode) --- */
+/* --- Arrow --- */
 .blockr-select__arrow {
   flex-shrink: 0;
   display: flex;
@@ -174,9 +174,12 @@
   opacity: 0;
 }
 
-/* --- Tags container (multi mode) --- */
+/* --- Tags container (multi mode) ---
+   Grows to fill the control, which puts the chevron at the end as in a
+   single select, however many rows the tags wrap onto. */
 .blockr-select__tags {
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
   gap: 3px;
   align-items: center;
@@ -198,7 +201,6 @@
 .blockr-select--single-line .blockr-select__tags {
   flex-wrap: nowrap;
   overflow: hidden;
-  flex: 1;
 }
 .blockr-select--single-line .blockr-select__tag {
   flex: 0 0 auto;
