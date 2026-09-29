@@ -1170,20 +1170,21 @@ Specified under "A pill that opens a menu" in [Controls](#controls).
 ### Block status
 
 An 8px dot on the block's mark with a 2px `bg-surface` ring, one spec for dock
-and the DAG (`block_status_style()`). Its fills are local tokens owned by
-blockr.dock, each pointing at a meaning token:
+and the DAG (`block_status_style()`). Its fills are meaning tokens, with no
+status tokens of their own: the spec names each token next to its light
+value, which a renderer that cannot read CSS (the DAG's canvas) draws with.
 
-| Token | Points at | State |
+| State | Fill | When |
 |---|---|---|
-| `--blockr-dock-status-stale` | `text-muted` | stale |
-| `--blockr-dock-status-waiting` | `border-warning`, drawn as a hollow ring (1.5px, `bg-surface` inside) | an input is not ready: nothing linked in, or the block upstream is unset, waiting or failed |
-| `--blockr-dock-status-failed` | `border-danger` | failed |
-| `--blockr-dock-status-unset` | `border-warning` | a required input is empty; the same amber as the empty field's cue |
+| stale | `text-muted` | the inputs changed since the block last ran |
+| waiting | `border-warning`, drawn as a hollow ring (1.5px, `bg-surface` inside) | an input is not ready: nothing linked in, or the block upstream is unset, waiting or failed |
+| failed | `border-danger` | the block failed |
+| unset | `border-warning` | a required input is empty; the same amber as the empty field's cue |
 
 Unset and waiting share the amber and differ by shape: the block that needs
 you has the solid dot, and the blocks below it, which wait for it, have rings.
-`-unset` replaces the off-palette `#eab308` in blockr.dock
-`block_status_style()`.
+The amber replaces the off-palette `#eab308` blockr.dock's
+`block_status_style()` gave unset.
 
 ### Status line and plain text
 
@@ -1508,9 +1509,9 @@ rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
 `crossfilter-block.css`), the gear button, the tool button and the action
 menu (`tool_button()`, `action_menu()`), the button classes
 (`.blockr-btn`), the chevron (`Blockr.icons.chevron`), and the column-label reader. blockr.dock owns the dock
-header, the "…" menu, the block status dot, the category colours
-(`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
-rule that hides the gear in simplified mode. blockr.theme owns data colours.
+header, the "…" menu, the block status dot and its spec
+(`block_status_style()`, which the DAG draws from too), the category colours
+(`blk_color()`) and the rule that hides the gear in simplified mode. blockr.theme owns data colours.
 
 The token tests in blockr.ui check that the vocabulary changes only
 deliberately, that every name follows the grammar or is a legacy alias, that
