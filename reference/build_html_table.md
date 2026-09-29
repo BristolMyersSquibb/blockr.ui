@@ -84,7 +84,8 @@ build_html_table(
 
 ## Value
 
-A [`shiny::tagList()`](https://rdrr.io/pkg/shiny/man/reexports.html)
+A
+[`shiny::tagList()`](https://rstudio.github.io/htmltools/reference/tagList.html)
 with the table preview, carrying the
 [`table_preview_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/table_preview_dep.md)
 html dependency.

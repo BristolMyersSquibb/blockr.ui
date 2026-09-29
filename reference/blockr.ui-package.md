@@ -16,3 +16,7 @@ Useful links:
 ## Author
 
 **Maintainer**: David Granjon <david@cynkra.com>
+
+Authors:
+
+- David Granjon <david@cynkra.com>
