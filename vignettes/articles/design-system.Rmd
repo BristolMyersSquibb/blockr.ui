@@ -832,9 +832,12 @@ icon-only button has a tooltip. Tools do not shrink with the panel.
 
 The dock header has the "…" menu, and next to it a block's own control where
 the block has one (the AI assistant's sparkle, at every width, until a global
-assistant replaces it). They are quieter than other tools: at rest their icon
-is `border-strong` grey, on hover `text-disabled` on the `bg-hover` wash, so
-the header reads as the block's name. The preview's eye stays in the header
+assistant replaces it). They are one step quieter than other tools: at rest
+their icon is `text-disabled`, on hover `text-muted` on the `bg-hover` wash,
+so the header reads as the block's name. A border colour would be quieter
+still on white, but the dark scheme keeps its borders faint on purpose, and
+an icon in `border-strong` all but vanishes there (1.4:1 on `bg-surface`).
+The preview's eye stays in the header
 too, left of the block's own control: while building, the preview is what
 gets switched most. Controls is the menu's first row, with its familiar icon
 and a check when on, then a rule, then the block's actions. The header has one size at every
