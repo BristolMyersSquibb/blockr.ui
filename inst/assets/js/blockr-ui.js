@@ -685,7 +685,7 @@ Blockr.tooltip = (() => {
  * holds the focus; `config.minWidth` widens the panel.
  *
  * `config.head` ({ title, badge?, text? }) puts a block of text above the
- * rows, as the "…" menu's name, package and description. `align` is 'start'
+ * rows, as a link's menu in the outline names the link. `align` is 'start'
  * (default) or 'end', for a trigger in a header row. `onClose` runs once
  * whichever way the menu closes.
  *

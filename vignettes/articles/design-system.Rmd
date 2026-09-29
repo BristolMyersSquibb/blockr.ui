@@ -253,9 +253,13 @@ monospace`. Code is 13px on every code surface.
 | `--blockr-control-h-sm` | 30px | buttons in toolbars and dialogs, the crossfilter card search |
 | `--blockr-control-h-xs` | 26px | header tools, the gear, buttons in a header strip, the builder/code switch, segmented controls inside a row |
 
-No control is smaller than 26px, except what sits inside a 42px row or field
-(the 24px pill, tag and ↵ button) and the 16px checkbox box, whose label is
-part of its target.
+Nothing you click is smaller than 24px (WCAG 2.2, 2.5.8); a control that
+stands on its own is at least 26px, and one inside a row, field or tag may be
+24px. Below 24px only where the target is a word in running text (a slot, in a
+sentence or an empty state), whose height is the line's, or where the same
+action has a full-size target too: the 16px checkbox box (its label), a tag's ×
+(the list unticks it) and the outline's input markers ("Connect to…" in the
+row's menu).
 
 ### Elevation
 
@@ -333,9 +337,11 @@ There is no 16px section heading inside a block.
 ### The block's mark and bare mode
 
 - The mark is a tinted square (the category colour at about 18% on the
-  surface) with the glyph in the category colour. Sizes: 28px in the dock
-  header, 24px in list rows (menus, pickers) with the package as a badge,
-  16px in a tab.
+  surface) with the glyph in the category colour. It comes in four sizes:
+  32px in the dock header, 24px in list rows (menus, pickers, block lists)
+  with the package as a badge, 20px in the compact header, 16px in a tab. The
+  glyph is half the mark plus 2px (18, 14, 12, 10) and the corner radius a
+  quarter of it (8, 6, 5, 4).
 - The header's mark carries the block type and package as its tooltip, one
   of the few on something that is not a button or a cut-off label (see
   Tooltips).
@@ -739,9 +745,9 @@ title, an outline row, a view name, a tab (in bare mode).
   Where the gesture is a single click (a name in the views menu's manage
   mode), the tooltip says so ("Click to rename").
 - Markup: `data-blockr-editable` on the element that shows the name, with the
-  gesture as its value where it is not the double-click. blockr-ui.js gives
-  it the tooltip and blockr-tooltip.css the cursor, both loaded wherever
-  blockr-ui.js is; nothing else is needed.
+  gesture as its value where it is not the double-click. The script
+  blockr-ui.js gives it the tooltip and blockr-tooltip.css the cursor, both
+  loaded wherever blockr-ui.js is; nothing else is needed.
 - While editing, the text becomes a field at its own size and weight: 1px
   `border-accent`, the focus ring, `bg-surface`, the text selected. No label.
 - Enter commits, Escape restores, a click elsewhere commits. An empty or
@@ -769,7 +775,7 @@ patient profile's sidebar.
   `text-muted`.
 - A 14px magnifier in `text-muted`, 9px from the left; the text starts at
   30px.
-- While there is text, a 22px clear button at the right: a thin ×,
+- While there is text, a 24px clear button at the right: a thin ×,
   `text-muted`, radius 4, the hover wash. Escape clears too.
 - Focus: `bg-surface`, `border-accent` and the focus ring.
 - It filters as you type. A list shows it only above 8 entries, as a menu
@@ -986,16 +992,19 @@ Every menu, dropdown and list that floats uses one surface:
   plain action: it opens a mode or another surface ("Manage pages"), or it
   destroys something ("Remove", a bin). Such a row sits in a group of its
   own, after a gap or a divider, so a label with an icon never sits right
-  under one without.
+  under one without. The toggle for what the card shows keeps its icon too
+  (Controls, the sliders).
 - A destructive row is plain text at rest and turns `text-danger` on a
-  `bg-danger` wash under the pointer or as the keyboard row. The current item (the page you are on)
-  is weight 600 with a check at the end, no fill. Its classes (`.blockr-menu`,
-  `.blockr-menu__item`, ...) also style a menu whose markup is rendered
-  elsewhere, so it looks the same.
+  `bg-danger` wash under the pointer or as the keyboard row. The current item
+  (the page you are on) is weight 600 with a check at the end, no fill. Its
+  classes (`.blockr-menu`, `.blockr-menu__item`, ...) also style a menu whose
+  markup is rendered elsewhere, so it looks the same.
 
-- A menu of actions (downloads, the "…" menu) is `action_menu()`: its rows
-  run once and close it, and nothing is remembered. A menu that sets a value
-  is `Blockr.Select.menu()`. The two share the surface and the placement.
+- A menu of actions (downloads, the "…" menu) is `action_menu()` or
+  `Blockr.menu`: its rows run once and close it. The one remembered row is a
+  toggle for what the card shows: a check at the end while on, first, in its
+  own group before a divider. A menu that sets a value is
+  `Blockr.Select.menu()`. The two share the surface and the placement.
 
 **Row states.**
 
@@ -1003,6 +1012,7 @@ Every menu, dropdown and list that floats uses one surface:
 |---|---|
 | hover and keyboard row (same look) | `bg-hover`; meta text and icons turn `text-default` |
 | current pick | weight 600 |
+| toggle on | a check at the end, normal weight |
 | multi pick | a tick (14px, `text-accent`) in a slot every row keeps; normal weight |
 | disabled | listed in `text-disabled`, no hover, the reason in a tooltip |
 
@@ -1046,11 +1056,10 @@ the menu; a multi pick keeps it open and keeps the filter text.
 
 ### The block's "…" menu
 
-Its head holds the block's name, package and description (12px `text-muted`,
-the name in `text-default` weight 600), above a divider. Then the actions:
-Rename, Duplicate, Copy block ID (the ID as mono meta text), and Remove after a
-divider, a destructive row. The dock header has no subtitle; the block type is
-the tooltip on its mark.
+Controls (the sliders, a check when on), a divider, then Rename, Append
+block, Copy block ID (the ID as mono meta text), and Remove block after a
+divider, a destructive row. No head: the block's type and package are the
+tooltip on its mark, and the dock header has no subtitle.
 
 ### Tooltips
 
@@ -1152,11 +1161,8 @@ Specified under "A pill that opens a menu" in [Controls](#controls).
 
 ### Showing that a block filters
 
-- The control that undoes the filter (Reset) is a 26px xs main button while a
-  filter is on, disabled when none is. It carries the number of active filters
-  as a count, and its tooltip names the clause.
-- Where the count is itself a control (the patient profile's cohort tag opens
-  the sidebar), count and reset join as one 26px segment.
+- The control that undoes a filter says what the filter kept, never a count
+  of filters: see the rule under [Messages](#messages).
 - Dots are for block status only; the heatmap's filter dot goes.
 
 ### Block status
@@ -1237,13 +1243,18 @@ names, an exhibit in labels.
     tell none from broken: "No medication records between D-30 and D189".
   A panel keeps its title and sentence above the line; the panel does not
   change size to hold it.
-- A filter that narrows what the reader sees (the population filter, a
-  drill) says so in one place: while nothing is filtered, grey 12px text
-  with the count ("306 patients"); while something is, the same place is
-  the 26px main button with the reset icon and what the filter kept ("179
-  of 306 patients"), which clears it. Count in the unit the reader thinks
-  in (patients, not rows across tables). The tooltip names the clause it
-  clears. No count of active filters: the controls that set them show that.
+- A block that narrows what the reader sees (the crossfilter, the population
+  filter, the patient profile under a drill) says so in one place on its
+  header row. While nothing is filtered it is grey 12px text with the count
+  ("306 patients"); while something is, the same place is the 26px main
+  button with the reset icon and what the filter kept ("179 of 306
+  patients"), which clears it. Count in the unit the reader thinks in: the
+  subject when the block knows it, rows otherwise. When the total is
+  unknown, the button says what is shown ("6 patients"). Its tooltip names
+  the clauses it clears. No count of active filters: the controls that set
+  them show that.
+- A block that sends a filter on without narrowing its own view (a chart or
+  table drill) names the clause in its status line, with Reset beside it.
 - A block-level error or warning (a failed expression, dropped rows) uses the
   message style, above the output: `text-<status>` on `bg-<status>` with a
   `border-<status>-subtle` edge, 13px, radius 6. Danger for errors, the amber set for
@@ -1365,19 +1376,20 @@ and the composer table, which render annotated data frames).
 
 ### Crossfilter
 
-- **Header row:** the standard one. Row count, "Reset all" and the gear sit on
-  the header row at the top. "Group by" is a field with a label; "Filter by" is
+- **Header row:** the standard one. The count, which turns into Reset all
+  while something is filtered, and the gear sit on the header row at the top. "Group by" is a field with a label; "Filter by" is
   a section title over the tags and cards. (The population filter, a block that
   joins two blocks in one, keeps its own layout.)
-- **Reset all:** the 26px main button with the reset icon and the count of
-  active filters, no label; disabled when nothing is filtered. Its tooltip
-  names the clause it undoes ([Labels](#labels)).
+- **Reset all:** the header row's count, as a block that filters shows it
+  (see [Messages](#messages)): the 26px main button with the reset icon and
+  what the filters kept while something is filtered. Its tooltip names the
+  clauses it undoes.
 - **Filter by tags:** 13px tags. A tag whose card is open takes the hover wash
   (`bg-hover`); a tag cutting rows wears the accent tint, which wins when both
   hold.
 - **Filter cards:** the column's name with its label as meta. Reset and remove
   are 26px tools, always shown; the reset is disabled while the card cuts no
-  rows, like Reset all. Above 8 values the card has a search field
+  rows. Above 8 values the card has a search field
   ([Controls](#controls)).
 - **The card's list** is a table and follows [Tables](#special): headers 13px
   weight 600 with the rule under each, rows 30px at 14px with 12px side
