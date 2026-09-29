@@ -12,11 +12,15 @@ in load order.
 }
 \description{
 The JavaScript and CSS of the controls blockr blocks are built from:
-\code{Blockr.Select} (single, multi and menu), the Enter button of a field that
+\code{Blockr.Select} (single, multi and menu), \code{Blockr.Input} (the code field
+with column and function completions), the Enter button of a field that
 commits on Enter, the required-empty cue, the checkbox, the segmented
-control, the gear tray and the placement routine for floating panels
-(\code{Blockr.place}), all on the \code{window.Blockr} namespace, together with the
-rows, pills, labels and fields they draw.
+control, the gear tray, the tooltip (\code{Blockr.tooltip}), the menus of
+actions (\code{Blockr.menu} for those built in JavaScript, \code{Blockr.actionMenu}
+for those \code{\link[=action_menu]{action_menu()}} builds in R) and the placement routine for
+floating panels (\code{Blockr.place}), all on the \code{window.Blockr} namespace,
+together with the rows, pills, labels, fields and buttons (\code{.blockr-btn})
+they draw.
 }
 \details{
 The stylesheets read the design tokens without fallbacks, so the
@@ -26,7 +30,8 @@ Attach it from a block's UI; dependencies are de-duplicated by name, so
 any number of blocks can.
 
 The dependency names are the ones blockr.dplyr used while these files
-lived there (\code{blockr-select-js}, \code{blockr-select-css}, \code{blockr-blocks-css}),
+lived there (\code{blockr-select-js}, \code{blockr-select-css}, \code{blockr-blocks-css},
+\code{blockr-input-js}, \code{blockr-input-css}),
 so a page carries one copy of each. Of two dependencies with one name,
 htmltools keeps the higher version, so while blockr.dplyr still ships its
 own copies, a page that has both uses blockr.dplyr's.

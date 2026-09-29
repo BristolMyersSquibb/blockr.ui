@@ -3,7 +3,9 @@
  * Blockr.Select: the dropdown every blockr block uses.
  *
  * Three forms of one widget. `single` shows its pick in a control and closes
- * on a pick; `multi` shows its picks as tags in the control and stays open;
+ * on a pick; `multi` shows its picks as tags in the control, ticks them in
+ * the list and stays open, keeping the filter text so one search can serve
+ * several picks;
  * `menu` is the list alone, hung under an element the caller owns (a word in
  * a block's sentence), open from the start and gone when it closes. The
  * list, the filter, the keyboard, the placement and the server search are
@@ -266,11 +268,14 @@
     // the listbox is rebuilt on a render. A menu keeps its title, its tags
     // and its filter box in the panel above it, so a keystroke cannot
     // re-create (or move, which blurs) the input the user is typing into.
-    const list = div('blockr-select__dropdown');
+    const list = div(`blockr-select__dropdown blockr-select__dropdown--${mode}`);
     const listbox = div('blockr-select__listbox');
     listbox.id = listId;
     listbox.setAttribute('role', 'listbox');
     if (label) listbox.setAttribute('aria-label', label);
+    // A multi keeps its picks in the list, each aria-selected, which a
+    // listbox allows only when it says it takes several.
+    if (multi) listbox.setAttribute('aria-multiselectable', 'true');
     if (headless) {
       // One sticky element holds the title, the tags and the filter box, so
       // a long list scrolls under all three (design system, Menus). Three
@@ -310,7 +315,6 @@
       let extra = 0;
       for (const opt of st.options) {
         const val = optValue(opt);
-        if (multi && st.selected.indexOf(val) >= 0) continue;
         // `val` may be a number (numeric value pickers send JSON numbers).
         if (q && String(val).toLowerCase().indexOf(q) < 0 &&
             optLabel(opt).toLowerCase().indexOf(q) < 0) continue;
@@ -447,14 +451,16 @@
       }
       if (!rows.length) {
         listbox.appendChild(div('blockr-select__empty',
-          st.query ? 'No matches' : (multi ? 'All selected' : 'No options')));
+          st.query ? 'No matches' : 'No options'));
         return;
       }
       st.highlight = Math.max(0, Math.min(st.highlight, rows.length - 1));
       rows.forEach((opt, i) => {
         const val = optValue(opt);
         const row = div('blockr-select__option');
-        const picked = !multi && val === st.selected;
+        const picked = multi
+          ? /** @type {string[]} */ (st.selected).indexOf(val) >= 0
+          : val === st.selected;
         if (st.keyboard && i === st.highlight) row.classList.add('blockr-select__option--highlighted');
         if (picked) row.classList.add('blockr-select__option--selected');
         row.setAttribute('role', 'option');
@@ -462,6 +468,15 @@
         row.setAttribute('aria-selected', picked ? 'true' : 'false');
         row.setAttribute('data-value', val);
         fillOptContent(row, opt, labelFirst);
+        // Every multi row keeps the tick's space, so the names line up
+        // whether or not they are picked.
+        if (multi) {
+          const tick = document.createElement('span');
+          tick.className = 'blockr-select__tick';
+          tick.setAttribute('aria-hidden', 'true');
+          if (picked) tick.innerHTML = Blockr.icons.confirm;
+          row.insertBefore(tick, row.firstChild);
+        }
         listbox.appendChild(row);
       });
       if (st.serverSearch) {
@@ -555,6 +570,9 @@
         // 180 to 320px (design system, Menus).
         width: headless ? { min: 180, max: 320 } : 'anchor',
         minWidth: 190,
+        // The word can be redrawn under an open menu (a multi pick recomposes
+        // the block); the caller says how to find it again.
+        reanchor: typeof config.reanchor === 'function' ? config.reanchor : undefined,
         onFlip: (above) => root.classList.toggle('blockr-select--above', above)
       });
       syncDocClick();
@@ -586,12 +604,12 @@
     /** @param {string} value */
     const pick = (value) => {
       if (multi) {
+        // The query stays, and the rows stay where they are: a search for
+        // "blood" serves every blood test in turn. A ticked row unticks.
         const sel = /** @type {string[]} */ (st.selected);
-        if (sel.indexOf(value) >= 0) return;
-        sel.push(value);
-        st.query = '';
-        input.value = '';
-        st.highlight = 0;
+        const i = sel.indexOf(value);
+        if (i >= 0) sel.splice(i, 1);
+        else sel.push(value);
         render();
         emit();
       } else {
@@ -633,8 +651,8 @@
         if (val != null) removeTag(val);
         return;
       }
-      // The "+N" chip shows the rest rather than opening the list, which in
-      // multi mode offers only what is NOT selected.
+      // The "+N" chip shows the hidden tags in place rather than opening
+      // the list.
       if (t.closest('.blockr-select__more')) {
         e.stopPropagation();
         st.expanded = true;

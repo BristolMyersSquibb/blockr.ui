@@ -45,6 +45,42 @@ test('place: a field dropdown takes the control\'s width, at least minWidth', (n
   win.close();
 });
 
+test('place: a panel whose anchor left the page stays put, or follows reanchor', (newWindow) => {
+  const win = newWindow();
+  Object.defineProperty(win.document.documentElement, 'clientWidth', { value: 800, configurable: true });
+  const rectAt = (el, left) => {
+    el.getBoundingClientRect = () => ({ left, width: 60, right: left + 60, top: 100, bottom: 130, height: 30 });
+  };
+  const panel = host(win);
+  const word = host(win);
+  rectAt(word, 200);
+  const h = win.Blockr.place(panel, word, { width: { min: 180, max: 320 } });
+  assert.strictEqual(parseFloat(panel.style.left), 200);
+  // The band is redrawn: the word leaves the page. A detached element would
+  // measure 0,0 and throw the panel to the corner; it stays where it was.
+  word.remove();
+  word.getBoundingClientRect = () => ({ left: 0, width: 0, right: 0, top: 0, bottom: 0, height: 0 });
+  h.update();
+  assert.strictEqual(parseFloat(panel.style.left), 200);
+  assert.strictEqual(parseFloat(panel.style.top), 134);
+  h.stop();
+
+  // With reanchor, it follows the word that replaced it.
+  const old = host(win);
+  rectAt(old, 200);
+  let redrawn = null;
+  const h2 = win.Blockr.place(panel, old, { width: { min: 180, max: 320 }, reanchor: () => redrawn });
+  old.remove();
+  h2.update();
+  assert.strictEqual(parseFloat(panel.style.left), 200, 'no new word yet: stays');
+  redrawn = host(win);
+  rectAt(redrawn, 260);
+  h2.update();
+  assert.strictEqual(parseFloat(panel.style.left), 260, 'follows the new word');
+  h2.stop();
+  win.close();
+});
+
 test('place: both width modes stay 8px inside the viewport', (newWindow) => {
   const win = newWindow();
   // A 120px control at the right edge, widened to 190px: pulled back.
@@ -144,11 +180,11 @@ test('Select: Escape on an open list closes the list and stops there', (newWindo
   win.close();
 });
 
-test('textCommit: the Enter button reads "Enter" while dirty and is marked confirmed after', (newWindow) => {
+test('textCommit: the button shows ↵ while dirty and is marked confirmed after', (newWindow) => {
   const win = newWindow();
   const f = fieldInTray(win);
   type(win, f.input, 'SEX');
-  assert.ok(f.chip.textContent.startsWith('Enter'));
+  assert.strictEqual(f.chip.textContent, '↵');
   assert.ok(!f.chip.classList.contains('confirmed'));
   press(win, f.input, 'Enter');
   assert.deepStrictEqual(f.committed, ['SEX']);

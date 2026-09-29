@@ -1,0 +1,102 @@
+/* =========================================================================
+   BlockrInput — code input with autocomplete
+   ========================================================================= */
+
+/* Code is 13px on every code surface (design system, "Code"). */
+.blockr-input {
+  position: relative;
+  width: 100%;
+  font-family: var(--blockr-font-mono);
+  font-size: var(--blockr-font-size-sm);
+  line-height: 1.5;
+}
+
+/* --- Input field --- */
+.blockr-input__field {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: var(--blockr-color-text-default);
+  padding: 2px 4px;
+  margin: 0;
+  box-sizing: border-box;
+  resize: none; /* textarea */
+}
+
+.blockr-input__field::placeholder {
+  color: var(--blockr-color-text-muted);
+}
+
+/* Bordered modifier for standalone use.
+   Matches blockr.dock's .form-control sizing. */
+.blockr-input--bordered .blockr-input__field {
+  background-color: var(--blockr-color-bg-field);
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: var(--blockr-radius-lg);
+  padding: 10px 14px;
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+.blockr-input--bordered .blockr-input__field:focus {
+  border-color: var(--blockr-color-border-accent);
+  box-shadow: var(--blockr-focus-ring);
+}
+
+/* --- Autocomplete popup ---
+   The one surface every floating list uses (design system, "Menus"), as a
+   field dropdown: dense rows, like Blockr.Select's list. On document.body
+   while open, placed there by Blockr.place, which sets its position, width
+   and offset. */
+.blockr-input__popup {
+  display: none;
+  box-sizing: border-box;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--blockr-color-bg-raised);
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: var(--blockr-radius-lg);
+  box-shadow: var(--blockr-shadow-md);
+  z-index: var(--blockr-z-menu);
+  font-family: inherit;
+  font-size: var(--blockr-font-size-base);
+}
+
+/* --- Completion items: 32px, the hover and the keyboard row one look --- */
+.blockr-input__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border-radius: var(--blockr-radius-sm);
+  cursor: pointer;
+}
+
+.blockr-input__item--highlighted,
+.blockr-input__item:hover {
+  background: var(--blockr-color-bg-hover);
+}
+
+.blockr-input__item-text {
+  font-family: var(--blockr-font-mono);
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-default);
+}
+
+.blockr-input__item-parens {
+  font-family: var(--blockr-font-mono);
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-muted);
+}
+
+.blockr-input__item-meta {
+  margin-left: auto;
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-muted);
+  text-transform: lowercase;
+}

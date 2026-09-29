@@ -43,7 +43,7 @@ col_type_label <- function(x) {
 #' 8px/char at the 14px table font (the constant the header min-width
 #' heuristic used for years) over-estimates almost every UI font, so the
 #' estimate degrades to slightly roomy columns - or, at worst, mild
-#' ellipsis with the title tooltip - never to crushed ones.
+#' ellipsis with the tooltip - never to crushed ones.
 #'
 #' @param col_names Character vector of column header texts (plain text,
 #'   strip any HTML before calling).
@@ -115,6 +115,19 @@ format_column_inner <- function(x, max_chars = 50) {
     shaft <- pillar::pillar_shaft(x)
     trimws(format(shaft, width = max_chars))
   }
+}
+
+#' The design system's chevron, pointing down; CSS turns it (design system,
+#' "Chevrons"). 12px, a 1.4px stroke that does not scale.
+#' @noRd
+chevron_svg <- function() {
+  shiny::HTML(paste0(
+    '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" ',
+    'stroke="currentColor" stroke-width="1.4" stroke-linecap="round" ',
+    'stroke-linejoin="round" aria-hidden="true">',
+    '<polyline points="3 4.5 6 7.5 9 4.5" vector-effect="non-scaling-stroke">',
+    "</polyline></svg>"
+  ))
 }
 
 #' Build the HTML table preview for one page
@@ -201,17 +214,22 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
             )
           )
         ),
-        table_preview_dep()
+        c(list(table_preview_dep()), table_preview_tooltip_dep())
       )
     )
   }
 
   col_names <- names(dat)
 
-  # Extract column labels (e.g. from ADaM datasets)
-  col_labels <- vapply(dat, function(x) {
-    lbl <- attr(x, "label")
-    if (is.null(lbl)) "" else lbl
+  # Column labels (e.g. from ADaM datasets). `exact = TRUE`: without it a
+  # column carrying haven value labels but no variable label returns those
+  # (`attr(x, "label")` partial-matches `labels`) and vapply() errors. A label
+  # equal to the column name adds nothing and is dropped.
+  col_labels <- vapply(seq_along(dat), function(j) {
+    lbl <- attr(dat[[j]], "label", exact = TRUE)
+    ok <- is.character(lbl) && length(lbl) == 1L && !is.na(lbl) &&
+      nzchar(lbl) && !identical(lbl, names(dat)[j])
+    if (ok) lbl else ""
   }, character(1))
   has_labels <- any(nzchar(col_labels))
 
@@ -257,63 +275,91 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     }
   }
 
+  # What each sort direction puts on its header: the order screen readers
+  # get (aria-sort) and the tooltip that says in words what the cue shows,
+  # since the dot for missing values first does not say "missing" by itself.
+  # The classes are named after the direction.
+  sort_states <- list(
+    asc = list(
+      aria = "ascending",
+      tip = "Sorted ascending, missing values last"
+    ),
+    desc = list(
+      aria = "descending",
+      tip = "Sorted descending, missing values last"
+    ),
+    na = list(
+      aria = "ascending",
+      tip = "Missing values first, then ascending"
+    )
+  )
+
   # Build header row
   header_cells <- vector("list", n_cols + 1L)
   header_cells[[1L]] <- shiny::tags$th(class = "blockr-row-number", "")
   for (j in seq_along(col_names)) {
     col_name <- col_names[j]
 
-    # Determine sort class for this column
-    header_class <- "blockr-sortable"
-    sort_icon_class <- "blockr-sort-icon"
-    if (!is.null(sort_col) && sort_col == col_name && sort_dir != "none") {
-      sort_class_suffix <- switch(
-        sort_dir,
-        asc = " blockr-sort-asc",
-        desc = " blockr-sort-desc",
-        na = " blockr-sort-na",
-        ""
-      )
-      header_class <- paste0(header_class, sort_class_suffix)
-      icon_class_suffix <- switch(
-        sort_dir,
-        asc = " blockr-sort-icon-asc",
-        desc = " blockr-sort-icon-desc",
-        na = " blockr-sort-icon-na",
-        ""
-      )
-      sort_icon_class <- paste0(sort_icon_class, icon_class_suffix)
+    # NULL unless this column is the sorted one ("none" has no state)
+    sorted <- if (!is.null(sort_col) && sort_col == col_name) {
+      sort_states[[sort_dir]]
     }
+    header_class <- paste(
+      c("blockr-sortable",
+        if (!is.null(sorted)) paste0("blockr-sort-", sort_dir)),
+      collapse = " "
+    )
+    sort_icon_class <- paste(
+      c("blockr-sort-icon",
+        if (!is.null(sorted)) paste0("blockr-sort-icon-", sort_dir)),
+      collapse = " "
+    )
 
+    # The label sits under the name and is cut by the layout (CSS ellipsis);
+    # a cut-off label shows whole in its tooltip.
+    # A column without a label keeps an empty line when others have one, so
+    # every name sits level.
     label_tag <- if (has_labels && nzchar(col_labels[j])) {
-      is_truncated <- nchar(col_labels[j]) > 20
-      display_text <- if (is_truncated) {
-        paste0(substr(col_labels[j], 1, 18), "\u2026")
-      } else {
-        col_labels[j]
-      }
-      label_args <- list(
+      shiny::tags$span(
         class = "blockr-col-label",
-        display_text
+        `data-blockr-tooltip` = col_labels[j],
+        `data-blockr-tooltip-overflow` = NA,
+        col_labels[j]
       )
-      if (is_truncated) {
-        label_args[["title"]] <- col_labels[j]
-      }
-      do.call(shiny::tags$span, label_args)
+    } else if (has_labels) {
+      shiny::tags$span(
+        class = "blockr-col-label blockr-col-label--empty",
+        `aria-hidden` = "true",
+        shiny::HTML("&nbsp;")
+      )
     }
 
     th_style <- sprintf("width: %dpx;", col_widths_px[j])
 
+    # A numeric column's header follows its numbers to the right.
+    if (col_is_numeric[j]) {
+      header_class <- paste(header_class, "blockr-th-numeric")
+    }
+
+    # The sort cue (sort bars, see blockr-table-preview.css) sits on the
+    # name's line: after the name, or before it on a right-aligned numeric
+    # column so the name stays flush over its numbers. Hidden at rest on an
+    # unsorted column, shown muted on hover as what a click would do.
     header_cells[[j + 1L]] <- shiny::tags$th(
       class = header_class,
       style = th_style,
       `data-column` = col_name,
-      shiny::tags$span(class = "blockr-col-name", col_name),
+      `aria-sort` = sorted$aria,
+      `data-blockr-tooltip` = sorted$tip,
+      shiny::tags$span(
+        class = "blockr-col-head",
+        shiny::tags$span(class = "blockr-col-name", col_name),
+        shiny::tags$span(class = sort_icon_class, `aria-hidden` = "true")
+      ),
       label_tag,
       shiny::tags$span(
         class = "blockr-type-row",
-        shiny::tags$span(class = "blockr-type-label", col_types[j]),
-        shiny::tags$span(class = sort_icon_class)
+        shiny::tags$span(class = "blockr-type-label", col_types[j])
       )
     )
   }
@@ -349,10 +395,13 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         formatted[[j]][i]
       }
 
-      cell_title <- if (!is_na) formatted[[j]][i] else NULL
+      # A value cut off by the column width shows whole in the tooltip;
+      # one that fits has none.
+      cell_tip <- if (!is_na) formatted[[j]][i] else NULL
       row_cells[[j + 1L]] <- shiny::tags$td(
         class = cell_class,
-        title = cell_title,
+        `data-blockr-tooltip` = cell_tip,
+        `data-blockr-tooltip-overflow` = if (!is_na) NA,
         content
       )
     }
@@ -402,21 +451,15 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
   table_label_tag <- NULL
   if (!is.null(table_label) && is.character(table_label) &&
         nzchar(table_label)) {
-    is_truncated <- nchar(table_label) > 60
-    display_text <- if (is_truncated) {
-      paste0(substr(table_label, 1, 58), "\u2026")
-    } else {
-      table_label
-    }
-    label_args <- list(
+    # Cut by the layout (CSS ellipsis), as a column label is; a cut-off
+    # label shows whole in its tooltip.
+    table_label_tag <- shiny::tags$span(
       class = "blockr-table-label",
+      `data-blockr-tooltip` = table_label,
+      `data-blockr-tooltip-overflow` = NA,
       shiny::HTML("&middot;&nbsp;"),
-      display_text
+      table_label
     )
-    if (is_truncated) {
-      label_args[["title"]] <- table_label
-    }
-    table_label_tag <- do.call(shiny::tags$span, label_args)
   }
 
   footer <- shiny::tags$div(
@@ -432,13 +475,17 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         class = paste0("blockr-nav-btn", if (page == 1L) " disabled"),
         disabled = if (page == 1L) "disabled" else NULL,
         `data-direction` = "prev",
-        shiny::HTML("&#x2039;")
+        `aria-label` = "Previous page",
+        `data-blockr-tooltip` = "Previous page",
+        chevron_svg()
       ),
       shiny::tags$button(
         class = paste0("blockr-nav-btn", if (next_disabled) " disabled"),
         disabled = if (next_disabled) "disabled" else NULL,
         `data-direction` = "next",
-        shiny::HTML("&#x203A;")
+        `aria-label` = "Next page",
+        `data-blockr-tooltip` = "Next page",
+        chevron_svg()
       )
     )
   )
@@ -470,7 +517,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         footer
       )
     ),
-    table_preview_dep()
+    c(list(table_preview_dep()), table_preview_tooltip_dep())
   )
 }
 
@@ -494,6 +541,17 @@ table_preview_dep <- function() {
     stylesheet = "css/blockr-table-preview.css",
     script = "js/blockr-table-preview.js",
     all_files = FALSE
+  )
+}
+
+# The shared tooltip (Blockr.tooltip) and its card style, for the sorted
+# header's tooltip and the cut-off cells. The card reads the tokens without
+# fallbacks, so they come along; the theme layer stays the app's to attach.
+table_preview_tooltip_dep <- function() {
+  list(
+    tokens_dep(),
+    controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
+    controls_asset("blockr-tooltip-css", stylesheet = "css/blockr-tooltip.css")
   )
 }
 

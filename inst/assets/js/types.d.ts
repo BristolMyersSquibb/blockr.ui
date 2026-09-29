@@ -17,6 +17,8 @@ interface BlockrSelectConfigBase {
   options?: BlockrSelectOption[];
   /** The field's label, as screen readers announce the select. A menu falls back to its title. */
   label?: string;
+  /** Select.menu(): find the anchor again after it was redrawn (see Blockr.place). */
+  reanchor?: () => HTMLElement | null;
   /** Shown when nothing is selected (single) / no tags (multi). */
   placeholder?: string;
   /**
@@ -213,6 +215,12 @@ interface BlockrPlaceOptions {
   gap?: number;
   /** Distance kept from the viewport edges, both ways (default 8). */
   margin?: number;
+  /**
+   * The element that now stands for the anchor, once the anchor has left
+   * the page (redrawn under the open panel). Without it, or while it returns
+   * null, the panel stays where it is.
+   */
+  reanchor?: () => HTMLElement | null;
   /** Called on every placement with whether the panel sits above the anchor. */
   onFlip?: (above: boolean) => void;
 }
@@ -220,7 +228,7 @@ interface BlockrPlaceOptions {
 /* --- Blockr.tooltip (blockr-ui.js) --- */
 
 /** One tooltip line: plain text, or a column shown as its name, then its label muted. */
-type BlockrTooltipLine = string | { name: string; label?: string };
+type BlockrTooltipLine = string | { name: string; label?: string; badge?: string };
 
 /** A tooltip's content: one line, or several (the "+N" chip lists its hidden tags). */
 type BlockrTooltipContent = BlockrTooltipLine | BlockrTooltipLine[];
@@ -237,9 +245,118 @@ interface BlockrTooltip {
   text(el: Element): string;
 }
 
+/** A row of Blockr.menu(). */
+interface BlockrMenuItem {
+  label: string;
+  /** Drawn before the label: a Blockr.icons name ('trash') or an SVG/HTML string. */
+  icon?: string;
+  /** Grey text after the label (a block ID, a shortcut). */
+  meta?: string;
+  /** Set `meta` in the code face. */
+  mono?: boolean;
+  /** The item in use (the active view): weight 600. */
+  current?: boolean;
+  /** A toggle row; true shows a check (role menuitemcheckbox). */
+  checked?: boolean;
+  /** A destructive action: red under the pointer. */
+  danger?: boolean;
+  /** A muted row, such as "Manage pages". */
+  quiet?: boolean;
+  disabled?: boolean;
+  /** Tooltip on a disabled row saying why. */
+  reason?: string;
+  onSelect?: () => void;
+  /** A block's glyph on a tint of its category colour, before the label. */
+  mark?: { icon?: string; color?: string };
+  /** A neutral badge at the end of the row (a package). */
+  badge?: string;
+  /** More text the filter box matches. */
+  keywords?: string;
+}
+
+type BlockrMenuEntry = BlockrMenuItem | { gap: true } | { divider: true } | { title: string };
+
+interface BlockrMenuConfig {
+  items: BlockrMenuEntry[];
+  /** Text above the rows: a title with an optional badge, then a line. */
+  head?: { title: string; badge?: string; text?: string };
+  /** 'end' lines the menu up with the trigger's right edge. */
+  align?: 'start' | 'end';
+  /** One muted line on top, saying what the menu is for. */
+  caption?: string;
+  /** A filter box on top (true, or its placeholder). */
+  filter?: boolean | string;
+  /** The panel's least width in px (default 180). */
+  minWidth?: number;
+  onClose?: () => void;
+}
+
+interface BlockrMenu {
+  (anchor: HTMLElement, config: BlockrMenuConfig): { el: HTMLDivElement; close: () => void };
+  /** Wire `trigger` to open and close its menu; a function config is read on each open. */
+  bind(trigger: HTMLElement, config: BlockrMenuConfig | (() => BlockrMenuConfig)): void;
+}
+
+/* --- Blockr.actionMenu (blockr-ui.js) --- */
+
+/** The document-level controller of the menus action_menu() builds in R. */
+interface BlockrActionMenu {
+  /** The trigger of the open menu, or null. */
+  current(): HTMLElement | null;
+  /** Close the open menu, if any. */
+  close(): void;
+}
+
+/* --- Blockr.Input (blockr-input.js) --- */
+
+interface BlockrInputConfig {
+  /** Initial field value. */
+  value?: string;
+  /** The field's name, as screen readers announce it. */
+  label?: string;
+  /** Column names offered as completions (backticked when non-syntactic). */
+  columns?: string[];
+  /**
+   * Function completions: category label (shown as meta) -> function names.
+   * Functions insert with trailing "()", cursor between the parens.
+   */
+  categories?: Record<string, string[]>;
+  placeholder?: string;
+  /** Render a <textarea> instead of <input>; disables Enter -> onConfirm. */
+  multiline?: boolean;
+  /** Fires on every edit and on completion insert (no arguments). */
+  onChange?: () => void;
+  /**
+   * Single-line only: fires with the trimmed value on Enter while the
+   * completion popup is closed.
+   */
+  onConfirm?: (value: string) => void;
+}
+
+interface BlockrInputHandle {
+  /** Root element (already appended to the container). */
+  el: HTMLDivElement;
+  /** Trimmed field value. */
+  getValue(): string;
+  setValue(v: string | null | undefined): void;
+  /** Replace the column completions (function categories are fixed). */
+  setColumns(cols: string[] | null | undefined): void;
+  focus(): void;
+  destroy(): void;
+}
+
+interface BlockrInputStatic {
+  create(container: HTMLElement, config: BlockrInputConfig): BlockrInputHandle;
+}
+
 interface BlockrNamespace {
   tooltip: BlockrTooltip;
+  menu: BlockrMenu;
+
+  actionMenu: BlockrActionMenu;
   uid(prefix?: string): string;
+  /** Whether `el`, or anything in it, is cut off by its box. */
+  cutOff(el: Element): boolean;
   escapeHtml(s: string): string;
   removeNode(node: Node | null | undefined): void;
   contentWidth(el: Element): number;
@@ -255,6 +372,8 @@ interface BlockrNamespace {
   _docClick: Set<{ el: Element; cb: (e: MouseEvent) => void }>;
   /** Blockr.Select (blockr-select.js). */
   Select?: BlockrSelectStatic;
+  /** Blockr.Input, the code field with completions (blockr-input.js). */
+  Input?: BlockrInputStatic;
   /** Design-system checkbox factory (blockr-ui.js). */
   checkbox(
     label: string,
@@ -278,7 +397,11 @@ interface BlockrNamespace {
   ): BlockrGearTrayHandle;
   /** Toggle the canonical required-empty amber cue on a field wrapper. */
   setRequiredEmpty(el: Element, empty: boolean): void;
-  /** Commit-on-Enter text input with the "Enter ↵" chip (§5.5). */
+  /** Whether this is a Mac; decided once, with `.blockr-mac` on the root. */
+  isMac: boolean;
+  /** A shortcut written for this platform: "Mod+S" is "⌘S" or "Ctrl+S". */
+  keys(keys: string): string;
+  /** Commit-on-Enter text input with the ↵ button (§5.5). */
   textCommit(
     input: HTMLInputElement,
     opts: { onCommit: (value: string) => void }

@@ -1,0 +1,176 @@
+/* Blockr.Input, the code field with completions, seen from a caller: what it
+ * offers while typing, what a pick inserts, and what Enter does.
+ *
+ * happy-dom has no layout engine, so the popup's position is not checked
+ * here; the placement is the same portal pattern as Blockr.Select.
+ */
+'use strict';
+
+const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
+const nodeTest = require('node:test');
+const { newWindow } = require('./select-impls');
+
+const input = fs.readFileSync(
+  path.join(__dirname, '..', '..', 'inst', 'assets', 'js', 'blockr-input.js'), 'utf8');
+
+const test = (name, fn) => nodeTest(name, () => {
+  const win = newWindow();
+  win.eval(input);
+  try { fn(win); } finally { win.close(); }
+});
+
+const mount = (win, config) => {
+  const host = win.document.createElement('div');
+  win.document.body.appendChild(host);
+  const h = win.Blockr.Input.create(host, config);
+  const field = h.el.querySelector('input, textarea');
+  return { h, field };
+};
+
+/* Type `text` at the end of the field and fire the input event. */
+const type = (win, field, text) => {
+  field.value += text;
+  field.setSelectionRange(field.value.length, field.value.length);
+  field.dispatchEvent(new win.Event('input', { bubbles: true }));
+};
+
+const key = (win, field, k) =>
+  field.dispatchEvent(new win.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+
+const offered = (win) =>
+  [...win.document.querySelectorAll('.blockr-input__item-text')].map((e) => e.textContent);
+
+test('Input: typing offers the columns and functions that start with the word', (win) => {
+  const { field } = mount(win, {
+    columns: ['mpg', 'cyl', 'my col'],
+    categories: { Math: ['mean', 'max'] }
+  });
+  type(win, field, 'm');
+  // Columns rank above functions; a non-syntactic name comes backticked.
+  assert.deepStrictEqual(offered(win), ['`my col`', 'mpg', 'max', 'mean']);
+  type(win, field, 'e');
+  assert.deepStrictEqual(offered(win), ['mean']);
+});
+
+test('Input: Enter on an open list inserts the pick; a function gets its parens', (win) => {
+  const changes = [];
+  const { h, field } = mount(win, {
+    columns: ['mpg'],
+    categories: { Math: ['mean'] },
+    onChange: () => changes.push(h.getValue())
+  });
+  type(win, field, 'me');
+  key(win, field, 'Enter');
+  assert.strictEqual(h.getValue(), 'mean()');
+  // The cursor lands between the parens, ready for the argument.
+  assert.strictEqual(field.selectionStart, 'mean('.length);
+  assert.strictEqual(offered(win).length, 0);
+  assert.ok(changes.includes('mean()'));
+});
+
+test('Input: Enter with the list closed confirms the trimmed value', (win) => {
+  const confirmed = [];
+  const { field } = mount(win, { onConfirm: (v) => confirmed.push(v) });
+  type(win, field, 'mpg > 20  ');
+  key(win, field, 'Enter');
+  assert.deepStrictEqual(confirmed, ['mpg > 20']);
+});
+
+test('Input: a multiline field never confirms on Enter', (win) => {
+  const confirmed = [];
+  const { field } = mount(win, { multiline: true, onConfirm: (v) => confirmed.push(v) });
+  assert.strictEqual(field.tagName, 'TEXTAREA');
+  type(win, field, 'x');
+  key(win, field, 'Enter');
+  assert.deepStrictEqual(confirmed, []);
+});
+
+test('Input: setColumns replaces the columns offered; setValue does not fire onChange', (win) => {
+  let changes = 0;
+  const { h, field } = mount(win, { columns: ['mpg'], onChange: () => changes++ });
+  h.setValue('restored');
+  assert.strictEqual(h.getValue(), 'restored');
+  assert.strictEqual(changes, 0);
+  h.setValue('');
+  h.setColumns(['hp', 'hwy']);
+  type(win, field, 'h');
+  assert.deepStrictEqual(offered(win), ['hp', 'hwy']);
+});
+
+test('Input: Escape closes the list and destroy removes the popup', (win) => {
+  const { h, field } = mount(win, { columns: ['mpg'] });
+  type(win, field, 'm');
+  assert.strictEqual(offered(win).length, 1);
+  key(win, field, 'Escape');
+  assert.strictEqual(offered(win).length, 0);
+  type(win, field, 'p');
+  h.destroy();
+  assert.strictEqual(win.document.querySelectorAll('.blockr-input__popup').length, 0);
+});
+
+test('Input: Escape on an open list closes the list and stops there', (win) => {
+  const doc = win.document;
+  const band = doc.createElement('div');
+  const gear = doc.createElement('button');
+  doc.body.append(band, gear);
+  const tray = win.Blockr.gearTray(band, gear);
+  const h = win.Blockr.Input.create(band, { columns: ['AGE', 'AGEGR1'] });
+  const field = h.el.querySelector('input');
+  tray.set(true);
+  type(win, field, 'AG');
+  const open = () => h.el.classList.contains('blockr-input--popup-open');
+  assert.ok(open(), 'the list is open');
+  key(win, field, 'Escape');
+  assert.ok(!open(), 'the list closed');
+  assert.ok(tray.isOpen(), 'the tray did not see the Escape');
+  key(win, field, 'Escape');
+  assert.ok(!tray.isOpen(), 'a closed list lets the next Escape through');
+});
+
+test('Input: listens for outside clicks only while its list is open', (win) => {
+  // A document listener per field for the whole page life would hold the
+  // field and its block after they leave the page.
+  const doc = win.document;
+  const live = new Set();
+  const add = doc.addEventListener.bind(doc);
+  const remove = doc.removeEventListener.bind(doc);
+  doc.addEventListener = (type, fn, opts) => { if (type === 'click') live.add(fn); add(type, fn, opts); };
+  doc.removeEventListener = (type, fn, opts) => { if (type === 'click') live.delete(fn); remove(type, fn, opts); };
+  const { h, field } = mount(win, { columns: ['AGE', 'AGEGR1'] });
+  assert.strictEqual(live.size, 0, 'none at rest');
+  type(win, field, 'AG');
+  assert.strictEqual(live.size, 1, 'one while the list is open');
+  doc.body.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  assert.ok(!h.el.classList.contains('blockr-input--popup-open'), 'a click outside closes it');
+  assert.strictEqual(live.size, 0, 'and takes the listener with it');
+});
+
+test('Input: the field and its list are wired for screen readers', (win) => {
+  const { h, field } = mount(win, { columns: ['AGE', 'AGEGR1'], label: 'Expression' });
+  const popup = () => win.document.getElementById(field.getAttribute('aria-controls'));
+  assert.strictEqual(field.getAttribute('role'), 'combobox');
+  assert.strictEqual(field.getAttribute('aria-label'), 'Expression');
+  assert.strictEqual(field.getAttribute('aria-expanded'), 'false');
+  type(win, field, 'AG');
+  assert.strictEqual(field.getAttribute('aria-expanded'), 'true');
+  assert.strictEqual(popup().getAttribute('aria-label'), 'Completions');
+  const rows = [...popup().querySelectorAll('[role="option"]')];
+  assert.strictEqual(field.getAttribute('aria-activedescendant'), rows[0].id);
+  key(win, field, 'ArrowDown');
+  const now = [...popup().querySelectorAll('[role="option"]')];
+  assert.strictEqual(field.getAttribute('aria-activedescendant'), now[1].id);
+  assert.strictEqual(now[1].getAttribute('aria-selected'), 'true');
+  key(win, field, 'Escape');
+  assert.strictEqual(field.getAttribute('aria-expanded'), 'false');
+  assert.ok(!field.hasAttribute('aria-activedescendant'));
+  h.destroy();
+
+  // A textarea cannot be a combobox; it names the list it controls.
+  const multi = mount(win, { columns: ['AGE'], multiline: true });
+  assert.ok(!multi.field.hasAttribute('role'));
+  assert.ok(!multi.field.hasAttribute('aria-expanded'));
+  assert.ok(multi.field.getAttribute('aria-controls'));
+});
+

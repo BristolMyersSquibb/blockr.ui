@@ -35,6 +35,10 @@ const dropdown = (win) =>
 const optionTexts = (win) =>
   [...win.document.querySelectorAll('.blockr-select__option')]
     .map((e) => e.textContent);
+const ticked = (win) =>
+  [...win.document.querySelectorAll('.blockr-select__option')]
+    .filter((e) => e.querySelector('.blockr-select__tick svg'))
+    .map((e) => e.getAttribute('data-value'));
 
 test('the menu opens itself: no control to click first', (newWindow) => {
   const win = newWindow();
@@ -220,13 +224,14 @@ test('a multi menu carries its picks in the panel head', (newWindow) => {
   assert.strictEqual(win.document.querySelectorAll('.blockr-select__control').length, 0);
   assert.deepStrictEqual(tagValues(win), ['AESOC', 'AEDECOD']);
   assert.ok(dropdown(win).contains(win.document.querySelector('.blockr-select__tags')));
-  // And the list offers only what is not picked.
-  assert.deepStrictEqual(optionTexts(win), ['AETOXGR']);
+  // The list keeps every option and ticks the picks.
+  assert.deepStrictEqual(optionTexts(win), ['AESOC', 'AEDECOD', 'AETOXGR']);
+  assert.deepStrictEqual(ticked(win), ['AESOC', 'AEDECOD']);
   m.close();
   win.close();
 });
 
-test('a pick keeps the multi menu open and moves the value into the head', (newWindow) => {
+test('a pick keeps the multi menu open, adds a tag and ticks the row', (newWindow) => {
   const win = newWindow();
   const picked = [];
   let closed = 0;
@@ -241,12 +246,13 @@ test('a pick keeps the multi menu open and moves the value into the head', (newW
   assert.strictEqual(closed, 0, 'the panel stays: the next pick is one click away');
   assert.ok(dropdown(win), 'still on screen');
   assert.deepStrictEqual(tagValues(win), ['AESOC', 'AETOXGR']);
-  assert.deepStrictEqual(optionTexts(win), ['AEDECOD']);
+  assert.deepStrictEqual(optionTexts(win), ['AESOC', 'AEDECOD', 'AETOXGR']);
+  assert.deepStrictEqual(ticked(win), ['AESOC', 'AETOXGR']);
   m.close();
   win.close();
 });
 
-test('the x on a tag removes it, and the value comes back to the list', (newWindow) => {
+test('the x on a tag removes it, and unticks its row', (newWindow) => {
   const win = newWindow();
   const picked = [];
   const m = win.Blockr.Select.menu(anchorIn(win), {
@@ -258,7 +264,7 @@ test('the x on a tag removes it, and the value comes back to the list', (newWind
   x.dispatchEvent(new win.Event('click', { bubbles: true }));
   assert.deepStrictEqual(picked, [['AEDECOD']]);
   assert.deepStrictEqual(tagValues(win), ['AEDECOD']);
-  assert.deepStrictEqual(optionTexts(win), ['AESOC']);
+  assert.deepStrictEqual(ticked(win), ['AEDECOD']);
   // Emptying it sends [], not [''] -- the slot is unset, and a blank tag is
   // what the old path drew when it was handed one.
   win.document

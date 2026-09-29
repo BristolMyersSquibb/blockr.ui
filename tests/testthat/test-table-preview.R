@@ -26,15 +26,35 @@ test_that("type tags are rendered per column", {
   }
 })
 
-test_that("column labels render, truncate and carry a title", {
+test_that("column labels render whole, the label a cut-off-only tooltip", {
   df <- data.frame(x = 1, y = 2)
   attr(df$x, "label") <- "Short label"
-  attr(df$y, "label") <- strrep("Long label ", 5)
+  long <- trimws(strrep("Long label ", 5))
+  attr(df$y, "label") <- long
   html <- render_chr(build_html_table(df, 1L))
   expect_match(html, "Short label")
   expect_match(html, "blockr-col-label")
-  expect_match(html, "title=")
-  expect_match(html, "…")
+  # The layout cuts a long label (CSS ellipsis); R passes it whole.
+  expect_match(html, paste0('data-blockr-tooltip="', long, '"'), fixed = TRUE)
+  expect_match(html, "data-blockr-tooltip-overflow", fixed = TRUE)
+  expect_no_match(html, "…")
+})
+
+test_that("cells carry no native title, only a cut-off-only tooltip", {
+  df <- data.frame(x = c("Placebo", NA))
+  html <- render_chr(build_html_table(df, 1L))
+  expect_no_match(html, "<td[^>]* title=")
+  expect_match(html,
+               'data-blockr-tooltip="Placebo" data-blockr-tooltip-overflow',
+               fixed = TRUE)
+})
+
+test_that("haven value labels and a label equal to the name show no label", {
+  df <- data.frame(sex = c(1, 2), age = c(30, 40))
+  attr(df$sex, "labels") <- c(Male = 1, Female = 2)
+  attr(df$age, "label") <- "age"
+  html <- render_chr(build_html_table(df, 2L))
+  expect_no_match(html, "blockr-col-label")
 })
 
 test_that("NA and negative values get their styling hooks", {
@@ -100,6 +120,14 @@ test_that("the table label shows in the footer", {
   )
   expect_match(html, "blockr-table-label")
   expect_match(html, "ADSL: Subject-Level")
+
+  # A long one is cut by the layout and shows whole in the light card, not
+  # in a native title.
+  long <- strrep("Subject-Level Analysis Dataset ", 4L)
+  html <- render_chr(build_html_table(df, 1L, table_label = long))
+  expect_no_match(html, "title=", fixed = TRUE)
+  expect_no_match(html, "\u2026", fixed = TRUE)
+  expect_match(html, paste0('data-blockr-tooltip="', long, '"'), fixed = TRUE)
 })
 
 test_that("the html dependency is attached (no inline style/script)", {
@@ -218,4 +246,76 @@ test_that("wrap_names leaves single-word and empty headers alone", {
   }
   expect_equal(column_widths_px("", formatted = list("x"), wrap_names = TRUE),
                60)  # clamped to the floor, no NA/-Inf from an empty split
+})
+
+test_that("a numeric column's header is marked to follow its numbers", {
+  df <- data.frame(name = c("a", "b"), n = c(1, 2))
+  html <- render_chr(build_html_table(df, 2L))
+  expect_match(html,
+               'class="blockr-sortable blockr-th-numeric"[^>]*data-column="n"')
+  expect_no_match(html, 'blockr-th-numeric"[^>]*data-column="name"')
+})
+
+test_that("an unlabelled column keeps the label line when others have one", {
+  df <- data.frame(x = 1, y = 2)
+  attr(df$x, "label") <- "Has a label"
+  html <- render_chr(build_html_table(df, 1L))
+  expect_match(html, "blockr-col-label blockr-col-label--empty", fixed = TRUE)
+  # With no label anywhere there is no empty line to keep.
+  html0 <- render_chr(build_html_table(data.frame(x = 1, y = 2), 1L))
+  expect_no_match(html0, "blockr-col-label--empty", fixed = TRUE)
+})
+
+test_that("the pager draws the chevron, named for screen readers", {
+  html <- render_chr(
+    build_html_table(data.frame(x = 1:12), 12L, page_size = 5L)
+  )
+  expect_match(html, 'aria-label="Previous page"', fixed = TRUE)
+  expect_match(html, 'aria-label="Next page"', fixed = TRUE)
+  # Icon-only buttons, so each has the light card as well.
+  expect_match(html, 'data-blockr-tooltip="Previous page"', fixed = TRUE)
+  expect_match(html, 'data-blockr-tooltip="Next page"', fixed = TRUE)
+  expect_match(html, 'points="3 4.5 6 7.5 9 4.5"', fixed = TRUE)
+  expect_no_match(html, "&#x2039;|&#x203A;")
+})
+
+test_that("the sort cue sits on the name's line and the header says its sort", {
+  df <- data.frame(name = c("b", "a"), n = c(2, 1))
+  html <- render_chr(
+    build_html_table(df, 2L, sort_state = list(col = "n", dir = "desc"))
+  )
+  expect_match(html, 'data-column="n" aria-sort="descending"', fixed = TRUE)
+  expect_match(html, paste0(
+    '<span class="blockr-col-head">\\s*',
+    '<span class="blockr-col-name">n</span>\\s*',
+    '<span class="blockr-sort-icon blockr-sort-icon-desc" ',
+    'aria-hidden="true"></span>'
+  ))
+  # No arrow characters any more: the cue is sort bars, drawn in CSS.
+  css_file <- system.file("assets", "css", "blockr-table-preview.css",
+                          package = "blockr.ui")
+  css <- paste(readLines(css_file), collapse = "\n")
+  expect_no_match(css, "\\\\2191|\\\\2193")
+  expect_match(css, "M2 3h3M2 6h5.5M2 9h8", fixed = TRUE)
+})
+
+test_that("the sorted header names its sort in a tooltip", {
+  df <- data.frame(x = c(2, NA, 1))
+  html <- render_chr(
+    build_html_table(df, 3L, sort_state = list(col = "x", dir = "na"))
+  )
+  expect_match(html,
+               'data-blockr-tooltip="Missing values first, then ascending"',
+               fixed = TRUE)
+  tags <- build_html_table(df, 3L)
+  deps <- vapply(htmltools::findDependencies(tags), `[[`, "", "name")
+  expect_true(all(
+    c("blockr-table-preview", "blockr-ui-js", "blockr-tooltip-css") %in% deps
+  ))
+  # The card reads the tokens without fallbacks, and an app that shows the
+  # preview need not attach theme_dep().
+  expect_true(tokens_dep()$name %in% deps)
+  # Unsorted: no tooltip on any header.
+  expect_no_match(render_chr(tags), "Sorted ascending", fixed = TRUE)
+  expect_no_match(render_chr(tags), "aria-sort", fixed = TRUE)
 })

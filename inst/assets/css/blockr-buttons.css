@@ -1,0 +1,169 @@
+/* =========================================================================
+   blockr-buttons.css: the design system's buttons (design system,
+   "Buttons"). Four kinds (main, secondary, quiet, destructive) in three
+   sizes (m 42px, s 30px, xs 26px). A bare .blockr-btn is a secondary m.
+
+   blockr-theme.css maps Bootstrap's button classes onto the same values, so
+   Shiny's actionButton() and downloadButton() follow them too.
+   ========================================================================= */
+
+.blockr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: var(--blockr-control-h);
+  padding: 0 16px;
+  font: inherit;
+  font-size: var(--blockr-font-size-base);
+  font-weight: var(--blockr-font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--blockr-color-text-default);
+  background: var(--blockr-color-bg-surface);
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: var(--blockr-radius-lg);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--blockr-transition),
+    background-color var(--blockr-transition),
+    border-color var(--blockr-transition);
+}
+
+/* A bare .blockr-btn hovers as a secondary one; each kind restates it. */
+.blockr-btn:hover {
+  color: var(--blockr-color-text-default);
+  background: var(--blockr-color-bg-hover);
+  border-color: var(--blockr-color-border-strong);
+}
+
+.blockr-btn:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}
+
+/* --- Sizes: m (the default) beside inputs, s in toolbars and dialogs, xs in
+   a header strip next to the gear. --- */
+.blockr-btn--m {
+  height: var(--blockr-control-h);
+  padding: 0 16px;
+  font-size: var(--blockr-font-size-base);
+  border-radius: var(--blockr-radius-lg);
+}
+
+.blockr-btn--s {
+  height: var(--blockr-control-h-sm);
+  padding: 0 11px;
+  font-size: var(--blockr-font-size-sm);
+  border-radius: var(--blockr-radius-md);
+}
+
+.blockr-btn--xs {
+  height: var(--blockr-control-h-xs);
+  padding: 0 9px;
+  font-size: var(--blockr-font-size-xs);
+  border-radius: var(--blockr-radius-sm);
+}
+
+/* --- Kinds. After the sizes, so the quiet button's 8px side padding holds
+   at every size. --- */
+
+/* Main: the accent tint, at most one per view. Its text is
+   text-accent-strong, as all text on the tint: text-accent falls below
+   4.5:1 there. */
+.blockr-btn--main {
+  color: var(--blockr-color-text-accent-strong);
+  background: var(--blockr-color-bg-accent-subtle);
+  border-color: var(--blockr-color-border-accent-subtle);
+}
+
+.blockr-btn--main:hover {
+  color: var(--blockr-color-text-accent-strong);
+  background: var(--blockr-color-bg-accent-subtle-hover);
+  border-color: var(--blockr-color-border-accent);
+}
+
+/* Secondary: everything else with a frame. */
+.blockr-btn--secondary {
+  color: var(--blockr-color-text-default);
+  background: var(--blockr-color-bg-surface);
+  border-color: var(--blockr-color-border-default);
+}
+
+.blockr-btn--secondary:hover {
+  color: var(--blockr-color-text-default);
+  background: var(--blockr-color-bg-hover);
+  border-color: var(--blockr-color-border-strong);
+}
+
+/* Quiet: text only. */
+.blockr-btn--quiet {
+  padding-left: 8px;
+  padding-right: 8px;
+  color: var(--blockr-color-text-muted);
+  background: transparent;
+  border-color: transparent;
+}
+
+.blockr-btn--quiet:hover {
+  color: var(--blockr-color-text-default);
+  background: var(--blockr-color-bg-hover);
+  border-color: transparent;
+}
+
+/* Destructive: only to confirm a removal. */
+.blockr-btn--danger {
+  color: var(--blockr-color-text-danger);
+  background: color-mix(in srgb, var(--blockr-color-border-danger) 6%, transparent);
+  border-color: var(--blockr-color-border-danger-subtle);
+}
+
+.blockr-btn--danger:hover {
+  color: var(--blockr-color-text-danger);
+  background: color-mix(in srgb, var(--blockr-color-border-danger) 12%, transparent);
+  border-color: var(--blockr-color-border-danger);
+}
+
+/* --- Disabled, of every kind, with no hover. Last, so it wins over the
+   hover rules of equal weight. --- */
+.blockr-btn:disabled,
+.blockr-btn.disabled,
+.blockr-btn[aria-disabled="true"] {
+  color: var(--blockr-color-text-disabled);
+  background: transparent;
+  border-color: var(--blockr-color-border-default);
+  cursor: default;
+}
+
+/* --- Tool (tool_button()) ---
+   The icon button: 26px, radius 4, bare, the icon in text-muted; hover
+   washes it and the icon turns default. It stays that way while the menu it
+   opens is open. */
+.blockr-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--blockr-control-h-xs);
+  height: var(--blockr-control-h-xs);
+  padding: 0;
+  color: var(--blockr-color-text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--blockr-radius-sm);
+  cursor: pointer;
+  transition: color var(--blockr-transition), background-color var(--blockr-transition);
+}
+
+.blockr-tool:hover,
+.blockr-tool[aria-expanded="true"] {
+  color: var(--blockr-color-text-default);
+  background: var(--blockr-color-bg-hover);
+}
+
+.blockr-tool:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}

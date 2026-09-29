@@ -125,3 +125,75 @@ test('the controls set no native title', (newWindow) => {
     'a terse segment shows its caller\'s title');
   win.close();
 });
+
+test('a line can carry a badge after the name', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  win.Blockr.tooltip.set(b, { name: 'dataset block', badge: 'blockr.core' });
+  b.focus();
+  const badge = card(win).querySelector('.blockr-tooltip__badge');
+  assert.ok(badge, 'badge drawn');
+  assert.strictEqual(badge.textContent, 'blockr.core');
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'dataset block · blockr.core');
+  win.close();
+});
+
+test('markup from R carries its tooltip as an attribute', async (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  b.setAttribute('data-blockr-tooltip', 'Download');
+  const icon = win.document.createElement('span');
+  b.appendChild(icon);
+  over(win, icon);
+  await wait(350);
+  assert.strictEqual(card(win).textContent, 'Download', 'found from a child');
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Download');
+  win.document.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  win.Blockr.tooltip.set(b, 'Set wins');
+  b.focus();
+  assert.strictEqual(card(win).textContent, 'Set wins', 'set() wins over the attribute');
+  win.close();
+});
+
+test('an empty attribute shows nothing', (newWindow) => {
+  const win = newWindow();
+  const b = button(win);
+  b.setAttribute('data-blockr-tooltip', '');
+  b.focus();
+  assert.ok(!card(win));
+  win.close();
+});
+
+test('editable text names its gesture, the default or its own', (newWindow) => {
+  const win = newWindow();
+  const a = win.document.createElement('span');
+  a.textContent = 'Filter rows';
+  a.setAttribute('data-blockr-editable', '');
+  const b = win.document.createElement('span');
+  b.textContent = 'Overview';
+  b.setAttribute('data-blockr-editable', 'Click to rename');
+  win.document.body.append(a, b);
+  over(win, a);
+  assert.strictEqual(win.Blockr.tooltip.text(a), 'Double-click to edit');
+  over(win, b);
+  assert.strictEqual(win.Blockr.tooltip.text(b), 'Click to rename');
+  b.removeAttribute('data-blockr-editable');
+  assert.strictEqual(win.Blockr.tooltip.text(b), '', 'none once the attribute goes');
+  win.close();
+});
+
+test('a native title that reaches the page is left to its owner', (newWindow) => {
+  // Blockr markup carries data-blockr-tooltip instead. Rewriting other
+  // code's titles froze them (a title cleared later kept its old card) and
+  // hid them from code that reads them, such as a Bootstrap tooltip set up
+  // after the first hover.
+  const win = newWindow();
+  const b = button(win);
+  b.setAttribute('title', 'Attach file');
+  over(win, b);
+  b.dispatchEvent(new win.FocusEvent('focusin', { bubbles: true }));
+  assert.strictEqual(b.getAttribute('title'), 'Attach file');
+  assert.ok(!b.hasAttribute('aria-label'));
+  assert.strictEqual(win.Blockr.tooltip.text(b), '');
+  win.close();
+});
