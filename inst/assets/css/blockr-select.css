@@ -317,8 +317,10 @@
 }
 
 /* A column label inside a tag is 12px meta, 8px after the name like
-   everywhere else. */
+   everywhere else. Muted is under 4.5:1 on the tag's bg-hover, so it takes
+   the name's mix at 70%, a step softer than the name. */
 .blockr-select__tag .blockr-select__opt-label {
+  color: color-mix(in srgb, var(--blockr-color-text-default) 70%, var(--blockr-color-bg-field));
   font-size: var(--blockr-font-size-xs);
   margin-left: 8px;
 }

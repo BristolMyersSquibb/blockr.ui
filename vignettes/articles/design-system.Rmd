@@ -718,7 +718,8 @@ operator.
 
 - 24px inside a 42px row, radius 4, 1px `border-default`, `bg-hover` (the
   tags' fill, a step darker than the field), 12px
-  weight 500 `text-muted`, with the 10px chevron so it reads as a choice. Hover:
+  weight 500 `text-default` mixed 70% with `bg-field` (`text-muted` is under
+  4.5:1 on `bg-hover`), with the 10px chevron so it reads as a choice. Hover:
   `border-strong`, `text-default`.
 - A click opens `Blockr.Select.menu()` anchored on the pill, listing every
   value.
@@ -1140,8 +1141,9 @@ you act on, keep 4px corners.
 24px, radius 4, 1px `border-default`, 8px side padding. Inside a field (a multi
 Select, a row) a tag takes `bg-hover`, a step darker than the field, and its
 name is 13px `text-default` mixed 80% with `bg-field`, so the tags do not
-outshout the rest of the block. The crossfilter's "Filter by" tags sit on the
-surface: `bg-surface`, `text-default`, and `bg-hover` while their card is open.
+outshout the rest of the block. A column label after the name is 12px, the
+same mix at 70%, since `text-muted` is under 4.5:1 on `bg-hover`. The
+crossfilter's "Filter by" tags sit on the surface: `bg-surface`, `text-default`, and `bg-hover` while their card is open.
 The × follows [Controls](#controls). The accent tint on a tag
 means the value is cutting rows. The crossfilter's "Filter by" pills are tags
 by this rule, and the read-only items in a drill receipt are tags without ×.
