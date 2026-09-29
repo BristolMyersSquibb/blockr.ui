@@ -1,5 +1,10 @@
 # blockr.ui (development version)
 
+* A new layer, `--blockr-z-overlay` (1000, Bootstrap's `$zindex-dropdown`),
+  for an overlay that belongs to the content but is fixed on `<body>`, such
+  as a drag ghost or a drop line: above the content, under the navbar and
+  everything that floats.
+
 * The new `small_icon()` draws the design system's small icons in markup
   built in R (#64), from the list `Blockr.icons` is now built from:
   `controls_dep()` writes the list into the page ahead of `blockr-ui.js`,
