@@ -119,6 +119,37 @@ test('a multi select opens on a click and keeps focus in its search input', (new
   win.close();
 });
 
+test('a click on the chevron of an open select closes it, single or multi', (newWindow) => {
+  const win = newWindow();
+  for (const sel of [single(win, { options: ABC }), multi(win, { options: ABC, selected: ['a'] })]) {
+    const arrow = control(sel).querySelector('.blockr-select__arrow');
+    click(win, arrow);
+    assert.ok(isOpen(sel), 'a closed select opens on it, as on the rest of its control');
+    click(win, arrow.querySelector('svg'));
+    assert.ok(!isOpen(sel));
+    assert.strictEqual(rows(win, sel).length, 0, 'the list is emptied on close');
+  }
+  win.close();
+});
+
+test('an open multi stays open on a click anywhere in its control but the chevron', (newWindow) => {
+  const win = newWindow();
+  const sel = multi(win, { options: ABC, selected: ['a', 'b'] });
+  click(win, control(sel));
+  for (const el of [
+    sel.el.querySelector('.blockr-select__tags'),
+    sel.el.querySelector('.blockr-select__tag-label'),
+    search(sel)
+  ]) {
+    click(win, el);
+    assert.ok(isOpen(sel), el.className);
+  }
+  click(win, control(sel).querySelector('.blockr-select__arrow'));
+  assert.ok(!isOpen(sel));
+  assert.strictEqual(win.document.activeElement, search(sel), 'focus stays on the combobox');
+  win.close();
+});
+
 test('a multi select ends on the chevron, as a single one does', (newWindow) => {
   const win = newWindow();
   const one = single(win, { options: ABC });

@@ -117,6 +117,26 @@
   transform: rotate(180deg);
 }
 
+/* A click on an open multi's chevron closes the list, while anywhere else in
+   the control a click only opens it (blockr-select.js). So while the list
+   is open the chevron takes clicks itself, over a 24px square centred on
+   it, the least a target inside a field may be (design system, Shape and
+   size). The square is an invisible ::after, so the chevron does not move. */
+.blockr-select--multi.blockr-select--open .blockr-select__arrow {
+  position: relative;
+  pointer-events: auto;
+}
+
+.blockr-select--multi.blockr-select--open .blockr-select__arrow::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+}
+
 /* A bare select sits in a row, whose field it is: its chevron is 10px, as
    a pill's (design system, "Chevrons"). The stroke does not scale. */
 .blockr-select:not(.blockr-select--bordered) .blockr-select__arrow svg {

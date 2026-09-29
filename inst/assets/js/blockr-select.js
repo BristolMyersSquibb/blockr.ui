@@ -665,6 +665,15 @@
         render();
         return;
       }
+      // A click on an open multi's chevron closes the list, as the turned-up
+      // chevron invites. Anywhere else a multi's control only opens: the
+      // filter is typed there, and a click to place the caret must not close
+      // the list. Focus stays on the combobox, as after Escape.
+      if (multi && st.open && t.closest('.blockr-select__arrow')) {
+        close();
+        input.focus();
+        return;
+      }
       if (multi) { open(); input.focus(); }
       else if (st.open) close();
       else open();

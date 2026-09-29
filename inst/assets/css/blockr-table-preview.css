@@ -253,7 +253,10 @@
       transition: background-color 0.15s ease;
     }
 
-    .blockr-table th.blockr-sortable:hover {
+    /* The wash and the cue below say what a click would do, and a click on
+       the name does not sort (blockr-table-preview.js), so neither shows
+       while the pointer is on the name. */
+    .blockr-table th.blockr-sortable:hover:not(:has(.blockr-col-name:hover)) {
       background-color: var(--blockr-color-bg-hover, #f3f4f6);
     }
 
@@ -292,7 +295,7 @@
       mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M2 3h3M2 6h5.5M2 9h8'/%3E%3C/svg%3E") no-repeat center / 12px 12px;
     }
 
-    .blockr-table th.blockr-sortable:hover .blockr-sort-icon {
+    .blockr-table th.blockr-sortable:hover:not(:has(.blockr-col-name:hover)) .blockr-sort-icon {
       visibility: visible;
     }
 
