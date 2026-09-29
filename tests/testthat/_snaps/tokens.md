@@ -216,7 +216,7 @@
       --blockr-color-danger: #f87171
       --blockr-color-success: #4ade80
       --blockr-color-warning: #fbbf24
-      --blockr-color-warning-bg: rgb(251 191 36 / 0.12)
+      --blockr-color-warning-bg: rgb(251 191 36 / 0.10)
       --blockr-color-warning-text: #fbbf24
       --blockr-font-size-section: 1rem
       --blockr-font-size-title: 1.25rem
@@ -247,9 +247,9 @@
       --blockr-color-text-danger: #f87171
       --blockr-color-text-warning: #fbbf24
       --blockr-color-text-success: #4ade80
-      --blockr-color-bg-danger: rgb(248 113 113 / 0.12)
-      --blockr-color-bg-warning: rgb(251 191 36 / 0.12)
-      --blockr-color-bg-success: rgb(74 222 128 / 0.12)
+      --blockr-color-bg-danger: rgb(248 113 113 / 0.10)
+      --blockr-color-bg-warning: rgb(251 191 36 / 0.10)
+      --blockr-color-bg-success: rgb(74 222 128 / 0.10)
       --blockr-color-border-danger: #f87171
       --blockr-color-border-warning: #fbbf24
       --blockr-color-border-success: #4ade80

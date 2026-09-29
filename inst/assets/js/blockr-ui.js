@@ -160,7 +160,9 @@ Blockr.place = (panel, anchor, opts) => {
     // Not laid out yet on the first call after display: block; a guess is
     // better than 0, which would never flip.
     const h = panel.offsetHeight || 240;
-    const spaceBelow = window.innerHeight - r.bottom - margin;
+    // The gap counts too: without it, a panel that just fit below ended 4px
+    // from the window's edge.
+    const spaceBelow = window.innerHeight - r.bottom - gap - margin;
     const above = spaceBelow < h && r.top > h;
 
     panel.style.position = 'fixed';

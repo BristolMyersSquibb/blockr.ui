@@ -12,7 +12,8 @@ jobs:
       BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}
 
   # The shared controls' JavaScript (inst/assets/js): the tests in tests/js
-  # run in node with happy-dom, and files with `// @ts-check` are
+  # run in node with happy-dom, and in the runner's own Chrome through
+  # Playwright where they need a layout; files with `// @ts-check` are
   # type-checked against inst/assets/js/types.d.ts. No build step.
   js:
     runs-on: ubuntu-latest

@@ -25,6 +25,32 @@ test_that("controls_dep ships the controls after the tokens", {
   expect_true(all(file.exists(file.path(assets, files))))
 })
 
+test_that("the browser tests' page loads what controls_dep() attaches", {
+
+  # The JavaScript tests that run in Chrome build their controls on
+  # tests/js/controls.html, which stands in for an app's page, so it loads
+  # the same files in the same order.
+  page <- test_path("..", "js", "controls.html")
+  skip_if_not(file.exists(page), "the JavaScript tests are not in this build")
+
+  html <- readLines(page, warn = FALSE)
+  loaded <- regmatches(
+    html,
+    regexpr("(?<=inst/assets/)[^\"]+", html, perl = TRUE)
+  )
+
+  deps <- htmltools::findDependencies(controls_dep())
+  attached <- blockr.core::unlst(
+    blockr.core::map(
+      c,
+      blockr.core::lst_xtr(deps, "stylesheet"),
+      blockr.core::lst_xtr(deps, "script")
+    )
+  )
+
+  expect_identical(loaded, attached)
+})
+
 test_that("the controls read only meaning tokens this package defines", {
 
   # Every stylesheet controls_dep() ships, read off the dependency, so a

@@ -100,3 +100,13 @@
   color: var(--blockr-color-text-muted);
   text-transform: lowercase;
 }
+
+/* Muted is under 4.5:1 on the hover wash, so on the hover and the keyboard
+   row the muted parts turn text-default, as in a menu (design system,
+   "Row states"). */
+.blockr-input__item--highlighted .blockr-input__item-parens,
+.blockr-input__item--highlighted .blockr-input__item-meta,
+.blockr-input__item:hover .blockr-input__item-parens,
+.blockr-input__item:hover .blockr-input__item-meta {
+  color: var(--blockr-color-text-default);
+}

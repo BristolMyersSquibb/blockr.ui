@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- The page the browser tests (browser.js) build their controls on: the
+     shipped stylesheets and scripts, in the order controls_dep() attaches
+     them, and no controls of its own. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Controls</title>
+<link rel="stylesheet" href="../../inst/assets/css/blockr-tokens.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-tokens-dark.css">
+<script src="../../inst/assets/js/blockr-ui.js"></script>
+<link rel="stylesheet" href="../../inst/assets/css/blockr-blocks.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-menu.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-tooltip.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-buttons.css">
+<link rel="stylesheet" href="../../inst/assets/css/blockr-settings-band.css">
+<script src="../../inst/assets/js/blockr-select.js"></script>
+<link rel="stylesheet" href="../../inst/assets/css/blockr-select.css">
+<script src="../../inst/assets/js/blockr-input.js"></script>
+<link rel="stylesheet" href="../../inst/assets/css/blockr-input.css">
+<style>
+  /* What the host gives a control in an app: the box model of Bootstrap's
+     reboot, which bslib puts on every page, and a block's surface and text
+     colour, in either scheme. */
+  *, ::before, ::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: system-ui, sans-serif;
+    font-size: var(--blockr-font-size-base);
+    line-height: 1.5;
+    background: var(--blockr-color-bg-surface);
+    color: var(--blockr-color-text-default);
+  }
+</style>
+</head>
+<body></body>
+</html>
