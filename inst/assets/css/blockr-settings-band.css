@@ -84,10 +84,24 @@
   transform: rotate(45deg);
 }
 
+/* The tray has no heading (design system, "The gear tray"): the card's
+   title and the tinted gear already say what it is. blockr.viz's engine
+   still writes one ("Chart settings") as .dd-popover-title; it stays in the
+   page for screen readers, as the tray's name, but is not shown. It goes
+   once the engine names the tray with an aria-label. */
+.blockr-settings .dd-popover-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Section title (design system, "Section titles"): 12px, weight 600,
-   uppercase, 0.05em, muted; 10px above its first field. The engine's title
-   element keeps its dd-popover-title class; restyle it as the band heading. */
-.blockr-settings .dd-popover-title,
+   uppercase, 0.05em, muted; 10px above its first field. */
 .blockr-settings__title {
   flex: 1 1 100%;
   font-size: var(--blockr-font-size-xs);
