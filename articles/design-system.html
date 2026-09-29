@@ -312,9 +312,8 @@ rest</td>
 <tr class="even">
 <td><code>--blockr-color-text-accent-strong</code></td>
 <td>accent-700</td>
-<td>text on the accent tint (every selected or “on” state, a count on
-the main button, the avatar initial), where accent-600 falls below
-4.5:1</td>
+<td>text on the accent tint (every selected or “on” state, the avatar
+initial), where accent-600 falls below 4.5:1</td>
 </tr>
 <tr class="odd">
 <td>
@@ -1572,9 +1571,10 @@ buttons and the dm, io and pharma segmented copies.</li>
 key operator.</p>
 <ul>
 <li>24px inside a 42px row, radius 4, 1px <code>border-default</code>,
-<code>bg-surface</code>, 12px weight 500 <code>text-muted</code>, with
-the 10px chevron so it reads as a choice. Hover:
-<code>border-strong</code>, <code>text-default</code>.</li>
+<code>bg-hover</code> (the tags’ fill, a step darker than the field),
+12px weight 500 <code>text-muted</code>, with the 10px chevron so it
+reads as a choice. Hover: <code>border-strong</code>,
+<code>text-default</code>.</li>
 <li>A click opens <code>Blockr.Select.menu()</code> anchored on the
 pill, listing every value.</li>
 <li>The click-to-cycle pill is retired. Join type, outside a row, is a
@@ -2281,13 +2281,16 @@ system page</a>.</p>
 <tbody>
 <tr class="odd">
 <td>Badge</td>
-<td><code>.blockr-badge</code></td>
+<td>
+<code>.blockr-menu__badge</code>,
+<code>.blockr-tooltip__badge</code>
+</td>
 <td>you only read it: “Categorical”, “blockr.dplyr”, “Added”</td>
 <td>capsule</td>
 </tr>
 <tr class="even">
 <td>Tag</td>
-<td><code>.blockr-tag</code></td>
+<td><code>.blockr-select__tag</code></td>
 <td>a value you picked, with × when it can be removed</td>
 <td>4px corners</td>
 </tr>
@@ -2299,7 +2302,7 @@ system page</a>.</p>
 </tr>
 <tr class="even">
 <td>Count</td>
-<td><code>.blockr-count</code></td>
+<td>none yet</td>
 <td>a number on a button</td>
 <td>capsule</td>
 </tr>
@@ -2339,10 +2342,15 @@ pill) come from the board’s scale and are outside this rule.</li>
 <div class="section level3">
 <h3 id="tags">Tags<a class="anchor" aria-label="anchor" href="#tags"></a>
 </h3>
-<p>24px, radius 4, 1px <code>border-default</code>,
-<code>bg-surface</code>, 13px <code>text-default</code>, 8px side
-padding. The × follows <a href="#controls">Controls</a>. The accent tint
-on a tag means the value is cutting rows. The crossfilter’s “Filter by”
+<p>24px, radius 4, 1px <code>border-default</code>, 8px side padding.
+Inside a field (a multi Select, a row) a tag takes
+<code>bg-hover</code>, a step darker than the field, and its name is
+13px <code>text-default</code> mixed 80% with <code>bg-field</code>, so
+the tags do not outshout the rest of the block. The crossfilter’s
+“Filter by” tags sit on the surface: <code>bg-surface</code>,
+<code>text-default</code>, and <code>bg-hover</code> while their card is
+open. The × follows <a href="#controls">Controls</a>. The accent tint on
+a tag means the value is cutting rows. The crossfilter’s “Filter by”
 pills are tags by this rule, and the read-only items in a drill receipt
 are tags without ×.</p>
 </div>
@@ -2365,6 +2373,8 @@ with <code>text-accent-strong</code> text.</li>
 colour: <code>text-default</code> on a <code>bg-hover</code> fill, or
 <code>text-danger</code> on <code>border-danger</code> at 14%. A count
 never brings a second colour into a button.</li>
+<li>A count never counts active filters (see <a href="#messages">Messages</a>). No control shows a count at the
+moment.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -2491,7 +2501,7 @@ and mutes the name, so the row reads like the word that was clicked
 (Select’s <code>labelFirst</code>). The word belongs to the exhibit,
 which speaks in labels.</li>
 <li>A tooltip that shows both has the name, then the label muted, like
-the control. The “+N” chip lists the hidden tags that way, one per
+the control. The “+N” overflow lists the hidden tags that way, one per
 line.</li>
 <li>An aggregate reads “Mean of Age”, on a chart, in a table and in a
 rank table header.</li>
@@ -2618,7 +2628,7 @@ Theme” board option is a follow-up.</p>
 uppercase, 0.05em, <code>text-muted</code>), centred over its panel. No
 card around the panel and no band behind the name; 24px between panels.
 Exports match.</p></li>
-<li><p><strong>Legend band:</strong> HTML. Chip text
+<li><p><strong>Legend band:</strong> HTML. Item text
 <code>text-muted</code>, like the axis labels. Its items take the focus
 outline. The 25 x 14px swatch stays.</p></li>
 <li><p><strong>Data tooltip:</strong> the raised card
@@ -2915,9 +2925,9 @@ page</a>.</p>
 (<code>inst/assets/css/blockr-tokens.css</code>,
 <code>blockr-tokens-dark.css</code>) and the shared components: the
 params grid (moving from blockr.extra), <code>Blockr.Select</code> and
-its placement routine, <code>Blockr.checkbox</code>, the badge, tag,
-pill and count classes, the slot and offer rules (today declared twice,
-in blockr.viz <code>chart.css</code> and blockr.dm
+its placement routine, <code>Blockr.checkbox</code>, the badge, tag and
+pill styles, the slot and offer rules (today declared twice, in
+blockr.viz <code>chart.css</code> and blockr.dm
 <code>crossfilter-block.css</code>), the gear button, the tool button
 and the action menu (<code><a href="../reference/tool_button.html">tool_button()</a></code>,
 <code><a href="../reference/action_menu.html">action_menu()</a></code>), the button classes

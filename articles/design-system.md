@@ -86,7 +86,7 @@ disabled.
 | `--blockr-color-text-disabled` | grey-400 | disabled controls only |
 | `--blockr-color-text-on-accent` | `#ffffff` | text on a solid accent fill |
 | `--blockr-color-text-accent` | accent-600 | accent text on a plain surface |
-| `--blockr-color-text-accent-strong` | accent-700 | text on the accent tint (every selected or “on” state, a count on the main button, the avatar initial), where accent-600 falls below 4.5:1 |
+| `--blockr-color-text-accent-strong` | accent-700 | text on the accent tint (every selected or “on” state, the avatar initial), where accent-600 falls below 4.5:1 |
 | `--blockr-color-text-danger` / `-warning` / `-success` | red-700 / amber-700 / green-700 | status text |
 
 Muted is 4.8:1 on white, 4.6:1 on grey-50 and 4.4:1 on grey-100. Muted
@@ -738,9 +738,10 @@ and the pick is readable without a click.
 For four or more values inside a row: the filter operator, the join key
 operator.
 
-- 24px inside a 42px row, radius 4, 1px `border-default`, `bg-surface`,
-  12px weight 500 `text-muted`, with the 10px chevron so it reads as a
-  choice. Hover: `border-strong`, `text-default`.
+- 24px inside a 42px row, radius 4, 1px `border-default`, `bg-hover`
+  (the tags’ fill, a step darker than the field), 12px weight 500
+  `text-muted`, with the 10px chevron so it reads as a choice. Hover:
+  `border-strong`, `text-default`.
 - A click opens `Blockr.Select.menu()` anchored on the pill, listing
   every value.
 - The click-to-cycle pill is retired. Join type, outside a row, is a
@@ -1162,10 +1163,10 @@ page](https://bristolmyerssquibb.github.io/blockr.ui/articles/design-system/inde
 
 | Kind | Class | Job | Shape |
 |----|----|----|----|
-| Badge | `.blockr-badge` | you only read it: “Categorical”, “blockr.dplyr”, “Added” | capsule |
-| Tag | `.blockr-tag` | a value you picked, with × when it can be removed | 4px corners |
+| Badge | `.blockr-menu__badge`, `.blockr-tooltip__badge` | you only read it: “Categorical”, “blockr.dplyr”, “Added” | capsule |
+| Tag | `.blockr-select__tag` | a value you picked, with × when it can be removed | 4px corners |
 | Pill | `.blockr-pill` | a click changes a setting (the operator) | 4px corners |
-| Count | `.blockr-count` | a number on a button | capsule |
+| Count | none yet | a number on a button | capsule |
 
 The word “chip” goes. Round ends mean read-only; tags, pills and
 buttons, which you act on, keep 4px corners.
@@ -1188,11 +1189,15 @@ buttons, which you act on, keep 4px corners.
 
 ### Tags
 
-24px, radius 4, 1px `border-default`, `bg-surface`, 13px `text-default`,
-8px side padding. The × follows [Controls](#controls). The accent tint
-on a tag means the value is cutting rows. The crossfilter’s “Filter by”
-pills are tags by this rule, and the read-only items in a drill receipt
-are tags without ×.
+24px, radius 4, 1px `border-default`, 8px side padding. Inside a field
+(a multi Select, a row) a tag takes `bg-hover`, a step darker than the
+field, and its name is 13px `text-default` mixed 80% with `bg-field`, so
+the tags do not outshout the rest of the block. The crossfilter’s
+“Filter by” tags sit on the surface: `bg-surface`, `text-default`, and
+`bg-hover` while their card is open. The × follows
+[Controls](#controls). The accent tint on a tag means the value is
+cutting rows. The crossfilter’s “Filter by” pills are tags by this rule,
+and the read-only items in a drill receipt are tags without ×.
 
 ### Pills
 
@@ -1210,6 +1215,8 @@ Specified under “A pill that opens a menu” in [Controls](#controls).
   colour: `text-default` on a `bg-hover` fill, or `text-danger` on
   `border-danger` at 14%. A count never brings a second colour into a
   button.
+- A count never counts active filters (see [Messages](#messages)). No
+  control shows a count at the moment.
 
 ### Showing that a block filters
 
@@ -1264,7 +1271,8 @@ in names, an exhibit in labels.
   (Select’s `labelFirst`). The word belongs to the exhibit, which speaks
   in labels.
 - A tooltip that shows both has the name, then the label muted, like the
-  control. The “+N” chip lists the hidden tags that way, one per line.
+  control. The “+N” overflow lists the hidden tags that way, one per
+  line.
 - An aggregate reads “Mean of Age”, on a chart, in a table and in a rank
   table header.
 - Code and decode pairs (PARAMCD and PARAM) follow the same rule: where
@@ -1358,7 +1366,7 @@ page](https://bristolmyerssquibb.github.io/blockr.ui/articles/design-system/inde
   0.05em, `text-muted`), centred over its panel. No card around the
   panel and no band behind the name; 24px between panels. Exports match.
 
-- **Legend band:** HTML. Chip text `text-muted`, like the axis labels.
+- **Legend band:** HTML. Item text `text-muted`, like the axis labels.
   Its items take the focus outline. The 25 x 14px swatch stays.
 
 - **Data tooltip:** the raised card (`bg-raised`, `border-default`,
@@ -1600,10 +1608,10 @@ page](https://bristolmyerssquibb.github.io/blockr.ui/articles/design-system/inde
 blockr.ui owns the tokens (`inst/assets/css/blockr-tokens.css`,
 `blockr-tokens-dark.css`) and the shared components: the params grid
 (moving from blockr.extra), `Blockr.Select` and its placement routine,
-`Blockr.checkbox`, the badge, tag, pill and count classes, the slot and
-offer rules (today declared twice, in blockr.viz `chart.css` and
-blockr.dm `crossfilter-block.css`), the gear button, the tool button and
-the action menu
+`Blockr.checkbox`, the badge, tag and pill styles, the slot and offer
+rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
+`crossfilter-block.css`), the gear button, the tool button and the
+action menu
 ([`tool_button()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/tool_button.md),
 [`action_menu()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)),
 the button classes (`.blockr-btn`), the chevron
