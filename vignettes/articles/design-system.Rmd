@@ -185,7 +185,7 @@ tokens directly.
 | `text-accent` | accent-500 |
 | `text-accent-strong` | `text-accent` |
 | `text-` / `border-danger`, `-warning`, `-success` | `#f87171`, `#fbbf24`, `#4ade80` |
-| `bg-danger`, `-warning`, `-success` | the same hues at 12% |
+| `bg-danger`, `-warning`, `-success` | the same hues at 10%, which keeps a required field's `text-muted` placeholder at 4.5:1 on a block |
 | `focus-ring` | `0 0 0 3px rgb(96 165 250 / 0.28)` |
 | shadows | the same geometry at 0.5 to 0.7 black |
 
