@@ -119,6 +119,22 @@ test('a multi select opens on a click and keeps focus in its search input', (new
   win.close();
 });
 
+test('a multi select ends on the chevron, as a single one does', (newWindow) => {
+  const win = newWindow();
+  const one = single(win, { options: ABC });
+  const many = multi(win, { options: ABC, selected: ['a', 'b'] });
+  for (const sel of [one, many]) {
+    const last = control(sel).lastElementChild;
+    assert.ok(last.classList.contains('blockr-select__arrow'), 'the chevron comes last');
+    assert.ok(last.querySelector('svg'));
+  }
+  // A pick redraws the tags in their own row, never after the chevron.
+  click(win, control(many));
+  clickRow(win, many, 'c');
+  assert.ok(control(many).lastElementChild.classList.contains('blockr-select__arrow'));
+  win.close();
+});
+
 test('a click on a tag\'s x while closed removes it without opening', (newWindow) => {
   const win = newWindow();
   const seen = [];
@@ -910,6 +926,21 @@ test('a tag shows the value and, muted, its label; full text on hover', (newWind
   assert.strictEqual(win.Blockr.tooltip.text(labels[1]), 'BASE');
   const x = sel.el.querySelector('.blockr-select__tag[data-value="AVAL"] .blockr-select__tag-remove');
   assert.strictEqual(x.getAttribute('aria-label'), 'Remove AVAL');
+  win.close();
+});
+
+test('a tag\'s x names itself in a tooltip, unless it is disabled', (newWindow) => {
+  const win = newWindow();
+  const sel = multi(win, { options: LABELLED, selected: ['AVAL'] });
+  const x = () => sel.el.querySelector('.blockr-select__tag-remove');
+  assert.strictEqual(win.Blockr.tooltip.text(x()), 'Remove AVAL');
+  x().focus();
+  assert.strictEqual(win.document.querySelector('.blockr-tooltip').textContent, 'Remove AVAL',
+    'keyboard focus shows it');
+  sel.setDisabled(true);
+  assert.strictEqual(win.Blockr.tooltip.text(x()), '', 'a disabled x never shows, nor its tooltip');
+  sel.setDisabled(false);
+  assert.strictEqual(win.Blockr.tooltip.text(x()), 'Remove AVAL');
   win.close();
 });
 

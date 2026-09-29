@@ -257,11 +257,13 @@
     } else {
       control.appendChild(face);
       control.appendChild(input);
-      const arrow = document.createElement('span');
-      arrow.className = 'blockr-select__arrow';
-      arrow.innerHTML = Blockr.icons.chevron;
-      control.appendChild(arrow);
     }
+    // Single and multi alike end on the chevron, turned up while the list
+    // is open (design system, Chevrons).
+    const arrow = document.createElement('span');
+    arrow.className = 'blockr-select__arrow';
+    arrow.innerHTML = Blockr.icons.chevron;
+    control.appendChild(arrow);
 
     // The panel is the floating surface; the listbox inside it holds the
     // rows and nothing else, since a listbox may contain only options. Only
@@ -379,6 +381,9 @@
         remove.setAttribute('aria-label', `Remove ${val}`);
         remove.disabled = st.disabled;
         remove.innerHTML = Blockr.icons.remove;
+        // An icon-only button, so it has a tooltip (design system,
+        // Tooltips). A disabled x never shows, so it has none.
+        if (!st.disabled) Blockr.tooltip.set(remove, `Remove ${val}`);
         tag.appendChild(remove);
         // In a menu the input is the panel's filter box, not a child here.
         if (input.parentElement === tagsEl) tagsEl.insertBefore(tag, input);
