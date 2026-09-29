@@ -299,6 +299,22 @@ test_that("the sort cue sits on the name's line and the header says its sort", {
   expect_match(css, "M2 3h3M2 6h5.5M2 9h8", fixed = TRUE)
 })
 
+test_that("no hover cue on a header shows over the name, which does not sort", {
+
+  hover <- grep(
+    "blockr-sortable:hover",
+    css_selectors(
+      system.file("assets", "css", "blockr-table-preview.css",
+                  package = "blockr.ui")
+    ),
+    value = TRUE,
+    fixed = TRUE
+  )
+
+  expect_gt(length(hover), 0L)
+  expect_match(hover, ":not(:has(.blockr-col-name:hover))", fixed = TRUE)
+})
+
 test_that("the sorted header names its sort in a tooltip", {
   df <- data.frame(x = c(2, NA, 1))
   html <- render_chr(

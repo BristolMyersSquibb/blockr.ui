@@ -1364,12 +1364,14 @@ and the composer table, which render annotated data frames).
   frame does not sort: its row order is its structure.
 - **The sort cue:** sort bars, 12px, three bars of 1.4px that draw the values
   top to bottom: short to long for ascending, long to short for descending.
-  Missing values first adds a hollow dot at the top right. The sorted
-  column's cue is in `text-accent`; an unsorted column shows the ascending
-  bars in `text-muted` on hover, as what a click would do. It sits on the
-  name's line: after the name, or before it on a right-aligned column, so the
-  name stays over its numbers. The sorted header names its sort in the light
-  tooltip ("Missing values first, then ascending") and carries `aria-sort`.
+  Missing values first adds a hollow dot at the top right. The sorted column's
+  cue is in `text-accent`. On hover the header takes the `bg-hover` wash and
+  an unsorted column shows the ascending bars in `text-muted`, as what a click
+  would do; neither shows while the pointer is on the name, which a click does
+  not sort. The cue sits on the name's line: after the name, or before it on a
+  right-aligned column, so the name stays over its numbers. The sorted header
+  names its sort in the light tooltip ("Missing values first, then ascending")
+  and carries `aria-sort`.
 - **Preview footer:** the row range (12px muted) left, the pager right as 26px
   tools with the chevron pointing left and right, one `border-default` rule
   above. Row numbers are a 44px right-aligned gutter, 12px muted.
