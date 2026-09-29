@@ -381,6 +381,9 @@
         remove.setAttribute('aria-label', `Remove ${val}`);
         remove.disabled = st.disabled;
         remove.innerHTML = Blockr.icons.remove;
+        // An icon-only button, so it has a tooltip (design system,
+        // Tooltips). A disabled x never shows, so it has none.
+        if (!st.disabled) Blockr.tooltip.set(remove, `Remove ${val}`);
         tag.appendChild(remove);
         // In a menu the input is the panel's filter box, not a child here.
         if (input.parentElement === tagsEl) tagsEl.insertBefore(tag, input);

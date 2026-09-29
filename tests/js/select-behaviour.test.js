@@ -929,6 +929,21 @@ test('a tag shows the value and, muted, its label; full text on hover', (newWind
   win.close();
 });
 
+test('a tag\'s x names itself in a tooltip, unless it is disabled', (newWindow) => {
+  const win = newWindow();
+  const sel = multi(win, { options: LABELLED, selected: ['AVAL'] });
+  const x = () => sel.el.querySelector('.blockr-select__tag-remove');
+  assert.strictEqual(win.Blockr.tooltip.text(x()), 'Remove AVAL');
+  x().focus();
+  assert.strictEqual(win.document.querySelector('.blockr-tooltip').textContent, 'Remove AVAL',
+    'keyboard focus shows it');
+  sel.setDisabled(true);
+  assert.strictEqual(win.Blockr.tooltip.text(x()), '', 'a disabled x never shows, nor its tooltip');
+  sel.setDisabled(false);
+  assert.strictEqual(win.Blockr.tooltip.text(x()), 'Remove AVAL');
+  win.close();
+});
+
 test('a tag for a value the list does not carry still shows the value', (newWindow) => {
   const win = newWindow();
   const sel = multi(win, { options: ABC, selected: [] });
