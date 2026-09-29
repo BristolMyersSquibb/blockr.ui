@@ -3,7 +3,8 @@
  * tooltip showing.
  *
  * Only axe's WCAG rules run. Colour contrast needs a layout, which happy-dom
- * does not have, and landmark rules are about the host page, not a control.
+ * does not have, so contrast.test.js checks it in Chrome; landmark rules are
+ * about the host page, not a control.
  */
 'use strict';
 
