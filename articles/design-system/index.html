@@ -810,9 +810,9 @@ with live words. Both keep the rest behind the gear, which opens the tray in flo
           <span class="hdl" data-tip="Drag to reorder"><svg width="10" height="16"><use href="#i-grip"/></svg></span>
           <button class="rsel" data-menu="m-cols" data-value="Month"><span class="v">Month</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
           <button class="pill" data-menu="m-ops" data-value="in"><span class="v">is one of</span><svg width="10" height="10"><use href="#i-car"/></svg></button>
-          <span class="tag">6<button class="x" aria-label="Remove 6"><svg width="10" height="10"><use href="#i-x"/></svg></button></span>
-          <span class="tag">7<button class="x" aria-label="Remove 7"><svg width="10" height="10"><use href="#i-x"/></svg></button></span>
-          <span class="tag">8<button class="x" aria-label="Remove 8"><svg width="10" height="10"><use href="#i-x"/></svg></button></span>
+          <span class="tag">6<button class="x" data-tip="Remove 6" aria-label="Remove 6"><svg width="10" height="10"><use href="#i-x"/></svg></button></span>
+          <span class="tag">7<button class="x" data-tip="Remove 7" aria-label="Remove 7"><svg width="10" height="10"><use href="#i-x"/></svg></button></span>
+          <span class="tag">8<button class="x" data-tip="Remove 8" aria-label="Remove 8"><svg width="10" height="10"><use href="#i-x"/></svg></button></span>
           <button class="rx" data-tip="Remove condition" aria-label="Remove condition"><svg width="12" height="12"><use href="#i-x"/></svg></button>
         </div>
       </div>
@@ -1553,7 +1553,7 @@ click changes a setting) and a button have 4px corners. A badge has colour only 
 <div class="cols c2">
   <div class="card">
     <div class="line"><span class="cap" style="margin:0;width:70px">badge</span><span class="badge">Categorical</span><span class="badge">blockr.dplyr</span><span class="badge on">Added</span><span class="badge danger">Not found</span><span class="badge warning">Stale</span><span class="badge success">Saved</span></div>
-    <div class="line"><span class="cap" style="margin:0;width:70px">tag</span><span class="tag">Ozone<button class="x" aria-label="Remove Ozone"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="tag f-hover">Month<button class="x" aria-label="Remove Month"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="tag">Wind<button class="x" aria-label="Remove Wind"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="m" style="font-size:12px">Month drawn hovered</span></div>
+    <div class="line"><span class="cap" style="margin:0;width:70px">tag</span><span class="tag">Ozone<button class="x" data-tip="Remove Ozone" aria-label="Remove Ozone"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="tag f-hover">Month<button class="x" data-tip="Remove Month" aria-label="Remove Month"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="tag">Wind<button class="x" data-tip="Remove Wind" aria-label="Remove Wind"><svg width="10" height="10"><use href="#i-x"/></svg></button></span><span class="m" style="font-size:12px">Month drawn hovered</span></div>
     <div class="line"><span class="cap" style="margin:0;width:70px">pill</span><button class="pill" data-menu="m-ops" data-value="≥"><span class="v">≥</span><svg width="10" height="10"><use href="#i-car"/></svg></button><button class="pill" data-menu="m-ops" data-value="in"><span class="v">is one of</span><svg width="10" height="10"><use href="#i-car"/></svg></button></div>
     <div class="line"><span class="cap" style="margin:0;width:70px">count</span><button class="b xs main"><svg width="12" height="12"><use href="#i-reset"/></svg>Reset <span class="count">2</span></button><button class="b s second">Filters <span class="count">12</span></button></div>
   </div>
@@ -1957,7 +1957,7 @@ function refresh(t) {
     vals.forEach(v => {
       const s = document.createElement('span');
       s.className = 'tag';
-      s.innerHTML = `${labelOf(t, v)}<button class="x" aria-label="Remove ${v}" data-v="${v}"><svg width="10" height="10"><use href="#i-x"/></svg></button>`;
+      s.innerHTML = `${labelOf(t, v)}<button class="x" data-tip="Remove ${v}" aria-label="Remove ${v}" data-v="${v}"><svg width="10" height="10"><use href="#i-x"/></svg></button>`;
       t.insertBefore(s, car);
     });
   } else if (t.hasAttribute('data-multi')) {
