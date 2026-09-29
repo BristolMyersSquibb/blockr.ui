@@ -228,13 +228,14 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .badge.danger { color: var(--blockr-color-text-danger); background: var(--blockr-color-bg-danger); border-color: var(--blockr-color-border-danger-subtle); }
 .badge.warning { color: var(--blockr-color-text-warning); background: var(--blockr-color-bg-warning); border-color: var(--blockr-color-border-warning-subtle); }
 .badge.success { color: var(--blockr-color-text-success); background: var(--blockr-color-bg-success); border-color: var(--blockr-color-border-success-subtle); }
-.tag { display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 3px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-default); white-space: nowrap; flex: none; }
+.tag { display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 3px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-hover); font-size: var(--blockr-font-size-sm); color: color-mix(in srgb, var(--blockr-color-text-default) 80%, var(--blockr-color-bg-field)); white-space: nowrap; flex: none; }
 .tag .x { display: inline-flex; width: 16px; height: 16px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 3px; background: none; color: var(--blockr-color-text-muted); cursor: pointer; opacity: 0; }
 .tag:hover .x, .tag:focus-within .x, .tag.f-hover .x { opacity: 1; }
 .tag .x:hover { color: var(--blockr-color-text-danger); }
-.tag.open { background: var(--blockr-color-bg-hover); }
+.tag.shelf { background: var(--blockr-color-bg-surface); color: var(--blockr-color-text-default); }
+.tag.shelf.open { background: var(--blockr-color-bg-hover); }
 .tag.cut { color: var(--blockr-color-text-accent); background: var(--blockr-color-bg-accent-subtle); border-color: var(--blockr-color-border-accent-subtle); }
-.pill { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 5px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-surface); font-size: var(--blockr-font-size-xs); font-weight: 500; color: var(--blockr-color-text-muted); cursor: pointer; white-space: nowrap; flex: none; }
+.pill { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 5px 0 8px; border-radius: var(--blockr-radius-sm); border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-hover); font-size: var(--blockr-font-size-xs); font-weight: 500; color: var(--blockr-color-text-muted); cursor: pointer; white-space: nowrap; flex: none; }
 .pill:hover { border-color: var(--blockr-color-border-strong); color: var(--blockr-color-text-default); }
 .pill.open { border-color: var(--blockr-color-border-accent); color: var(--blockr-color-text-default); box-shadow: var(--blockr-focus-ring); }
 .count { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--blockr-radius-pill); font-size: 11px; font-weight: 600; line-height: 1; color: var(--blockr-color-text-accent-strong); background: color-mix(in srgb, var(--blockr-color-border-accent) 14%, transparent); font-variant-numeric: tabular-nums; }
@@ -1561,8 +1562,8 @@ click changes a setting) and a button have 4px corners. A badge has colour only 
   <ul class="rules" style="margin:0">
     <li>Badge: 18px capsule, 11px weight 500, 7px side padding, <code>bg-subtle</code>, <code>border-default</code>, muted. Types, packages and significance levels are neutral.</li>
     <li>Accent tint on a badge means on, added or cutting rows. Status tints only for danger, warning and success; blue "info" becomes neutral.</li>
-    <li>Tag: 24px, 13px, <code>text-default</code>. Its × shows on the hovered tag only and turns red on its own hover.</li>
-    <li>Pill: 24px with a caret; it opens a menu. The click-to-cycle pill is retired.</li>
+    <li>Tag: 24px, 13px. In a field it takes <code>bg-hover</code>, a step darker than the field, with the name at 80% <code>text-default</code>; on the surface (the crossfilter's Filter by) <code>bg-surface</code>. Its × shows on the hovered tag only and turns red on its own hover.</li>
+    <li>Pill: 24px with a caret, the tags' <code>bg-hover</code> fill; it opens a menu. The click-to-cycle pill is retired.</li>
     <li>Count: 16px capsule in the host's colour at 14%, text <code>accent-700</code> (4.5:1 for small text). No control shows one at the moment: it never counts active filters.</li>
     <li>In blockr.ui a tag is <code>.blockr-select__tag</code>, a pill <code>.blockr-pill</code>, a badge <code>.blockr-menu__badge</code> or <code>.blockr-tooltip__badge</code>. The word "chip" goes.</li>
   </ul>
@@ -1678,7 +1679,7 @@ supporting marks.</p>
     <div class="fld s2"><span class="lbl">Group by</span><button class="ctl" data-menu="m-cols-opt" data-place="field" data-value="None"><span class="v ph">None</span><span class="car"></span></button></div>
   </div></div>
   <div class="sec" style="margin-top:24px">Filter by</div>
-  <div class="line" style="margin-bottom:12px"><span class="tag cut">Month</span><span class="tag open">Wind</span><span class="tag open">Day</span><span class="tag">Temp</span><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>More filters</button></div>
+  <div class="line" style="margin-bottom:12px"><span class="tag shelf cut">Month</span><span class="tag shelf open">Wind</span><span class="tag shelf open">Day</span><span class="tag shelf">Temp</span><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>More filters</button></div>
   <div class="xf-cards">
     <div>
       <div class="xf-card-h"><span class="xf-cl">Month<small>5 values</small></span><button class="tool" data-tip="Clear this filter" aria-label="Clear this filter"><svg width="13" height="13"><use href="#i-reset"/></svg></button><button class="tool" data-tip="Remove card" aria-label="Remove card"><svg width="12" height="12"><use href="#i-x"/></svg></button></div>
