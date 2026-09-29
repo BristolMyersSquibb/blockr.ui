@@ -2,6 +2,12 @@
 
 ## All functions
 
+- [`action_menu()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)
+  [`menu_item()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)
+  [`menu_section()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)
+  [`menu_divider()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)
+  : Action menu
+
 - [`apply_table_sort()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/apply_table_sort.md)
   : Sort a data frame for the table preview
 
@@ -24,6 +30,9 @@
 
   Strip a redundant `:has(> *)` guard from Shiny's recalculating fade
 
+- [`shortcut()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/shortcut.md)
+  : A keyboard shortcut hint
+
 - [`table_page()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/table_page.md)
   : Fetch one page of a tabular result
 
@@ -33,3 +42,6 @@
 
 - [`theme_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/theme_dep.md)
   : Shared blockr stylesheet
+
+- [`tool_button()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/tool_button.md)
+  : Tool button

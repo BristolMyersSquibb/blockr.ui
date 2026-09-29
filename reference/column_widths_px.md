@@ -68,5 +68,5 @@ digit 0, which in some font stacks runs 40% narrower than average text,
 so ch-sized columns clip hard exactly where fonts differ. 8px/char at
 the 14px table font (the constant the header min-width heuristic used
 for years) over-estimates almost every UI font, so the estimate degrades
-to slightly roomy columns - or, at worst, mild ellipsis with the title
+to slightly roomy columns - or, at worst, mild ellipsis with the
 tooltip - never to crushed ones.

@@ -2,6 +2,64 @@
 
 ## blockr.ui (development version)
 
+- The design system’s menu of actions, `Blockr.menu()`, joins
+  [`controls_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md):
+  rows with an icon, label and meta text, dividers, group titles, a head
+  (a name with a badge and a line of text), current, disabled and
+  destructive rows, placed with `Blockr.place()` and driven from the
+  keyboard. A trigger is wired with `Blockr.menu.bind()`. Its classes
+  also style menus built elsewhere.
+
+- A `Blockr.tooltip` line can carry a `badge`.
+
+- The new
+  [`action_menu()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)
+  builds a menu of actions opened by a button: downloads, Rename,
+  Remove. Its rows are
+  [`menu_item()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)s
+  wrapping a `downloadLink()`, an `actionLink()` or any link or button,
+  with
+  [`menu_section()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)
+  titles and
+  [`menu_divider()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)
+  rules between them. A row does one thing and the menu closes; unlike
+  `Blockr.Select.menu()` it sets no value. Open, the list sits on the
+  page body, so no panel’s overflow clips it.
+
+- The new
+  [`tool_button()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/tool_button.md)
+  is the design system’s 26px icon button, named by a tooltip.
+
+- An element built in R can carry its tooltip as a `data-blockr-tooltip`
+  attribute; `Blockr.tooltip` shows it as the light card, in place of
+  the native `title` box.
+
+- Text marked `data-blockr-editable` shows the text cursor and a tooltip
+  naming the gesture, “Double-click to edit” unless the attribute names
+  another.
+
+- The new
+  [`shortcut()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/shortcut.md)
+  writes a keyboard hint once for every platform:
+  `shortcut("Mod+Shift+S")` reads ⌘⇧S on a Mac and Ctrl+Shift+S
+  elsewhere. It fits the meta slot of a
+  [`menu_item()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md).
+
+- The table preview draws its header in the table style: the sort cue
+  sits on the name’s line, a numeric column’s header sits over its
+  numbers, and a sorted header states its order in a tooltip and in
+  `aria-sort`. A label or value cut off by its column shows whole in the
+  light card rather than a native `title`.
+
+- With
+  [`theme_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/theme_dep.md)
+  in the page, Bootstrap’s buttons take the design system’s kinds:
+  `.btn-primary` is the main button, `.btn-default` (Shiny’s
+  `actionButton()` and `downloadButton()`), `.btn-secondary` and
+  `.btn-light` the secondary one, `.btn-link` the quiet one and
+  `.btn-danger` the destructive one. Markup built for blockr uses the
+  `.blockr-btn` classes, in three sizes.
+
 - The design tokens are rewritten around the vocabulary of the design
   spec: a colour palette, meaning tokens for text, backgrounds, borders
   and status, type, radii, control heights and shadows. Every name
@@ -37,6 +95,11 @@
   one copy of each; while blockr.dplyr still ships its own copies, that
   copy is blockr.dplyr’s, as htmltools keeps the higher version of a
   name.
+
+- [`controls_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
+  also carries `Blockr.Input`, the code field with column and function
+  completions, moved here from blockr.dplyr under its old dependency
+  names (`blockr-input-js`, `blockr-input-css`).
 
 ## blockr.ui 0.0.1
 
