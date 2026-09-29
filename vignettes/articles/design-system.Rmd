@@ -1359,9 +1359,10 @@ and the composer table, which render annotated data frames).
   with no accent bars; the crossing cell takes `bg-accent-subtle-hover` at
   weight 600.
 - **Sorting:** the preview sorts on a header click: ascending, descending,
-  missing values first (then ascending), off. Ascending and descending put
-  missing values last. An output table of an annotated data frame does not
-  sort: its row order is its structure.
+  missing values first (then ascending), off. A click on the name itself
+  does not sort, since the name is text you can select. Ascending and
+  descending put missing values last. An output table of an annotated data
+  frame does not sort: its row order is its structure.
 - **The sort cue:** sort bars, 12px, three bars of 1.4px that draw the values
   top to bottom: short to long for ascending, long to short for descending.
   Missing values first adds a hollow dot at the top right. The sorted

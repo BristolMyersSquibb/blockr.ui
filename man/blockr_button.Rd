@@ -43,7 +43,7 @@ dialogs, \code{"xs"} (26px) in a header strip next to the gear.}
 \item{...}{Further attributes for the button.}
 }
 \value{
-A \link[htmltools:builder]{htmltools::tag} carrying \code{\link[=controls_dep]{controls_dep()}}.
+A \link[htmltools:tag]{htmltools::tag} carrying \code{\link[=controls_dep]{controls_dep()}}.
 }
 \description{
 The design system's buttons: main, secondary, quiet and destructive, at

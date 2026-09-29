@@ -104,7 +104,7 @@ select.}
 \code{"xs"} (26px) inside a row or a bar.}
 }
 \value{
-The field, a \link[htmltools:builder]{htmltools::tag} carrying \code{\link[=controls_dep]{controls_dep()}}. The
+The field, a \link[htmltools:tag]{htmltools::tag} carrying \code{\link[=controls_dep]{controls_dep()}}. The
 \verb{update_*()} functions return nothing.
 }
 \description{

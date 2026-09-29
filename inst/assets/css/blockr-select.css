@@ -103,7 +103,7 @@
   display: none;
 }
 
-/* --- Arrow (single mode) --- */
+/* --- Arrow --- */
 .blockr-select__arrow {
   flex-shrink: 0;
   display: flex;
@@ -174,9 +174,12 @@
   opacity: 0;
 }
 
-/* --- Tags container (multi mode) --- */
+/* --- Tags container (multi mode) ---
+   Grows to fill the control, which puts the chevron at the end as in a
+   single select, however many rows the tags wrap onto. */
 .blockr-select__tags {
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
   gap: 3px;
   align-items: center;
@@ -198,7 +201,6 @@
 .blockr-select--single-line .blockr-select__tags {
   flex-wrap: nowrap;
   overflow: hidden;
-  flex: 1;
 }
 .blockr-select--single-line .blockr-select__tag {
   flex: 0 0 auto;
@@ -238,13 +240,13 @@
   height: 24px;
   box-sizing: border-box;
   padding: 0 3px 0 8px;
-  /* A step darker than the field it sits in, with a softer name
-     (design system, Tags). */
-  background: var(--blockr-color-bg-hover);
+  /* The surface fill, with the name in the default text colour (design
+     system, Tags). */
+  background: var(--blockr-color-bg-surface);
   border: 1px solid var(--blockr-color-border-default);
   border-radius: var(--blockr-radius-sm);
   font-size: var(--blockr-font-size-sm);
-  color: color-mix(in srgb, var(--blockr-color-text-default) 80%, var(--blockr-color-bg-field));
+  color: var(--blockr-color-text-default);
   cursor: default;
   user-select: none;
   /* Cap at the control width, not a fixed size: a tag only ellipsizes when
