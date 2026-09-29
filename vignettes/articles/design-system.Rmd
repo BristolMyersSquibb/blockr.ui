@@ -93,8 +93,11 @@ disabled.
 Muted is 4.8:1 on white, 4.6:1 on grey-50 and 4.4:1 on grey-100. Muted text
 therefore never sits on a hover or selected background: on a hovered row, meta
 text and icons turn default; on a selected row, they turn `text-accent-strong`
-with the rest of the row. Grey-400 is 2.5:1 and serves disabled controls
-only.
+with the rest of the row. A status fill takes muted text only where it keeps
+4.5:1: `bg-warning` (4.7:1 in light, 4.6:1 in dark on a block), which holds a
+required field's placeholder, and `bg-success` (4.6:1 in both), with the dark
+fills at 10% for that. On `bg-danger` muted is 4.4:1 in light, so muted text
+does not go there. Grey-400 is 2.5:1 and serves disabled controls only.
 
 ### Surfaces
 
