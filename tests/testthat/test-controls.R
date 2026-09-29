@@ -39,10 +39,12 @@ test_that("the browser tests' page loads what controls_dep() attaches", {
     regexpr("(?<=inst/assets/)[^\"]+", html, perl = TRUE)
   )
 
+  deps <- htmltools::findDependencies(controls_dep())
   attached <- blockr.core::unlst(
-    lapply(
-      htmltools::findDependencies(controls_dep()),
-      function(dep) c(dep$stylesheet, dep$script)
+    blockr.core::map(
+      c,
+      blockr.core::lst_xtr(deps, "stylesheet"),
+      blockr.core::lst_xtr(deps, "script")
     )
   )
 
