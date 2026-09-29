@@ -14,7 +14,7 @@ tool_button(icon, tooltip, ...)
 \item{...}{Further attributes, such as \code{id}.}
 }
 \value{
-A \verb{<button>} \link[htmltools:builder]{htmltools::tag} carrying \code{\link[=controls_dep]{controls_dep()}}.
+A \verb{<button>} \link[htmltools:tag]{htmltools::tag} carrying \code{\link[=controls_dep]{controls_dep()}}.
 }
 \description{
 The design system's icon button: 26px, bare, the icon muted until hover.

@@ -54,7 +54,7 @@ identical widths and the columns never reflow. When \code{NULL}, widths are
 recomputed from the current page on every render.}
 }
 \value{
-A \code{\link[shiny:reexports]{shiny::tagList()}} with the table preview, carrying the
+A \code{\link[shiny:tagList]{shiny::tagList()}} with the table preview, carrying the
 \code{\link[=table_preview_dep]{table_preview_dep()}} html dependency.
 }
 \description{

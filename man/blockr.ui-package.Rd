@@ -19,5 +19,10 @@ Useful links:
 \author{
 \strong{Maintainer}: David Granjon \email{david@cynkra.com}
 
+Authors:
+\itemize{
+  \item David Granjon \email{david@cynkra.com}
+}
+
 }
 \keyword{internal}
