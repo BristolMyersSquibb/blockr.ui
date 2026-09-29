@@ -255,9 +255,11 @@ monospace`. Code is 13px on every code surface.
 
 Nothing you click is smaller than 24px (WCAG 2.2, 2.5.8); a control that
 stands on its own is at least 26px, and one inside a row, field or tag may be
-24px. Below 24px only where the same action has a full-size target too: the
-16px checkbox box (its label), a tag's × (the list unticks it) and the
-outline's input markers ("Connect to…" in the row's menu).
+24px. Below 24px only where the target is a word in running text (a slot, in a
+sentence or an empty state), whose height is the line's, or where the same
+action has a full-size target too: the 16px checkbox box (its label), a tag's ×
+(the list unticks it) and the outline's input markers ("Connect to…" in the
+row's menu).
 
 ### Elevation
 
@@ -743,9 +745,9 @@ title, an outline row, a view name, a tab (in bare mode).
   Where the gesture is a single click (a name in the views menu's manage
   mode), the tooltip says so ("Click to rename").
 - Markup: `data-blockr-editable` on the element that shows the name, with the
-  gesture as its value where it is not the double-click. blockr-ui.js gives
-  it the tooltip and blockr-tooltip.css the cursor, both loaded wherever
-  blockr-ui.js is; nothing else is needed.
+  gesture as its value where it is not the double-click. The script
+  blockr-ui.js gives it the tooltip and blockr-tooltip.css the cursor, both
+  loaded wherever blockr-ui.js is; nothing else is needed.
 - While editing, the text becomes a field at its own size and weight: 1px
   `border-accent`, the focus ring, `bg-surface`, the text selected. No label.
 - Enter commits, Escape restores, a click elsewhere commits. An empty or
