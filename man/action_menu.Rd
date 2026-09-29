@@ -27,8 +27,8 @@ conditional.}
 trigger in a block's header row, where a menu opening to the right would
 leave the block; \code{"start"} with its left edge.}
 
-\item{x}{The row's element: a \code{\link[shiny:downloadButton]{shiny::downloadLink()}}, an
-\code{\link[shiny:actionButton]{shiny::actionLink()}}, or any \verb{<a>} or \verb{<button>}. Its text is the row's
+\item{x}{The row's element: a \code{\link[shiny:downloadLink]{shiny::downloadLink()}}, an
+\code{\link[shiny:actionLink]{shiny::actionLink()}}, or any \verb{<a>} or \verb{<button>}. Its text is the row's
 label.}
 
 \item{meta}{Text after the label, muted and right-aligned: the format of a
@@ -47,7 +47,7 @@ the row stays in the list, greyed, with the reason as its tooltip.}
 divider, belong under it.}
 }
 \value{
-A \link[htmltools:builder]{htmltools::tag} carrying \code{\link[=controls_dep]{controls_dep()}}.
+A \link[htmltools:tag]{htmltools::tag} carrying \code{\link[=controls_dep]{controls_dep()}}.
 }
 \description{
 A menu of actions opened by a button: downloads, Rename, Remove. A row does
@@ -55,8 +55,8 @@ one thing and the menu closes. That is the difference from a select, which
 sets a value: nothing here is remembered, and there is no current pick.
 }
 \details{
-The rows are ordinary Shiny markup, so a \code{\link[shiny:downloadButton]{shiny::downloadLink()}} or an
-\code{\link[shiny:actionButton]{shiny::actionLink()}} works as it is; \code{\link[=menu_item]{menu_item()}} only dresses it as a
+The rows are ordinary Shiny markup, so a \code{\link[shiny:downloadLink]{shiny::downloadLink()}} or an
+\code{\link[shiny:actionLink]{shiny::actionLink()}} works as it is; \code{\link[=menu_item]{menu_item()}} only dresses it as a
 row. \code{Blockr.actionMenu} (in \code{blockr-ui.js}, loaded by \code{\link[=controls_dep]{controls_dep()}})
 opens the list on a click on the trigger, places it on the page body with
 \code{Blockr.place} so no panel's overflow clips it, and closes it again on a
