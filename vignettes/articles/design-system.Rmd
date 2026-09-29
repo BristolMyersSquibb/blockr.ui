@@ -681,7 +681,9 @@ selected row, the active group's front tab.
 On/off is a bare checkbox everywhere: in the gear tray, on a block's face and
 in the board options. Core's `bslib::input_switch` calls, Shiny's
 `checkboxInput`s, the pharma header switch and the on/off pills all become
-`Blockr.checkbox`; a Bootstrap `.form-check` override covers the R side.
+`Blockr.checkbox`. On the R side the theme layer does it: `theme_dep()` draws
+Shiny's `checkboxInput()` and `checkboxGroupInput()` and bslib's
+`input_switch()` as this checkbox, so R code keeps calling them.
 
 - Box: 16px, radius 4, 1px `border-strong`, `bg-surface`. Hover: border
   `text-muted`.

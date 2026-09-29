@@ -147,6 +147,104 @@ label:has(input[type="file"]) {
   color: var(--blockr-color-text-default) !important;
 }
 
+/* --- Checkboxes and switches: Bootstrap's onto the blockr checkbox ---
+   On/off is one control, the bare checkbox (design system, Controls,
+   Checkbox). Shiny's checkboxInput() and checkboxGroupInput() and bslib's
+   input_switch() draw Bootstrap's; these rules give them the checkbox's
+   look, so R code keeps calling them. Shiny puts the input inside its label
+   (.checkbox), bslib next to it (.form-check, .form-switch). The box is the
+   input itself; the check is Blockr.checkbox's path in text-on-accent,
+   written out once per scheme because a background image cannot read a
+   custom property. Radios are left alone. */
+:root .checkbox > label:has(> input[type="checkbox"]),
+:root .form-check:has(> input[type="checkbox"]) {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: var(--blockr-control-h-xs);
+  margin: 0;
+  padding-left: 0;
+  font-size: var(--blockr-font-size-base);
+  font-weight: var(--blockr-font-weight-normal);
+  color: var(--blockr-color-text-default);
+  cursor: pointer;
+}
+
+/* The checkbox's words, not a field label: the label rule above would draw
+   them 12px muted. */
+:root .form-check:has(> input[type="checkbox"]) > .form-check-label {
+  margin: 0;
+  font-size: var(--blockr-font-size-base);
+  font-weight: var(--blockr-font-weight-normal);
+  color: inherit;
+  cursor: pointer;
+}
+
+:root .checkbox > label > input[type="checkbox"],
+:root .form-check > input.form-check-input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: static;
+  float: none;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--blockr-color-border-strong);
+  border-radius: var(--blockr-radius-sm);
+  background-color: var(--blockr-color-bg-surface);
+  background-image: none;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 10px 10px;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color var(--blockr-transition),
+    border-color var(--blockr-transition);
+}
+
+:root .checkbox > label:hover > input[type="checkbox"],
+:root .form-check:hover > input.form-check-input[type="checkbox"] {
+  border-color: var(--blockr-color-text-muted);
+}
+
+:root .checkbox > label > input[type="checkbox"]:checked,
+:root .form-check > input.form-check-input[type="checkbox"]:checked {
+  border-color: var(--blockr-color-bg-accent);
+  background-color: var(--blockr-color-bg-accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0'/%3E%3C/svg%3E");
+}
+
+:root[data-bs-theme="dark"] .checkbox > label > input[type="checkbox"]:checked,
+:root[data-bs-theme="dark"] .form-check > input.form-check-input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%230e1219'%3E%3Cpath d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0'/%3E%3C/svg%3E");
+}
+
+:root .checkbox > label > input[type="checkbox"]:focus,
+:root .form-check > input.form-check-input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+:root .checkbox > label > input[type="checkbox"]:focus-visible,
+:root .form-check > input.form-check-input[type="checkbox"]:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}
+
+:root .checkbox > label > input[type="checkbox"]:disabled,
+:root .form-check > input.form-check-input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  border-color: var(--blockr-color-border-strong);
+  cursor: default;
+}
+
+:root .checkbox > label:has(> input:disabled),
+:root .form-check:has(> input:disabled) {
+  color: var(--blockr-color-text-disabled);
+  cursor: default;
+}
+
 /* --- Buttons: Bootstrap's classes onto the design system's kinds ---
    The values of blockr-buttons.css, set through Bootstrap's own button
    variables so its hover, active, focus and disabled rules draw them.

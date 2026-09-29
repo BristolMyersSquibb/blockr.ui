@@ -69,3 +69,31 @@ test_that("the theme layer hides only chrome the host cannot reach", {
     ".popover .btn-close"
   )
 })
+
+test_that("the theme draws Bootstrap's checkboxes as the blockr checkbox", {
+
+  css <- css_source("blockr-theme.css")
+
+  # Shiny puts the input inside its label, bslib next to it; both boxes are
+  # 16px at radius-sm, filled with the accent when checked.
+  for (sel in c(
+    ':root .checkbox > label > input[type="checkbox"]',
+    ':root .form-check > input.form-check-input[type="checkbox"]'
+  )) {
+    expect_match(css, sel, fixed = TRUE, info = sel)
+  }
+
+  box <- css_matches(
+    css,
+    ':root \\.checkbox > label > input\\[type="checkbox"\\],[^{]*\\{[^}]*\\}'
+  )
+  expect_length(box, 1L)
+  expect_match(box, "appearance: none", fixed = TRUE)
+  expect_match(box, "width: 16px", fixed = TRUE)
+  expect_match(box, "border-radius: var(--blockr-radius-sm)", fixed = TRUE)
+  expect_match(css, "background-color: var(--blockr-color-bg-accent)",
+               fixed = TRUE)
+
+  # Radios are not checkboxes and keep their own look.
+  expect_no_match(css, 'input[type="radio"]', fixed = TRUE)
+})
