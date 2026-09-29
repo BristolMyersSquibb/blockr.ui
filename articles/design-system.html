@@ -328,8 +328,13 @@ initial), where accent-600 falls below 4.5:1</td>
 <p>Muted is 4.8:1 on white, 4.6:1 on grey-50 and 4.4:1 on grey-100.
 Muted text therefore never sits on a hover or selected background: on a
 hovered row, meta text and icons turn default; on a selected row, they
-turn <code>text-accent-strong</code> with the rest of the row. Grey-400
-is 2.5:1 and serves disabled controls only.</p>
+turn <code>text-accent-strong</code> with the rest of the row. A status
+fill takes muted text only where it keeps 4.5:1: <code>bg-warning</code>
+(4.7:1 in light, 4.6:1 in dark on a block), which holds a required
+field’s placeholder, and <code>bg-success</code> (4.6:1 in both), with
+the dark fills at 10% for that. On <code>bg-danger</code> muted is 4.4:1
+in light, so muted text does not go there. Grey-400 is 2.5:1 and serves
+disabled controls only.</p>
 </div>
 <div class="section level3">
 <h3 id="surfaces">Surfaces<a class="anchor" aria-label="anchor" href="#surfaces"></a>
@@ -619,7 +624,8 @@ directly.</p>
 <code>bg-danger</code>, <code>-warning</code>,
 <code>-success</code>
 </td>
-<td>the same hues at 12%</td>
+<td>the same hues at 10%, which keeps a required field’s
+<code>text-muted</code> placeholder at 4.5:1 on a block</td>
 </tr>
 <tr class="odd">
 <td><code>focus-ring</code></td>
@@ -1572,9 +1578,10 @@ key operator.</p>
 <ul>
 <li>24px inside a 42px row, radius 4, 1px <code>border-default</code>,
 <code>bg-hover</code> (the tags’ fill, a step darker than the field),
-12px weight 500 <code>text-muted</code>, with the 10px chevron so it
-reads as a choice. Hover: <code>border-strong</code>,
-<code>text-default</code>.</li>
+12px weight 500 <code>text-default</code> mixed 70% with
+<code>bg-field</code> (<code>text-muted</code> is under 4.5:1 on
+<code>bg-hover</code>), with the 10px chevron so it reads as a choice.
+Hover: <code>border-strong</code>, <code>text-default</code>.</li>
 <li>A click opens <code>Blockr.Select.menu()</code> anchored on the
 pill, listing every value.</li>
 <li>The click-to-cycle pill is retired. Join type, outside a row, is a
@@ -2346,13 +2353,13 @@ pill) come from the board’s scale and are outside this rule.</li>
 Inside a field (a multi Select, a row) a tag takes
 <code>bg-hover</code>, a step darker than the field, and its name is
 13px <code>text-default</code> mixed 80% with <code>bg-field</code>, so
-the tags do not outshout the rest of the block. The crossfilter’s
-“Filter by” tags sit on the surface: <code>bg-surface</code>,
-<code>text-default</code>, and <code>bg-hover</code> while their card is
-open. The × follows <a href="#controls">Controls</a>. The accent tint on
-a tag means the value is cutting rows. The crossfilter’s “Filter by”
-pills are tags by this rule, and the read-only items in a drill receipt
-are tags without ×.</p>
+the tags do not outshout the rest of the block. A column label after the
+name is 12px, the same mix at 70%, since <code>text-muted</code> is
+under 4.5:1 on <code>bg-hover</code>. The crossfilter’s “Filter by” tags
+sit on the surface: <code>bg-surface</code>, <code>text-default</code>,
+and <code>bg-hover</code> while their card is open. The × follows <a href="#controls">Controls</a>. The accent tint on a tag means the value
+is cutting rows. The crossfilter’s “Filter by” pills are tags by this
+rule, and the read-only items in a drill receipt are tags without ×.</p>
 </div>
 <div class="section level3">
 <h3 id="pills">Pills<a class="anchor" aria-label="anchor" href="#pills"></a>
