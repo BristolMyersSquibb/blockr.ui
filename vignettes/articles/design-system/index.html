@@ -400,9 +400,6 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .marks .bar { height: 16px; background: var(--blockr-color-bg-accent); border-radius: 0 var(--blockr-mark-radius) var(--blockr-mark-radius) 0; }
 .marks .bar.sup { opacity: var(--blockr-mark-weight-supporting); }
 .marks .lab { text-align: right; }
-.fixed { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; }
-.fixed div { display: flex; align-items: center; gap: 10px; font-size: var(--blockr-font-size-sm); }
-.fixed i { width: 30px; height: 30px; border-radius: 7px; display: inline-block; flex: none; }
 .ramp { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 14px; }
 .ramp div { width: 88px; }
 .ramp .sw { height: 40px; border-radius: var(--blockr-radius-md); border: 1px solid var(--blockr-color-border-default); }
@@ -1043,19 +1040,9 @@ Chart and series colours come from blockr.theme; this page draws them in the acc
 </div>
 
 <h3 class="sh" id="categories">Block category colours</h3>
-<p class="note">Fixed, outside the tokens: one Okabe-Ito colour per category from <code>blk_color()</code> in blockr.dock. The
-same under every theme and in dark.</p>
-<div class="card"><div class="fixed">
-  <div><i style="background:#0072B2"></i>input <code class="val">#0072B2</code></div>
-  <div><i style="background:#009E73"></i>transform <code class="val">#009E73</code></div>
-  <div><i style="background:#56B4E9"></i>structured <code class="val">#56B4E9</code></div>
-  <div><i style="background:#E69F00"></i>plot <code class="val">#E69F00</code></div>
-  <div><i style="background:#CC79A7"></i>table <code class="val">#CC79A7</code></div>
-  <div><i style="background:#F0E442"></i>model <code class="val">#F0E442</code></div>
-  <div><i style="background:#D55E00"></i>output <code class="val">#D55E00</code></div>
-  <div><i style="background:#CCCCCC"></i>utility <code class="val">#CCCCCC</code></div>
-  <div><i style="background:#999999"></i>uncategorised <code class="val">#999999</code></div>
-</div></div>
+<p class="note">One Okabe-Ito token per category, read by the block's mark. A fixed set, the same under every theme and in
+dark. A category outside it takes <code>uncategorized</code>.</p>
+<div class="card"><div data-tokens="block categories"></div></div>
 </section>
 
 <!-- ================================================================ 3 BLOCK -->
@@ -1756,10 +1743,10 @@ the active line <code>bg-hover</code>, the input line a band mixed from the acce
   <div class="card">
     <h4 class="mini" style="margin-top:0">Where the code lives</h4>
     <ul class="rules" style="margin:0">
-      <li>blockr.ui owns the tokens: <code>inst/assets/css/blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>.</li>
-      <li>blockr.ui owns the shared components: badge, tag, pill and count classes, the button classes, the gear button, Blockr.Select and the one menu placement routine.</li>
-      <li>blockr.dock owns the dock header and the block category colours (<code>blk_color()</code>).</li>
-      <li>blockr.theme owns data colours (chart palettes, map markers).</li>
+      <li>Package blockr.ui owns the tokens, the block category colours among them: <code>inst/assets/css/blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>.</li>
+      <li>Package blockr.ui owns the shared components: badge, tag, pill and count classes, the button classes, the gear button, the block's mark, Blockr.Select and the one menu placement routine.</li>
+      <li>Package blockr.dock owns the dock header.</li>
+      <li>Package blockr.theme owns data colours (chart palettes, map markers).</li>
     </ul>
   </div>
 </div>

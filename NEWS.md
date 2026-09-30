@@ -1,5 +1,18 @@
 # blockr.ui (development version)
 
+* The block's mark is drawn here, in the design system's four sizes (#65).
+  In R, `block_mark()` builds it from a block's glyph and category as the
+  `.blockr-mark` class: 24px, or 32, 20 and 16px through its `--32`, `--20`
+  and `--16` modifiers, with the glyph half the mark plus 2px and the corners
+  a quarter of it. For a place that needs an image, such as the DAG's canvas,
+  `block_mark_svg()` draws the same mark as an SVG or its `data:` URI. The
+  category colours are tokens, `--blockr-category-<category>`, with the
+  spec's fixed Okabe-Ito values, and blockr.ui owns them in place of
+  blockr.dock's `blk_color()`. In R, `category_color()` reads them. A
+  `Blockr.menu` row's `mark` takes the block's `category` and draws the same
+  mark at 24px, in place of the menu's own `.blockr-menu__mark` class and its
+  `--blockr-menu-mark` property.
+
 * The warning border, `--blockr-color-border-warning`, is amber-600
   (`#d97706`) in the light scheme, a new step of the amber ramp, up from
   amber-500: a warning border, and a status dot drawn in one, now clears 3:1
