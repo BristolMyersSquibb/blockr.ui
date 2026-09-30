@@ -71,7 +71,7 @@ because a colour chosen for text is not automatically right as a fill.
 | grey | 50 100 200 300 400 500 600 700 800 900 | `#f9fafb` `#f3f4f6` `#e5e7eb` `#d1d5db` `#9ca3af` `#6b7280` `#4b5563` `#374151` `#1f2937` `#111827` |
 | blue | 50 100 500 600 700 | `#eff6ff` `#dbeafe` `#3b82f6` `#2563eb` `#1d4ed8` |
 | red | 50 100 600 700 | `#fef2f2` `#fee2e2` `#dc2626` `#b91c1c` |
-| amber | 50 100 500 700 | `#fffbeb` `#fef3c7` `#f59e0b` `#b45309` |
+| amber | 50 100 500 600 700 | `#fffbeb` `#fef3c7` `#f59e0b` `#d97706` `#b45309` |
 | green | 50 100 600 700 | `#f0fdf4` `#dcfce7` `#16a34a` `#15803d` |
 | accent | 50 100 500 600 700 | points at blue |
 
@@ -131,7 +131,7 @@ lands on grey-100.
 | `--blockr-color-border-default` | grey-200 | every border, input borders included |
 | `--blockr-color-border-strong` | grey-300 | hovered borders, stronger lines, a border drawn with a text colour |
 | `--blockr-color-border-accent` | accent-600 | focus, full-strength accent edge |
-| `--blockr-color-border-danger` / `-warning` / `-success` | red-600 / amber-500 / green-600 | status edges |
+| `--blockr-color-border-danger` / `-warning` / `-success` | red-600 / amber-600 / green-600 | status edges |
 | `--blockr-color-border-accent-subtle` | `color-mix(in srgb, var(--blockr-color-border-accent) 35%, transparent)` | the accent tint's edge |
 | `--blockr-color-border-danger-subtle` / `-success-subtle` | the status border at 35% | the edge of a status badge, a message, the destructive button |
 | `--blockr-color-border-warning-subtle` | the warning border at 45% | the same; amber is paler, so its edge is stronger |
@@ -151,7 +151,11 @@ without the edge). Hovering a selected thing keeps its look.
 
 Every status role has a text, a background and a border token: danger,
 warning, success. `error` is `danger`; there is one red. Warning's border is
-amber-500, `#f59e0b`. Blue is never a status colour, because blue means "on".
+amber-600, `#d97706`: a status border, and a status dot drawn in one, marks a
+state, so it clears 3:1 on white (WCAG 1.4.11), where amber-500 is 2.2:1.
+Amber-700, the warning text, would clear it too, but it is as dark as the red,
+and an amber dot and a red one would then differ by hue alone. Blue is never a
+status colour, because blue means "on".
 Negative numbers in a table are data, and their colour belongs to
 blockr.theme.
 
@@ -631,7 +635,7 @@ selected row, the active group's front tab.
   padding, 14px `text-default`. Placeholder `text-muted`.
 - Focus: `border-accent` and `--blockr-focus-ring`, on any focus.
 - Disabled: `text-disabled`.
-- Required and empty: `border-warning` (amber-500, `#f59e0b`), `bg-warning`
+- Required and empty: `border-warning` (amber-600, `#d97706`), `bg-warning`
   fill, and a `*` after the label. The cue clears when the field has a value.
 - Commit on Enter or blur. The ↵ button (24px square, the accent tint) is
   armed while the field is dirty. Escape reverts. See [Keyboard
@@ -837,9 +841,11 @@ icon-only button has a tooltip. Tools do not shrink with the panel.
 
 The dock header has the "…" menu, and next to it a block's own control where
 the block has one (the AI assistant's sparkle, at every width, until a global
-assistant replaces it). They are quieter than other tools: at rest their icon
-is `border-strong` grey, on hover `text-disabled` on the `bg-hover` wash, so
-the header reads as the block's name. The preview's eye stays in the header
+assistant replaces it). They look like the tools above: the title's size and
+weight make the header read as the block's name, and a quieter icon would
+fall under the 3:1 an active control needs (WCAG 1.4.11), as `text-disabled`
+(2.5:1) and `border-strong` (1.5:1) do on white.
+The preview's eye stays in the header
 too, left of the block's own control: while building, the preview is what
 gets switched most. Controls is the menu's first row, with its familiar icon
 and a check when on, then a rule, then the block's actions. The header has one size at every
@@ -1212,20 +1218,21 @@ Specified under "A pill that opens a menu" in [Controls](#controls).
 ### Block status
 
 An 8px dot on the block's mark with a 2px `bg-surface` ring, one spec for dock
-and the DAG (`block_status_style()`). Its fills are local tokens owned by
-blockr.dock, each pointing at a meaning token:
+and the DAG (`block_status_badge()`). Its fills are meaning tokens, with no
+status tokens of their own: the spec names each token next to its light
+value, which a renderer that cannot read CSS (the DAG's canvas) draws with.
 
-| Token | Points at | State |
+| State | Fill | When |
 |---|---|---|
-| `--blockr-dock-status-stale` | `text-muted` | stale |
-| `--blockr-dock-status-waiting` | `border-warning`, drawn as a hollow ring (1.5px, `bg-surface` inside) | an input is not ready: nothing linked in, or the block upstream is unset, waiting or failed |
-| `--blockr-dock-status-failed` | `border-danger` | failed |
-| `--blockr-dock-status-unset` | `border-warning` | a required input is empty; the same amber as the empty field's cue |
+| stale | `text-muted` | the inputs changed since the block last ran |
+| waiting | `border-warning`, drawn as a hollow ring (1.5px, `bg-surface` inside) | an input is not ready: nothing linked in, or the block upstream is unset, waiting or failed |
+| failed | `border-danger` | the block failed |
+| unset | `border-warning` | a required input is empty; the same amber as the empty field's cue |
 
 Unset and waiting share the amber and differ by shape: the block that needs
 you has the solid dot, and the blocks below it, which wait for it, have rings.
-`-unset` replaces the off-palette `#eab308` in blockr.dock
-`block_status_style()`.
+The amber replaces the off-palette `#eab308` blockr.dock's
+`block_status_badge()` gave unset.
 
 ### Status line and plain text
 
@@ -1554,13 +1561,14 @@ rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
 `crossfilter-block.css`), the gear button, the tool button and the action
 menu (`tool_button()`, `action_menu()`), the button classes
 (`.blockr-btn`), the chevron (`Blockr.icons.chevron`), and the column-label reader. blockr.dock owns the dock
-header, the "…" menu, the block status dot, the category colours
-(`blk_color()`), the status dot's `--blockr-dock-status-*` tokens and the
-rule that hides the gear in simplified mode. blockr.theme owns data colours.
+header, the "…" menu, the block status dot and its spec
+(`block_status_badge()`, which the DAG draws from too), the category colours
+(`blk_color()`) and the rule that hides the gear in simplified mode. blockr.theme owns data colours.
 
 The token tests in blockr.ui check that the vocabulary changes only
 deliberately, that every name follows the grammar or is a legacy alias, that
-the controls read meaning tokens only, and that consumers' fallbacks agree with
+the controls read meaning tokens only, that icons and status borders clear
+3:1 on the surface in both schemes, and that consumers' fallbacks agree with
 the tokens. Palette and legacy reads elsewhere in blockr.ui change only
 deliberately too. To do: warn on every palette or legacy read in the packages
 that consume the tokens.

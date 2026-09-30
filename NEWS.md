@@ -1,5 +1,11 @@
 # blockr.ui (development version)
 
+* The warning border, `--blockr-color-border-warning`, is amber-600
+  (`#d97706`) in the light scheme, a new step of the amber ramp, up from
+  amber-500: a warning border, and a status dot drawn in one, now clears 3:1
+  on white (WCAG 1.4.11). A test holds icons and status borders to 3:1 on the
+  surface in both schemes.
+
 * Escape and a click outside go through one dismiss stack, `Blockr.layer()`
   (#49). Every control that opens something registers it as a layer: the
   Select's list and its expanded tags, the code field's completions, both
