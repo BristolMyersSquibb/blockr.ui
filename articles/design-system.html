@@ -552,9 +552,9 @@ nothing</td>
 <p>The ring alone is 1.2:1 on white and does not show on a frameless
 tool; the outline is 5.2:1. The 2px offset keeps it off the gear’s frame
 and a selected segment’s tint. The keyboard row in a menu is not focus
-(focus stays in the filter box) and keeps the hover look. The ring is
-written as a literal, so a theme that changes the accent restates it.
-The 0.45 ring in blockr.viz and blockr.ggplot
+(focus stays in the filter box or on the list) and keeps the hover look.
+The ring is written as a literal, so a theme that changes the accent
+restates it. The 0.45 ring in blockr.viz and blockr.ggplot
 (<code>--blockr-color-focus</code>) goes.</p>
 </div>
 <div class="section level3">
@@ -2052,6 +2052,42 @@ blockr.ui hold its stylesheets to these two forms and the layers to
 Bootstrap’s values.</p>
 </div>
 <div class="section level3">
+<h3 id="dismissing">Dismissing<a class="anchor" aria-label="anchor" href="#dismissing"></a>
+</h3>
+<p>Anything that can be dismissed is a layer: a menu, a tooltip, the
+gear tray, a side panel, and a field holding an edit not yet committed.
+Layers stack in the order they opened. One listener on the page decides
+what Escape and an outside click close; a control does not stop the
+event itself.</p>
+<ul>
+<li>
+<strong>Escape</strong> acts on the top layer only. A second press
+acts on the next one. Escape never commits: a dirty field reverts, a
+title being renamed restores, a menu closes and returns focus to its
+trigger.</li>
+<li>
+<strong>An outside click</strong> (outside the layer and everything
+opened from it) closes menus and tooltips, and commits a dirty field, as
+blur does. It leaves the gear tray and a pinned side panel open.</li>
+<li>
+<strong>The gear tray</strong> closes by its gear and by Escape. It
+is in the page, not over it, so Escape closes the tray that holds focus;
+several trays can be open at once.</li>
+<li>
+<strong>A side panel</strong> floats until it is pinned. Unpinned,
+Escape and an outside click close it. Pinned, it is part of the page,
+and only its close button closes it.</li>
+</ul>
+<p>The stack is <code>Blockr.layer</code> (blockr-ui.js). It reads
+Escape and the pointer before anything else on the page does, so a menu
+over a modal, or a field in a side panel, takes the key before the modal
+or the panel sees it. A click is read on pointerdown: it lands in the
+topmost layer it hits, a layer’s trigger counting as part of it, and
+closes the layers opened after that one. A tooltip is a layer too, so
+while one shows, the next Escape hides it and leaves the layer under it
+open.</p>
+</div>
+<div class="section level3">
 <h3 id="menus">Menus<a class="anchor" aria-label="anchor" href="#menus"></a>
 </h3>
 <p>Every menu, dropdown and list that floats uses one surface:</p>
@@ -2194,10 +2230,15 @@ names only the value.</p>
 with a count row that asks you to type; server-searched lists say how
 many values there are. Empty and loading rows are centred, italic,
 <code>text-muted</code> (“No matches”, “No options”, “Loading…”).</p>
-<p><strong>Behaviour.</strong> Arrows move, Enter picks, typing filters.
-Escape closes and returns focus to the trigger; Tab and an outside click
-close. A pick closes the menu; a multi pick keeps it open and keeps the
-filter text.</p>
+<p><strong>Behaviour.</strong> The focus stays in the filter box or on
+the list, and the keyboard row is its active descendant, in a list of
+values and a menu of actions alike. Arrows move the row, Enter picks,
+typing filters. In a menu of actions the pointer moves the same row,
+Home and End jump, and Space picks too; opened from the keyboard, the
+menu starts on its first row, and the down arrow on its trigger opens
+it. Escape closes and returns focus to the trigger; Tab and an outside
+click close. A pick closes the menu; a multi pick keeps it open and
+keeps the filter text.</p>
 </div>
 <div class="section level3">
 <h3 id="the-blocks-menu">The block’s “…” menu<a class="anchor" aria-label="anchor" href="#the-blocks-menu"></a>
@@ -2907,6 +2948,11 @@ actions through <code>Blockr.menu</code> or <code><a href="../reference/action_m
 all placed by the shared routine. No popovers. Tooltips only where the
 Tooltips section gives one, using the light card; no native
 <code>title</code>.</label></li>
+<li><label><input type="checkbox">Anything Escape or a click outside
+closes is a layer on <code>Blockr.layer</code>, added when it opens and
+removed when it closes. No document listeners for Escape or outside
+clicks, and no <code>stopPropagation()</code> to keep a key from what
+lies around it.</label></li>
 <li><label><input type="checkbox">Badges are capsules and neutral
 unless they state status or “on”.</label></li>
 <li><label><input type="checkbox">Columns: the name with its label as
