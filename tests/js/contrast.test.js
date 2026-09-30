@@ -221,13 +221,13 @@ const states = {
 
   'an action menu open on a keyboard row with an icon and meta': async (page) => {
     await actionMenu(page);
-    await shows(page, '.blockr-menu__item:focus .blockr-menu__meta');
+    await shows(page, '.blockr-menu__item--active .blockr-menu__meta');
   },
 
   'an action menu open on its destructive row': async (page) => {
     await actionMenu(page);
     await page.keyboard.press('ArrowDown');
-    await shows(page, '.blockr-menu__item--danger:focus');
+    await shows(page, '.blockr-menu__item--danger.blockr-menu__item--active');
   },
 
   'a menu with every kind of row, on a keyboard row with meta': async (page) => {

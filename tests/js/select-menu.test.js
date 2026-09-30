@@ -177,28 +177,34 @@ test('a pick reports the value and takes the menu away', (newWindow) => {
   });
 });
 
-test('a click on the anchor is the caller\'s toggle, not an outside click', (newWindow) => {
+/* A click as a browser delivers it: the pointerdown, which the dismiss stack
+ * reads as landing inside a layer or outside it, then the click. */
+const click = (win, el) => {
+  el.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+  el.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+};
+const tick = (win) => new Promise((resolve) => win.setTimeout(resolve, 0));
+
+test('a click on the anchor is the caller\'s toggle, not an outside click', async (newWindow) => {
   const win = newWindow();
   const anchor = anchorIn(win);
   let closed = 0;
   const m = win.Blockr.Select.menu(anchor, {
     options: COLS, selected: 'AVAL', onClose: () => { closed++; }
   });
-  anchor.dispatchEvent(new win.Event('click', { bubbles: true }));
+  click(win, anchor);
+  // Teardown is deferred by a tick, as above.
+  await tick(win);
   assert.strictEqual(closed, 0, 'the menu stays: closing here would have it reopen on the same click');
   assert.ok(dropdown(win), 'and it is still on screen');
-  // Anywhere else does close it. Teardown is deferred by a tick, as above.
+  // Anywhere else does close it.
   const elsewhere = win.document.createElement('div');
   win.document.body.appendChild(elsewhere);
-  elsewhere.dispatchEvent(new win.Event('click', { bubbles: true }));
-  return new Promise((resolve) => {
-    win.setTimeout(() => {
-      assert.strictEqual(closed, 1);
-      m.close();
-      win.close();
-      resolve();
-    }, 0);
-  });
+  click(win, elsewhere);
+  await tick(win);
+  assert.strictEqual(closed, 1);
+  m.close();
+  win.close();
 });
 
 /* --- multi mode -----------------------------------------------------------
