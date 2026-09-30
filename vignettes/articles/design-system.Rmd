@@ -167,9 +167,9 @@ Two styles:
 The ring alone is 1.2:1 on white and does not show on a frameless tool; the
 outline is 5.2:1. The 2px offset keeps it off the gear's frame and a selected
 segment's tint. The keyboard row in a menu is not focus (focus stays in the
-filter box) and keeps the hover look. The ring is written as a literal, so a
-theme that changes the accent restates it. The 0.45 ring in blockr.viz and
-blockr.ggplot (`--blockr-color-focus`) goes.
+filter box or on the list) and keeps the hover look. The ring is written as a
+literal, so a theme that changes the accent restates it. The 0.45 ring in
+blockr.viz and blockr.ggplot (`--blockr-color-focus`) goes.
 
 ### Dark scheme
 
@@ -1082,9 +1082,14 @@ asks you to type; server-searched lists say how many values there are. Empty
 and loading rows are centred, italic, `text-muted` ("No matches", "No
 options", "Loading…").
 
-**Behaviour.** Arrows move, Enter picks, typing filters. Escape closes and
-returns focus to the trigger; Tab and an outside click close. A pick closes
-the menu; a multi pick keeps it open and keeps the filter text.
+**Behaviour.** The focus stays in the filter box or on the list, and the
+keyboard row is its active descendant, in a list of values and a menu of
+actions alike. Arrows move the row, Enter picks, typing filters. In a menu of
+actions the pointer moves the same row, Home and End jump, and Space picks
+too; opened from the keyboard, the menu starts on its first row, and the down
+arrow on its trigger opens it. Escape closes and returns focus to the
+trigger; Tab and an outside click close. A pick closes the menu; a multi pick
+keeps it open and keeps the filter text.
 
 ### The block's "…" menu
 

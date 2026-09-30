@@ -75,8 +75,17 @@ test('the menus pass axe while open, with a head, a filter and every kind of row
   const doc = win.document;
   doc.documentElement.lang = 'en';
   doc.title = 'Menus';
+  win.eval(axe);
+  const violations = async () => {
+    const res = await win.axe.run(win.document, {
+      runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] },
+      rules: { 'color-contrast': { enabled: false } }
+    });
+    return Array.from(res.violations, (v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
+  };
 
-  // The markup action_menu() renders in R, opened from its trigger.
+  // The markup action_menu() renders in R, opened from the keyboard, so its
+  // first row is the list's active descendant.
   const host = doc.createElement('div');
   host.innerHTML = `
     <span class="blockr-action-menu" data-align="end">
@@ -94,9 +103,12 @@ test('the menus pass axe while open, with a head, a filter and every kind of row
     </span>`;
   doc.body.appendChild(host);
   host.querySelector('.blockr-action-menu__trigger')
-    .dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+    .dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 }));
+  assert.ok(doc.querySelector('body > .blockr-menu[aria-activedescendant]'), 'open, on its first row');
+  assert.deepStrictEqual(await violations(), []);
 
-  // Blockr.menu with every part a caller can ask for.
+  // Blockr.menu with every part a caller can ask for. Opening it closes the
+  // action menu: one menu is open at a time.
   const views = doc.createElement('button');
   views.textContent = 'Views';
   doc.body.appendChild(views);
@@ -118,16 +130,8 @@ test('the menus pass axe while open, with a head, a filter and every kind of row
   doc.querySelector('.blockr-menu__filter-input')
     .dispatchEvent(new win.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
 
-  assert.strictEqual(doc.querySelectorAll('body > .blockr-menu').length, 2, 'both open');
-  win.eval(axe);
-  const { violations } = await win.axe.run(win.document, {
-    runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] },
-    rules: { 'color-contrast': { enabled: false } }
-  });
-  assert.deepStrictEqual(
-    Array.from(violations, (v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
-    []
-  );
+  assert.strictEqual(doc.querySelectorAll('body > .blockr-menu').length, 1, 'one menu open');
+  assert.deepStrictEqual(await violations(), []);
   win.close();
 });
 

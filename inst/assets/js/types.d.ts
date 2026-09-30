@@ -334,6 +334,28 @@ interface BlockrMenu {
   bind(trigger: HTMLElement, config: BlockrMenuConfig | (() => BlockrMenuConfig)): void;
 }
 
+/** What drives an open menu of actions, of either kind (blockr-ui.js). */
+interface BlockrMenuDrive {
+  /** The floating surface, on <body> already. */
+  panel: HTMLElement;
+  /** Holds the rows and carries the menu role: the panel itself for markup from R. */
+  list: HTMLElement;
+  /** Takes the focus: the filter box, else the list. */
+  focus?: HTMLElement;
+  /** The trigger. */
+  anchor: HTMLElement;
+  width: { min: number; max: number };
+  align: 'start' | 'end';
+  /** Opened from the keyboard: the first row is the keyboard row. */
+  byKeyboard?: boolean;
+  /** A click on a usable row, by the pointer or by Enter and Space. */
+  onPick(row: HTMLElement, e: MouseEvent): void;
+  /** Takes the panel down once the menu has closed. */
+  detach(): void;
+  /** Runs last, once, whichever way the menu closed. */
+  onClose?: () => void;
+}
+
 /* --- Blockr.actionMenu (blockr-ui.js) --- */
 
 /** The document-level controller of the menus action_menu() builds in R. */

@@ -163,6 +163,23 @@ test('bind() opens on click, closes on a second click, reads a function config',
   win.close();
 });
 
+test('bind(): a click from the keyboard opens on the first row, one from the pointer on none', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu.bind(t, { items: [{ label: 'One' }, { label: 'Two' }] });
+  // A click the keyboard made (Enter or Space on the button) has detail 0.
+  const click = (detail) =>
+    t.dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true, detail }));
+  const list = () => panel(win).querySelector('[role="menu"]');
+  click(1);
+  assert.strictEqual(list().getAttribute('aria-activedescendant'), null);
+  click(1);
+  click(0);
+  const one = panel(win).querySelector('.blockr-menu__item');
+  assert.strictEqual(list().getAttribute('aria-activedescendant'), one.id);
+  win.close();
+});
+
 test('opening a second menu closes the first', (newWindow) => {
   const win = newWindow();
   const a = trigger(win);
