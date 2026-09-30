@@ -241,10 +241,10 @@ chosen for text is not automatically right as a fill.</p>
 </tr>
 <tr class="even">
 <td>amber</td>
-<td>50 100 500 700</td>
+<td>50 100 500 600 700</td>
 <td>
 <code>#fffbeb</code> <code>#fef3c7</code> <code>#f59e0b</code>
-<code>#b45309</code>
+<code>#d97706</code> <code>#b45309</code>
 </td>
 </tr>
 <tr class="odd">
@@ -466,7 +466,7 @@ colour</td>
 <code>--blockr-color-border-danger</code> / <code>-warning</code> /
 <code>-success</code>
 </td>
-<td>red-600 / amber-500 / green-600</td>
+<td>red-600 / amber-600 / green-600</td>
 <td>status edges</td>
 </tr>
 <tr class="odd">
@@ -506,9 +506,13 @@ without the edge). Hovering a selected thing keeps its look.</p>
 </h3>
 <p>Every status role has a text, a background and a border token:
 danger, warning, success. <code>error</code> is <code>danger</code>;
-there is one red. Warning’s border is amber-500, <code>#f59e0b</code>.
-Blue is never a status colour, because blue means “on”. Negative numbers
-in a table are data, and their colour belongs to blockr.theme.</p>
+there is one red. Warning’s border is amber-600, <code>#d97706</code>: a
+status border, and a status dot drawn in one, marks a state, so it
+clears 3:1 on white (WCAG 1.4.11), where amber-500 is 2.2:1. Amber-700,
+the warning text, would clear it too, but it is as dark as the red, and
+an amber dot and a red one would then differ by hue alone. Blue is never
+a status colour, because blue means “on”. Negative numbers in a table
+are data, and their colour belongs to blockr.theme.</p>
 </div>
 <div class="section level3">
 <h3 id="focus">Focus<a class="anchor" aria-label="anchor" href="#focus"></a>
@@ -1468,8 +1472,8 @@ the open gear, a selected row, the active group’s front tab.</p>
 <li>Focus: <code>border-accent</code> and
 <code>--blockr-focus-ring</code>, on any focus.</li>
 <li>Disabled: <code>text-disabled</code>.</li>
-<li>Required and empty: <code>border-warning</code> (amber-500,
-<code>#f59e0b</code>), <code>bg-warning</code> fill, and a
+<li>Required and empty: <code>border-warning</code> (amber-600,
+<code>#d97706</code>), <code>bg-warning</code> fill, and a
 <code>*</code> after the label. The cue clears when the field has a
 value.</li>
 <li>Commit on Enter or blur. The ↵ button (24px square, the accent tint)
@@ -1809,17 +1813,18 @@ radius 4, bare, icon <code>text-muted</code>. Hover:
 button has a tooltip. Tools do not shrink with the panel.</p>
 <p>The dock header has the “…” menu, and next to it a block’s own
 control where the block has one (the AI assistant’s sparkle, at every
-width, until a global assistant replaces it). They are quieter than
-other tools: at rest their icon is <code>border-strong</code> grey, on
-hover <code>text-disabled</code> on the <code>bg-hover</code> wash, so
-the header reads as the block’s name. The preview’s eye stays in the
-header too, left of the block’s own control: while building, the preview
-is what gets switched most. Controls is the menu’s first row, with its
-familiar icon and a check when on, then a rule, then the block’s
-actions. The header has one size at every card width, or the compact one
-when the board asks for it. The accent tint’s fill and frame are for the
-builder/code switch, which changes how a value is edited rather than
-what is shown.</p>
+width, until a global assistant replaces it). They look like the tools
+above: the title’s size and weight make the header read as the block’s
+name, and a quieter icon would fall under the 3:1 an active control
+needs (WCAG 1.4.11), as <code>text-disabled</code> (2.5:1) and
+<code>border-strong</code> (1.5:1) do on white. The preview’s eye stays
+in the header too, left of the block’s own control: while building, the
+preview is what gets switched most. Controls is the menu’s first row,
+with its familiar icon and a check when on, then a rule, then the
+block’s actions. The header has one size at every card width, or the
+compact one when the board asks for it. The accent tint’s fill and frame
+are for the builder/code switch, which changes how a value is edited
+rather than what is shown.</p>
 </div>
 <div class="section level3">
 <h3 id="the-gear-button">The gear button<a class="anchor" aria-label="anchor" href="#the-gear-button"></a>
@@ -2438,9 +2443,10 @@ count of filters: see the rule under <a href="#messages">Messages</a>.</li>
 <h3 id="block-status">Block status<a class="anchor" aria-label="anchor" href="#block-status"></a>
 </h3>
 <p>An 8px dot on the block’s mark with a 2px <code>bg-surface</code>
-ring, one spec for dock and the DAG (<code>block_status_style()</code>).
-Its fills are local tokens owned by blockr.dock, each pointing at a
-meaning token:</p>
+ring, one spec for dock and the DAG (<code>block_status_badge()</code>).
+Its fills are meaning tokens, with no status tokens of their own: the
+spec names each token next to its light value, which a renderer that
+cannot read CSS (the DAG’s canvas) draws with.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -2448,18 +2454,18 @@ meaning token:</p>
 <col width="33%">
 </colgroup>
 <thead><tr class="header">
-<th>Token</th>
-<th>Points at</th>
 <th>State</th>
+<th>Fill</th>
+<th>When</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code>--blockr-dock-status-stale</code></td>
-<td><code>text-muted</code></td>
 <td>stale</td>
+<td><code>text-muted</code></td>
+<td>the inputs changed since the block last ran</td>
 </tr>
 <tr class="even">
-<td><code>--blockr-dock-status-waiting</code></td>
+<td>waiting</td>
 <td>
 <code>border-warning</code>, drawn as a hollow ring (1.5px,
 <code>bg-surface</code> inside)</td>
@@ -2467,12 +2473,12 @@ meaning token:</p>
 unset, waiting or failed</td>
 </tr>
 <tr class="odd">
-<td><code>--blockr-dock-status-failed</code></td>
-<td><code>border-danger</code></td>
 <td>failed</td>
+<td><code>border-danger</code></td>
+<td>the block failed</td>
 </tr>
 <tr class="even">
-<td><code>--blockr-dock-status-unset</code></td>
+<td>unset</td>
 <td><code>border-warning</code></td>
 <td>a required input is empty; the same amber as the empty field’s
 cue</td>
@@ -2481,9 +2487,8 @@ cue</td>
 </table>
 <p>Unset and waiting share the amber and differ by shape: the block that
 needs you has the solid dot, and the blocks below it, which wait for it,
-have rings. <code>-unset</code> replaces the off-palette
-<code>#eab308</code> in blockr.dock
-<code>block_status_style()</code>.</p>
+have rings. The amber replaces the off-palette <code>#eab308</code>
+blockr.dock’s <code>block_status_badge()</code> gave unset.</p>
 </div>
 <div class="section level3">
 <h3 id="status-line-and-plain-text">Status line and plain text<a class="anchor" aria-label="anchor" href="#status-line-and-plain-text"></a>
@@ -2986,13 +2991,14 @@ and the action menu (<code><a href="../reference/tool_button.html">tool_button()
 <code><a href="../reference/action_menu.html">action_menu()</a></code>), the button classes
 (<code>.blockr-btn</code>), the chevron
 (<code>Blockr.icons.chevron</code>), and the column-label reader.
-blockr.dock owns the dock header, the “…” menu, the block status dot,
-the category colours (<code>blk_color()</code>), the status dot’s
-<code>--blockr-dock-status-*</code> tokens and the rule that hides the
-gear in simplified mode. blockr.theme owns data colours.</p>
+blockr.dock owns the dock header, the “…” menu, the block status dot and
+its spec (<code>block_status_badge()</code>, which the DAG draws from
+too), the category colours (<code>blk_color()</code>) and the rule that
+hides the gear in simplified mode. blockr.theme owns data colours.</p>
 <p>The token tests in blockr.ui check that the vocabulary changes only
 deliberately, that every name follows the grammar or is a legacy alias,
-that the controls read meaning tokens only, and that consumers’
+that the controls read meaning tokens only, that icons and status
+borders clear 3:1 on the surface in both schemes, and that consumers’
 fallbacks agree with the tokens. Palette and legacy reads elsewhere in
 blockr.ui change only deliberately too. To do: warn on every palette or
 legacy read in the packages that consume the tokens.</p>
