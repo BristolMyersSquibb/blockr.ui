@@ -260,13 +260,13 @@
   height: 24px;
   box-sizing: border-box;
   padding: 0 3px 0 8px;
-  /* The surface fill, with the name in the default text colour (design
-     system, Tags). */
-  background: var(--blockr-color-bg-surface);
+  /* A step darker than the field it sits in, with a softer name
+     (design system, Tags). */
+  background: var(--blockr-color-bg-hover);
   border: 1px solid var(--blockr-color-border-default);
   border-radius: var(--blockr-radius-sm);
   font-size: var(--blockr-font-size-sm);
-  color: var(--blockr-color-text-default);
+  color: color-mix(in srgb, var(--blockr-color-text-default) 80%, var(--blockr-color-bg-field));
   cursor: default;
   user-select: none;
   /* Cap at the control width, not a fixed size: a tag only ellipsizes when
@@ -317,8 +317,10 @@
 }
 
 /* A column label inside a tag is 12px meta, 8px after the name like
-   everywhere else. */
+   everywhere else. Muted is under 4.5:1 on the tag's bg-hover, so it takes
+   the name's mix at 70%, a step softer than the name. */
 .blockr-select__tag .blockr-select__opt-label {
+  color: color-mix(in srgb, var(--blockr-color-text-default) 70%, var(--blockr-color-bg-field));
   font-size: var(--blockr-font-size-xs);
   margin-left: 8px;
 }
