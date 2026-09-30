@@ -26,3 +26,33 @@ test_that("text on the accent tint is text-accent-strong", {
     character()
   )
 })
+
+test_that("icons and status borders clear 3:1 on the surface", {
+
+  # What marks a control or its state (an icon, a status border, the status
+  # dot drawn in one) needs 3:1 against the surface (WCAG 1.4.11), which the
+  # Chrome check's axe does not cover. The disabled colour is exempt, as it is
+  # for text.
+  marks <- paste0(
+    "--blockr-color-",
+    c(
+      "text-muted", "text-default", "border-accent",
+      "border-danger", "border-warning", "border-success"
+    )
+  )
+
+  for (scheme in c("light", "dark")) {
+
+    tokens <- blockr_tokens(scheme)
+    ratios <- blockr.core::dbl_ply(
+      tokens[marks],
+      contrast_ratio,
+      tokens[["--blockr-color-bg-surface"]]
+    )
+
+    expect_identical(
+      sprintf("%s %s: %.2f:1", scheme, marks, ratios)[ratios < 3],
+      character()
+    )
+  }
+})

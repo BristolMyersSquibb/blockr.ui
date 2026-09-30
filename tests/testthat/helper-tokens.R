@@ -245,6 +245,30 @@ expand_hex <- function(hex) {
   tolower(hex)
 }
 
+# WCAG 2's contrast ratio of two opaque hex colours.
+contrast_ratio <- function(colour, background) {
+
+  luminance <- blockr.core::dbl_ply(c(colour, background), relative_luminance)
+
+  (max(luminance) + 0.05) / (min(luminance) + 0.05)
+}
+
+relative_luminance <- function(hex) {
+
+  channel <- strtoi(
+    substring(expand_hex(hex), c(2L, 4L, 6L), c(3L, 5L, 7L)),
+    16L
+  ) / 255
+
+  linear <- ifelse(
+    channel <= 0.04045,
+    channel / 12.92,
+    ((channel + 0.055) / 1.055)^2.4
+  )
+
+  sum(c(0.2126, 0.7152, 0.0722) * linear)
+}
+
 # The selectors a stylesheet styles, one per comma-separated part, with the
 # rules inside an at-rule read like any other.
 css_selectors <- function(file) {

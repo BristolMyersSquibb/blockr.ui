@@ -1,5 +1,11 @@
 # blockr.ui (development version)
 
+* The warning border, `--blockr-color-border-warning`, is amber-600
+  (`#d97706`) in the light scheme, a new step of the amber ramp, up from
+  amber-500: a warning border, and a status dot drawn in one, now clears 3:1
+  on white (WCAG 1.4.11). A test holds icons and status borders to 3:1 on the
+  surface in both schemes.
+
 * The design system's menu of actions, `Blockr.menu()`, joins
   `controls_dep()`: rows with an icon, label and meta text, dividers, group
   titles, a head (a name with a badge and a line of text), current, disabled

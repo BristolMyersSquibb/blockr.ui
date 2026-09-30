@@ -49,6 +49,7 @@
   --blockr-amber-50: #fffbeb;
   --blockr-amber-100: #fef3c7;
   --blockr-amber-500: #f59e0b;
+  --blockr-amber-600: #d97706;
   --blockr-amber-700: #b45309;
 
   --blockr-green-50: #f0fdf4;
@@ -115,7 +116,7 @@
   --blockr-color-border-strong: var(--blockr-grey-300);
   --blockr-color-border-accent: var(--blockr-accent-600);
   --blockr-color-border-danger: var(--blockr-red-600);
-  --blockr-color-border-warning: var(--blockr-amber-500);
+  --blockr-color-border-warning: var(--blockr-amber-600);
   --blockr-color-border-success: var(--blockr-green-600);
 
   /* ------------------------------------------------------------ tints */
