@@ -7,7 +7,8 @@
   of `blockr-ui.js`, so a page that loads that file on its own, as a test
   harness might, has none. Every icon is hidden from screen readers, and
   the plus is a 1.25px stroke now, as blockr.dock's views menu draws it, in
-  place of Bootstrap's filled path.
+  place of Bootstrap's filled path. The set gains `grip`, the drag handle
+  of that menu's page rows.
 
 * The warning border, `--blockr-color-border-warning`, is amber-600
   (`#d97706`) in the light scheme, a new step of the amber ramp, up from

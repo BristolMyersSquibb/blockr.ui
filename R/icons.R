@@ -1,7 +1,7 @@
 #' @param name The icon: `"chevron"`, `"remove"` (a tag's x, 10px), `"x"` (a
-#'   row's remove button, 14px), `"plus"`, `"trash"`, `"sliders"`, `"check"`
-#'   (a menu's current item), `"confirm"` (a committed field, a picked
-#'   option), `"code"` or `"gear"`.
+#'   row's remove button, 14px), `"grip"` (a drag handle), `"plus"`,
+#'   `"trash"`, `"sliders"`, `"check"` (a menu's current item), `"confirm"`
+#'   (a committed field, a picked option), `"code"` or `"gear"`.
 #'
 #' @return For `small_icon()`, the icon's `<svg>` element, as
 #'   [htmltools::HTML()].
@@ -53,6 +53,18 @@ icon_set <- c(
     'aria-hidden="true">',
     '<line x1="3.5" y1="3.5" x2="10.5" y2="10.5"></line>',
     '<line x1="10.5" y1="3.5" x2="3.5" y2="10.5"></line></svg>'
+  ),
+  # A drag handle: six small dots, as the page rows of blockr.dock's views
+  # menu draw it.
+  grip = paste0(
+    '<svg width="8" height="12" viewBox="0 0 8 12" fill="currentColor" ',
+    'aria-hidden="true">',
+    '<circle cx="2" cy="2" r="1"></circle>',
+    '<circle cx="6" cy="2" r="1"></circle>',
+    '<circle cx="2" cy="6" r="1"></circle>',
+    '<circle cx="6" cy="6" r="1"></circle>',
+    '<circle cx="2" cy="10" r="1"></circle>',
+    '<circle cx="6" cy="10" r="1"></circle></svg>'
   ),
   # The plus of an add button ("Add condition", "New page"): a stroke, as the
   # design page draws it, at the menu icons' 1.25, so it matches the sliders
