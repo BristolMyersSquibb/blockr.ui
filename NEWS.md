@@ -1,5 +1,12 @@
 # blockr.ui (development version)
 
+* The new `small_icon()` draws the design system's small icons in markup
+  built in R (#64), from the list `Blockr.icons` is now built from:
+  `controls_dep()` writes the list into the page ahead of `blockr-ui.js`,
+  so R and JavaScript draw one copy of each. The icons are no longer part
+  of `blockr-ui.js`, so a page that loads that file on its own, as a test
+  harness might, has none. Every icon is hidden from screen readers.
+
 * The warning border, `--blockr-color-border-warning`, is amber-600
   (`#d97706`) in the light scheme, a new step of the amber ramp, up from
   amber-500: a warning border, and a status dot drawn in one, now clears 3:1
