@@ -3,7 +3,8 @@
  * Blockr.Input — lightweight code input with autocomplete
  *
  * Replaces ACE editor in blockr blocks.
- * Depends on blockr-ui.js (Blockr.uid, Blockr.removeNode, Blockr.place).
+ * Depends on blockr-ui.js (Blockr.uid, Blockr.removeNode, Blockr.place,
+ * Blockr.layer).
  *
  * API:
  *   Blockr.Input.create(container, config) -> { el, getValue, setValue, setColumns, focus, destroy }
@@ -102,6 +103,8 @@
     // shrinks as typing narrows it.
     /** @type {BlockrPlaceHandle | null} */
     let placement = null;
+    /** @type {BlockrLayerHandle | null} */
+    let layer = null;
 
     // --- Completion list building ---
 
@@ -222,9 +225,10 @@
       root.classList.add('blockr-input--popup-open');
       if (!multiline) field.setAttribute('aria-expanded', 'true');
       placement = Blockr.place(popup, root, { gap: 2 });
-      // Only while open: a listener per field for the whole life of the page
-      // would hold the field and its block after they leave it.
-      document.addEventListener('click', onDocumentClick, true);
+      // The open list is a layer (Blockr.layer): Escape closes it, so the
+      // gear tray the field sits in stays open, and so does a click outside
+      // the list and the field.
+      layer = Blockr.layer(popup, { from: root, escape: closePopup, outside: closePopup });
     };
 
     const closePopup = () => {
@@ -232,7 +236,7 @@
       popupOpen = false;
 
       if (placement) { placement.stop(); placement = null; }
-      document.removeEventListener('click', onDocumentClick, true);
+      if (layer) { layer.remove(); layer = null; }
 
       popup.style.display = '';
       root.classList.remove('blockr-input--popup-open');
@@ -300,14 +304,6 @@
             e.preventDefault();
             acceptCompletion(highlightIdx);
             break;
-          case 'Escape':
-            // An open list owns this Escape, as an open Blockr.Select's does:
-            // it closes and the key goes no further, so the gear tray the
-            // field sits in stays open.
-            e.preventDefault();
-            e.stopPropagation();
-            closePopup();
-            break;
         }
       } else {
         if (e.key === 'Enter' && !multiline) {
@@ -328,12 +324,6 @@
           field.focus();
         }
       }
-    };
-
-    /** @param {MouseEvent} e */
-    const onDocumentClick = (e) => {
-      if (root.contains(/** @type {Node | null} */ (e.target)) || popup.contains(/** @type {Node | null} */ (e.target))) return;
-      closePopup();
     };
 
     const onFieldBlur = () => {

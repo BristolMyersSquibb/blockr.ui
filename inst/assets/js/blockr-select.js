@@ -17,7 +17,7 @@
  * blockr.extra reads .blockr-select__value) and several style it, so the
  * class names are part of that surface.
  *
- * Depends on: blockr-ui.js (Blockr.uid, icons, removeNode, place).
+ * Depends on: blockr-ui.js (Blockr.uid, icons, removeNode, place, layer).
  */
 (() => {
   'use strict';
@@ -521,7 +521,7 @@
         ?.scrollIntoView({ block: 'nearest' });
     };
 
-    // --- Placement and the document click ----------------------------------
+    // --- Placement and dismissing ------------------------------------------
 
     // The list lives on <body> while open so it escapes any clipping or
     // stacking-context ancestor (dock panels, offcanvas, modals; see
@@ -529,29 +529,12 @@
     // the control, or under the caller's anchor when there is no control.
     /** @type {BlockrPlaceHandle | null} */
     let placed = null;
-
-    /** @param {MouseEvent} e */
-    const onDocClick = (e) => {
-      const t = /** @type {Node | null} */ (e.target);
-      if (root.contains(t) || list.contains(t)) return;
-      // The anchor is not outside: a click on it is the caller's toggle, and
-      // closing here first would have it re-open on the same click.
-      if (anchor && anchor.contains(t)) return;
-      collapse();
-      close();
-    };
-    // One listener, only while there is something for an outside click to
-    // do. Capture phase, because a pick re-renders the list in the bubble
-    // phase and detaches the clicked row: by the time a bubble-phase
-    // document listener ran, the target would be outside everything.
-    let listening = false;
-    const syncDocClick = () => {
-      const want = st.open || st.expanded;
-      if (want === listening) return;
-      listening = want;
-      if (want) document.addEventListener('click', onDocClick, true);
-      else document.removeEventListener('click', onDocClick, true);
-    };
+    // The open list and the expanded tags are layers (Blockr.layer), each on
+    // the stack while it lasts.
+    /** @type {BlockrLayerHandle | null} */
+    let listLayer = null;
+    /** @type {BlockrLayerHandle | null} */
+    let tagsLayer = null;
 
     // --- Open, close, pick -------------------------------------------------
 
@@ -580,7 +563,11 @@
         reanchor: typeof config.reanchor === 'function' ? config.reanchor : undefined,
         onFlip: (above) => root.classList.toggle('blockr-select--above', above)
       });
-      syncDocClick();
+      // Escape closes the list and leaves the focus on the input, the
+      // combobox (a menu hands it back to its anchor when it tears down). A
+      // click outside the list and the control closes it too; a menu's
+      // anchor is not outside, as its click is the caller's toggle.
+      listLayer = Blockr.layer(list, { from: anchor || root, escape: close, outside: close });
       // The pick may be far down a long column list.
       showHighlight();
       input.focus();
@@ -594,8 +581,8 @@
       input.value = '';
       st.keyboard = false;
       if (placed) { placed.stop(); placed = null; }
+      if (listLayer) { listLayer.remove(); listLayer = null; }
       root.classList.remove('blockr-select--above');
-      syncDocClick();
       render();
       // Last, with the DOM settled: a menu tears the whole widget down from
       // here.
@@ -636,10 +623,20 @@
       emit();
     };
 
+    // Expanded, the control shows every tag until a click lands outside it.
+    // It is in the page, so an Escape collapses it only from inside the
+    // control.
+    const expand = () => {
+      if (st.expanded) return;
+      st.expanded = true;
+      tagsLayer = Blockr.layer(root, { inPage: true, escape: collapse, outside: collapse });
+      render();
+    };
+
     const collapse = () => {
       if (!st.expanded) return;
       st.expanded = false;
-      syncDocClick();
+      if (tagsLayer) { tagsLayer.remove(); tagsLayer = null; }
       render();
     };
 
@@ -660,9 +657,7 @@
       // the list.
       if (t.closest('.blockr-select__more')) {
         e.stopPropagation();
-        st.expanded = true;
-        syncDocClick();
-        render();
+        expand();
         return;
       }
       // A click on an open multi's chevron closes the list, as the turned-up
@@ -762,16 +757,6 @@
           // Opens a closed select as a native one does; once open, a space
           // is typing.
           if (!st.open) { e.preventDefault(); open(true); }
-          break;
-        case 'Escape':
-          e.preventDefault();
-          // An open list owns this Escape, as a dirty text field does: it
-          // closes and the key goes no further, so the gear tray or modal
-          // around the select stays open. A closed select lets it through.
-          if (st.open) e.stopPropagation();
-          // Focus stays on the input, which is the combobox; a menu returns
-          // it to its anchor when it tears down.
-          close();
           break;
         case 'Backspace':
           if (multi && input.value === '' && st.selected.length > 0) {
@@ -948,10 +933,9 @@
         if (st.destroyed) return;
         if (searchTimer) clearTimeout(searchTimer);
         if (resizeObs) resizeObs.disconnect();
+        collapse();
         close();
         st.destroyed = true;
-        st.expanded = false;
-        syncDocClick();
         Blockr.removeNode(list);
         Blockr.removeNode(root);
       }

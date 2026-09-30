@@ -971,6 +971,34 @@ A layer sits above everything it can open from: a menu opens from a modal or a
 side panel, and a tooltip names a menu's rows. The tests in blockr.ui hold its
 stylesheets to these two forms and the layers to Bootstrap's values.
 
+### Dismissing
+
+Anything that can be dismissed is a layer: a menu, a tooltip, the gear tray, a
+side panel, and a field holding an edit not yet committed. Layers stack in the
+order they opened. One listener on the page decides what Escape and an outside
+click close; a control does not stop the event itself.
+
+- **Escape** acts on the top layer only. A second press acts on the next one.
+  Escape never commits: a dirty field reverts, a title being renamed restores,
+  a menu closes and returns focus to its trigger.
+- **An outside click** (outside the layer and everything opened from it)
+  closes menus and tooltips, and commits a dirty field, as blur does. It
+  leaves the gear tray and a pinned side panel open.
+- **The gear tray** closes by its gear and by Escape. It is in the page, not
+  over it, so Escape closes the tray that holds focus; several trays can be
+  open at once.
+- **A side panel** floats until it is pinned. Unpinned, Escape and an outside
+  click close it. Pinned, it is part of the page, and only its close button
+  closes it.
+
+The stack is `Blockr.layer` (blockr-ui.js). It reads Escape and the pointer
+before anything else on the page does, so a menu over a modal, or a field in a
+side panel, takes the key before the modal or the panel sees it. A click is
+read on pointerdown: it lands in the topmost layer it hits, a layer's trigger
+counting as part of it, and closes the layers opened after that one. A tooltip
+is a layer too, so while one shows, the next Escape hides it and leaves the
+layer under it open.
+
 ### Menus
 
 Every menu, dropdown and list that floats uses one surface:
@@ -1494,6 +1522,10 @@ Drawn in the [design system page](design-system/index.html#special).
       actions through `Blockr.menu` or `action_menu()`, all placed by the
       shared routine. No popovers. Tooltips only where the Tooltips section
       gives one, using the light card; no native `title`.
+- [ ] Anything Escape or a click outside closes is a layer on
+      `Blockr.layer`, added when it opens and removed when it closes. No
+      document listeners for Escape or outside clicks, and no
+      `stopPropagation()` to keep a key from what lies around it.
 - [ ] Badges are capsules and neutral unless they state status or "on".
 - [ ] Columns: the name with its label as meta where a column is picked, the
       label alone in an exhibit; read labels with the shared reader.

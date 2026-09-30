@@ -49,6 +49,12 @@ const build = (win) => {
 
 const click = (win, el, detail = 1) =>
   el.dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true, detail }));
+/* A pointer's click: the pointerdown first, which the dismiss stack reads as
+ * landing inside the menu or outside it. */
+const tap = (win, el) => {
+  el.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+  click(win, el);
+};
 const key = (win, el, k) =>
   el.dispatchEvent(new win.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
 
@@ -178,8 +184,10 @@ test('a click outside or Tab closes; opening another menu closes the first', (ne
   const a = build(win);
   const b = build(win);
 
-  click(win, a.trigger);
-  click(win, win.document.getElementById('after'));
+  tap(win, a.trigger);
+  tap(win, a.panel.querySelector('.blockr-menu__title'));
+  assert.strictEqual(a.panel.hidden, false, 'a click in the list is inside');
+  tap(win, win.document.getElementById('after'));
   assert.strictEqual(a.panel.hidden, true, 'outside click');
 
   click(win, a.trigger);

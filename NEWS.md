@@ -1,5 +1,16 @@
 # blockr.ui (development version)
 
+* Escape and a click outside go through one dismiss stack, `Blockr.layer()`
+  (#49). Every control that opens something registers it as a layer: the
+  Select's list and its expanded tags, the code field's completions, both
+  menus of actions, the tooltip, a dirty `Blockr.textCommit()` field and the
+  gear tray. Escape closes the top layer only, and a click, read on
+  pointerdown, closes the layers above the one it lands in, so a Select in
+  the gear tray or a menu over a modal closes alone. While a tooltip shows,
+  the next Escape hides it and leaves what is under it open. The
+  `Blockr.onDocClick()` registry is gone; a package's own floating UI
+  registers with `Blockr.layer()` instead.
+
 * The design system's menu of actions, `Blockr.menu()`, joins
   `controls_dep()`: rows with an icon, label and meta text, dividers, group
   titles, a head (a name with a badge and a line of text), current, disabled

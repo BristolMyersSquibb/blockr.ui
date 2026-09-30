@@ -137,9 +137,13 @@ test('a click outside closes it', (newWindow) => {
   const win = newWindow();
   const t = trigger(win);
   win.Blockr.menu(t, { items: [{ label: 'One' }] });
+  // The pointerdown decides, as it comes first.
+  const tap = (el) => el.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+  tap(panel(win).querySelector('.blockr-menu__item'));
+  assert.ok(panel(win), 'a row is inside');
   const other = win.document.createElement('div');
   win.document.body.appendChild(other);
-  other.click();
+  tap(other);
   assert.ok(!panel(win));
   win.close();
 });

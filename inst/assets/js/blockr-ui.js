@@ -1,12 +1,12 @@
 // @ts-check
 /**
  * blockr-ui.js — the design system's shared JS layer: the Blockr namespace,
- * DOM helpers, placement (Blockr.place), the icon set, keyboard hints, the
- * tooltip, text edited in place, the menus of actions (Blockr.menu and the
- * R-built Blockr.actionMenu), and the small controls every block builds on
- * (the Enter button, the required-empty cue, the checkbox, the segmented
- * control, the gear tray). Blockr.Select (blockr-select.js) and
- * Blockr.Input (blockr-input.js) build on it.
+ * DOM helpers, the dismiss stack (Blockr.layer), placement (Blockr.place),
+ * the icon set, keyboard hints, the tooltip, text edited in place, the menus
+ * of actions (Blockr.menu and the R-built Blockr.actionMenu), and the small
+ * controls every block builds on (the Enter button, the required-empty cue,
+ * the checkbox, the segmented control, the gear tray). Blockr.Select
+ * (blockr-select.js) and Blockr.Input (blockr-input.js) build on it.
  *
  * Load it first. It holds nothing block-specific: the block protocol
  * (Blockr.registerBlock and the restore queue) is blockr.dplyr's
@@ -74,30 +74,101 @@ Blockr.cutOff = (el) => [el, ...Array.from(el.querySelectorAll('*'))].some(
 );
 
 /**
- * Document-click registry — one document-level listener for all blocks.
+ * The dismiss stack (design system, "Dismissing"). Anything Escape or a
+ * click outside can close is a layer: a menu, a list, a tooltip, the gear
+ * tray, a field holding an edit not yet committed. A control registers a
+ * layer when it opens and removes it when it closes, and one pair of
+ * listeners on the window decides for every layer, so no control listens
+ * for these itself or stops the event:
  *
- * Per-instance `document.addEventListener('click', ...)` calls leak: the
- * closure retains the block and its detached DOM forever once the block is
- * removed from the board. Entries here are dropped automatically when their
- * anchor element leaves the document, so removed blocks become collectable.
+ * - Escape acts on the top layer only; the next press acts on the one below.
+ * - A pointerdown closes the layers above the topmost one it lands in.
  *
- * Blockr.onDocClick(anchorEl, cb) -> calls cb(event) for every document
- * click while `anchorEl` is connected. The callback does its own
- * containment checks (e.g. close a popover unless the click hit it).
+ * Blockr.layer(el, opts) puts `el` (an element, or a list of them) on top
+ * and returns `{ remove }`. The option `from` names what opened the layer: a
+ * pointerdown there is inside, as the trigger's own click toggles the layer.
+ * The options `escape` and `outside` say what Escape and a click outside do;
+ * a layer without `outside` stays open, as the gear tray does. The layer is
+ * off the stack before either runs.
+ *
+ * The option `inPage` marks a layer that sits in the page rather than over
+ * it: the gear tray, a dirty field. Escape reaches it only from inside it,
+ * so it closes the tray that holds the focus, and several can be open at
+ * once.
+ *
+ * Both listeners run in the capture phase, ahead of every other: a menu over
+ * a modal, or a field in a side panel, takes the Escape before the modal or
+ * the panel sees it. A layer whose elements have all left the page (a block
+ * removed while its menu or tray was open) is dropped, so the stack does not
+ * hold on to the block.
  */
-Blockr._docClick = new Set();
-document.addEventListener('click', (e) => {
-  for (const entry of Blockr._docClick) {
-    if (!entry.el.isConnected) {
-      Blockr._docClick.delete(entry);
-    } else {
-      entry.cb(e);
+Blockr.layer = (() => {
+  /** @type {BlockrLayerEntry[]} */
+  const stack = [];
+
+  /** @param {BlockrLayerEntry} entry */
+  const drop = (entry) => {
+    const i = stack.indexOf(entry);
+    if (i >= 0) stack.splice(i, 1);
+  };
+
+  const prune = () => {
+    for (let i = stack.length - 1; i >= 0; i--) {
+      if (!stack[i].els.some((el) => el.isConnected)) stack.splice(i, 1);
     }
-  }
-});
-Blockr.onDocClick = (el, cb) => {
-  Blockr._docClick.add({ el, cb });
-};
+  };
+
+  /** @param {BlockrLayerEntry} entry @param {EventTarget | null} node */
+  const holds = (entry, node) =>
+    node instanceof Node && entry.els.some((el) => el.contains(node));
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.isComposing) return;
+    prune();
+    // The top layer, passing over a layer in the page that the key was not
+    // pressed in.
+    let i = stack.length - 1;
+    while (i >= 0 && (!stack[i].escape || (stack[i].inPage && !holds(stack[i], e.target)))) i--;
+    if (i < 0) return;
+    const entry = stack[i];
+    e.preventDefault();
+    e.stopPropagation();
+    drop(entry);
+    /** @type {(e: KeyboardEvent) => void} */ (entry.escape)(e);
+  }, true);
+
+  window.addEventListener('pointerdown', (e) => {
+    prune();
+    let at = stack.length - 1;
+    while (at >= 0 && !holds(stack[at], e.target)) at--;
+    for (const entry of stack.slice(at + 1).reverse()) {
+      // One that closed with the layer above it is gone already.
+      if (!entry.outside || stack.indexOf(entry) < 0) continue;
+      drop(entry);
+      entry.outside(e);
+    }
+  }, true);
+
+  /**
+   * @param {Element | Element[]} el
+   * @param {BlockrLayerOptions} [opts]
+   * @returns {BlockrLayerHandle}
+   */
+  const layer = (el, opts) => {
+    const o = opts || {};
+    const entry = {
+      els: (Array.isArray(el) ? el : [el]).concat(o.from ? [o.from] : []),
+      inPage: !!o.inPage,
+      escape: o.escape || null,
+      outside: o.outside || null
+    };
+    stack.push(entry);
+    return { remove: () => drop(entry) };
+  };
+  /** How many layers are open. Tests read it. */
+  layer.count = () => { prune(); return stack.length; };
+  return layer;
+})();
 
 /**
  * Hang a fixed-position panel under an anchor and keep it there.
@@ -337,8 +408,8 @@ Blockr.keys = (keys) => {
 /**
  * Commit-on-Enter text input (design-system §5.5): typing never submits —
  * a ↵ button arms while the value is dirty, the value commits on Enter,
- * blur or the button (which then fades to the ✓ icon), and Escape reverts
- * to the last committed value.
+ * blur, a click outside or the button (which then fades to the ✓ icon), and
+ * Escape reverts to the last committed value.
  *
  * The input must already sit in its parent: the chip is inserted directly
  * after it. Programmatic value changes (setState restores, mode switches)
@@ -364,8 +435,11 @@ Blockr.textCommit = (input, opts) => {
   chip.style.display = 'none';
   let committed = input.value;
   let everCommitted = false;
+  /** @type {BlockrLayerHandle | null} */
+  let layer = null;
   const syncChip = () => {
-    if (input.value !== committed) {
+    const dirty = input.value !== committed;
+    if (dirty) {
       chip.style.display = '';
       chip.classList.remove('confirmed');
       chip.textContent = '↵';
@@ -376,6 +450,21 @@ Blockr.textCommit = (input, opts) => {
     } else {
       chip.style.display = 'none';
     }
+    // A dirty field is a layer (design system, "Dismissing"): Escape reverts
+    // it, so the gear tray it sits in stays open, and a click outside
+    // commits it, as blur does. It is in the page, so only an Escape pressed
+    // in the field reverts it; a clean field lets the key through to the
+    // tray.
+    if (dirty && !layer) {
+      layer = Blockr.layer([input, chip], {
+        inPage: true,
+        escape: () => { layer = null; revert(); },
+        outside: () => { layer = null; commit(); }
+      });
+    } else if (!dirty && layer) {
+      layer.remove();
+      layer = null;
+    }
   };
   const commit = () => {
     if (input.value === committed) return;
@@ -384,17 +473,13 @@ Blockr.textCommit = (input, opts) => {
     opts.onCommit(input.value);
     syncChip();
   };
+  const revert = () => {
+    input.value = committed;
+    syncChip();
+  };
   input.addEventListener('input', syncChip);
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); commit(); }
-    else if (e.key === 'Escape' && input.value !== committed) {
-      // A dirty field owns this Escape: it reverts and the key goes no
-      // further, so the gear tray the field sits in stays open. A clean
-      // field lets it through to whatever closes on Escape.
-      e.stopPropagation();
-      input.value = committed;
-      syncChip();
-    }
   });
   input.addEventListener('blur', commit);
   // Keep focus on the input so the chip click doesn't race blur-commit.
@@ -433,10 +518,11 @@ Blockr.textCommit = (input, opts) => {
  * same element wins over the attribute.
  *
  * One set of document listeners serves every tooltip, added when this file
- * loads (like Blockr.onDocClick's), so no instance adds or leaks its own.
- * The card shows after the pointer rests 300ms, at once on keyboard focus,
- * and at once while "warm": within 400ms of another card leaving, so moving
- * along a row of icons does not wait at each one.
+ * loads, so no instance adds or leaks its own. The card shows after the
+ * pointer rests 300ms, at once on keyboard focus, and at once while "warm":
+ * within 400ms of another card leaving, so moving along a row of icons does
+ * not wait at each one. A card on screen is a layer (Blockr.layer): Escape
+ * hides it, and so does a click, which can only land outside it.
  */
 Blockr.tooltip = (() => {
   const DELAY = 300;
@@ -452,6 +538,8 @@ Blockr.tooltip = (() => {
   /** @type {ReturnType<typeof setTimeout> | null} */
   let timer = null;
   let warmUntil = 0;
+  /** @type {BlockrLayerHandle | null} */
+  let layer = null;
 
   /** @param {BlockrTooltipLine} line */
   const lineText = (line) => {
@@ -510,6 +598,7 @@ Blockr.tooltip = (() => {
 
   const hide = () => {
     if (timer) { clearTimeout(timer); timer = null; }
+    if (layer) { layer.remove(); layer = null; }
     if (card && card.isConnected) {
       card.remove();
       warmUntil = Date.now() + WARM;
@@ -548,6 +637,8 @@ Blockr.tooltip = (() => {
     card.style.top = `${top}px`;
     el.setAttribute('aria-describedby', card.id);
     current = el;
+    if (layer) layer.remove();
+    layer = Blockr.layer(card, { escape: hide, outside: hide });
   };
 
   /** @param {Event} e */
@@ -581,9 +672,7 @@ Blockr.tooltip = (() => {
   document.addEventListener('focusin', enter, true);
   document.addEventListener('pointerout', /** @type {EventListener} */ (leave), true);
   document.addEventListener('focusout', hide, true);
-  document.addEventListener('pointerdown', hide, true);
   document.addEventListener('scroll', hide, true);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); }, true);
 
   return {
     /**
@@ -905,10 +994,13 @@ Blockr.menu = (() => {
     let closed = false;
     /** @type {BlockrPlaceHandle | null} */
     let placed = null;
+    /** @type {BlockrLayerHandle | null} */
+    let layer = null;
     /** @param {boolean} [refocus] */
     const close = (refocus) => {
       if (closed) return;
       closed = true;
+      if (layer) layer.remove();
       if (placed) placed.stop();
       panel.remove();
       anchor.setAttribute('aria-expanded', 'false');
@@ -973,7 +1065,6 @@ Blockr.menu = (() => {
         e.preventDefault();
         pick(active >= 0 ? active : (filterInput && filterInput.value ? pickable()[0] : -1));
       }
-      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
       // Back on the trigger first, so the browser's Tab moves on from there;
       // from the removed panel it would start over at the top of the page.
       else if (e.key === 'Tab') { close(true); }
@@ -992,11 +1083,13 @@ Blockr.menu = (() => {
     anchor.setAttribute('aria-expanded', 'true');
     anchor.setAttribute('aria-haspopup', 'menu');
     anchor.setAttribute('aria-controls', list.id);
-    // A click outside closes it; the trigger's own click is its binding's.
-    Blockr.onDocClick(panel, (e) => {
-      const t = e.target;
-      if (t instanceof Node && (panel.contains(t) || anchor.contains(t))) return;
-      close(false);
+    // A layer (Blockr.layer): Escape closes it and hands focus back to the
+    // trigger, and a click outside closes it. The trigger is not outside:
+    // its own click is its binding's.
+    layer = Blockr.layer(panel, {
+      from: anchor,
+      escape: () => close(true),
+      outside: () => close(false)
     });
     focusEl.focus({ preventScroll: true });
 
@@ -1087,6 +1180,8 @@ Blockr.menu = (() => {
     var open = false;
     /** @type {Animation | null} */
     var anim = null;
+    /** @type {BlockrLayerHandle | null} */
+    var layer = null;
     var still = typeof window.matchMedia === 'function' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1102,6 +1197,19 @@ Blockr.menu = (() => {
       open = next;
       gear.classList.toggle('blockr-gear-active', open);
       gear.setAttribute('aria-expanded', open ? 'true' : 'false');
+      // Open, the tray is a layer (Blockr.layer) in the page: an Escape
+      // pressed in the band or on the gear closes it, and a click outside
+      // leaves it open.
+      if (open) {
+        layer = Blockr.layer(band, {
+          from: gear,
+          inPage: true,
+          escape: function () { set(false); gear.focus(); }
+        });
+      } else if (layer) {
+        layer.remove();
+        layer = null;
+      }
       if (anim) { anim.cancel(); anim = null; }
       if (open) band.classList.add('blockr-settings--open');
       if (still || typeof band.animate !== 'function') {
@@ -1129,18 +1237,6 @@ Blockr.menu = (() => {
     }
 
     gear.addEventListener('click', function () { set(!open); });
-    /** @param {KeyboardEvent} e */
-    function onEscape(e) {
-      if (e.key === 'Escape' && open) {
-        e.stopPropagation();
-        set(false);
-        gear.focus();
-      }
-    }
-    band.addEventListener('keydown', onEscape);
-    // After a click on the gear, focus is on the gear, not in the band; the
-    // spec says Escape closes the tray, so listen there too.
-    gear.addEventListener('keydown', onEscape);
 
     return {
       set: set,
@@ -1226,10 +1322,11 @@ Blockr.menu = (() => {
  * Keys: a keyboard open focuses the first row; arrows, Home and End move;
  * Enter or Space runs the row; Escape closes and returns focus to the
  * trigger; Tab closes. A click outside closes. A disabled row does
- * nothing.
+ * nothing. The open menu is a layer (Blockr.layer), which takes Escape and
+ * the click outside.
  */
 Blockr.actionMenu = (() => {
-  /** @type {{ trigger: HTMLElement, panel: HTMLElement, home: Node, next: Node | null, placement: BlockrPlaceHandle, watch: MutationObserver | null } | null} */
+  /** @type {{ trigger: HTMLElement, panel: HTMLElement, home: Node, next: Node | null, placement: BlockrPlaceHandle, watch: MutationObserver | null, layer: BlockrLayerHandle } | null} */
   let open = null;
 
   /** @param {Element | null} el */
@@ -1259,8 +1356,9 @@ Blockr.actionMenu = (() => {
   /** @param {boolean} [refocus] */
   const close = (refocus) => {
     if (!open) return;
-    const { trigger, panel, home, next, placement, watch } = open;
+    const { trigger, panel, home, next, placement, watch, layer } = open;
     open = null;
+    layer.remove();
     placement.stop();
     if (watch) watch.disconnect();
     panel.hidden = true;
@@ -1303,7 +1401,12 @@ Blockr.actionMenu = (() => {
       watch = new MutationObserver(() => { if (!trigger.isConnected) close(); });
       watch.observe(document.body, { childList: true, subtree: true });
     }
-    open = { trigger, panel, home, next, placement, watch };
+    const layer = Blockr.layer(panel, {
+      from: trigger,
+      escape: () => close(true),
+      outside: () => close()
+    });
+    open = { trigger, panel, home, next, placement, watch, layer };
     const first = rows(panel)[0];
     if (byKeyboard && first) first.focus();
     else panel.focus();
@@ -1343,21 +1446,12 @@ Blockr.actionMenu = (() => {
       // Let the row do its job (the download, Shiny's action binding) before
       // the list goes back beside its trigger.
       setTimeout(() => close(true), 0);
-      return;
     }
-    if (!(target && open.panel.contains(target))) close();
   }, true);
 
   document.addEventListener('keydown', (e) => {
-    if (!open) return;
-    const inside = e.target instanceof Node && open.panel.contains(e.target);
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      e.stopPropagation();
-      close(true);
-    } else if (!inside) {
-      return;
-    } else if (e.key === 'ArrowDown') {
+    if (!open || !(e.target instanceof Node && open.panel.contains(e.target))) return;
+    if (e.key === 'ArrowDown') {
       e.preventDefault(); move(1);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault(); move(-1);

@@ -193,6 +193,43 @@ interface BlockrSelectStatic {
   midTruncate(value: string, cap: number): string;
 }
 
+/* --- Blockr.layer, the dismiss stack (blockr-ui.js) --- */
+
+interface BlockrLayerOptions {
+  /** What opened the layer: a pointerdown on it is inside, not outside. */
+  from?: Element;
+  /**
+   * The layer sits in the page, not over it (the gear tray, a dirty field):
+   * Escape reaches it only from inside it.
+   */
+  inPage?: boolean;
+  /** What Escape does when the layer is on top; without it, Escape passes it by. */
+  escape?: (e: KeyboardEvent) => void;
+  /** What a pointerdown outside does; without it, the layer stays open. */
+  outside?: (e: PointerEvent) => void;
+}
+
+/** Handle returned by Blockr.layer. */
+interface BlockrLayerHandle {
+  /** Take the layer off the stack; the control calls it when it closes. */
+  remove(): void;
+}
+
+/** A layer as the stack holds it. */
+interface BlockrLayerEntry {
+  /** The layer's elements and what opened it: a pointerdown in any is inside. */
+  els: Element[];
+  inPage: boolean;
+  escape: ((e: KeyboardEvent) => void) | null;
+  outside: ((e: PointerEvent) => void) | null;
+}
+
+interface BlockrLayer {
+  (el: Element | Element[], opts?: BlockrLayerOptions): BlockrLayerHandle;
+  /** How many layers are open. */
+  count(): number;
+}
+
 /** Handle returned by Blockr.place (blockr-ui.js). */
 interface BlockrPlaceHandle {
   /** Recompute the position now (it also follows scroll, resize and size changes). */
@@ -362,14 +399,14 @@ interface BlockrNamespace {
   contentWidth(el: Element): number;
   _measureEl?: HTMLDivElement;
   icons: Record<string, string>;
-  onDocClick(el: Element, cb: (e: MouseEvent) => void): void;
+  /** The dismiss stack: what Escape and a click outside close (blockr-ui.js). */
+  layer: BlockrLayer;
   /**
    * Hang a fixed-position, body-portalled panel under an anchor and keep it
    * there: flips above when there is no room below, follows scroll, resize
    * and size changes of anchor and panel (blockr-ui.js).
    */
   place(panel: HTMLElement, anchor: HTMLElement, opts?: BlockrPlaceOptions): BlockrPlaceHandle;
-  _docClick: Set<{ el: Element; cb: (e: MouseEvent) => void }>;
   /** Blockr.Select (blockr-select.js). */
   Select?: BlockrSelectStatic;
   /** Blockr.Input, the code field with completions (blockr-input.js). */
