@@ -54,11 +54,14 @@ icon_set <- c(
     '<line x1="3.5" y1="3.5" x2="10.5" y2="10.5"></line>',
     '<line x1="10.5" y1="3.5" x2="3.5" y2="10.5"></line></svg>'
   ),
+  # The plus of an add button ("Add condition", "New page"): a stroke, as the
+  # design page draws it, at the menu icons' 1.25, so it matches the sliders
+  # beside it in the views menu. It was Bootstrap's filled plus.
   plus = paste0(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" ',
-    'fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">',
-    '<path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0',
-    'v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/></svg>'
+    '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" ',
+    'stroke="currentColor" stroke-width="1.25" stroke-linecap="round" ',
+    'aria-hidden="true">',
+    '<path d="M8 3v10M3 8h10"></path></svg>'
   ),
   # Menu icons, drawn at 1.25 stroke so the few rows that carry one read as
   # one set: the bin of a destructive row, the sliders of a row that opens a

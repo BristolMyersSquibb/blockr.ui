@@ -5,7 +5,9 @@
   `controls_dep()` writes the list into the page ahead of `blockr-ui.js`,
   so R and JavaScript draw one copy of each. The icons are no longer part
   of `blockr-ui.js`, so a page that loads that file on its own, as a test
-  harness might, has none. Every icon is hidden from screen readers.
+  harness might, has none. Every icon is hidden from screen readers, and
+  the plus is a 1.25px stroke now, as blockr.dock's views menu draws it, in
+  place of Bootstrap's filled path.
 
 * The warning border, `--blockr-color-border-warning`, is amber-600
   (`#d97706`) in the light scheme, a new step of the amber ramp, up from
