@@ -149,13 +149,22 @@ test_that("block_mark_svg() draws the same mark as an image", {
   expect_no_match(svg, "1em", fixed = TRUE)
 })
 
-test_that("block_mark_svg() keeps a glyph's own grid", {
+test_that("block_mark_svg() keeps a glyph's own grid, or takes bsicons'", {
 
   wide <- "<svg viewBox='0 0 24 24'><circle r=\"12\"/></svg>"
+  bare <- "<svg><circle r=\"8\"/></svg>"
 
   expect_match(
     as.character(block_mark_svg(wide, "input")),
     "viewBox=\"0 0 24 24\" fill=\"#0072b2\"",
+    fixed = TRUE
+  )
+  expect_match(
+    as.character(block_mark_svg(bare, "input")),
+    paste0(
+      "viewBox=\"0 0 16 16\" fill=\"#0072b2\" color=\"#0072b2\">",
+      "<circle r=\"8\"/>"
+    ),
     fixed = TRUE
   )
 })
