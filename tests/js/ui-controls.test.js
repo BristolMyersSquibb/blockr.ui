@@ -223,10 +223,15 @@ test('gear tray: the gear toggles it and Escape on the gear closes it', (newWind
   assert.ok(f.band.classList.contains('blockr-settings--open'));
   assert.ok(f.gear.classList.contains('blockr-gear-active'));
   assert.strictEqual(f.gear.getAttribute('aria-expanded'), 'true');
-  // After the click, focus is on the gear, not in the band.
+  // After the click, focus is on the gear, not in the band. A browser does
+  // not count that as keyboard focus, so the gear's tooltip stays away;
+  // happy-dom counts every focus, so stand in for the browser's verdict.
   let reached = 0;
   win.document.addEventListener('keydown', () => { reached++; });
+  const matches = f.gear.matches.bind(f.gear);
+  f.gear.matches = (s) => (s === ':focus-visible' ? false : matches(s));
   f.gear.focus();
+  f.gear.matches = matches;
   press(win, f.gear, 'Escape');
   assert.ok(!f.tray.isOpen());
   assert.strictEqual(reached, 0, 'consumed: nothing above the gear sees it');

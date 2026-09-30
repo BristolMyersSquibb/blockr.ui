@@ -40,8 +40,9 @@
   display: none;
 }
 
-/* The keyboard row is focused, so it takes the hover look instead of the
-   focus outline. */
+/* A row that has the focus, as a Bootstrap dropdown's keyboard row does,
+   takes the hover look instead of the focus outline. Blockr's own menus keep
+   the focus on the list and mark the keyboard row active. */
 .blockr-menu__item:hover,
 .blockr-menu__item:focus {
   background: var(--blockr-color-bg-hover);
@@ -118,8 +119,8 @@
 
 /* A destructive row is plain at rest and red only under the pointer or as
    the keyboard row, so the menu does not shout about deleting every time it
-   opens. The keyboard row is focused in a menu built in R and marked active
-   in Blockr.menu. */
+   opens. The keyboard row is marked active in blockr's menus and focused in
+   a Bootstrap dropdown. */
 .blockr-menu__item--danger:hover,
 .blockr-menu__item--danger:focus,
 .blockr-menu__item--danger.blockr-menu__item--active {

@@ -4,8 +4,9 @@
  * side). What a caller can see: a click on the trigger opens the list on
  * <body> and a second click, a pick, Escape, Tab or a click outside closes it
  * and puts it back beside the trigger; the keyboard moves over the usable
- * rows only; a disabled row does nothing; a block removed while its menu is
- * open takes the menu with it.
+ * rows only, with the focus on the list and the keyboard row its active
+ * descendant, as in Blockr.menu; a disabled row does nothing; a block
+ * removed while its menu is open takes the menu with it.
  */
 'use strict';
 
@@ -49,8 +50,16 @@ const build = (win) => {
 
 const click = (win, el, detail = 1) =>
   el.dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true, detail }));
+/* A pointer's click: the pointerdown first, which the dismiss stack reads as
+ * landing inside the menu or outside it. */
+const tap = (win, el) => {
+  el.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+  click(win, el);
+};
 const key = (win, el, k) =>
   el.dispatchEvent(new win.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+/** The keyboard row: the list's active descendant. */
+const row = (panel) => panel.getAttribute('aria-activedescendant');
 
 test('a click opens the list on the body; a second click puts it back', (newWindow) => {
   const win = newWindow();
@@ -76,26 +85,29 @@ test('a click opens the list on the body; a second click puts it back', (newWind
 test('the keyboard opens on the first row and moves over usable rows only', (newWindow) => {
   const win = newWindow();
   const { trigger, panel } = build(win);
-  const id = () => win.document.activeElement.id;
 
   click(win, trigger, 0);
-  assert.strictEqual(id(), 'pptx', 'a keyboard open focuses the first row');
-  key(win, win.document.activeElement, 'ArrowDown');
-  assert.strictEqual(id(), 'html', 'the disabled row is skipped');
-  key(win, win.document.activeElement, 'ArrowDown');
-  assert.strictEqual(id(), 'rm');
-  key(win, win.document.activeElement, 'ArrowDown');
-  assert.strictEqual(id(), 'pptx', 'wraps round');
-  key(win, win.document.activeElement, 'ArrowUp');
-  assert.strictEqual(id(), 'rm');
-  key(win, win.document.activeElement, 'Home');
-  assert.strictEqual(id(), 'pptx');
-  key(win, win.document.activeElement, 'End');
-  assert.strictEqual(id(), 'rm');
+  assert.strictEqual(win.document.activeElement, panel, 'the list holds the focus');
+  assert.strictEqual(row(panel), 'pptx', 'a keyboard open starts on the first row');
+  assert.strictEqual(panel.querySelector('.blockr-menu__item--active').id, 'pptx');
+  key(win, panel, 'ArrowDown');
+  assert.strictEqual(row(panel), 'html', 'the disabled row is passed over');
+  key(win, panel, 'ArrowDown');
+  assert.strictEqual(row(panel), 'rm');
+  key(win, panel, 'ArrowDown');
+  assert.strictEqual(row(panel), 'pptx', 'wraps round');
+  key(win, panel, 'ArrowUp');
+  assert.strictEqual(row(panel), 'rm');
+  key(win, panel, 'Home');
+  assert.strictEqual(row(panel), 'pptx');
+  key(win, panel, 'End');
+  assert.strictEqual(row(panel), 'rm');
 
-  key(win, win.document.activeElement, 'Escape');
+  key(win, panel, 'Escape');
   assert.strictEqual(panel.hidden, true, 'Escape closes');
   assert.strictEqual(win.document.activeElement, trigger, 'and hands focus back');
+  assert.strictEqual(row(panel), null, 'with no keyboard row left behind');
+  assert.strictEqual(panel.querySelector('.blockr-menu__item--active'), null);
   win.close();
 });
 
@@ -105,24 +117,23 @@ test('a download Shiny has not bound yet keeps its place for the keyboard', (new
   // A downloadLink() before its handler binds, as Shiny marks it; on the
   // first open every download is still in this state.
   for (const id of ['pptx', 'html']) {
-    const row = panel.querySelector(`#${id}`);
-    row.classList.add('shiny-download-link', 'disabled');
-    row.setAttribute('aria-disabled', 'true');
+    const r = panel.querySelector(`#${id}`);
+    r.classList.add('shiny-download-link', 'disabled');
+    r.setAttribute('aria-disabled', 'true');
   }
   click(win, trigger, 0);
-  const id = () => win.document.activeElement.id;
-  assert.strictEqual(id(), 'pptx', 'the first row, not Remove');
-  key(win, win.document.activeElement, ' ');
+  assert.strictEqual(row(panel), 'pptx', 'the first row, not Remove');
+  key(win, panel, ' ');
   assert.strictEqual(clicks.pptx, 0, 'inert until Shiny binds it');
-  key(win, win.document.activeElement, 'ArrowDown');
-  assert.strictEqual(id(), 'html', 'the row its author disabled is still skipped');
+  key(win, panel, 'ArrowDown');
+  assert.strictEqual(row(panel), 'html', 'the row its author disabled is still passed over');
 
   // Shiny binds the handler.
   const pptx = panel.querySelector('#pptx');
   pptx.classList.remove('disabled');
   pptx.removeAttribute('aria-disabled');
-  key(win, win.document.activeElement, 'ArrowUp');
-  key(win, win.document.activeElement, ' ');
+  key(win, panel, 'ArrowUp');
+  key(win, panel, ' ');
   assert.strictEqual(clicks.pptx, 1);
   win.close();
 });
@@ -131,12 +142,68 @@ test('arrows from a mouse open start at the ends', (newWindow) => {
   const win = newWindow();
   const { trigger, panel } = build(win);
   click(win, trigger);
+  assert.strictEqual(row(panel), null, 'a mouse open marks no row');
   key(win, panel, 'ArrowDown');
-  assert.strictEqual(win.document.activeElement.id, 'pptx');
-  key(win, win.document.activeElement, 'Escape');
+  assert.strictEqual(row(panel), 'pptx');
+  key(win, panel, 'Escape');
   click(win, trigger);
   key(win, panel, 'ArrowUp');
-  assert.strictEqual(win.document.activeElement.id, 'rm');
+  assert.strictEqual(row(panel), 'rm');
+  win.close();
+});
+
+test('Enter clicks the keyboard row, as the pointer would', async (newWindow) => {
+  const win = newWindow();
+  const { wrap, trigger, panel, clicks } = build(win);
+  click(win, trigger, 0);
+  key(win, panel, 'ArrowDown');
+  key(win, panel, 'Enter');
+  assert.strictEqual(clicks.html, 1);
+  await wait(5);
+  assert.strictEqual(panel.parentNode, wrap, 'then the menu closes');
+  win.close();
+});
+
+test('the pointer moves the keyboard row, over usable rows only', (newWindow) => {
+  const win = newWindow();
+  const { trigger, panel } = build(win);
+  const move = (el) => el.dispatchEvent(new win.MouseEvent('mousemove', { bubbles: true }));
+  click(win, trigger);
+  move(panel.querySelector('#html'));
+  assert.strictEqual(row(panel), 'html');
+  move(panel.querySelector('#xlsx'));
+  assert.strictEqual(row(panel), 'html', 'a disabled row does not take it');
+  key(win, panel, 'ArrowDown');
+  assert.strictEqual(row(panel), 'rm', 'the keys go on from where the pointer left it');
+  panel.dispatchEvent(new win.MouseEvent('mouseleave'));
+  assert.strictEqual(row(panel), null);
+  win.close();
+});
+
+test('the down arrow on the trigger opens the menu on its first row', (newWindow) => {
+  const win = newWindow();
+  const { trigger, panel } = build(win);
+  trigger.focus();
+  key(win, trigger, 'ArrowDown');
+  assert.strictEqual(panel.hidden, false);
+  assert.strictEqual(win.document.activeElement, panel);
+  assert.strictEqual(row(panel), 'pptx');
+  win.close();
+});
+
+test('one menu of either kind is open at a time', (newWindow) => {
+  const win = newWindow();
+  const { wrap, trigger, panel } = build(win);
+  const views = win.document.createElement('button');
+  win.document.body.appendChild(views);
+  click(win, trigger);
+  win.Blockr.menu(views, { items: [{ label: 'Page 1' }] });
+  assert.strictEqual(panel.parentNode, wrap, 'Blockr.menu closed the action menu');
+  assert.strictEqual(win.Blockr.actionMenu.current(), null);
+  click(win, trigger);
+  assert.strictEqual(win.document.querySelector('.blockr-menu__list'), null,
+    'and the action menu closed it in turn');
+  assert.strictEqual(win.Blockr.actionMenu.current(), trigger);
   win.close();
 });
 
@@ -178,8 +245,10 @@ test('a click outside or Tab closes; opening another menu closes the first', (ne
   const a = build(win);
   const b = build(win);
 
-  click(win, a.trigger);
-  click(win, win.document.getElementById('after'));
+  tap(win, a.trigger);
+  tap(win, a.panel.querySelector('.blockr-menu__title'));
+  assert.strictEqual(a.panel.hidden, false, 'a click in the list is inside');
+  tap(win, win.document.getElementById('after'));
   assert.strictEqual(a.panel.hidden, true, 'outside click');
 
   click(win, a.trigger);
@@ -211,7 +280,50 @@ test('a row the page has hidden is skipped by the keyboard', (newWindow) => {
   const { trigger, panel } = build(win);
   panel.querySelector('#html').hidden = true;
   click(win, trigger, 0);
-  key(win, win.document.activeElement, 'ArrowDown');
-  assert.strictEqual(win.document.activeElement.id, 'rm');
+  key(win, panel, 'ArrowDown');
+  assert.strictEqual(row(panel), 'rm');
   win.close();
+});
+
+/* --- In Chrome ------------------------------------------------------------ */
+
+/* Real keys (browser.js): a click the keyboard makes reaches the page with
+ * detail 0, which is how the menu tells a keyboard open from a pointer's. */
+const chrome = require('./browser').test;
+
+chrome('in Chrome, Enter on the trigger opens on the first row, and Enter runs the keyboard row', async (page) => {
+  await page.evaluate(() => {
+    const host = document.createElement('div');
+    host.innerHTML = `
+      <span class="blockr-action-menu" data-align="start">
+        <button class="blockr-tool blockr-action-menu__trigger" type="button" aria-label="Actions">…</button>
+        <div class="blockr-menu" role="menu" tabindex="-1" hidden>
+          <button id="rename" class="blockr-menu__item" role="menuitem" tabindex="-1" type="button">Rename</button>
+          <button id="remove" class="blockr-menu__item" role="menuitem" tabindex="-1" type="button">Remove</button>
+        </div>
+      </span>`;
+    document.body.appendChild(host);
+    window.ran = [];
+    for (const b of host.querySelectorAll('.blockr-menu__item')) {
+      b.addEventListener('click', () => window.ran.push(b.id));
+    }
+  });
+  const state = () => page.evaluate(() => {
+    const panel = document.querySelector('.blockr-menu');
+    return {
+      open: !panel.hidden,
+      row: panel.getAttribute('aria-activedescendant'),
+      focus: document.activeElement.className,
+      ran: window.ran
+    };
+  });
+  await page.focus('.blockr-action-menu__trigger');
+  await page.keyboard.press('Enter');
+  assert.deepStrictEqual(await state(), { open: true, row: 'rename', focus: 'blockr-menu', ran: [] });
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => document.querySelector('.blockr-menu').hidden);
+  assert.deepStrictEqual(await state(), {
+    open: false, row: null, focus: 'blockr-tool blockr-action-menu__trigger', ran: ['remove']
+  });
 });

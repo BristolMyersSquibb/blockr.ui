@@ -137,9 +137,13 @@ test('a click outside closes it', (newWindow) => {
   const win = newWindow();
   const t = trigger(win);
   win.Blockr.menu(t, { items: [{ label: 'One' }] });
+  // The pointerdown decides, as it comes first.
+  const tap = (el) => el.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+  tap(panel(win).querySelector('.blockr-menu__item'));
+  assert.ok(panel(win), 'a row is inside');
   const other = win.document.createElement('div');
   win.document.body.appendChild(other);
-  other.click();
+  tap(other);
   assert.ok(!panel(win));
   win.close();
 });
@@ -156,6 +160,23 @@ test('bind() opens on click, closes on a second click, reads a function config',
   assert.ok(!panel(win), 'closed after the second');
   t.click();
   assert.strictEqual(reads, 2, 'config read on each open');
+  win.close();
+});
+
+test('bind(): a click from the keyboard opens on the first row, one from the pointer on none', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu.bind(t, { items: [{ label: 'One' }, { label: 'Two' }] });
+  // A click the keyboard made (Enter or Space on the button) has detail 0.
+  const click = (detail) =>
+    t.dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true, detail }));
+  const list = () => panel(win).querySelector('[role="menu"]');
+  click(1);
+  assert.strictEqual(list().getAttribute('aria-activedescendant'), null);
+  click(1);
+  click(0);
+  const one = panel(win).querySelector('.blockr-menu__item');
+  assert.strictEqual(list().getAttribute('aria-activedescendant'), one.id);
   win.close();
 });
 

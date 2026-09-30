@@ -59,7 +59,13 @@ const tags = (sel) =>
 const json = (x) => JSON.parse(JSON.stringify(x));
 const values = (sel) => json(sel.getValue());
 
-const click = (win, el) => el.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+/* A click the way a browser delivers it: the pointerdown first, which the
+ * dismiss stack reads as landing inside a layer or outside it, then the
+ * click. */
+const click = (win, el) => {
+  el.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+  el.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+};
 const clickOutside = (win) => click(win, win.document.body);
 
 /* A key the way a browser delivers it: keydown first, and when nothing
@@ -1113,6 +1119,24 @@ test('singleLine: the chip expands the control until a click elsewhere', (newWin
   clickOutside(win);
   assert.ok(!sel.el.classList.contains('blockr-select--expanded'));
   assert.strictEqual(hidden(), 3);
+  win.close();
+});
+
+test('singleLine: Escape closes the list first, then collapses the tags', (newWindow, t) => {
+  const win = newWindow();
+  t.after(stubLayout(win));
+  const sel = multi(win, { options: ABC, selected: ABC, singleLine: true });
+  const expanded = () => sel.el.classList.contains('blockr-select--expanded');
+  click(win, sel.el.querySelector('.blockr-select__more'));
+  press(win, win.document.body, 'Escape');
+  assert.ok(expanded(), 'the control is in the page: an Escape pressed elsewhere leaves it');
+  click(win, control(sel));
+  assert.ok(isOpen(sel));
+  press(win, search(sel), 'Escape');
+  assert.ok(!isOpen(sel), 'the list is on top, so it goes first');
+  assert.ok(expanded());
+  press(win, search(sel), 'Escape');
+  assert.ok(!expanded(), 'then the tags collapse');
   win.close();
 });
 
