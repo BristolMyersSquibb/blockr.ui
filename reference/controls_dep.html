@@ -5,19 +5,19 @@ with column and function completions), the Enter button of a field that
 commits on Enter, the required-empty cue, the checkbox, the segmented
 control, the gear tray, the tooltip (Blockr.tooltip), the menus of
 actions (Blockr.menu for those built in JavaScript, Blockr.actionMenu
-for those action_menu() builds in R) and the placement routine for
-floating panels (Blockr.place), all on the window.Blockr namespace,
-together with the rows, pills, labels, fields and buttons (.blockr-btn)
-they draw."><meta property="og:description" content="The JavaScript and CSS of the controls blockr blocks are built from:
+for those action_menu() builds in R), the placement routine for
+floating panels (Blockr.place) and the small icons (Blockr.icons), all
+on the window.Blockr namespace, together with the rows, pills, labels,
+fields and buttons (.blockr-btn) they draw."><meta property="og:description" content="The JavaScript and CSS of the controls blockr blocks are built from:
 Blockr.Select (single, multi and menu), Blockr.Input (the code field
 with column and function completions), the Enter button of a field that
 commits on Enter, the required-empty cue, the checkbox, the segmented
 control, the gear tray, the tooltip (Blockr.tooltip), the menus of
 actions (Blockr.menu for those built in JavaScript, Blockr.actionMenu
-for those action_menu() builds in R) and the placement routine for
-floating panels (Blockr.place), all on the window.Blockr namespace,
-together with the rows, pills, labels, fields and buttons (.blockr-btn)
-they draw."></head><body>
+for those action_menu() builds in R), the placement routine for
+floating panels (Blockr.place) and the small icons (Blockr.icons), all
+on the window.Blockr namespace, together with the rows, pills, labels,
+fields and buttons (.blockr-btn) they draw."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -57,7 +57,7 @@ they draw."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Shared block controls</h1>
-      <small class="dont-index">Source: <a href="https://github.com/BristolMyersSquibb/blockr.ui/blob/main/R/controls.R" class="external-link"><code>R/controls.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/BristolMyersSquibb/blockr.ui/blob/main/R/controls.R" class="external-link"><code>R/controls.R</code></a>, <a href="https://github.com/BristolMyersSquibb/blockr.ui/blob/main/R/icons.R" class="external-link"><code>R/icons.R</code></a></small>
       <div class="d-none name"><code>controls_dep.Rd</code></div>
     </div>
 
@@ -68,25 +68,47 @@ with column and function completions), the Enter button of a field that
 commits on Enter, the required-empty cue, the checkbox, the segmented
 control, the gear tray, the tooltip (<code>Blockr.tooltip</code>), the menus of
 actions (<code>Blockr.menu</code> for those built in JavaScript, <code>Blockr.actionMenu</code>
-for those <code><a href="action_menu.html">action_menu()</a></code> builds in R) and the placement routine for
-floating panels (<code>Blockr.place</code>), all on the <code>window.Blockr</code> namespace,
-together with the rows, pills, labels, fields and buttons (<code>.blockr-btn</code>)
-they draw.</p>
+for those <code><a href="action_menu.html">action_menu()</a></code> builds in R), the placement routine for
+floating panels (<code>Blockr.place</code>) and the small icons (<code>Blockr.icons</code>), all
+on the <code>window.Blockr</code> namespace, together with the rows, pills, labels,
+fields and buttons (<code>.blockr-btn</code>) they draw.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">controls_dep</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">controls_dep</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">small_icon</span><span class="op">(</span><span class="va">name</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+
+
+<dl><dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
+<dd><p>The icon: <code>"chevron"</code>, <code>"remove"</code> (a tag's x, 10px), <code>"x"</code> (a
+row's remove button, 14px), <code>"grip"</code> (a drag handle), <code>"plus"</code>,
+<code>"trash"</code>, <code>"sliders"</code>, <code>"check"</code> (a menu's current item), <code>"confirm"</code>
+(a committed field, a picked option), <code>"code"</code> or <code>"gear"</code>.</p></dd>
+
+</dl></div>
+    <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An <code><a href="https://rstudio.github.io/htmltools/reference/tagList.html" class="external-link">htmltools::tagList()</a></code> of <a href="https://rstudio.github.io/htmltools/reference/htmlDependency.html" class="external-link">htmltools::htmlDependency</a> objects,
-in load order.</p>
+    <p>For <code>controls_dep()</code>, an <code><a href="https://rstudio.github.io/htmltools/reference/tagList.html" class="external-link">htmltools::tagList()</a></code> of
+<a href="https://rstudio.github.io/htmltools/reference/htmlDependency.html" class="external-link">htmltools::htmlDependency</a> objects, in load order.</p>
+<p>For <code>small_icon()</code>, the icon's <code>&lt;svg&gt;</code> element, as
+<code><a href="https://rstudio.github.io/htmltools/reference/HTML.html" class="external-link">htmltools::HTML()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The stylesheets read the design tokens without fallbacks, so the
+    <p>The small icons are not in <code>blockr-ui.js</code>: the dependency writes them into
+the page's head ahead of it, from the list <code>small_icon()</code> reads, so markup
+built in R and markup built in JavaScript draw one copy of each, and
+<code>small_icon("gear")</code> is <code>Blockr.icons.gear</code>. An icon draws in
+<code>currentColor</code>, so it takes the colour of the text around it, and is
+hidden from screen readers: the control that holds it carries the name, as
+<code><a href="tool_button.html">tool_button()</a></code> does.</p>
+<p>The stylesheets read the design tokens without fallbacks, so the
 dependency brings the tokens along, but not the theme layer that
 restyles the rest of the page: an app opts into that with <code><a href="theme_dep.html">theme_dep()</a></code>.
 Attach it from a block's UI; dependencies are de-duplicated by name, so
@@ -116,6 +138,9 @@ own copies, a page that has both uses blockr.dplyr's.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       { options: ['mpg', 'cyl', 'disp'], selected: ['mpg'] });</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;/script&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/div&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="tool_button.html">tool_button</a></span><span class="op">(</span><span class="fu">small_icon</span><span class="op">(</span><span class="st">"gear"</span><span class="op">)</span>, <span class="st">"Settings"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;button type="button" class="blockr-tool" aria-label="Settings" data-blockr-tooltip="Settings"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"&gt;&lt;path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/&gt;&lt;/svg&gt;&lt;/button&gt;</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

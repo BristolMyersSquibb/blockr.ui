@@ -904,13 +904,19 @@ rest and appear on hover or keyboard focus of their row; remove turns
 `text-danger` on hover. Fold arrows stay visible. The crossfilter’s
 filter cards are the exception (see [Special blocks](#special)).
 
+The icons are blockr.ui’s, one list read two ways: `Blockr.icons` in
+JavaScript and
+[`small_icon()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
+in R. A package draws them from there rather than keeping a copy of the
+SVG.
+
 ### Chevrons
 
 One chevron does every disclosure, dropdown and “go to” arrow:
-`Blockr.icons.chevron` in blockr.ui. It is a 12px box with the path
-`M3 4.5l3 3 3-3`, half the box wide and a quarter high with a right
-angle at the tip, stroked at 1.4px with round caps and joins and no
-fill.
+`Blockr.icons.chevron` in blockr.ui, `small_icon("chevron")` in R. It is
+a 12px box with the path `M3 4.5l3 3 3-3`, half the box wide and a
+quarter high with a right angle at the tip, stroked at 1.4px with round
+caps and joins and no fill.
 
 - Size: 12px; 10px inside a 24px pill or a bare select in a row. The
   stroke stays 1.4px at both sizes.
@@ -1625,9 +1631,9 @@ or 26px. No Bootstrap solid buttons.
 Header row: 26px tools, gear last, `.blockr-gear-btn` on the gear only.
 No gear if there are no options. Every option is in the gear.
 
-Chevrons: `Blockr.icons.chevron` only, 12px (10px in a pill). Folds
-point down open and right closed; menus flip up while open; “go to”
-arrows point right or left.
+Chevrons: `Blockr.icons.chevron` (`small_icon("chevron")` in R) only,
+12px (10px in a pill). Folds point down open and right closed; menus
+flip up while open; “go to” arrows point right or left.
 
 Value pickers through `Blockr.Select` / `Select.menu()`, menus of
 actions through `Blockr.menu` or
@@ -1668,12 +1674,13 @@ rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
 action menu
 ([`tool_button()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/tool_button.md),
 [`action_menu()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)),
-the button classes (`.blockr-btn`), the chevron
-(`Blockr.icons.chevron`), and the column-label reader. blockr.dock owns
-the dock header, the “…” menu, the block status dot and its spec
-(`block_status_badge()`, which the DAG draws from too), the category
-colours (`blk_color()`) and the rule that hides the gear in simplified
-mode. blockr.theme owns data colours.
+the button classes (`.blockr-btn`), the small icons (`Blockr.icons`,
+[`small_icon()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
+in R), and the column-label reader. blockr.dock owns the dock header,
+the “…” menu, the block status dot and its spec (`block_status_badge()`,
+which the DAG draws from too), the category colours (`blk_color()`) and
+the rule that hides the gear in simplified mode. blockr.theme owns data
+colours.
 
 The token tests in blockr.ui check that the vocabulary changes only
 deliberately, that every name follows the grammar or is a legacy alias,
