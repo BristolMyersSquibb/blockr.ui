@@ -17,7 +17,8 @@
  * blockr.extra reads .blockr-select__value) and several style it, so the
  * class names are part of that surface.
  *
- * Depends on: blockr-ui.js (Blockr.uid, icons, removeNode, place, layer).
+ * Depends on: blockr-ui.js (Blockr.uid, removeNode, place, layer) and
+ * Blockr.icons, which controls_dep() writes into the page.
  */
 (() => {
   'use strict';
