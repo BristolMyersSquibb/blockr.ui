@@ -4,7 +4,7 @@ html_of <- function(x) htmltools::renderTags(x)$html
 recording_session <- function() {
   env <- new.env()
   env$sent <- list()
-  env$sendInputMessage <- function(inputId, message) {
+  env$sendInputMessage <- function(inputId, message) { # nolint
     env$sent[[length(env$sent) + 1L]] <- list(id = inputId, message = message)
   }
   env
@@ -18,13 +18,18 @@ test_that("select_input() writes its settings for the binding", {
   )
 
   expect_match(html, 'class="blockr-settings__field"', fixed = TRUE)
-  expect_match(html, '<label id="col-label" class="blockr-label">Column</label>',
-               fixed = TRUE)
+  expect_match(
+    html, '<label id="col-label" class="blockr-label">Column</label>',
+    fixed = TRUE
+  )
   expect_match(html, 'id="col" class="blockr-ui-select"', fixed = TRUE)
   expect_match(html, 'data-multiple="false"', fixed = TRUE)
   expect_match(
     html,
-    'data-options="[&quot;mpg&quot;,{&quot;value&quot;:&quot;Displacement&quot;,&quot;label&quot;:&quot;disp&quot;}]"',
+    paste0(
+      'data-options="[&quot;mpg&quot;,{&quot;value&quot;:',
+      '&quot;Displacement&quot;,&quot;label&quot;:&quot;disp&quot;}]"'
+    ),
     fixed = TRUE
   )
   expect_match(html, 'data-selected="[&quot;disp&quot;]"', fixed = TRUE)
@@ -78,8 +83,10 @@ test_that("checkbox_input() draws Blockr.checkbox's markup", {
   html <- html_of(checkbox_input("header", "First row is a header", TRUE))
 
   expect_match(html, '<label class="blockr-checkbox">', fixed = TRUE)
-  expect_match(html, 'id="header" type="checkbox" class="blockr-ui-checkbox" checked',
-               fixed = TRUE)
+  expect_match(
+    html, 'id="header" type="checkbox" class="blockr-ui-checkbox" checked',
+    fixed = TRUE
+  )
   expect_match(html, '<span class="blockr-checkbox__box"><svg', fixed = TRUE)
   expect_match(html, "blockr-checkbox__label\">First row is a header",
                fixed = TRUE)
@@ -88,12 +95,18 @@ test_that("checkbox_input() draws Blockr.checkbox's markup", {
 
 test_that("segmented_input() takes two or three values", {
 
-  html <- html_of(segmented_input("from", "From", c(First = "head", Last = "tail"),
-                                  size = "xs"))
+  html <- html_of(
+    segmented_input("from", "From", c(First = "head", Last = "tail"),
+                    size = "xs")
+  )
 
   expect_match(
     html,
-    'data-choices="[{&quot;value&quot;:&quot;head&quot;,&quot;label&quot;:&quot;First&quot;},{&quot;value&quot;:&quot;tail&quot;,&quot;label&quot;:&quot;Last&quot;}]"',
+    paste0(
+      'data-choices="[{&quot;value&quot;:&quot;head&quot;,',
+      "&quot;label&quot;:&quot;First&quot;},{&quot;value&quot;:",
+      '&quot;tail&quot;,&quot;label&quot;:&quot;Last&quot;}]"'
+    ),
     fixed = TRUE
   )
   expect_match(html, 'data-selected="&quot;head&quot;"', fixed = TRUE)
@@ -144,9 +157,12 @@ test_that("gear_tray() draws the gear last in the header row, and the tray", {
 
   expect_match(
     html,
-    paste0('<button id="gear" type="button" class="blockr-gear-btn blockr-ui-gear" ',
-           'aria-controls="gear_tray" aria-expanded="false" aria-label="Settings" ',
-           'data-blockr-tooltip="Settings"></button>'),
+    paste0(
+      '<button id="gear" type="button" ',
+      'class="blockr-gear-btn blockr-ui-gear" aria-controls="gear_tray" ',
+      'aria-expanded="false" aria-label="Settings" ',
+      'data-blockr-tooltip="Settings"></button>'
+    ),
     fixed = TRUE
   )
   expect_match(html, "blockr-tool.*blockr-gear-btn")
