@@ -12,7 +12,10 @@ const { test } = require('node:test');
 const JS_DIR = path.join(__dirname, '..', '..', 'inst', 'assets', 'js');
 
 // Scripts whose tests are R tests, and where.
-const elsewhere = { 'shiny-has-perf.js': 'tests/testthat/test-shiny-has-perf.R' };
+const elsewhere = {
+  'shiny-has-perf.js': 'tests/testthat/test-shiny-has-perf.R',
+  'shiny-input-batch.js': 'tests/testthat/test-shiny-input-batch.R'
+};
 
 test('every shipped script has a test', () => {
   const tests = fs.readdirSync(__dirname)

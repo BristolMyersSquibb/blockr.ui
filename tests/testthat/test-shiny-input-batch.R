@@ -2,7 +2,7 @@
 # covers what the browser executes.
 input_batch_ctx <- function() {
 
-  skip_if_not_installed("V8")
+  testthat::skip_if_not_installed("V8")
 
   ctx <- V8::v8()
 
