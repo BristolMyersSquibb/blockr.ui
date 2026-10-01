@@ -43,10 +43,10 @@ header and 16px in a tab. The glyph is half the mark plus 2px, and the
 corner radius a quarter of it.
 }
 \details{
-In HTML, \code{block_mark()} draws the mark with the \code{.blockr-mark} class, which
-colours it from the category's token, \verb{--blockr-category-<category>}. The
-mark on a \code{Blockr.menu} row is the same element at 24px. For a place that
-takes an image rather than markup, such as the DAG's canvas,
+In HTML, \code{block_mark()} draws the mark with the \code{.blockr-block-mark} class,
+which colours it from the category's token, \verb{--blockr-category-<category>}.
+The mark on a \code{Blockr.menu} row is the same element at 24px. For a place
+that takes an image rather than markup, such as the DAG's canvas,
 \code{block_mark_svg()} draws the mark as a standalone SVG. An image cannot read
 the tokens, so the SVG carries its colour as a literal, which
 \code{category_color()} looks up from the tokens file. Both tints are

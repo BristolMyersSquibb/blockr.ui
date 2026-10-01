@@ -354,11 +354,11 @@ There is no 16px section heading inside a block.
   with the package as a badge, 20px in the compact header, 16px in a tab. The
   glyph is half the mark plus 2px (18, 14, 12, 10) and the corner radius a
   quarter of it (8, 6, 5, 4).
-- One element draws it everywhere, blockr.ui's `.blockr-mark`: 24px, or
-  another size through `.blockr-mark--32`, `--20` and `--16`. It is built by
-  `block_mark()` in R and by a row's `mark` in `Blockr.menu`. Where the mark
-  has to be an image, as on the DAG's canvas, `block_mark_svg()` draws the
-  same mark as an SVG.
+- One element draws it everywhere, blockr.ui's `.blockr-block-mark`: 24px,
+  or another size through `.blockr-block-mark--32`, `--20` and `--16`. It is
+  built by `block_mark()` in R and by a row's `mark` in `Blockr.menu`. Where
+  the mark has to be an image, as on the DAG's canvas, `block_mark_svg()`
+  draws the same mark as an SVG.
 - The header's mark carries the block type and package as its tooltip, one
   of the few on something that is not a button or a cut-off label (see
   Tooltips).

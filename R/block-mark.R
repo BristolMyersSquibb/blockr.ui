@@ -6,10 +6,10 @@
 #' header and 16px in a tab. The glyph is half the mark plus 2px, and the
 #' corner radius a quarter of it.
 #'
-#' In HTML, `block_mark()` draws the mark with the `.blockr-mark` class, which
-#' colours it from the category's token, `--blockr-category-<category>`. The
-#' mark on a `Blockr.menu` row is the same element at 24px. For a place that
-#' takes an image rather than markup, such as the DAG's canvas,
+#' In HTML, `block_mark()` draws the mark with the `.blockr-block-mark` class,
+#' which colours it from the category's token, `--blockr-category-<category>`.
+#' The mark on a `Blockr.menu` row is the same element at 24px. For a place
+#' that takes an image rather than markup, such as the DAG's canvas,
 #' `block_mark_svg()` draws the mark as a standalone SVG. An image cannot read
 #' the tokens, so the SVG carries its colour as a literal, which
 #' `category_color()` looks up from the tokens file. Both tints are
@@ -50,8 +50,8 @@ block_mark <- function(icon, category, size = 24, ...) {
 
   with_controls(
     tags$span(
-      class = "blockr-mark",
-      class = if (size != 24) paste0("blockr-mark--", size),
+      class = "blockr-block-mark",
+      class = if (size != 24) paste0("blockr-block-mark--", size),
       `data-category` = category,
       ...,
       htmltools::HTML(icon)

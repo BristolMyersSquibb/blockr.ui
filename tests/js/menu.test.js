@@ -227,16 +227,16 @@ test('a row\'s mark is the block\'s mark, in its category\'s colour or one of it
     ]
   });
   const rows = panel(win).querySelectorAll('.blockr-menu__item');
-  const chart = rows[0].querySelector('.blockr-mark');
+  const chart = rows[0].querySelector('.blockr-block-mark');
   assert.strictEqual(rows[0].firstElementChild, chart, 'before the label');
-  assert.strictEqual(chart.className, 'blockr-mark', 'the 24px size, no modifier');
+  assert.strictEqual(chart.className, 'blockr-block-mark', 'the 24px size, no modifier');
   assert.strictEqual(chart.dataset.category, 'plot');
   assert.strictEqual(chart.style.color, '', 'the stylesheet colours it');
   assert.ok(chart.querySelector('svg'), 'the glyph');
-  const stack = rows[1].querySelector('.blockr-mark');
+  const stack = rows[1].querySelector('.blockr-block-mark');
   assert.strictEqual(stack.dataset.category, undefined);
   assert.notStrictEqual(stack.style.color, '', 'its own colour');
-  assert.strictEqual(rows[2].querySelector('.blockr-mark'), null, 'no mark unless given');
+  assert.strictEqual(rows[2].querySelector('.blockr-block-mark'), null, 'no mark unless given');
   win.close();
 });
 
@@ -259,7 +259,7 @@ test('a filter box narrows the rows, hides empty groups and Enter takes the firs
   assert.strictEqual(p.querySelector('.blockr-menu__caption').textContent, 'Add a block');
   const input = p.querySelector('.blockr-menu__filter-input');
   assert.strictEqual(win.document.activeElement, input, 'the filter holds the focus');
-  assert.ok(p.querySelector('.blockr-mark'), 'mark drawn');
+  assert.ok(p.querySelector('.blockr-block-mark'), 'mark drawn');
 
   input.value = 'subset';
   input.dispatchEvent(new win.Event('input', { bubbles: true }));

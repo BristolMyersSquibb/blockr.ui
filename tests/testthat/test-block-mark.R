@@ -9,7 +9,7 @@ test_that("block_mark() draws the glyph at a size, coloured by category", {
   attrib <- htmltools::tagGetAttribute
   mark <- block_mark(glyph, "plot")
 
-  expect_identical(attrib(mark, "class"), "blockr-mark")
+  expect_identical(attrib(mark, "class"), "blockr-block-mark")
   expect_identical(attrib(mark, "data-category"), "plot")
   expect_match(as.character(mark), "<path d=\"M0 0h16v16H0z\">", fixed = TRUE)
 
@@ -17,7 +17,7 @@ test_that("block_mark() draws the glyph at a size, coloured by category", {
   for (size in c(32, 20, 16)) {
     expect_identical(
       attrib(block_mark(glyph, "plot", size = size), "class"),
-      paste0("blockr-mark blockr-mark--", size)
+      paste0("blockr-block-mark blockr-block-mark--", size)
     )
   }
 
@@ -66,7 +66,7 @@ test_that("each size of the mark follows the spec's rule", {
   for (size in c(24, 32, 20, 16)) {
 
     decl <- rule(
-      if (size == 24) ".blockr-mark" else paste0(".blockr-mark--", size)
+      paste0(".blockr-block-mark", if (size != 24) paste0("--", size))
     )
 
     expect_identical(
@@ -94,9 +94,9 @@ test_that("every category token colours the mark, and every category has one", {
     system.file("assets", "css", "blockr-blocks.css", package = "blockr.ui")
   )
   coloured <- sub(
-    "^\\.blockr-mark\\[data-category=\"([a-z]+)\"\\]$",
+    "^\\.blockr-block-mark\\[data-category=\"([a-z]+)\"\\]$",
     "\\1",
-    grep("^\\.blockr-mark\\[data-category=", selectors, value = TRUE)
+    grep("^\\.blockr-block-mark\\[data-category=", selectors, value = TRUE)
   )
 
   expect_setequal(coloured, setdiff(categories, "uncategorized"))

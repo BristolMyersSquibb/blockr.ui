@@ -569,7 +569,7 @@
    is mixed from it, so a mark in some other colour (a stack's) sets `color`
    alone. Mixed with transparent, the tint sits at 18% on whatever surface or
    row fill is under the mark. */
-.blockr-mark {
+.blockr-block-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -582,37 +582,37 @@
   background: color-mix(in srgb, currentColor 18%, transparent);
 }
 
-.blockr-mark svg {
+.blockr-block-mark svg {
   width: 1em;
   height: 1em;
 }
 
-.blockr-mark--32 {
+.blockr-block-mark--32 {
   width: 32px;
   height: 32px;
   border-radius: 8px;
   font-size: 18px;
 }
 
-.blockr-mark--20 {
+.blockr-block-mark--20 {
   width: 20px;
   height: 20px;
   border-radius: 5px;
   font-size: 12px;
 }
 
-.blockr-mark--16 {
+.blockr-block-mark--16 {
   width: 16px;
   height: 16px;
   border-radius: 4px;
   font-size: 10px;
 }
 
-.blockr-mark[data-category="input"] { color: var(--blockr-category-input); }
-.blockr-mark[data-category="transform"] { color: var(--blockr-category-transform); }
-.blockr-mark[data-category="structured"] { color: var(--blockr-category-structured); }
-.blockr-mark[data-category="plot"] { color: var(--blockr-category-plot); }
-.blockr-mark[data-category="table"] { color: var(--blockr-category-table); }
-.blockr-mark[data-category="model"] { color: var(--blockr-category-model); }
-.blockr-mark[data-category="output"] { color: var(--blockr-category-output); }
-.blockr-mark[data-category="utility"] { color: var(--blockr-category-utility); }
+.blockr-block-mark[data-category="input"] { color: var(--blockr-category-input); }
+.blockr-block-mark[data-category="transform"] { color: var(--blockr-category-transform); }
+.blockr-block-mark[data-category="structured"] { color: var(--blockr-category-structured); }
+.blockr-block-mark[data-category="plot"] { color: var(--blockr-category-plot); }
+.blockr-block-mark[data-category="table"] { color: var(--blockr-category-table); }
+.blockr-block-mark[data-category="model"] { color: var(--blockr-category-model); }
+.blockr-block-mark[data-category="output"] { color: var(--blockr-category-output); }
+.blockr-block-mark[data-category="utility"] { color: var(--blockr-category-utility); }

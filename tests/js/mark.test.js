@@ -50,8 +50,8 @@ const rgba = (css) => {
 };
 
 test('each size derives its glyph and its corners from its side', async (page) => {
-  for (const [side, cls] of [[24, 'blockr-mark'], [32, 'blockr-mark blockr-mark--32'],
-    [20, 'blockr-mark blockr-mark--20'], [16, 'blockr-mark blockr-mark--16']]) {
+  for (const [side, cls] of [[24, 'blockr-block-mark'], [32, 'blockr-block-mark blockr-block-mark--32'],
+    [20, 'blockr-block-mark blockr-block-mark--20'], [16, 'blockr-block-mark blockr-block-mark--16']]) {
     const seen = await measure(page, cls, 'plot');
     assert.deepStrictEqual(
       { size: seen.size, glyph: seen.glyph, centred: seen.centred, radius: seen.radius },
@@ -66,7 +66,7 @@ test('the glyph and the tint take the category colour, in both schemes', async (
     await page.evaluate((s) => document.documentElement.setAttribute('data-bs-theme', s), scheme);
     for (const [category, colour] of [['plot', [230, 159, 0]], ['input', [0, 114, 178]],
       ['uncategorized', [153, 153, 153]], ['not-a-category', [153, 153, 153]], [null, [153, 153, 153]]]) {
-      const seen = await measure(page, 'blockr-mark', category);
+      const seen = await measure(page, 'blockr-block-mark', category);
       assert.deepStrictEqual(
         { color: rgba(seen.color), fill: rgba(seen.fill), tint: rgba(seen.tint) },
         { color: [...colour, 1], fill: [...colour, 1], tint: [...colour, 0.18] },
@@ -79,7 +79,7 @@ test('the glyph and the tint take the category colour, in both schemes', async (
 test('a colour of its own wins over the category\'s', async (page) => {
   const tint = await page.evaluate(() => {
     const mark = document.createElement('span');
-    mark.className = 'blockr-mark';
+    mark.className = 'blockr-block-mark';
     mark.dataset.category = 'plot';
     mark.style.color = 'rgb(124, 58, 237)';
     document.body.appendChild(mark);
@@ -94,7 +94,7 @@ test('a menu row draws the 24px mark', async (page) => {
     button.textContent = 'Add';
     document.body.appendChild(button);
     Blockr.menu(button, { items: [{ label: 'Chart', mark: { icon: glyph, category: 'plot' } }] });
-    const mark = document.querySelector('.blockr-menu__item .blockr-mark').getBoundingClientRect();
+    const mark = document.querySelector('.blockr-menu__item .blockr-block-mark').getBoundingClientRect();
     return [mark.width, mark.height];
   }, GLYPH);
   assert.deepStrictEqual(side, [24, 24]);

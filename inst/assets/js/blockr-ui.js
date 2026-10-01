@@ -997,7 +997,7 @@ Blockr.tooltip = (() => {
       }
       if (item.mark) {
         const mk = document.createElement('span');
-        mk.className = 'blockr-mark';
+        mk.className = 'blockr-block-mark';
         if (item.mark.category) mk.dataset.category = item.mark.category;
         if (item.mark.color) mk.style.color = item.mark.color;
         mk.innerHTML = item.mark.icon || '';
