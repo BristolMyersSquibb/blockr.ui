@@ -889,8 +889,8 @@ joins and no fill.
 - A fold (something opens in place: a table section, an outline chapter, a
   settings section) points down when open and right when closed, rotating
   −90°.
-- A menu or select (something floats: Select, a pill, the navbar's view menu,
-  a split button) points down and flips up (180°) while its menu is open.
+- A menu or select (something floats: Select, a pill, the navbar's workflow
+  name, Save and view menu) points down and flips up (180°) while its menu is open.
 - A "go to" arrow (an options page, back, the next page of rows) points right
   or left and does not rotate.
 - Every rotation uses `--blockr-transition`.
@@ -935,20 +935,30 @@ joins and no fill.
 The board's toolbar: 48px high, `bg-surface`, a `border-default` rule under
 it, every control 30px, tokens only.
 
-- Left: the logo, then the workflow's name, then its save state as 12px
-  `text-muted` text ("Not saved", "Saved just now"), then one quiet "…"
-  workflow menu (save as, copy link, history, new). No split buttons.
-- The workflow's name is its ID: chosen in a dialog at the first save, unique,
-  like a file name (spaces allowed). It is shown in the body face, weight 600,
-  never monospace. There is no separate title.
-- Right: the view menu as a quiet button (current view marked by weight 600,
-  no fill), the board options gear, and the account avatar last: a 28px circle
-  with the count's accent fill (`border-accent` at 14%) and a
-  `text-accent-strong` initial.
-- Hover on every navbar control is `bg-hover`. The spinner's label is the
-  light tooltip.
+- Left: the blockr mark, then the workflow's name, then Save.
+- The mark is the logo in its own green and the board's busy indicator. It
+  has no menu.
+- The workflow's name is its ID: chosen in a dialog at the first save,
+  unique, like a file name (spaces allowed). It is shown in the body face,
+  weight 600, never monospace, with a chevron. It opens the workflow
+  switcher: the saved workflows, then New workflow. There is no separate
+  title.
+- Save is the word in `text-muted` with a chevron. It opens the save menu:
+  Save (Ctrl+S), Save as new workflow (Ctrl+Shift+S), Download, then the
+  versions once there is one. No save state is shown as text.
+- Right: the view menu (the current view's name with a chevron), a 20px
+  `border-default` rule, help, the board options (the side panel icon), and
+  the account avatar last: a 28px circle with the accent fill
+  (`border-accent` at 14%) and a `text-accent-strong` initial.
+- The board option "Show views as tabs" puts the views on a second line
+  under a `border-default` rule, one tab per view, the current one in
+  weight 600 over a 2px `border-accent` line. The view menu then shows only
+  its chevron and moves to the end of the tab line, for managing views.
+- Every chevron is the one from [Chevrons](#chevrons): muted, `text-default`
+  on hover, turned while its menu is open. Hover on every navbar control is
+  `bg-hover`.
 
-Drawn in the [design system page](design-system/index.html#actions).
+Drawn in the [design system page](design-system/index.html#navbar).
 
 ---
 

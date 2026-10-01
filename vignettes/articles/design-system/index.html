@@ -497,22 +497,32 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
 .z-cap { font-size: 12px; color: var(--blockr-color-text-muted); margin: 14px 0 6px; }
 .z-h { font-size: 15px; font-weight: 600; margin: 26px 0 4px; }
 .z-note { font-size: 13px; color: var(--blockr-color-text-muted); margin: 0 0 10px; max-width: 86ch; }
-.z-nav { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 10px; font-size: 14px; }
+.z-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 48px; padding: 0 12px; background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 10px; font-size: 14px; }
+.z-nav + .z-nav { margin-top: 16px; }
+.z-nav.tabs { padding-top: 9px; }
 .z-nav > * { flex-shrink: 0; white-space: nowrap; }
 .z-nav .z-sp { flex: 1 1 auto; }
-.z-nav .z-logo { color: var(--blockr-color-text-muted); display: inline-flex; }
-.z-nav .z-nm { font-weight: 600; }
-.z-nav .z-meta { font-size: 12px; color: var(--blockr-color-text-muted); }
+.z-mark { display: inline-flex; align-items: center; height: 30px; padding: 0 5px; color: #089E76; }
+.z-nm, .z-save, .z-view { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px; border: 0; background: transparent; border-radius: 6px; font: inherit; color: var(--blockr-color-text-default); cursor: pointer; }
+.z-nm { font-weight: 600; }
+.z-save { margin-left: -4px; font-size: 13px; color: var(--blockr-color-text-muted); }
+.z-view { font-size: 13px; font-weight: 500; }
+.z-nm:hover, .z-save:hover, .z-view:hover, .z-nm.open, .z-save.open, .z-view.open { background: var(--blockr-color-bg-hover); }
+.z-save:hover, .z-save.open { color: var(--blockr-color-text-default); }
+.z-rule { width: 1px; height: 20px; margin: 0 6px 0 4px; background: var(--blockr-color-border-default); }
 .z-ib { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; border-radius: 4px; color: var(--blockr-color-text-muted); cursor: pointer; }
-.z-ib:hover { background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-default); }
-.z-view { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 0; background: transparent; border-radius: 6px; font: inherit; font-size: 13px; font-weight: 500; color: var(--blockr-color-text-default); cursor: pointer; }
-.z-view:hover { background: var(--blockr-color-bg-hover); }
+.z-ib:hover, .z-ib.open { background: var(--blockr-color-bg-hover); color: var(--blockr-color-text-default); }
 .z-car { width: 12px; height: 12px; flex: none; background: var(--blockr-color-text-muted); transition: transform var(--blockr-transition);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px 12px no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px 12px no-repeat; }
-.z-view:hover .z-car { background: var(--blockr-color-text-default); }
-.z-view.open .z-car { transform: rotate(180deg); }
-.z-av { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: color-mix(in srgb, var(--blockr-color-border-accent) 14%, transparent); color: var(--blockr-color-text-accent-strong); }
+:is(.z-nm, .z-save, .z-view, .z-ib):hover .z-car { background: var(--blockr-color-text-default); }
+.open > .z-car { transform: rotate(180deg); }
+.z-av { width: 28px; height: 28px; margin-left: 4px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: color-mix(in srgb, var(--blockr-color-border-accent) 14%, transparent); color: var(--blockr-color-text-accent-strong); }
 [data-bs-theme="dark"] .z-av { color: var(--blockr-color-text-accent); }
+.z-break { flex: 0 0 calc(100% + 24px); height: 1px; margin: 8px -12px 0; background: var(--blockr-color-border-default); }
+.z-vtabs { display: flex; flex: 1 1 auto; min-width: 0; height: 38px; margin-left: -4px; }
+.z-vtab { display: inline-flex; align-items: center; padding: 0 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; font: inherit; font-size: var(--blockr-font-size-sm); font-weight: 500; color: var(--blockr-color-text-muted); cursor: pointer; }
+.z-vtab:hover { color: var(--blockr-color-text-default); }
+.z-vtab.on { color: var(--blockr-color-text-default); font-weight: 600; border-bottom-color: var(--blockr-color-border-accent); }
 .z-mk { flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--c, #0072B2); background: color-mix(in srgb, var(--c, #0072B2) 18%, var(--blockr-color-bg-surface)); }
 .z-m28 { width: 28px; height: 28px; border-radius: 6px; } .z-m24 { width: 24px; height: 24px; border-radius: 6px; } .z-m16 { width: 16px; height: 16px; border-radius: 4px; }
 .z-ladder { display: flex; align-items: flex-end; gap: 22px; font-size: 11px; color: var(--blockr-color-text-muted); }
@@ -707,6 +717,27 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
   <div class="md"></div>
   <div class="mr danger"><span class="lab">Remove</span></div></template>
 
+<template id="m-nav-name"><div class="mt">Workflows</div>
+  <div class="mr cur"><span class="lab">airquality exploration</span><span class="meta">just now</span></div>
+  <div class="mr"><span class="lab">ozone by month</span><span class="meta">2 days ago</span></div>
+  <div class="mr"><span class="lab">wind and temperature</span><span class="meta">last week</span></div>
+  <div class="md"></div>
+  <div class="mr"><span class="lab">New workflow</span></div></template>
+<template id="m-nav-save">
+  <div class="mr"><span class="lab">Save</span><span class="meta">Ctrl+S</span></div>
+  <div class="mr"><span class="lab">Save as new workflow…</span><span class="meta">Ctrl+Shift+S</span></div>
+  <div class="mr"><span class="lab">Download</span></div>
+  <div class="md"></div><div class="mt">Versions</div>
+  <div class="mr"><span class="lab">Just now</span><span class="meta">567d4 (current)</span></div>
+  <div class="mr"><span class="lab">All versions →</span></div></template>
+<template id="m-nav-views"><div class="mt">Views</div>
+  <div class="mr cur"><span class="lab">Overview</span></div>
+  <div class="mr"><span class="lab">Ozone</span></div>
+  <div class="mr"><span class="lab">Data</span></div>
+  <div class="md"></div>
+  <div class="mr"><span class="lab">New view</span></div>
+  <div class="mr"><span class="lab">Show views as tabs</span></div></template>
+
 <div class="wrap">
 <header class="top">
   <div class="row1">
@@ -750,23 +781,42 @@ gears, hover the icons, click the words, pills and boxes.</p>
   <symbol id="z-dots" viewBox="0 0 16 16"><g fill="currentColor"><circle cx="3.5" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12.5" cy="8" r="1.2"/></g></symbol>
   <symbol id="z-dotsv" viewBox="0 0 16 16"><g fill="currentColor"><circle cx="8" cy="3.5" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="8" cy="12.5" r="1.2"/></g></symbol>
   <symbol id="z-sliders" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4h7M12 4h2M2 8h2M7 8h7M2 12h9"/><circle cx="10.5" cy="4" r="1.5"/><circle cx="5.5" cy="8" r="1.5"/><circle cx="12.5" cy="12" r="1.5"/></g></symbol>
+  <symbol id="z-mark" viewBox="0 0 224 224" fill="currentColor"><rect x="0" y="160" width="64" height="64" rx="7"/><rect x="0" y="80" width="64" height="64" rx="7"/><rect x="0" y="0" width="64" height="64" rx="7"/><rect x="80" y="0" width="64" height="64" rx="7"/><rect x="160" y="0" width="64" height="64" rx="7"/><rect x="80" y="80" width="64" height="64" rx="7"/><rect x="160" y="160" width="64" height="64" rx="7"/></symbol>
+  <symbol id="z-help" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6.2"/><path d="M6.2 6.3a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1v.4"/></g><circle cx="8" cy="11.4" r=".8" fill="currentColor"/></symbol>
+  <symbol id="z-sidebar" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="2.5" width="12" height="11" rx="1.5"/><path d="M10 2.5v11"/></g></symbol>
   <symbol id="z-eye" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></g></symbol>
 </svg>
 
 <!-- ================================================================ APP FRAME (topic 20) -->
 <section class="part" id="navbar">
 <h2 class="ph">The navbar</h2>
-<p class="rl">The board's toolbar: 48px, controls at 30px, tokens only. The workflow's name is its ID (chosen at the first save,
-like a file name), then its save state as text and one "…" workflow menu. On the right the view menu, the board options and
-the account. <a href="../design-system.html#actions">rules: design-system#actions</a></p>
+<p class="rl">The board's toolbar: 48px, controls at 30px, tokens only. On the left the blockr mark, which is also the busy
+indicator, then the workflow's name, which switches workflows, then Save, which opens the save menu. On the right the view
+menu, a short rule, help, the board options and the account. <a href="../design-system.html#the-navbar">rules: design-system#the-navbar</a></p>
 <div class="z-nav">
-  <span class="z-logo"><svg width="18" height="18"><use href="#z-layers"/></svg></span>
-  <span class="z-nm">airquality exploration</span><span class="z-meta">Saved just now</span>
-  <button class="z-ib" data-tip="Workflow menu" aria-label="Workflow menu"><svg width="15" height="15"><use href="#z-dots"/></svg></button>
+  <span class="z-mark" aria-label="blockr"><svg width="20" height="20"><use href="#z-mark"/></svg></span>
+  <button class="z-nm" data-menu="m-nav-name">airquality exploration<span class="z-car"></span></button>
+  <button class="z-save" data-menu="m-nav-save">Save<span class="z-car"></span></button>
   <span class="z-sp"></span>
-  <button class="z-view" data-tip="Views"><svg width="13" height="13"><use href="#z-page"/></svg>Build<span class="z-car"></span></button>
-  <button class="z-ib" data-tip="Board options" aria-label="Board options"><svg width="15" height="15"><use href="#i-gear"/></svg></button>
+  <button class="z-view" data-menu="m-nav-views" data-place="right">Overview<span class="z-car"></span></button>
+  <span class="z-rule"></span>
+  <button class="z-ib" data-tip="Help" aria-label="Help"><svg width="16" height="16"><use href="#z-help"/></svg></button>
+  <button class="z-ib" data-tip="Board options" aria-label="Board options"><svg width="16" height="16"><use href="#z-sidebar"/></svg></button>
   <span class="z-av" data-tip="Signed in as Christoph">C</span>
+</div>
+<p class="note" style="margin-top:20px">With the board option "Show views as tabs", the views move to a second line and the
+view menu shrinks to its chevron, kept for managing views.</p>
+<div class="z-nav tabs">
+  <span class="z-mark" aria-label="blockr"><svg width="20" height="20"><use href="#z-mark"/></svg></span>
+  <button class="z-nm" data-menu="m-nav-name">airquality exploration<span class="z-car"></span></button>
+  <button class="z-save" data-menu="m-nav-save">Save<span class="z-car"></span></button>
+  <span class="z-sp"></span>
+  <button class="z-ib" data-tip="Help" aria-label="Help"><svg width="16" height="16"><use href="#z-help"/></svg></button>
+  <button class="z-ib" data-tip="Board options" aria-label="Board options"><svg width="16" height="16"><use href="#z-sidebar"/></svg></button>
+  <span class="z-av" data-tip="Signed in as Christoph">C</span>
+  <span class="z-break"></span>
+  <span class="z-vtabs"><button class="z-vtab on">Overview</button><button class="z-vtab">Ozone</button><button class="z-vtab">Data</button></span>
+  <button class="z-ib" data-menu="m-nav-views" data-place="right" aria-label="Views"><span class="z-car"></span></button>
 </div>
 </section>
 
