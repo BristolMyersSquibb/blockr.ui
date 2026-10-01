@@ -1,5 +1,21 @@
 # blockr.ui (development version)
 
+* `theme_dep()` draws Shiny's `checkboxInput()` and `checkboxGroupInput()`
+  and bslib's `input_switch()` as the design system's checkbox, so R code
+  keeps calling them and on/off looks the same everywhere.
+
+* A gear tray shows no heading, as the design system says: the heading
+  blockr.viz writes (`.dd-popover-title`, "Chart settings") is kept for
+  screen readers but no longer drawn as a second section title.
+
+* Rows in a menu of actions (`Blockr.menu`, `action_menu()`) take radius 4,
+  like the rows of a Select list, instead of 6.
+
+* A new layer, `--blockr-z-overlay` (1000, Bootstrap's `$zindex-dropdown`),
+  for an overlay that belongs to the content but is fixed on `<body>`, such
+  as a drag ghost or a drop line: above the content, under the navbar and
+  everything that floats.
+
 * The new `small_icon()` draws the design system's small icons in markup
   built in R (#64), from the list `Blockr.icons` is now built from:
   `controls_dep()` writes the list into the page ahead of `blockr-ui.js`,
