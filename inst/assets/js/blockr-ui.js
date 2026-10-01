@@ -1291,11 +1291,23 @@ Blockr.tooltip = (() => {
     Blockr.tooltip.set(gear, 'Settings');
     gear.setAttribute('aria-label', 'Settings');
     gear.setAttribute('aria-expanded', 'false');
+    // Open, the tray is a layer (Blockr.layer) in the page: an Escape
+    // pressed in the band or on the gear closes it, and a click outside
+    // leaves it open.
+    function addLayer() {
+      layer = Blockr.layer(band, {
+        from: gear,
+        inPage: true,
+        escape: function () { set(false); gear.focus(); }
+      });
+    }
+
     if (opts && opts.open) {
       open = true;
       gear.classList.add('blockr-gear-active');
       gear.setAttribute('aria-expanded', 'true');
       band.classList.add('blockr-settings--open');
+      addLayer();
     }
 
     /** @param {boolean} next */
@@ -1304,15 +1316,8 @@ Blockr.tooltip = (() => {
       open = next;
       gear.classList.toggle('blockr-gear-active', open);
       gear.setAttribute('aria-expanded', open ? 'true' : 'false');
-      // Open, the tray is a layer (Blockr.layer) in the page: an Escape
-      // pressed in the band or on the gear closes it, and a click outside
-      // leaves it open.
       if (open) {
-        layer = Blockr.layer(band, {
-          from: gear,
-          inPage: true,
-          escape: function () { set(false); gear.focus(); }
-        });
+        addLayer();
       } else if (layer) {
         layer.remove();
         layer = null;
