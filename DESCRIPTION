@@ -19,6 +19,7 @@ Imports:
     blockr.core (>= 0.1.4),
     dplyr,
     htmltools,
+    jsonlite,
     pillar,
     rlang,
     shiny (>= 1.14.0)
