@@ -117,19 +117,6 @@ format_column_inner <- function(x, max_chars = 50) {
   }
 }
 
-#' The design system's chevron, pointing down; CSS turns it (design system,
-#' "Chevrons"). 12px, a 1.4px stroke that does not scale.
-#' @noRd
-chevron_svg <- function() {
-  shiny::HTML(paste0(
-    '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" ',
-    'stroke="currentColor" stroke-width="1.4" stroke-linecap="round" ',
-    'stroke-linejoin="round" aria-hidden="true">',
-    '<polyline points="3 4.5 6 7.5 9 4.5" vector-effect="non-scaling-stroke">',
-    "</polyline></svg>"
-  ))
-}
-
 #' Build the HTML table preview for one page
 #'
 #' Pure presentation: renders an already-materialized page of data as the
@@ -477,7 +464,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         `data-direction` = "prev",
         `aria-label` = "Previous page",
         `data-blockr-tooltip` = "Previous page",
-        chevron_svg()
+        small_icon("chevron")
       ),
       shiny::tags$button(
         class = paste0("blockr-nav-btn", if (next_disabled) " disabled"),
@@ -485,7 +472,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
         `data-direction` = "next",
         `aria-label` = "Next page",
         `data-blockr-tooltip` = "Next page",
-        chevron_svg()
+        small_icon("chevron")
       )
     )
   )
@@ -547,9 +534,11 @@ table_preview_dep <- function() {
 # The shared tooltip (Blockr.tooltip) and its card style, for the sorted
 # header's tooltip and the cut-off cells. The card reads the tokens without
 # fallbacks, so they come along; the theme layer stays the app's to attach.
+# The icons go wherever blockr-ui.js goes, as its menus draw them.
 table_preview_tooltip_dep <- function() {
   list(
     tokens_dep(),
+    icons_dep(),
     controls_asset("blockr-ui-js", script = "js/blockr-ui.js"),
     controls_asset("blockr-tooltip-css", stylesheet = "css/blockr-tooltip.css")
   )

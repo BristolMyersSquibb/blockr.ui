@@ -364,8 +364,8 @@ There is no 16px section heading inside a block.
   Tooltips).
 - Bare mode (a board option, for dashboards): the card has no header; the
   tab carries the mark and the name, the actions sit right of the tabs, and a
-  double-click on the tab renames. It needs dockViewR's tab components
-  (cynkra/dockViewR#102); there is no CSS-only interim.
+  double-click on the tab renames. It needs dockViewR's tab components;
+  there is no CSS-only interim.
 
 ### Header row
 
@@ -880,12 +880,17 @@ appear on hover or keyboard focus of their row; remove turns `text-danger` on
 hover. Fold arrows stay visible. The crossfilter's filter cards are the
 exception (see [Special blocks](#special)).
 
+The icons are blockr.ui's, one list read two ways: `Blockr.icons` in
+JavaScript and `small_icon()` in R. A package draws them from there rather
+than keeping a copy of the SVG.
+
 ### Chevrons
 
 One chevron does every disclosure, dropdown and "go to" arrow:
-`Blockr.icons.chevron` in blockr.ui. It is a 12px box with the path
-`M3 4.5l3 3 3-3`, half the box wide and a quarter high with a right angle at
-the tip, stroked at 1.4px with round caps and joins and no fill.
+`Blockr.icons.chevron` in blockr.ui, `small_icon("chevron")` in R. It is a
+12px box with the path `M3 4.5l3 3 3-3`, half the box wide and a quarter
+high with a right angle at the tip, stroked at 1.4px with round caps and
+joins and no fill.
 
 - Size: 12px; 10px inside a 24px pill or a bare select in a row. The stroke
   stays 1.4px at both sizes.
@@ -1537,9 +1542,9 @@ Drawn in the [design system page](design-system/index.html#special).
       26px. No Bootstrap solid buttons.
 - [ ] Header row: 26px tools, gear last, `.blockr-gear-btn` on the gear only.
       No gear if there are no options. Every option is in the gear.
-- [ ] Chevrons: `Blockr.icons.chevron` only, 12px (10px in a pill). Folds
-      point down open and right closed; menus flip up while open; "go to"
-      arrows point right or left.
+- [ ] Chevrons: `Blockr.icons.chevron` (`small_icon("chevron")` in R) only,
+      12px (10px in a pill). Folds point down open and right closed; menus
+      flip up while open; "go to" arrows point right or left.
 - [ ] Value pickers through `Blockr.Select` / `Select.menu()`, menus of
       actions through `Blockr.menu` or `action_menu()`, all placed by the
       shared routine. No popovers. Tooltips only where the Tooltips section
@@ -1570,8 +1575,8 @@ shared components: the params grid (moving from blockr.extra),
 and pill styles, the slot and offer rules (today declared twice, in
 blockr.viz `chart.css` and blockr.dm `crossfilter-block.css`), the gear
 button, the tool button and the action menu (`tool_button()`,
-`action_menu()`), the button classes (`.blockr-btn`), the chevron
-(`Blockr.icons.chevron`), the block's mark (`block_mark()`,
+`action_menu()`), the button classes (`.blockr-btn`), the small icons
+(`Blockr.icons`, `small_icon()` in R), the block's mark (`block_mark()`,
 `block_mark_svg()`), and the column-label reader. Package blockr.dock owns
 the dock header, the "…" menu, the block status dot and its spec
 (`block_status_badge()`, which the DAG draws from too) and the rule that

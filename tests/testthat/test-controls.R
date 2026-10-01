@@ -3,15 +3,15 @@ test_that("controls_dep ships the controls after the tokens", {
   deps <- htmltools::findDependencies(controls_dep())
   names <- blockr.core::chr_xtr(deps, "name")
 
-  # blockr-ui.js defines the namespace Select builds on, and the stylesheets
-  # read the tokens, so the order is part of the contract. The theme layer
-  # is the app's to attach.
+  # The namespace Select builds on comes from blockr-ui.js, with the icons
+  # already on it, and the stylesheets read the tokens, so the order is part
+  # of the contract. The theme layer is the app's to attach.
   expect_identical(
     names,
-    c("blockr-tokens", "blockr-ui-js", "blockr-blocks-css", "blockr-menu-css",
-      "blockr-tooltip-css", "blockr-buttons-css", "blockr-settings-band",
-      "blockr-select-js", "blockr-select-css", "blockr-input-js",
-      "blockr-input-css")
+    c("blockr-tokens", "blockr-icons", "blockr-ui-js", "blockr-blocks-css",
+      "blockr-menu-css", "blockr-tooltip-css", "blockr-buttons-css",
+      "blockr-settings-band", "blockr-select-js", "blockr-select-css",
+      "blockr-input-js", "blockr-input-css")
   )
 
   assets <- system.file("assets", package = "blockr.ui")
@@ -49,6 +49,12 @@ test_that("the browser tests' page loads what controls_dep() attaches", {
   )
 
   expect_identical(loaded, attached)
+
+  # The icons the dependency writes into the head come first, from the
+  # snapshot test-icons.R keeps of them.
+  icons <- grep("_snaps/icons/icons.js", html, fixed = TRUE)
+  expect_length(icons, 1L)
+  expect_lt(icons, grep("inst/assets/js/blockr-ui.js", html, fixed = TRUE))
 })
 
 test_that("the controls read only meaning tokens this package defines", {

@@ -423,6 +423,7 @@ interface BlockrNamespace {
   removeNode(node: Node | null | undefined): void;
   contentWidth(el: Element): number;
   _measureEl?: HTMLDivElement;
+  /** The small icons by name, from the list small_icon() reads in R. */
   icons: Record<string, string>;
   /** The dismiss stack: what Escape and a click outside close (blockr-ui.js). */
   layer: BlockrLayer;
