@@ -1,4 +1,4 @@
-test_that("blockr_button() is a Shiny action button in the design system's classes", {
+test_that("blockr_button() is an action button in the .blockr-btn classes", {
 
   btn <- blockr_button("go", "Write file", kind = "main", size = "s")
   html <- htmltools::renderTags(btn)$html

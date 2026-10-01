@@ -224,8 +224,9 @@ segmented_input <- function(inputId, label, choices, selected = NULL,
 
 #' @rdname inputs
 #' @export
-update_segmented_input <- function(inputId, selected = NULL, label = NULL,
-                                   session = shiny::getDefaultReactiveDomain()) {
+update_segmented_input <- function(
+    inputId, selected = NULL, label = NULL,
+    session = shiny::getDefaultReactiveDomain()) {
   send_update(session, inputId, list(selected = selected, label = label))
 }
 
@@ -365,10 +366,8 @@ render_section <- function(x) {
   }
 
   fields <- lapply(Filter(Negate(is.null), x$fields), function(f) {
-    if (inherits(f, "shiny.tag") &&
-          htmltools::tagHasAttribute(f, "class") &&
-          grepl("blockr-settings__field", htmltools::tagGetAttribute(f, "class"),
-                fixed = TRUE)) {
+    cls <- if (inherits(f, "shiny.tag")) htmltools::tagGetAttribute(f, "class")
+    if (!is.null(cls) && grepl("blockr-settings__field", cls, fixed = TRUE)) {
       f
     } else {
       tags$div(class = "blockr-settings__field", f)
@@ -444,8 +443,9 @@ select_options <- function(choices) {
   }
 
   unname(Map(
-    function(v, l) if (is.na(l) || !nzchar(l) || l == v) v else
-      list(value = v, label = l),
+    function(v, l) {
+      if (is.na(l) || !nzchar(l) || l == v) v else list(value = v, label = l)
+    },
     values, as.character(labels)
   ))
 }
