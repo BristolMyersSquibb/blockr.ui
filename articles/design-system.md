@@ -365,7 +365,7 @@ There is no 16px section heading inside a block.
 - Bare mode (a board option, for dashboards): the card has no header;
   the tab carries the mark and the name, the actions sit right of the
   tabs, and a double-click on the tab renames. It needs dockViewR’s tab
-  components (cynkra/dockViewR#102); there is no CSS-only interim.
+  components; there is no CSS-only interim.
 
 ### Header row
 
