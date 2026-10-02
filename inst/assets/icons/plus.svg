@@ -1,0 +1,6 @@
+<!-- The plus of an add button ("Add condition", "New page"): a stroke, as the
+     design page draws it, at the menu icons' 1.25, so it matches the sliders
+     beside it in the views menu. It was Bootstrap's filled plus. -->
+<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true">
+  <path d="M8 3v10M3 8h10"></path>
+</svg>

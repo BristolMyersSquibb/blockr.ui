@@ -10,9 +10,10 @@
  *
  * Load it first. It holds nothing block-specific: the block protocol
  * (Blockr.registerBlock and the restore queue) is blockr.dplyr's
- * blockr-core.js. Nor does it hold the icons it draws: Blockr.icons is the
- * list small_icon() reads in R, which controls_dep() writes into the page
- * ahead of this file.
+ * blockr-core.js. Nor does it hold the icons it draws: Blockr.icons comes
+ * from the files small_icon() reads in R, one SVG per icon in
+ * inst/assets/icons, and controls_dep() writes it into the page ahead of
+ * this file.
  */
 window.Blockr = window.Blockr || /** @type {BlockrNamespace} */ ({});
 

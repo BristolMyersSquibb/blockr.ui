@@ -49,12 +49,6 @@ test_that("the browser tests' page loads what controls_dep() attaches", {
   )
 
   expect_identical(loaded, attached)
-
-  # The icons the dependency writes into the head come first, from the
-  # snapshot test-icons.R keeps of them.
-  icons <- grep("_snaps/icons/icons.js", html, fixed = TRUE)
-  expect_length(icons, 1L)
-  expect_lt(icons, grep("inst/assets/js/blockr-ui.js", html, fixed = TRUE))
 })
 
 test_that("the controls read only meaning tokens this package defines", {

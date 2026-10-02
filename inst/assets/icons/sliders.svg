@@ -1,0 +1,9 @@
+<!-- A menu icon: the sliders of a row that opens a mode ("Manage pages"). It
+     is drawn at 1.25 stroke, as the bin is, so the few rows that carry one
+     read as one set. -->
+<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true">
+  <path d="M2 4h12M2 8h12M2 12h12"></path>
+  <circle cx="5" cy="4" r="1.6" fill="var(--blockr-color-bg-raised)"></circle>
+  <circle cx="10" cy="8" r="1.6" fill="var(--blockr-color-bg-raised)"></circle>
+  <circle cx="6" cy="12" r="1.6" fill="var(--blockr-color-bg-raised)"></circle>
+</svg>
