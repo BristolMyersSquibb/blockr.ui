@@ -2,8 +2,10 @@
  * where a control lands on the page, and how it reads there.
  *
  * Each test gets a fresh page, controls.html: the stylesheets and scripts
- * controls_dep() attaches, in its order, and no controls. The test builds
- * the ones it needs in it, and fails on any script error the page throws.
+ * controls_dep() attaches, in its order, and no controls. The icons, which
+ * controls_dep() writes into the head, are set ahead of the page's scripts
+ * from the icons' files (icons.js). The test builds the controls it needs
+ * in the page, and fails on any script error the page throws.
  *
  * Playwright drives the Chrome installed on the machine, which GitHub's
  * Ubuntu runners have, so nothing downloads a browser. Set CHROME_BIN to
@@ -23,6 +25,7 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const nodeTest = require('node:test');
 const { chromium } = require('playwright-core');
+const icons = require('./icons');
 
 const PAGE = pathToFileURL(path.join(__dirname, 'controls.html')).href;
 
@@ -55,6 +58,7 @@ const test = (name, fn, opts = {}) => nodeTest(name, async () => {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   try {
+    await page.addInitScript(icons.script);
     await page.goto(PAGE);
     await fn(page);
     assert.deepStrictEqual(errors, [], 'the page threw');

@@ -23,9 +23,8 @@ const { Window } = require('happy-dom');
 const JS_DIR = path.join(__dirname, '..', '..', 'inst', 'assets', 'js');
 const read = (f) => fs.readFileSync(path.join(JS_DIR, f), 'utf8');
 // Blockr.icons, as controls_dep() writes it into the page ahead of
-// blockr-ui.js: the list lives in R, and test-icons.R keeps this snapshot.
-const icons = fs.readFileSync(
-  path.join(__dirname, '..', 'testthat', '_snaps', 'icons', 'icons.js'), 'utf8');
+// blockr-ui.js, from the icons' files.
+const icons = require('./icons').script;
 const ui = read('blockr-ui.js');
 const select = read('blockr-select.js');
 
