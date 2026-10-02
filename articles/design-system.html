@@ -2298,9 +2298,10 @@ it joins). Nothing else does: a button that names its action in full,
 like Save, has no tooltip.</li>
 <li>No native <code>title</code> tooltips remain in blockr markup: an
 element built in R carries its tooltip as
-<code>data-blockr-tooltip</code>, and a control built in JavaScript sets
-it with <code>Blockr.tooltip.set()</code>. A third-party widget’s titles
-are its own and stay native.</li>
+<code>data-blockr-tooltip</code>, with a badge after the name (the
+mark’s package) as <code>data-blockr-tooltip-badge</code>, and a control
+built in JavaScript sets it with <code>Blockr.tooltip.set()</code>. A
+third-party widget’s titles are its own and stay native.</li>
 <li>It matches the chart’s data tooltip (see <a href="#special">Special
 blocks</a>), so blockr has one floating style.</li>
 <li>It shows after the pointer rests 300ms, and at once on keyboard

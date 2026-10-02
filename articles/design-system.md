@@ -1192,9 +1192,10 @@ focus; Escape hides it.
   a link in the outline (the blocks it joins). Nothing else does: a
   button that names its action in full, like Save, has no tooltip.
 - No native `title` tooltips remain in blockr markup: an element built
-  in R carries its tooltip as `data-blockr-tooltip`, and a control built
-  in JavaScript sets it with `Blockr.tooltip.set()`. A third-party
-  widget’s titles are its own and stay native.
+  in R carries its tooltip as `data-blockr-tooltip`, with a badge after
+  the name (the mark’s package) as `data-blockr-tooltip-badge`, and a
+  control built in JavaScript sets it with `Blockr.tooltip.set()`. A
+  third-party widget’s titles are its own and stay native.
 - It matches the chart’s data tooltip (see [Special blocks](#special)),
   so blockr has one floating style.
 - It shows after the pointer rests 300ms, and at once on keyboard focus

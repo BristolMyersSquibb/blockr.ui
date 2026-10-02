@@ -83,8 +83,10 @@
   is the design system’s 26px icon button, named by a tooltip.
 
 - An element built in R can carry its tooltip as a `data-blockr-tooltip`
-  attribute; `Blockr.tooltip` shows it as the light card, in place of
-  the native `title` box.
+  attribute, and a badge after the name as `data-blockr-tooltip-badge`
+  ([\#63](https://github.com/BristolMyersSquibb/blockr.ui/issues/63));
+  `Blockr.tooltip` shows it as the light card, in place of the native
+  `title` box.
 
 - Text marked `data-blockr-editable` shows the text cursor and a tooltip
   naming the gesture, “Double-click to edit” unless the attribute names
