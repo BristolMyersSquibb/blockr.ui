@@ -2,6 +2,15 @@
 
 ## blockr.ui (development version)
 
+- The small icons ship as files, one SVG per icon in `assets/icons`,
+  which
+  [`small_icon()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
+  and `Blockr.icons` are built from
+  ([\#80](https://github.com/BristolMyersSquibb/blockr.ui/issues/80)).
+  JavaScript that runs without R, such as a package’s test harness,
+  reads them there: an icon is its file without its comment, which
+  carries the icon’s note, and without the whitespace between tags.
+
 - The block’s mark is drawn here, in the design system’s four sizes
   ([\#65](https://github.com/BristolMyersSquibb/blockr.ui/issues/65)).
   In R,

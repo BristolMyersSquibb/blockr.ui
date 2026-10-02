@@ -102,12 +102,17 @@ row's remove button, 14px), <code>"grip"</code> (a drag handle), <code>"plus"</c
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The small icons are not in <code>blockr-ui.js</code>: the dependency writes them into
-the page's head ahead of it, from the list <code>small_icon()</code> reads, so markup
+the page's head ahead of it, from the files <code>small_icon()</code> reads, so markup
 built in R and markup built in JavaScript draw one copy of each, and
 <code>small_icon("gear")</code> is <code>Blockr.icons.gear</code>. An icon draws in
 <code>currentColor</code>, so it takes the colour of the text around it, and is
 hidden from screen readers: the control that holds it carries the name, as
 <code><a href="tool_button.html">tool_button()</a></code> does.</p>
+<p>Each icon is a file of its own, <code>assets/icons/&lt;name&gt;.svg</code> in the installed
+package, so JavaScript that runs without R, such as a package's test
+harness, can build <code>Blockr.icons</code> from the files: an icon is its file
+without its comment, which carries the icon's note, and without the
+whitespace between tags.</p>
 <p>The stylesheets read the design tokens without fallbacks, so the
 dependency brings the tokens along, but not the theme layer that
 restyles the rest of the page: an app opts into that with <code><a href="theme_dep.html">theme_dep()</a></code>.

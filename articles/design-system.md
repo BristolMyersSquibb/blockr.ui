@@ -918,8 +918,8 @@ rest and appear on hover or keyboard focus of their row; remove turns
 `text-danger` on hover. Fold arrows stay visible. The crossfilter’s
 filter cards are the exception (see [Special blocks](#special)).
 
-The icons are blockr.ui’s, one list read two ways: `Blockr.icons` in
-JavaScript and
+The icons are blockr.ui’s, one SVG file each, read two ways:
+`Blockr.icons` in JavaScript and
 [`small_icon()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
 in R. A package draws them from there rather than keeping a copy of the
 SVG.
