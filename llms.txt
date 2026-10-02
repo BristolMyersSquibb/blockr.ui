@@ -80,6 +80,11 @@ By contributing to this project, you agree to abide by its terms.
 - [`apply_table_sort()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/apply_table_sort.md)
   : Sort a data frame for the table preview
 
+- [`block_mark()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block_mark.md)
+  [`block_mark_svg()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block_mark.md)
+  [`category_color()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block_mark.md)
+  : Block mark
+
 - [`build_html_table()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/build_html_table.md)
   : Build the HTML table preview for one page
 

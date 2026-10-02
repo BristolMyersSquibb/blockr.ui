@@ -183,6 +183,13 @@ system page</a>.</p>
 <td>anything positioned against the page (<a href="#floating">Stacking</a>)</td>
 </tr>
 <tr class="odd">
+<td></td>
+<td><code>--blockr-category-&lt;category&gt;</code></td>
+<td><code>--blockr-category-plot</code></td>
+<td>the block’s mark (<a href="#foundations">Block category
+colours</a>)</td>
+</tr>
+<tr class="even">
 <td>Local</td>
 <td><code>--blockr-&lt;owner&gt;-&lt;thing&gt;</code></td>
 <td><code>--blockr-dock-spinner-delay</code></td>
@@ -193,10 +200,11 @@ system page</a>.</p>
 <p>A global token’s second word is one of <code>color</code>,
 <code>font</code>, <code>radius</code>, <code>control</code>,
 <code>shadow</code>, <code>focus</code>, <code>transition</code>,
-<code>mark</code>, <code>z</code>, or a palette hue. Anything else is
-local. For colour, <code>&lt;property&gt;</code> is <code>text</code>,
-<code>bg</code> or <code>border</code> and comes first, because a colour
-chosen for text is not automatically right as a fill.</p>
+<code>mark</code>, <code>z</code>, <code>category</code>, or a palette
+hue. Anything else is local. For colour, <code>&lt;property&gt;</code>
+is <code>text</code>, <code>bg</code> or <code>border</code> and comes
+first, because a colour chosen for text is not automatically right as a
+fill.</p>
 </div>
 <div class="section level3">
 <h3 id="palette">Palette<a class="anchor" aria-label="anchor" href="#palette"></a>
@@ -917,9 +925,12 @@ never from UI tokens.</p>
 <div class="section level3">
 <h3 id="block-category-colours">Block category colours<a class="anchor" aria-label="anchor" href="#block-category-colours"></a>
 </h3>
-<p>Okabe-Ito, one per category, through <code>blk_color()</code> in
-blockr.dock. A fixed set: identical under every theme and in dark
-mode.</p>
+<p>Okabe-Ito, one token per category,
+<code>--blockr-category-&lt;category&gt;</code>, read by the block’s
+mark. A fixed set: identical under every theme and in dark mode. A
+category outside the set takes <code>uncategorized</code>, blockr.core’s
+default. Where the mark is an image, which cannot read the tokens,
+<code><a href="../reference/block_mark.html">category_color()</a></code> gives the same values.</p>
 <table class="table">
 <thead><tr class="header">
 <th>Category</th>
@@ -928,38 +939,38 @@ mode.</p>
 <tbody>
 <tr class="odd">
 <td>input</td>
-<td><code>#0072B2</code></td>
+<td><code>#0072b2</code></td>
 </tr>
 <tr class="even">
 <td>transform</td>
-<td><code>#009E73</code></td>
+<td><code>#009e73</code></td>
 </tr>
 <tr class="odd">
 <td>structured</td>
-<td><code>#56B4E9</code></td>
+<td><code>#56b4e9</code></td>
 </tr>
 <tr class="even">
 <td>plot</td>
-<td><code>#E69F00</code></td>
+<td><code>#e69f00</code></td>
 </tr>
 <tr class="odd">
 <td>table</td>
-<td><code>#CC79A7</code></td>
+<td><code>#cc79a7</code></td>
 </tr>
 <tr class="even">
 <td>model</td>
-<td><code>#F0E442</code></td>
+<td><code>#f0e442</code></td>
 </tr>
 <tr class="odd">
 <td>output</td>
-<td><code>#D55E00</code></td>
+<td><code>#d55e00</code></td>
 </tr>
 <tr class="even">
 <td>utility</td>
-<td><code>#CCCCCC</code></td>
+<td><code>#cccccc</code></td>
 </tr>
 <tr class="odd">
-<td>uncategorised</td>
+<td>uncategorized</td>
 <td><code>#999999</code></td>
 </tr>
 </tbody>
@@ -1014,6 +1025,13 @@ surface) with the glyph in the category colour. It comes in four sizes:
 with the package as a badge, 20px in the compact header, 16px in a tab.
 The glyph is half the mark plus 2px (18, 14, 12, 10) and the corner
 radius a quarter of it (8, 6, 5, 4).</li>
+<li>One element draws it everywhere, blockr.ui’s
+<code>.blockr-block-mark</code>: 24px, or another size through
+<code>.blockr-block-mark--32</code>, <code>--20</code> and
+<code>--16</code>. It is built by <code><a href="../reference/block_mark.html">block_mark()</a></code> in R and by
+a row’s <code>mark</code> in <code>Blockr.menu</code>. Where the mark
+has to be an image, as on the DAG’s canvas,
+<code><a href="../reference/block_mark.html">block_mark_svg()</a></code> draws the same mark as an SVG.</li>
 <li>The header’s mark carries the block type and package as its tooltip,
 one of the few on something that is not a button or a cut-off label (see
 Tooltips).</li>
@@ -2985,22 +3003,25 @@ page</a>.</p>
 <div class="section level3">
 <h3 id="where-the-code-lives">Where the code lives<a class="anchor" aria-label="anchor" href="#where-the-code-lives"></a>
 </h3>
-<p>blockr.ui owns the tokens
+<p>Package blockr.ui owns the tokens
 (<code>inst/assets/css/blockr-tokens.css</code>,
-<code>blockr-tokens-dark.css</code>) and the shared components: the
-params grid (moving from blockr.extra), <code>Blockr.Select</code> and
-its placement routine, <code>Blockr.checkbox</code>, the badge, tag and
-pill styles, the slot and offer rules (today declared twice, in
-blockr.viz <code>chart.css</code> and blockr.dm
+<code>blockr-tokens-dark.css</code>), the block category colours among
+them, and the shared components: the params grid (moving from
+blockr.extra), <code>Blockr.Select</code> and its placement routine,
+<code>Blockr.checkbox</code>, the badge, tag and pill styles, the slot
+and offer rules (today declared twice, in blockr.viz
+<code>chart.css</code> and blockr.dm
 <code>crossfilter-block.css</code>), the gear button, the tool button
 and the action menu (<code><a href="../reference/tool_button.html">tool_button()</a></code>,
 <code><a href="../reference/action_menu.html">action_menu()</a></code>), the button classes
 (<code>.blockr-btn</code>), the small icons (<code>Blockr.icons</code>,
-<code><a href="../reference/controls_dep.html">small_icon()</a></code> in R), and the column-label reader.
-blockr.dock owns the dock header, the “…” menu, the block status dot and
-its spec (<code>block_status_badge()</code>, which the DAG draws from
-too), the category colours (<code>blk_color()</code>) and the rule that
-hides the gear in simplified mode. blockr.theme owns data colours.</p>
+<code><a href="../reference/controls_dep.html">small_icon()</a></code> in R), the block’s mark
+(<code><a href="../reference/block_mark.html">block_mark()</a></code>, <code><a href="../reference/block_mark.html">block_mark_svg()</a></code>), and the
+column-label reader. Package blockr.dock owns the dock header, the “…”
+menu, the block status dot and its spec
+(<code>block_status_badge()</code>, which the DAG draws from too) and
+the rule that hides the gear in simplified mode. Package blockr.theme
+owns data colours.</p>
 <p>The token tests in blockr.ui check that the vocabulary changes only
 deliberately, that every name follows the grammar or is a legacy alias,
 that the controls read meaning tokens only, that icons and status
