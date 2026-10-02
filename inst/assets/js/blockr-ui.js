@@ -448,8 +448,10 @@ Blockr.textCommit = (input, opts) => {
  *
  * Markup built in R cannot call `set()`, so an element can also carry its
  * tooltip as an attribute: `data-blockr-tooltip="Download"`, plus
- * `data-blockr-tooltip-overflow` for the cut-off-only case. A `set()` on the
- * same element wins over the attribute.
+ * `data-blockr-tooltip-badge` for a badge after the name (the dock header's
+ * mark: "filter block" with "blockr.dplyr") and `data-blockr-tooltip-overflow`
+ * for the cut-off-only case. A `set()` on the same element wins over the
+ * attributes.
  *
  * One set of document listeners serves every tooltip, added when this file
  * loads, so no instance adds or leaks its own. The card shows after the
@@ -489,11 +491,23 @@ Blockr.tooltip = (() => {
   const ATTR = 'data-blockr-tooltip';
 
   /**
-   * The tooltip `el` carries: one given by set(), else its attribute.
+   * The line `el`'s attributes give: the name, then its badge if it has one.
+   * An empty name shows nothing, badge or not.
+   * @param {Element} el
+   * @returns {BlockrTooltipLine}
+   */
+  const attrLine = (el) => {
+    const name = el.getAttribute(ATTR) || '';
+    const badge = el.getAttribute(ATTR + '-badge');
+    return name && badge ? { name, badge } : name;
+  };
+
+  /**
+   * The tooltip `el` carries: one given by set(), else its attributes.
    * @param {Element} el
    */
   const tipOf = (el) => tips.get(el) || (el.hasAttribute(ATTR)
-    ? { content: el.getAttribute(ATTR) || '', overflow: el.hasAttribute(ATTR + '-overflow') }
+    ? { content: attrLine(el), overflow: el.hasAttribute(ATTR + '-overflow') }
     : null);
 
   /**
