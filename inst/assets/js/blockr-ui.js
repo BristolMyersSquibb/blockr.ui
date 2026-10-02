@@ -863,11 +863,13 @@ Blockr.tooltip = (() => {
    * after a gap or a divider, so a label with an icon never sits right under
    * one without.
    *
-   * A row may also carry `mark` ({ icon, color }: a block's glyph on a tint
-   * of its category colour), `badge` (a neutral badge at the end, as a
-   * package) and `keywords` (more text the filter matches). `config.caption`
-   * is one muted line on top ("Append to Dataset"); `config.filter` (true, or
-   * the placeholder) adds a filter box that narrows the rows as you type and
+   * A row may also carry `mark` ({ icon, category, color? }: a block's mark,
+   * its glyph in its category's colour on a tint of it, as block_mark()
+   * draws it in R; `color` draws it in a colour of its own, such as a
+   * stack's), `badge` (a neutral badge at the end, as a package) and
+   * `keywords` (more text the filter matches). A `config.caption` is one
+   * muted line on top ("Append to Dataset"); `config.filter` (true, or the
+   * placeholder) adds a filter box that narrows the rows as you type and
    * holds the focus; `config.minWidth` widens the panel.
    *
    * `config.head` ({ title, badge?, text? }) puts a block of text above the
@@ -995,8 +997,9 @@ Blockr.tooltip = (() => {
       }
       if (item.mark) {
         const mk = document.createElement('span');
-        mk.className = 'blockr-menu__mark';
-        if (item.mark.color) mk.style.setProperty('--blockr-menu-mark', item.mark.color);
+        mk.className = 'blockr-block-mark';
+        if (item.mark.category) mk.dataset.category = item.mark.category;
+        if (item.mark.color) mk.style.color = item.mark.color;
         mk.innerHTML = item.mark.icon || '';
         row.appendChild(mk);
       }

@@ -57,12 +57,14 @@ The second word of a token's name says what kind it is.
 | | `--blockr-radius-<step>`, `--blockr-control-h[-<step>]`, `--blockr-shadow-<step>` | `--blockr-radius-lg` | |
 | | `--blockr-focus-<aspect>`, `--blockr-transition`, `--blockr-mark-<aspect>` | `--blockr-focus-outline` | |
 | | `--blockr-z-<layer>` | `--blockr-z-menu` | anything positioned against the page ([Stacking](#floating)) |
+| | `--blockr-category-<category>` | `--blockr-category-plot` | the block's mark ([Block category colours](#foundations)) |
 | Local | `--blockr-<owner>-<thing>` | `--blockr-dock-spinner-delay` | its owner's stylesheet only |
 
 A global token's second word is one of `color`, `font`, `radius`, `control`,
-`shadow`, `focus`, `transition`, `mark`, `z`, or a palette hue. Anything else
-is local. For colour, `<property>` is `text`, `bg` or `border` and comes first,
-because a colour chosen for text is not automatically right as a fill.
+`shadow`, `focus`, `transition`, `mark`, `z`, `category`, or a palette hue.
+Anything else is local. For colour, `<property>` is `text`, `bg` or `border`
+and comes first, because a colour chosen for text is not automatically right
+as a fill.
 
 ### Palette
 
@@ -298,20 +300,23 @@ UI tokens.
 
 ### Block category colours
 
-Okabe-Ito, one per category, through `blk_color()` in blockr.dock. A fixed
-set: identical under every theme and in dark mode.
+Okabe-Ito, one token per category, `--blockr-category-<category>`, read by
+the block's mark. A fixed set: identical under every theme and in dark mode. A
+category outside the set takes `uncategorized`, blockr.core's default. Where
+the mark is an image, which cannot read the tokens, `category_color()` gives
+the same values.
 
 | Category | Colour |
 |---|---|
-| input | `#0072B2` |
-| transform | `#009E73` |
-| structured | `#56B4E9` |
-| plot | `#E69F00` |
-| table | `#CC79A7` |
-| model | `#F0E442` |
-| output | `#D55E00` |
-| utility | `#CCCCCC` |
-| uncategorised | `#999999` |
+| input | `#0072b2` |
+| transform | `#009e73` |
+| structured | `#56b4e9` |
+| plot | `#e69f00` |
+| table | `#cc79a7` |
+| model | `#f0e442` |
+| output | `#d55e00` |
+| utility | `#cccccc` |
+| uncategorized | `#999999` |
 
 Drawn in the [design system page](design-system/index.html#foundations).
 
@@ -349,6 +354,11 @@ There is no 16px section heading inside a block.
   with the package as a badge, 20px in the compact header, 16px in a tab. The
   glyph is half the mark plus 2px (18, 14, 12, 10) and the corner radius a
   quarter of it (8, 6, 5, 4).
+- One element draws it everywhere, blockr.ui's `.blockr-block-mark`: 24px,
+  or another size through `.blockr-block-mark--32`, `--20` and `--16`. It is
+  built by `block_mark()` in R and by a row's `mark` in `Blockr.menu`. Where
+  the mark has to be an image, as on the DAG's canvas, `block_mark_svg()`
+  draws the same mark as an SVG.
 - The header's mark carries the block type and package as its tooltip, one
   of the few on something that is not a button or a cut-off label (see
   Tooltips).
@@ -1558,17 +1568,19 @@ Drawn in the [design system page](design-system/index.html#authors).
 
 ### Where the code lives
 
-blockr.ui owns the tokens (`inst/assets/css/blockr-tokens.css`,
-`blockr-tokens-dark.css`) and the shared components: the params grid (moving
-from blockr.extra), `Blockr.Select` and its placement routine,
-`Blockr.checkbox`, the badge, tag and pill styles, the slot and offer
-rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
-`crossfilter-block.css`), the gear button, the tool button and the action
-menu (`tool_button()`, `action_menu()`), the button classes
-(`.blockr-btn`), the small icons (`Blockr.icons`, `small_icon()` in R), and the column-label reader. blockr.dock owns the dock
-header, the "…" menu, the block status dot and its spec
-(`block_status_badge()`, which the DAG draws from too), the category colours
-(`blk_color()`) and the rule that hides the gear in simplified mode. blockr.theme owns data colours.
+Package blockr.ui owns the tokens (`inst/assets/css/blockr-tokens.css`,
+`blockr-tokens-dark.css`), the block category colours among them, and the
+shared components: the params grid (moving from blockr.extra),
+`Blockr.Select` and its placement routine, `Blockr.checkbox`, the badge, tag
+and pill styles, the slot and offer rules (today declared twice, in
+blockr.viz `chart.css` and blockr.dm `crossfilter-block.css`), the gear
+button, the tool button and the action menu (`tool_button()`,
+`action_menu()`), the button classes (`.blockr-btn`), the small icons
+(`Blockr.icons`, `small_icon()` in R), the block's mark (`block_mark()`,
+`block_mark_svg()`), and the column-label reader. Package blockr.dock owns
+the dock header, the "…" menu, the block status dot and its spec
+(`block_status_badge()`, which the DAG draws from too) and the rule that
+hides the gear in simplified mode. Package blockr.theme owns data colours.
 
 The token tests in blockr.ui check that the vocabulary changes only
 deliberately, that every name follows the grammar or is a legacy alias, that

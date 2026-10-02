@@ -60,10 +60,7 @@ test_that("the browser tests' page loads what controls_dep() attaches", {
 test_that("the controls read only meaning tokens this package defines", {
 
   # Every stylesheet controls_dep() ships, read off the dependency, so a
-  # sheet added to it is held to this at once. A property a component sets
-  # for itself (the menu mark's colour, set inline by Blockr.menu) is not a
-  # token and is named here.
-  local <- "--blockr-menu-mark"
+  # sheet added to it is held to this at once.
   sheets <- blockr.core::unlst(
     blockr.core::lst_xtr(htmltools::findDependencies(controls_dep()),
                          "stylesheet")
@@ -71,9 +68,7 @@ test_that("the controls read only meaning tokens this package defines", {
   sheets <- basename(sheets[!grepl("tokens", sheets)])
 
   sites <- token_references("blockr.ui")
-  controls <- sites[
-    basename(sites$file) %in% sheets & !sites$token %in% local,
-  ]
+  controls <- sites[basename(sites$file) %in% sheets, ]
   stray <- grepl(palette_token, controls$token) |
     controls$token %in% names(legacy_tokens())
 
