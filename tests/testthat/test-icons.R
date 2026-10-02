@@ -61,6 +61,21 @@ test_that("the icons go into the page wherever blockr-ui.js goes, ahead", {
   )
 })
 
+test_that("the scripts draw no icon of their own", {
+
+  # A script draws its icons from Blockr.icons. One written into the script
+  # is a copy small_icon() cannot read, and other packages copy it from
+  # there.
+  scripts <- list.files(
+    system.file("assets", "js", package = "blockr.ui"),
+    pattern = "\\.js$",
+    full.names = TRUE
+  )
+  src <- blockr.core::unlst(lapply(scripts, readLines, warn = FALSE))
+
+  expect_identical(grep("<svg", src, fixed = TRUE, value = TRUE), character())
+})
+
 test_that("the page's script sets every icon by name, and cannot end early", {
 
   # Each name is quoted, as a file's name need not be a JavaScript
