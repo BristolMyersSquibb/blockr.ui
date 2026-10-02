@@ -1,6 +1,7 @@
 /* =========================================================================
    blockr-blocks.css — shared layout styles for blockr block UIs: rows,
-   pills, segmented controls, labels, fields, the Enter button, the gear.
+   pills, segmented controls, labels, fields, the Enter button, the gear,
+   the block's mark.
    The retired popover rules stayed in blockr.dplyr.
    ========================================================================= */
 
@@ -557,3 +558,61 @@
 .blockr-empty--block {
   padding: 28px 0 32px;
 }
+
+/* --- The block's mark (design system, "The block's mark and bare mode") ---
+   The block's glyph in its category colour on an 18% tint of that colour:
+   24px in list rows, 32px in the dock header (--32), 20px in the compact
+   header (--20) and 16px in a tab (--16). The glyph is half the mark plus
+   2px and the corner radius a quarter of it; being a bsicons SVG sized 1em
+   inline, the glyph takes its size from the font size.
+   The colour is the mark's own `color`, from its data-category, and the tint
+   is mixed from it, so a mark in some other colour (a stack's) sets `color`
+   alone. Mixed with transparent, the tint sits at 18% on whatever surface or
+   row fill is under the mark. */
+.blockr-block-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--blockr-category-uncategorized);
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.blockr-block-mark svg {
+  width: 1em;
+  height: 1em;
+}
+
+.blockr-block-mark--32 {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 18px;
+}
+
+.blockr-block-mark--20 {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.blockr-block-mark--16 {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.blockr-block-mark[data-category="input"] { color: var(--blockr-category-input); }
+.blockr-block-mark[data-category="transform"] { color: var(--blockr-category-transform); }
+.blockr-block-mark[data-category="structured"] { color: var(--blockr-category-structured); }
+.blockr-block-mark[data-category="plot"] { color: var(--blockr-category-plot); }
+.blockr-block-mark[data-category="table"] { color: var(--blockr-category-table); }
+.blockr-block-mark[data-category="model"] { color: var(--blockr-category-model); }
+.blockr-block-mark[data-category="output"] { color: var(--blockr-category-output); }
+.blockr-block-mark[data-category="utility"] { color: var(--blockr-category-utility); }
