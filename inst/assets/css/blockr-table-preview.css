@@ -146,9 +146,9 @@
       background-color: var(--blockr-color-bg-hover, #f3f4f6);
     }
 
-    /* 30px rows: 20px of text and 5px above and below. */
+    /* 26px rows: 20px of text and 3px above and below. */
     .blockr-table td {
-      padding: 5px 12px;
+      padding: 3px 12px;
       line-height: 20px;
       font-size: var(--blockr-font-size-base, 0.875rem);
       color: var(--blockr-color-text-default, #111827);

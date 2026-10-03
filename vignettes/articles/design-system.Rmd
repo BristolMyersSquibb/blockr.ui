@@ -1381,7 +1381,7 @@ Drawn in the [design system page](design-system/index.html#labels).
 One style for the table preview and for every output table (the table block
 and the composer table, which render annotated data frames).
 
-- **Rows:** 30px, 14px text on a 20px line with 5px above and below, 12px side
+- **Rows:** 26px, 14px text on a 20px line with 3px above and below, 12px side
   padding. No rules in the body; the hover wash (`bg-hover`) carries the eye
   along a row.
 - **Header:** names 13px (`font-size-sm`), weight 600, `text-default`. A second
