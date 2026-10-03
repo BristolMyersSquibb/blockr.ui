@@ -103,6 +103,36 @@
     return found;
   }
 
+  // Delete the `display: contents` rule itself
+  // (`div:where(.shiny-html-output):has(> *)` and its conditionalPanel twin).
+  // It measures free on a DOM insertion, but not when a text node or an
+  // output changes inside a pass-through container: Chrome then restyles the
+  // whole document, twice per server round trip while typing into a field.
+  // Without it the containers lay out as blocks again, as before Shiny 1.8.1.
+  var PASS_THROUGH = /:has\(\s*>\s*\*\s*\)\s*$/;
+
+  function dropPassThrough() {
+    const doomed = [];
+    eachRule(function (rule) {
+      const parts = rule.selectorText.split(",").map(function (p) {
+        return p.trim();
+      });
+      const all = parts.every(function (p) {
+        return PASS_THROUGH.test(p) && isShinyPassThrough(p);
+      });
+      if (all) {
+        doomed.push(rule);
+      }
+    });
+    doomed.forEach(function (rule) {
+      const owner = rule.parentRule || rule.parentStyleSheet;
+      const idx = Array.prototype.indexOf.call(owner.cssRules, rule);
+      if (idx >= 0) {
+        owner.deleteRule(idx);
+      }
+    });
+  }
+
   function stripGuards() {
     eachRule(function (rule) {
       const selector = rule.selectorText;
@@ -122,6 +152,8 @@
         );
       }
     });
+
+    dropPassThrough();
 
     const left = survivingNonSubject();
     if (left.length) {
