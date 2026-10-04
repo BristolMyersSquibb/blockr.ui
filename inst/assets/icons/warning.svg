@@ -1,0 +1,7 @@
+<!-- A warning's mark: an exclamation in a triangle, at the menu icons' 1.25
+     stroke. -->
+<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M8 2.25l6.25 11H1.75z"></path>
+  <path d="M8 6.5v3"></path>
+  <circle cx="8" cy="11.4" r="0.4" fill="currentColor"></circle>
+</svg>

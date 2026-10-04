@@ -1,5 +1,10 @@
 # blockr.ui (development version)
 
+* `small_icon()` has `"eye"`, `"dots"`, `"minus"`, `"info"`, `"warning"`,
+  `"maximize"` and `"restore"`, the icons blockr.dock and blockr.extra still
+  took from Font Awesome, through `shiny::icon()` or dockViewR's defaults
+  (#85).
+
 * The small icons ship as files, one SVG per icon in `assets/icons`, which
   `small_icon()` and `Blockr.icons` are built from (#80). JavaScript that
   runs without R, such as a package's test harness, reads them there: an
