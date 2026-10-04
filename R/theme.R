@@ -126,9 +126,8 @@ shiny_has_perf_dep <- function() {
 #' own send. The first carries all pending inputs and the rest send an empty
 #' update. The server runs a full input cycle for each: it walks every output
 #' of the session to update its hidden state, then flushes. Mounting a block
-#' card sets about a dozen inputs, so a first visit to a 15-block dock view
-#' sent 218 messages, 177 of them empty, and the dock's own messages queued
-#' behind them for 2 to 4 seconds.
+#' card sets about a dozen inputs, so a dock view sends mostly empty messages
+#' while its cards mount, and the dock's own messages queue behind them.
 #'
 #' The script wraps `Shiny.shinyapp.sendInput` to return early on an empty
 #' object. Nothing is lost: the inputs such a send would have carried went

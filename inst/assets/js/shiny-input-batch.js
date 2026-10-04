@@ -9,11 +9,11 @@
 //
 // The server treats each of those as a full input cycle: manageInputs() walks
 // every output of the session to update its hidden state, then a reactive
-// flush runs. Mounting a block card sets about a dozen inputs, so a first
-// visit to a 15-block view sent 218 messages, 177 of them empty, at 3 to 11ms
-// each. They also sit in the websocket queue ahead of the messages that
-// matter: the dock's `initialized` report waited 1.9 to 3.7s behind them, and
-// nothing on the view evaluates before it is handled.
+// flush runs. Mounting a block card sets about a dozen inputs, so a dock view
+// sends mostly empty messages while its cards mount. They also sit in the
+// websocket queue ahead of the messages that matter: the dock's `initialized`
+// report waits behind them, and nothing on the view evaluates before it is
+// handled.
 //
 // An empty update carries nothing, so skipping it is behaviour-neutral: the
 // batch it would have sent was already sent by the first task. Once Shiny sets
