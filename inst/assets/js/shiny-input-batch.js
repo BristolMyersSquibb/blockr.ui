@@ -1,11 +1,11 @@
 // Drop the empty input messages Shiny sends after every deferred setInput.
 //
-// Shiny's InputBatchSender (shiny 1.14.0, srcts/src/inputPolicies/
-// inputBatchSender.ts) batches deferred inputs into one message per task. It
-// checks `sendIsEnqueued` before enqueueing the send, but never sets it, so
-// each deferred setInput enqueues its own send. The first carries every
-// pending input; the rest find the batch drained and send
-// `{"method":"update","data":{}}`.
+// Shiny's InputBatchSender (srcts/src/inputPolicies/inputBatchSender.ts)
+// batches deferred inputs into one message per task. It checks
+// `sendIsEnqueued` before enqueueing the send, but has never set it since the
+// flag came in with shiny 1.7.5, so each deferred setInput enqueues its own
+// send. The first carries every pending input; the rest find the batch
+// drained and send `{"method":"update","data":{}}`.
 //
 // The server treats each of those as a full input cycle: manageInputs() walks
 // every output of the session to update its hidden state, then a reactive
@@ -17,7 +17,9 @@
 //
 // An empty update carries nothing, so skipping it is behaviour-neutral: the
 // batch it would have sent was already sent by the first task. Once Shiny sets
-// the flag itself, no empty batch reaches this wrapper and it does nothing.
+// the flag itself, an empty batch is left only where an event-priority input
+// sent the batch while its send was queued, which is rare enough that this
+// script can go.
 (function () {
   function patch() {
     var app = window.Shiny && window.Shiny.shinyapp;

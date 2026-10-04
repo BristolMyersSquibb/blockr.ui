@@ -1,9 +1,9 @@
 # blockr.ui (development version)
 
 * The new `shiny_input_batch_dep()` dependency skips the empty input messages
-  Shiny 1.14.0 sends after every deferred input: its batcher never records
-  that a send is queued, so each deferred `setInput` queues one, and all but
-  the first go out empty. The server runs a full input cycle for each. On a
+  Shiny has sent after every deferred input since 1.7.5: its batcher never
+  records that a send is queued, so each deferred `setInput` queues one, and
+  all but the first go out empty. The server runs a full input cycle for each. On a
   first visit to a 15-block dock view that was 177 of 218 messages, and the
   dock's own messages waited 2 to 4 seconds behind them. Attach it once at
   the page level. Reported upstream as rstudio/shiny#4436.
