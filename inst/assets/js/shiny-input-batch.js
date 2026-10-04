@@ -39,14 +39,15 @@
     app.sendInput = wrapped;
   }
 
-  // shinyapp exists once Shiny initialises on document ready; the first
-  // deferred inputs go out after the socket connects, so patching at either
-  // point is early enough. Patch at both, the wrapper is applied once.
+  // Shiny creates `shinyapp` when it initialises, in a timeout after document
+  // ready, so a script in the page head runs before it exists. It does exist
+  // by `shiny:connected`, which Shiny fires before it starts running queued
+  // tasks, so patching then catches every deferred send. Patching now covers
+  // a script that arrives after connect, through renderUI() for example. The
+  // wrapper is applied once either way.
   patch();
 
   if (window.jQuery) {
     window.jQuery(document).on("shiny:connected", patch);
   }
-
-  document.addEventListener("DOMContentLoaded", patch);
 })();
