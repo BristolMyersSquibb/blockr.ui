@@ -340,7 +340,7 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  z-index: 1070;
+  z-index: var(--blockr-z-menu);
 }
 
 .blockr-dropdown[data-align="end"] > .blockr-dropdown__panel {

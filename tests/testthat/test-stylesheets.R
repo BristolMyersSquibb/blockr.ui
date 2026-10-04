@@ -8,7 +8,9 @@ test_that("no selector is styled in two stylesheets", {
     pattern = "\\.css$",
     full.names = TRUE
   )
-  files <- files[!grepl("tokens", basename(files))]
+  # The base sheet stands in for Bootstrap on a page without it, and the
+  # theme layer restyles over it as it does over Bootstrap.
+  files <- files[!grepl("tokens|blockr-base", basename(files))]
 
   selectors <- lapply(files, css_selectors)
   owners <- split(

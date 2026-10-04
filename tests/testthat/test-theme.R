@@ -69,3 +69,20 @@ test_that("the theme layer hides only chrome the host cannot reach", {
     ".popover .btn-close"
   )
 })
+
+test_that("base_dep() carries the font and the base sheet", {
+
+  deps <- htmltools::findDependencies(base_dep())
+
+  expect_identical(
+    blockr.core::chr_xtr(deps, "name"),
+    c("blockr-font", "blockr-base")
+  )
+
+  fonts <- system.file("assets", "fonts", package = "blockr.ui")
+  css <- readLines(file.path(fonts, "open-sans.css"), warn = FALSE)
+  files <- regmatches(css, regexpr("open-sans-[a-z-]+\\.woff2", css))
+
+  expect_setequal(files, list.files(fonts, pattern = "\\.woff2$"))
+  expect_true(all(c("math", "symbols") %in% sub("open-sans-([a-z]+)-.*", "\\1", files)))
+})

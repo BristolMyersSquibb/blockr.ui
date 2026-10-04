@@ -1,8 +1,8 @@
 /* Blockr.dropdown: a panel under its toggle that stays open while it is
  * worked in. What a caller can see: the toggle opens and closes it; a click
  * inside leaves it open, a click outside, Escape or another dropdown closes
- * it; the wrapper fires blockr:dropdown-shown and blockr:dropdown-hidden; the
- * panel never leaves its place in the page.
+ * it, through the dismiss stack; the wrapper fires blockr:dropdown-shown and
+ * blockr:dropdown-hidden; the panel never leaves its place in the page.
  */
 'use strict';
 
@@ -33,8 +33,12 @@ const build = (win, id) => {
   };
 };
 
-const click = (win, el) =>
+// A click as the browser sends it: the pointerdown, which the dismiss stack
+// reads, then the click.
+const click = (win, el) => {
+  el.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
   el.dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true }));
+};
 const key = (win, el, k) =>
   el.dispatchEvent(new win.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
 
@@ -106,4 +110,16 @@ test('shown and hidden events bubble from the wrapper', (newWindow) => {
   win.Blockr.dropdown.hide(wrap.querySelector('.row'));
   assert.deepStrictEqual(seen, [['shown', 'a'], ['hidden', 'a']]);
   assert.strictEqual(win.Blockr.dropdown.current(), null);
+});
+
+test('the open dropdown is one layer on the dismiss stack', (newWindow) => {
+  const win = newWindow();
+  const { toggle } = build(win, 'a');
+  const before = win.Blockr.layer.count();
+
+  click(win, toggle);
+  assert.strictEqual(win.Blockr.layer.count(), before + 1);
+
+  click(win, toggle);
+  assert.strictEqual(win.Blockr.layer.count(), before);
 });
