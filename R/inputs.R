@@ -225,8 +225,9 @@ segmented_input <- function(inputId, label, choices, selected = NULL,
 #' @rdname inputs
 #' @export
 update_segmented_input <- function(
-    inputId, selected = NULL, label = NULL,
-    session = shiny::getDefaultReactiveDomain()) {
+  inputId, selected = NULL, label = NULL,
+  session = shiny::getDefaultReactiveDomain()
+) {
   send_update(session, inputId, list(selected = selected, label = label))
 }
 
