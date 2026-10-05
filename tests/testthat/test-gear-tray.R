@@ -21,11 +21,8 @@ test_that("gear_tray() draws the gear last in the header row, and the tray", {
     ),
     fixed = TRUE
   )
-  # The icons are the shared ones: the gear's, and the toggle's check.
+  # The gear's icon is the shared one.
   expect_match(html, as.character(small_icon("gear")), fixed = TRUE)
-  expect_match(html, paste0('<span class="blockr-checkbox__box">',
-                            as.character(small_icon("confirm"))),
-               fixed = TRUE)
   expect_match(html, "blockr-tool.*blockr-gear-btn")
   expect_match(html, paste0('id="gear_tray" class="blockr-settings ',
                             'blockr-settings--beak" role="region" ',
@@ -34,8 +31,14 @@ test_that("gear_tray() draws the gear last in the header row, and the tray", {
                fixed = TRUE)
   expect_match(html, "blockr-settings__title blockr-settings__title--toggle",
                fixed = TRUE)
+  # The toggle is Shiny's own checkbox, labelled by the title.
+  expect_match(
+    html,
+    paste0('blockr-settings__title--toggle">\\s*',
+           '<div class="form-group shiny-input-container">')
+  )
   expect_match(html, 'id="skip_on" type="checkbox"', fixed = TRUE)
-  expect_match(html, "blockr-checkbox__label\">Skip", fixed = TRUE)
+  expect_match(html, "<span>Skip</span>", fixed = TRUE)
   expect_length(
     gregexpr('class="blockr-settings__grid"', html, fixed = TRUE)[[1L]], 2L
   )
@@ -67,33 +70,17 @@ test_that("a tray of one section has no title, unless it is a toggle", {
   expect_error(tray_section(NULL, toggle = "on"), "title")
 })
 
-test_that("Shiny's own inputs take the design system's sizes in the tray", {
-
-  expect_identical(field_size(shiny::numericInput("n", "Rows", 1)), "small")
-  expect_identical(field_size(shiny::checkboxInput("h", "Header")), "small")
-  expect_identical(field_size(htmltools::tags$input(type = "number")), "small")
-  expect_identical(
-    field_size(shiny::selectInput("c", "C", c("a", "b"), multiple = TRUE)),
-    "full"
-  )
-  expect_identical(field_size(shiny::selectInput("c", "C", c("a", "b"))),
-                   "large")
-  expect_identical(field_size(shiny::textInput("t", "T")), "large")
-  expect_identical(
-    field_size(shiny::checkboxGroupInput("g", "G", c("a", "b"))), "large"
-  )
-  expect_identical(field_size(htmltools::span("x")), "large")
-  expect_identical(field_size("x"), "large")
+test_that("every field gets a plain cell; the stylesheet sizes it", {
 
   html <- html_of(gear_tray(
     "g",
     shiny::numericInput("n", "Rows", 1, updateOn = "blur"),
     shiny::textInput("t", "Name", updateOn = "blur")
   ))
-  expect_match(
-    html, 'blockr-settings__field--small">\\s*<div class="form-group'
-  )
-  expect_match(
-    html, '<div class="blockr-settings__field">\\s*<div class="form-group'
-  )
+  cells <- gregexpr(
+    '<div class="blockr-settings__field">\\s*<div class="form-group', html
+  )[[1L]]
+  expect_length(cells, 2L)
+
+  expect_error(tray_section("A", toggle = "on", value = NA), "value")
 })

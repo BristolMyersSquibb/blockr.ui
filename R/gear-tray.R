@@ -22,9 +22,9 @@
 #' @param id The gear's id, an input id. The tray's is `<id>_tray`.
 #' @param ... For `gear_tray()`, `tray_section()`s, or fields for a tray of
 #'   one section. For `tray_section()`, its fields: Shiny's inputs, or any
-#'   other tag. Each goes in a grid cell at the size the design system gives
-#'   it: a number or a checkbox takes one column, a multi select the whole
-#'   row, anything else two.
+#'   other tag. Each goes in a cell of the tray's grid, which gives Shiny's
+#'   inputs the design system's sizes: a number or a checkbox takes one
+#'   column, a multi select the whole row, anything else two.
 #' @param tools Tool buttons ([tool_button()], an [action_menu()]) that
 #'   stand left of the gear in the header row.
 #' @param label The tray's accessible name.
@@ -51,7 +51,7 @@
 #' @export
 gear_tray <- function(id, ..., tools = NULL, label = "Settings") {
 
-  stopifnot(is_string(id), is_string(label))
+  stopifnot(blockr.core::is_string(id), blockr.core::is_string(label))
 
   sections <- Filter(Negate(is.null), list(...))
   is_section <- vapply(sections, inherits, logical(1L), "blockr_tray_section")
@@ -110,8 +110,11 @@ gear_tray <- function(id, ..., tools = NULL, label = "Settings") {
 #' @export
 tray_section <- function(title = NULL, ..., toggle = NULL, value = FALSE) {
 
-  stopifnot(is.null(title) || is_string(title), is.null(toggle) ||
-              is_string(toggle))
+  stopifnot(
+    is.null(title) || blockr.core::is_string(title),
+    is.null(toggle) || blockr.core::is_string(toggle),
+    isTRUE(value) || isFALSE(value)
+  )
 
   if (!is.null(toggle) && is.null(title)) {
     stop("A section switched on by a checkbox needs a `title`, the ",
@@ -134,79 +137,16 @@ render_section <- function(x) {
   title <- if (!is.null(x$toggle)) {
     tags$div(
       class = "blockr-settings__title blockr-settings__title--toggle",
-      checkbox_tag(x$toggle, x$title, x$value)
+      shiny::checkboxInput(x$toggle, x$title, x$value)
     )
   } else if (!is.null(x$title)) {
     tags$div(class = "blockr-settings__title", x$title)
   }
 
-  fields <- lapply(Filter(Negate(is.null), x$fields), function(f) {
-    cls <- if (inherits(f, "shiny.tag")) htmltools::tagGetAttribute(f, "class")
-    if (!is.null(cls) && grepl("blockr-settings__field", cls, fixed = TRUE)) {
-      f
-    } else {
-      input_field(field_size(f), f)
-    }
-  })
+  fields <- lapply(
+    Filter(Negate(is.null), x$fields),
+    function(f) tags$div(class = "blockr-settings__field", f)
+  )
 
   tagList(title, tags$div(class = "blockr-settings__grid", fields))
-}
-
-# --- helpers -----------------------------------------------------------------
-
-input_field <- function(size, ...) {
-  with_controls(tags$div(
-    class = "blockr-settings__field",
-    class = switch(size, small = "blockr-settings__field--small",
-                   full = "blockr-settings__field--full"),
-    ...
-  ))
-}
-
-# The grid size for a field, read off the inputs in it: one number or one
-# checkbox takes one column, a multi select the whole row, anything else two.
-field_size <- function(f) {
-
-  if (!inherits(f, c("shiny.tag", "shiny.tag.list"))) {
-    return("large")
-  }
-
-  # Wrapped, so a field that is a bare input is searched too.
-  q <- htmltools::tagQuery(tags$div(f))
-  attr_of <- function(sel, name) {
-    lapply(q$find(sel)$selectedTags(), htmltools::tagGetAttribute, name)
-  }
-
-  types <- unlist(attr_of("input", "type"))
-  multiple <- !vapply(attr_of("select", "multiple"), is.null, logical(1L))
-
-  if (length(types) == 1L && types %in% c("number", "checkbox")) {
-    "small"
-  } else if (any(multiple)) {
-    "full"
-  } else {
-    "large"
-  }
-}
-
-# The markup of Blockr.checkbox, for a section's toggle, with its check from
-# the same icon. Shiny's own checkbox binding reports it.
-checkbox_tag <- function(id, label, value) {
-
-  stopifnot(is_string(id), isTRUE(value) || isFALSE(value))
-
-  tags$label(
-    class = "blockr-checkbox",
-    tags$input(
-      id = id,
-      type = "checkbox",
-      checked = if (value) NA
-    ),
-    tags$span(class = "blockr-checkbox__box", small_icon("confirm")),
-    tags$span(class = "blockr-checkbox__label", label)
-  )
-}
-
-is_string <- function(x) {
-  is.character(x) && length(x) == 1L && !is.na(x) && nzchar(x)
 }

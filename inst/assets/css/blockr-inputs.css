@@ -5,13 +5,20 @@
    blockr-buttons.css.
    ========================================================================= */
 
-/* A tray section switched on by a checkbox: the checkbox stands before the
-   title and the title is its label, so it reads as a section title. Its
-   fields show only while it is checked. */
-.blockr-settings__title--toggle .blockr-checkbox {
-  min-height: 0;
-  font-size: inherit;
-  font-weight: inherit;
+/* A tray section switched on by a checkbox: the checkbox, Shiny's, stands
+   before the title and the title is its label, so it reads as a section
+   title. Its fields show only while it is checked. */
+.blockr-settings__title--toggle .shiny-input-container {
+  width: auto;
+  margin: 0;
+}
+
+.blockr-settings__title--toggle .checkbox,
+.blockr-settings__title--toggle .checkbox label {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
   color: inherit;
 }
 
@@ -24,6 +31,17 @@
 .blockr-settings__field > .shiny-input-container {
   width: 100%;
   margin-bottom: 0;
+}
+
+/* The design system's sizes: one number or one checkbox takes one column, a
+   multi select the whole row, anything else the field's two. */
+.blockr-settings__field:has(> .shiny-input-container input[type="number"]),
+.blockr-settings__field:has(> .shiny-input-container > .checkbox) {
+  grid-column: span 1;
+}
+
+.blockr-settings__field:has(> .shiny-input-container select[multiple]) {
+  grid-column: 1 / -1;
 }
 
 /* ...and its fields sit on the surface colour, as the tray's own do. The

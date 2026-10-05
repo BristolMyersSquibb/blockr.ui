@@ -14,9 +14,9 @@ tray_section(title = NULL, ..., toggle = NULL, value = FALSE)
 
 \item{...}{For \code{gear_tray()}, \code{tray_section()}s, or fields for a tray of
 one section. For \code{tray_section()}, its fields: Shiny's inputs, or any
-other tag. Each goes in a grid cell at the size the design system gives
-it: a number or a checkbox takes one column, a multi select the whole
-row, anything else two.}
+other tag. Each goes in a cell of the tray's grid, which gives Shiny's
+inputs the design system's sizes: a number or a checkbox takes one
+column, a multi select the whole row, anything else two.}
 
 \item{tools}{Tool buttons (\code{\link[=tool_button]{tool_button()}}, an \code{\link[=action_menu]{action_menu()}}) that
 stand left of the gear in the header row.}
