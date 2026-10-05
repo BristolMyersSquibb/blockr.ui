@@ -303,25 +303,6 @@
   color: var(--blockr-color-text-muted);
 }
 
-/* A block's mark in a list row: 24px, its glyph in the category colour on an
-   18% tint of it. */
-.blockr-menu__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--blockr-radius-md);
-  color: var(--blockr-menu-mark, var(--blockr-color-text-muted));
-  background: color-mix(in srgb, var(--blockr-menu-mark, var(--blockr-color-text-muted)) 18%, var(--blockr-color-bg-raised));
-}
-
-.blockr-menu__mark svg {
-  width: 14px;
-  height: 14px;
-}
-
 .blockr-menu__item .blockr-menu__badge {
   flex-shrink: 0;
   margin-left: 12px;

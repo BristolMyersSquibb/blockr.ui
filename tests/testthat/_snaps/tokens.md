@@ -105,6 +105,15 @@
       --blockr-mark-radius: 2px
       --blockr-mark-font-size: 11px
       --blockr-mark-weight-supporting: 0.6
+      --blockr-category-input: #0072b2
+      --blockr-category-transform: #009e73
+      --blockr-category-structured: #56b4e9
+      --blockr-category-plot: #e69f00
+      --blockr-category-table: #cc79a7
+      --blockr-category-model: #f0e442
+      --blockr-category-output: #d55e00
+      --blockr-category-utility: #cccccc
+      --blockr-category-uncategorized: #999999
       --blockr-color-text-primary: #111827
       --blockr-color-text-secondary: #374151
       --blockr-color-text-subtle: #9ca3af
@@ -206,6 +215,15 @@
       --blockr-mark-radius: 2px
       --blockr-mark-font-size: 11px
       --blockr-mark-weight-supporting: 0.6
+      --blockr-category-input: #0072b2
+      --blockr-category-transform: #009e73
+      --blockr-category-structured: #56b4e9
+      --blockr-category-plot: #e69f00
+      --blockr-category-table: #cc79a7
+      --blockr-category-model: #f0e442
+      --blockr-category-output: #d55e00
+      --blockr-category-utility: #cccccc
+      --blockr-category-uncategorized: #999999
       --blockr-color-text-primary: #f0f3f7
       --blockr-color-text-secondary: #c2c9d3
       --blockr-color-text-subtle: #6b7686

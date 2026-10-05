@@ -7,7 +7,8 @@
                                          tokens only, never by components
      meaning   --blockr-color-<property>-<role>[-<state>], --blockr-font-*,
                --blockr-radius-*, --blockr-control-*, --blockr-shadow-*,
-               --blockr-focus-*, --blockr-transition, --blockr-mark-*
+               --blockr-focus-*, --blockr-transition, --blockr-mark-*,
+               --blockr-category-*
      local     --blockr-<owner>-*        one component's or package's own
                                          setting, read only in its own sheet
 
@@ -223,6 +224,22 @@
   /* Weight for a mark that supports a choice rather than carrying the
      answer, e.g. the bars ranking options in a crossfilter picker. */
   --blockr-mark-weight-supporting: 0.6;
+
+  /* ------------------------------------------------- block categories */
+
+  /* One Okabe-Ito colour per block category, for the block's mark. A fixed
+     set outside the palette: the same under every theme, and the dark file
+     does not restate them. A category outside the set takes the colour of
+     `uncategorized`, blockr.core's default category. */
+  --blockr-category-input: #0072b2;
+  --blockr-category-transform: #009e73;
+  --blockr-category-structured: #56b4e9;
+  --blockr-category-plot: #e69f00;
+  --blockr-category-table: #cc79a7;
+  --blockr-category-model: #f0e442;
+  --blockr-category-output: #d55e00;
+  --blockr-category-utility: #cccccc;
+  --blockr-category-uncategorized: #999999;
 
   /* ------------------------------------------------- legacy (aliases) */
 

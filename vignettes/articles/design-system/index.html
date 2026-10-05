@@ -8,8 +8,8 @@
 <link rel="stylesheet" href="blockr-tokens.css">
 <link rel="stylesheet" href="blockr-tokens-dark.css">
 <style>
-/* The page is drawn from the tokens only (plus the fixed block category
-   colours), in Open Sans, so the Dark switch checks the dark file on every
+/* The page is drawn from the tokens only, the block category colours
+   included, in Open Sans, so the Dark switch checks the dark file on every
    part at once. Page chrome first, then the components as decided. */
 
 /* ================================================================ page */
@@ -85,10 +85,8 @@ ul.rules li::marker { color: var(--blockr-color-text-muted); }
 /* ================================================================= block */
 .dock { background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: var(--blockr-radius-xl); min-width: 0; }
 .dock-h { display: flex; align-items: center; gap: 10px; padding: 10px 14px 10px 18px; border-bottom: 1px solid var(--blockr-color-border-default); }
-.cat { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: none; color: var(--cat); background: color-mix(in srgb, var(--cat) 18%, var(--blockr-color-bg-surface)); }
 .dh-t { min-width: 0; }
 .bt { font-size: var(--blockr-font-size-lg); font-weight: 600; line-height: 1.2; }
-.cat svg { width: 16px; height: 16px; }
 .bs { font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-muted); }
 .dock-acts { margin-left: auto; display: flex; gap: 2px; }
 .face { padding: 14px 18px 14px; }
@@ -276,7 +274,15 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .mr:hover .meta, .mr.hi .meta { color: var(--blockr-color-text-default); }
 .mr.dis, .mr.dis .meta { color: var(--blockr-color-text-disabled); cursor: default; }
 .mr.dis:hover { background: none; }
-.mr.danger { color: var(--blockr-color-text-danger); }
+.mr .ic { display: inline-flex; flex: none; width: 16px; justify-content: center; color: var(--blockr-color-text-muted); }
+.mr .ic svg, .mr .chk svg { width: 14px; height: 14px; }
+.mr:hover .ic, .mr.hi .ic { color: var(--blockr-color-text-default); }
+.mr .chk { display: inline-flex; flex: none; margin-left: auto; padding-left: 12px; color: var(--blockr-color-text-accent); }
+.mr .meta.mono { font-family: var(--blockr-font-mono); }
+/* A destructive row is plain at rest and red only under the pointer or as
+   the keyboard row. */
+.mr.danger:hover, .mr.danger.hi, .mr.danger:hover .ic, .mr.danger.hi .ic { color: var(--blockr-color-text-danger); }
+.mr.danger:hover, .mr.danger.hi { background: var(--blockr-color-bg-danger); }
 .mt { position: sticky; top: calc(-1 * var(--mn-pad)); z-index: 1; background: var(--blockr-color-bg-raised); padding: 8px 10px 4px; font-size: var(--blockr-font-size-xs); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--blockr-color-text-muted); }
 .mn.has-filter .mt { top: 30px; }
 .mf { position: sticky; top: calc(-1 * var(--mn-pad)); z-index: 2; background: var(--blockr-color-bg-raised); padding: 0 0 4px; margin-top: 0; }
@@ -284,8 +290,6 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .mf input:focus { border-color: var(--blockr-color-border-accent); background: var(--blockr-color-bg-surface); }
 .mf input::placeholder { color: var(--blockr-color-text-muted); }
 .md { height: 1px; background: var(--blockr-color-border-default); margin: var(--mn-pad) calc(-1 * var(--mn-pad)); }
-.mh { padding: 6px 10px 8px; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); line-height: 1.5; white-space: normal; }
-.mh b { color: var(--blockr-color-text-default); font-weight: 600; font-size: var(--blockr-font-size-sm); margin-right: 4px; }
 
 .tip { position: fixed; z-index: 60; pointer-events: none; max-width: 320px; padding: 5px 9px; border-radius: var(--blockr-radius-lg); background: var(--blockr-color-bg-raised); color: var(--blockr-color-text-default); border: 1px solid var(--blockr-color-border-default); box-shadow: var(--blockr-shadow-md); font-size: var(--blockr-font-size-xs); line-height: 1.4; opacity: 0; transition: opacity .12s; }
 .tip.on { opacity: 1; }
@@ -400,9 +404,6 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .marks .bar { height: 16px; background: var(--blockr-color-bg-accent); border-radius: 0 var(--blockr-mark-radius) var(--blockr-mark-radius) 0; }
 .marks .bar.sup { opacity: var(--blockr-mark-weight-supporting); }
 .marks .lab { text-align: right; }
-.fixed { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; }
-.fixed div { display: flex; align-items: center; gap: 10px; font-size: var(--blockr-font-size-sm); }
-.fixed i { width: 30px; height: 30px; border-radius: 7px; display: inline-block; flex: none; }
 .ramp { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 14px; }
 .ramp div { width: 88px; }
 .ramp .sw { height: 40px; border-radius: var(--blockr-radius-md); border: 1px solid var(--blockr-color-border-default); }
@@ -513,8 +514,22 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
 .z-view.open .z-car { transform: rotate(180deg); }
 .z-av { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: color-mix(in srgb, var(--blockr-color-border-accent) 14%, transparent); color: var(--blockr-color-text-accent-strong); }
 [data-bs-theme="dark"] .z-av { color: var(--blockr-color-text-accent); }
-.z-mk { flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--c, #0072B2); background: color-mix(in srgb, var(--c, #0072B2) 18%, var(--blockr-color-bg-surface)); }
-.z-m28 { width: 28px; height: 28px; border-radius: 6px; } .z-m24 { width: 24px; height: 24px; border-radius: 6px; } .z-m16 { width: 16px; height: 16px; border-radius: 4px; }
+/* The block's mark, drawn as blockr.ui's .blockr-block-mark: 24px, and 32, 20 and 16px through its modifiers, the glyph half the
+   side plus 2px and the corners a quarter of it. The colour is the category's token, or a colour of the mark's own (a
+   stack's, a muted text item), and the tint is mixed from it with transparent. */
+.z-mk { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; color: var(--blockr-category-uncategorized); background: color-mix(in srgb, currentColor 18%, transparent); }
+.z-mk svg { width: 14px; height: 14px; }
+.z-m32 { width: 32px; height: 32px; border-radius: 8px; } .z-m32 svg { width: 18px; height: 18px; }
+.z-m20 { width: 20px; height: 20px; border-radius: 5px; } .z-m20 svg { width: 12px; height: 12px; }
+.z-m16 { width: 16px; height: 16px; border-radius: 4px; } .z-m16 svg { width: 10px; height: 10px; }
+.z-mk[data-category="input"] { color: var(--blockr-category-input); }
+.z-mk[data-category="transform"] { color: var(--blockr-category-transform); }
+.z-mk[data-category="structured"] { color: var(--blockr-category-structured); }
+.z-mk[data-category="plot"] { color: var(--blockr-category-plot); }
+.z-mk[data-category="table"] { color: var(--blockr-category-table); }
+.z-mk[data-category="model"] { color: var(--blockr-category-model); }
+.z-mk[data-category="output"] { color: var(--blockr-category-output); }
+.z-mk[data-category="utility"] { color: var(--blockr-category-utility); }
 .z-ladder { display: flex; align-items: flex-end; gap: 22px; font-size: 11px; color: var(--blockr-color-text-muted); }
 .z-ladder div { display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .z-badge { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; font-size: 11px; font-weight: 500; border-radius: 999px; border: 1px solid var(--blockr-color-border-default); background: var(--blockr-color-bg-subtle); color: var(--blockr-color-text-muted); margin-left: auto; }
@@ -570,7 +585,6 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
 .blx-brow.cur .blx-bn { color: var(--blockr-color-text-accent); }
 .blx-brow.txt { height: auto; min-height: 34px; align-items: flex-start; padding-top: 5px; padding-bottom: 5px; }
 .blx-brow .blx-bn { width: 14px; flex: none; text-align: right; font-size: var(--blockr-font-size-xs); color: var(--blockr-color-text-muted); font-variant-numeric: tabular-nums; }
-.blx-brow .blx-bm { width: 24px; height: 24px; flex: none; border-radius: var(--blockr-radius-md); display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 18%, var(--blockr-color-bg-surface)); }
 .blx-brow .blx-bt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .blx-brow.txt .blx-bt { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .blx-brow .blx-bv { flex: none; font-size: var(--blockr-font-size-sm); color: var(--blockr-color-text-muted); white-space: nowrap; }
@@ -614,6 +628,8 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
   <symbol id="i-plus" viewBox="0 0 12 12"><path d="M6 2v8M2 6h8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
   <symbol id="i-search" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></g></symbol>
   <symbol id="i-dots" viewBox="0 0 16 16"><g fill="currentColor"><circle cx="3.5" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12.5" cy="8" r="1.2"/></g></symbol>
+  <symbol id="i-trash" viewBox="0 0 16 16"><path d="M2.5 4.5h11M6.5 4.5V3h3v1.5M4 4.5l.7 9h6.6l.7-9" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-sliders" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4h7M12 4h2M2 8h2M7 8h7M2 12h9"/><circle cx="10.5" cy="4" r="1.5"/><circle cx="5.5" cy="8" r="1.5"/><circle cx="12.5" cy="12" r="1.5"/></g></symbol>
   <symbol id="i-eye" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></g></symbol>
   <symbol id="i-funnel" viewBox="0 0 24 24"><path d="M4 5h16l-6 7.5V19l-4-2v-4.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
@@ -694,18 +710,22 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
   <div class="mr"><span class="lab">PowerPoint slide</span></div>
   <div class="md"></div>
   <div class="mr"><span class="lab">Data as CSV</span></div></template>
-<template id="m-block-subset"><div class="mh"><b>subset block</b><span class="badge">blockr.core</span><br>Keeps the rows that match the conditions, and the chosen columns.</div><div class="md"></div>
-  <div class="mr"><span class="lab">Rename</span></div>
-  <div class="mr"><span class="lab">Duplicate</span></div>
-  <div class="mr"><span class="lab">Copy block ID</span><span class="meta">block_7f3a</span></div>
+<template id="m-block-subset">
+  <div class="mr"><span class="ic"><svg><use href="#i-sliders"/></svg></span><span class="lab">Controls</span><span class="chk"><svg><use href="#i-tick"/></svg></span></div>
   <div class="md"></div>
-  <div class="mr danger"><span class="lab">Remove</span></div></template>
-<template id="m-block-chart"><div class="mh"><b>chart block</b><span class="badge">blockr.viz</span><br>Draws a bar, line or point chart from a table.</div><div class="md"></div>
   <div class="mr"><span class="lab">Rename</span></div>
-  <div class="mr"><span class="lab">Duplicate</span></div>
-  <div class="mr"><span class="lab">Copy block ID</span><span class="meta">block_c21e</span></div>
+  <div class="mr"><span class="lab">Append block</span></div>
+  <div class="mr"><span class="lab">Copy block ID</span><span class="meta mono">block_7f3a</span></div>
   <div class="md"></div>
-  <div class="mr danger"><span class="lab">Remove</span></div></template>
+  <div class="mr danger"><span class="ic"><svg><use href="#i-trash"/></svg></span><span class="lab">Remove block</span></div></template>
+<template id="m-block-chart">
+  <div class="mr"><span class="ic"><svg><use href="#i-sliders"/></svg></span><span class="lab">Controls</span><span class="chk"><svg><use href="#i-tick"/></svg></span></div>
+  <div class="md"></div>
+  <div class="mr"><span class="lab">Rename</span></div>
+  <div class="mr"><span class="lab">Append block</span></div>
+  <div class="mr"><span class="lab">Copy block ID</span><span class="meta mono">block_c21e</span></div>
+  <div class="md"></div>
+  <div class="mr danger"><span class="ic"><svg><use href="#i-trash"/></svg></span><span class="lab">Remove block</span></div></template>
 
 <div class="wrap">
 <header class="top">
@@ -781,10 +801,9 @@ with live words. Both keep the rest behind the gear, which opens the tray in flo
   <!-- ---------------------------------------------------- transform block -->
   <div class="dock blk" id="blk-subset">
     <div class="dock-h">
-      <span class="cat" data-tip="subset block · blockr.core" style="--cat:#009E73"><svg width="24" height="24"><use href="#i-funnel"/></svg></span>
+      <span class="z-mk z-m32" data-category="transform" data-tip="subset block · blockr.core"><svg width="18" height="18"><use href="#i-funnel"/></svg></span>
       <div class="dh-t"><div class="bt">Subset</div></div>
       <div class="dock-acts">
-        <button class="ib on" data-tip="Controls" aria-label="Controls"><svg width="15" height="15"><use href="#i-sliders"/></svg></button>
         <button class="ib on" data-tip="Output" aria-label="Output"><svg width="15" height="15"><use href="#i-eye"/></svg></button>
         <button class="ib" data-tip="More" aria-label="More" data-menu="m-block-subset" data-place="right"><svg width="15" height="15"><use href="#i-dots"/></svg></button>
       </div>
@@ -846,10 +865,9 @@ with live words. Both keep the rest behind the gear, which opens the tray in flo
   <!-- ------------------------------------------------------- output block -->
   <div class="dock blk" id="blk-chart">
     <div class="dock-h">
-      <span class="cat" data-tip="chart block · blockr.viz" style="--cat:#E69F00"><svg width="24" height="24"><use href="#i-bars"/></svg></span>
+      <span class="z-mk z-m32" data-category="plot" data-tip="chart block · blockr.viz"><svg width="18" height="18"><use href="#i-bars"/></svg></span>
       <div class="dh-t"><div class="bt">Ozone by month</div></div>
       <div class="dock-acts">
-        <button class="ib on" data-tip="Controls" aria-label="Controls"><svg width="15" height="15"><use href="#i-sliders"/></svg></button>
         <button class="ib on" data-tip="Output" aria-label="Output"><svg width="15" height="15"><use href="#i-eye"/></svg></button>
         <button class="ib" data-tip="More" aria-label="More" data-menu="m-block-chart" data-place="right"><svg width="15" height="15"><use href="#i-dots"/></svg></button>
       </div>
@@ -1043,19 +1061,9 @@ Chart and series colours come from blockr.theme; this page draws them in the acc
 </div>
 
 <h3 class="sh" id="categories">Block category colours</h3>
-<p class="note">Fixed, outside the tokens: one Okabe-Ito colour per category from <code>blk_color()</code> in blockr.dock. The
-same under every theme and in dark.</p>
-<div class="card"><div class="fixed">
-  <div><i style="background:#0072B2"></i>input <code class="val">#0072B2</code></div>
-  <div><i style="background:#009E73"></i>transform <code class="val">#009E73</code></div>
-  <div><i style="background:#56B4E9"></i>structured <code class="val">#56B4E9</code></div>
-  <div><i style="background:#E69F00"></i>plot <code class="val">#E69F00</code></div>
-  <div><i style="background:#CC79A7"></i>table <code class="val">#CC79A7</code></div>
-  <div><i style="background:#F0E442"></i>model <code class="val">#F0E442</code></div>
-  <div><i style="background:#D55E00"></i>output <code class="val">#D55E00</code></div>
-  <div><i style="background:#CCCCCC"></i>utility <code class="val">#CCCCCC</code></div>
-  <div><i style="background:#999999"></i>uncategorised <code class="val">#999999</code></div>
-</div></div>
+<p class="note">One Okabe-Ito token per category, read by the block's mark. A fixed set, the same under every theme and in
+dark. A category outside it takes <code>uncategorized</code>.</p>
+<div class="card"><div data-tokens="block categories"></div></div>
 </section>
 
 <!-- ================================================================ 3 BLOCK -->
@@ -1070,9 +1078,9 @@ caption, status line). Its output title and sentence belong to the output and ex
 <div class="anat">
   <div class="dock blk open" id="blk-anat">
     <div class="dock-h an"><span class="n">1</span>
-      <span class="cat" data-tip="chart block · blockr.viz" style="--cat:#E69F00"><svg width="24" height="24"><use href="#i-bars"/></svg></span>
+      <span class="z-mk z-m32" data-category="plot" data-tip="chart block · blockr.viz"><svg width="18" height="18"><use href="#i-bars"/></svg></span>
       <div class="dh-t"><div class="bt">Ozone by month</div></div>
-      <div class="dock-acts"><button class="ib" data-tip="More" aria-label="More" data-menu="m-block-chart" data-place="right"><svg width="15" height="15"><use href="#i-dots"/></svg></button></div>
+      <div class="dock-acts"><button class="ib on" data-tip="Output" aria-label="Output"><svg width="15" height="15"><use href="#i-eye"/></svg></button><button class="ib" data-tip="More" aria-label="More" data-menu="m-block-chart" data-place="right"><svg width="15" height="15"><use href="#i-dots"/></svg></button></div>
     </div>
     <div class="face">
       <div class="hd an"><span class="n">2</span>
@@ -1105,7 +1113,7 @@ caption, status line). Its output title and sentence belong to the output and ex
     </div>
   </div>
   <div class="legend">
-    <div><span class="n">1</span><span><b>Dock header.</b> <span class="m">Category icon, block title (20px, 600) and a plain-text subtitle. The block's package, description and "Copy block ID" head its "…" menu.</span></span></div>
+    <div><span class="n">1</span><span><b>Dock header.</b> <span class="m">The block's 32px mark, the block title (16px, 600), and on the right the preview's eye and the "…" menu. No subtitle: the block type and package are the mark's tooltip.</span></span></div>
     <div><span class="n">2</span><span><b>Header row.</b> <span class="m">The output title (16px, 600) shares the row with the tools and wraps in the space they leave. Its sentence is the subtitle (13px, muted). Tools run left to right, gear last, all 26px.</span></span></div>
     <div><span class="n">3</span><span><b>Gear tray.</b> <span class="m">In flow under the header row: <code>bg-subtle</code> (the page colour in dark), no border, white fields, a beak towards the gear, no heading. Sections are a section title and 24px of space. Fields use the grid.</span></span></div>
     <div><span class="n">4</span><span><b>Body.</b> <span class="m">The chart or table. A transform block has its controls on the face above the output instead (see Subset above).</span></span></div>
@@ -1149,16 +1157,18 @@ way an output block's argument reaches its face.</p>
 </div></div>
 
 <h3 class="z-h">The block's mark at each size</h3>
-<p class="z-note">A tinted square in the category colour with the glyph in that colour: 28px in the header, 24px in list rows
-(with the package as a badge), 16px in a tab. The header mark's tooltip names the block type and package.</p>
+<p class="z-note">A tinted square, the category colour at 18% on the surface, with the glyph in that colour: 32px in the dock
+header, 24px in list rows (with the package as a badge), 20px in the compact header and 16px in a tab. The glyph is half the
+mark plus 2px and the corners a quarter of it. The header mark's tooltip names the block type and package.</p>
 <div class="z-grid2">
   <div><div class="z-ladder">
-    <div><span class="z-mk z-m28" style="--c:#009E73" data-tip="filter block · blockr.dplyr"><svg width="15" height="15"><use href="#z-filter"/></svg></span>header 28</div>
-    <div><span class="z-mk z-m24" style="--c:#009E73"><svg width="13" height="13"><use href="#z-filter"/></svg></span>list 24</div>
-    <div><span class="z-mk z-m16" style="--c:#009E73"><svg width="10" height="10"><use href="#z-filter"/></svg></span>tab 16</div></div></div>
-  <div class="z-card" style="padding:4px"><div class="z-mi"><span class="z-mk z-m24" style="--c:#0072B2"><svg width="13" height="13"><use href="#z-file"/></svg></span>Import Data<span class="z-badge">blockr.io</span></div>
-    <div class="z-mi"><span class="z-mk z-m24" style="--c:#009E73"><svg width="13" height="13"><use href="#z-filter"/></svg></span>Filter Rows<span class="z-badge">blockr.dplyr</span></div>
-    <div class="z-mi"><span class="z-mk z-m24" style="--c:#E69F00"><svg width="13" height="13"><use href="#z-chart"/></svg></span>Chart<span class="z-badge">blockr.viz</span></div></div>
+    <div><span class="z-mk z-m32" data-category="transform" data-tip="filter block · blockr.dplyr"><svg width="18" height="18"><use href="#z-filter"/></svg></span>header 32</div>
+    <div><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-filter"/></svg></span>list 24</div>
+    <div><span class="z-mk z-m20" data-category="transform"><svg width="12" height="12"><use href="#z-filter"/></svg></span>compact 20</div>
+    <div><span class="z-mk z-m16" data-category="transform"><svg width="10" height="10"><use href="#z-filter"/></svg></span>tab 16</div></div></div>
+  <div class="z-card" style="padding:4px"><div class="z-mi"><span class="z-mk" data-category="input"><svg width="14" height="14"><use href="#z-file"/></svg></span>Import Data<span class="z-badge">blockr.io</span></div>
+    <div class="z-mi"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-filter"/></svg></span>Filter Rows<span class="z-badge">blockr.dplyr</span></div>
+    <div class="z-mi"><span class="z-mk" data-category="plot"><svg width="14" height="14"><use href="#z-chart"/></svg></span>Chart<span class="z-badge">blockr.viz</span></div></div>
 </div>
 
 <h3 class="z-h">Block status, messages, computing</h3>
@@ -1166,19 +1176,19 @@ way an output block's argument reaches its face.</p>
 warning for the whole block is a message above the output. Past 300ms of computing any block dims its output and runs a clock
 under it. Press Run. The block that needs you has a solid amber dot; the blocks below it, waiting for it, have amber
 rings.</p>
-<div class="z-states"><span class="z-st"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#0072B2"><svg width="15" height="15"><use href="#z-file"/></svg></span><span class="z-dot" style="background:var(--blockr-color-border-warning)"></span></span>Unset: set this block's inputs</span><span class="z-st"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#009E73"><svg width="15" height="15"><use href="#z-filter"/></svg></span><span class="z-dot" style="background:var(--blockr-color-bg-surface);box-shadow:inset 0 0 0 1.5px var(--blockr-color-border-warning),0 0 0 2px var(--blockr-color-bg-surface)"></span></span>Waiting for a data input</span><span class="z-st"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#E69F00"><svg width="15" height="15"><use href="#z-chart"/></svg></span><span class="z-dot" style="background:var(--blockr-color-text-muted)"></span></span>Stale: inputs changed</span><span class="z-st"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#56B4E9"><svg width="15" height="15"><use href="#z-join"/></svg></span><span class="z-dot" style="background:var(--blockr-color-border-danger)"></span></span>Failed</span></div>
+<div class="z-states"><span class="z-st"><span class="z-mkw"><span class="z-mk z-m32" data-category="input"><svg width="18" height="18"><use href="#z-file"/></svg></span><span class="z-dot" style="background:var(--blockr-color-border-warning)"></span></span>Unset: set this block's inputs</span><span class="z-st"><span class="z-mkw"><span class="z-mk z-m32" data-category="transform"><svg width="18" height="18"><use href="#z-filter"/></svg></span><span class="z-dot" style="background:var(--blockr-color-bg-surface);box-shadow:inset 0 0 0 1.5px var(--blockr-color-border-warning),0 0 0 2px var(--blockr-color-bg-surface)"></span></span>Waiting for a data input</span><span class="z-st"><span class="z-mkw"><span class="z-mk z-m32" data-category="plot"><svg width="18" height="18"><use href="#z-chart"/></svg></span><span class="z-dot" style="background:var(--blockr-color-text-muted)"></span></span>Stale: inputs changed</span><span class="z-st"><span class="z-mkw"><span class="z-mk z-m32" data-category="structured"><svg width="18" height="18"><use href="#z-join"/></svg></span><span class="z-dot" style="background:var(--blockr-color-border-danger)"></span></span>Failed</span></div>
 <div class="z-grid2">
-  <div class="z-card"><div class="z-hd"><span class="z-mkw"><span class="z-mk z-m28" style="--c:#0072B2" data-tip="read block · blockr.io"><svg width="15" height="15"><use href="#z-file"/></svg></span><span class="z-dot" style="background:var(--blockr-color-border-warning)"></span></span><span class="z-t">Read data</span></div>
+  <div class="z-card"><div class="z-hd"><span class="z-mkw"><span class="z-mk z-m32" data-category="input" data-tip="read block · blockr.io"><svg width="18" height="18"><use href="#z-file"/></svg></span><span class="z-dot" style="background:var(--blockr-color-border-warning)"></span></span><span class="z-t">Read data</span></div>
     <div class="z-body"><div class="z-msg"><b>Error.</b> Column "Ozone2" not found in the data.</div><div class="z-status">Set this block's inputs</div></div></div>
-  <div class="z-card" id="z-busy"><div class="z-hd"><span class="z-mk z-m28" style="--c:#E69F00"><svg width="15" height="15"><use href="#z-chart"/></svg></span><span class="z-t">Ozone by month</span><span style="margin-left:auto"><button class="b xs sec" id="z-run" style="text-transform:none;letter-spacing:normal;font-weight:500;margin:0">Run</button></span></div>
+  <div class="z-card" id="z-busy"><div class="z-hd"><span class="z-mk z-m32" data-category="plot"><svg width="18" height="18"><use href="#z-chart"/></svg></span><span class="z-t">Ozone by month</span><span style="margin-left:auto"><button class="b xs sec" id="z-run" style="text-transform:none;letter-spacing:normal;font-weight:500;margin:0">Run</button></span></div>
     <div class="z-body"><div class="z-bars"><i style="height:40%"></i><i style="height:92%"></i><i style="height:100%"></i><i style="height:68%"></i><i style="height:52%"></i></div><div class="z-clock"></div></div></div>
 </div>
 
 <h3 class="z-h">Bare mode (later)</h3>
 <p class="z-note">A board option for dashboards: the card has no header; the tab carries the mark and the name, the actions sit
 right of the tabs, a double-click on the tab renames. It waits on dockViewR's tab components.</p>
-<div class="z-card" style="max-width:560px"><div class="z-tabs"><span class="z-tab"><span class="z-mk z-m16" style="--c:#009E73"><svg width="10" height="10"><use href="#z-filter"/></svg></span>Ozone above 40 <span class="z-x">✕</span></span><span style="flex:1"></span>
-  <button class="z-ib" style="width:26px;height:26px" data-tip="Controls"><svg width="14" height="14"><use href="#z-sliders"/></svg></button><button class="z-ib" style="width:26px;height:26px" data-tip="Output"><svg width="14" height="14"><use href="#z-eye"/></svg></button><button class="z-ib" style="width:26px;height:26px" data-tip="More"><svg width="14" height="14"><use href="#z-dotsv"/></svg></button></div>
+<div class="z-card" style="max-width:560px"><div class="z-tabs"><span class="z-tab"><span class="z-mk z-m16" data-category="transform"><svg width="10" height="10"><use href="#z-filter"/></svg></span>Ozone above 40 <span class="z-x">✕</span></span><span style="flex:1"></span>
+  <button class="z-ib" style="width:26px;height:26px" data-tip="Output"><svg width="14" height="14"><use href="#z-eye"/></svg></button><button class="z-ib" style="width:26px;height:26px" data-tip="More"><svg width="14" height="14"><use href="#z-dotsv"/></svg></button></div>
   <div class="z-body" style="padding-top:12px"><div class="fld" style="max-width:280px"><span class="lbl">Column</span><div class="ctl"><span class="v">Ozone</span><span class="car"></span></div></div></div></div>
 
 </section>
@@ -1264,7 +1274,7 @@ appears on the right and turns red on hover. The fold arrow stays visible. Hover
 the name on one line. Numbers only where the order is the product. The row's end holds state the reader needs at a glance (the
 report's code and output toggles, the outline's views as meta text); a "…" appears on hover. The block open in the dock is the
 current row. A stack is a tinted band; the pointer on its header deepens the whole band. Hover the rows.</p>
-<div class="blx-blists"><div class="blx-blist"><div class="blx-bh"><span>Outline</span></div><div class="blx-bstack" style="--c:#2563eb"><div class="blx-brow blx-bsh"><span class="blx-bm" style="--c:#2563eb"><svg width="14" height="14"><use href="#z-layers"/></svg></span><span class="blx-bt">Data prep</span><span class="blx-bc">3</span><svg width="12" height="12" style="color:var(--blockr-color-text-muted)"><use href="#i-chev"/></svg></div><div class="blx-brow"><span class="blx-bm" style="--c:#0072B2"><svg width="14" height="14"><use href="#z-db"/></svg></span><span class="blx-bt">Iris data</span><span class="blx-bv">Analysis <b>+1</b></span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow"><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-filter"/></svg></span><span class="blx-bt">Two species</span><span class="blx-bv">Analysis</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow"><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-sliders"/></svg></span><span class="blx-bt">Sepal ratio</span><span class="blx-bv">Analysis</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div></div><div class="blx-bstack f-hover" style="--c:#7c3aed"><div class="blx-brow blx-bsh"><span class="blx-bm" style="--c:#7c3aed"><svg width="14" height="14"><use href="#z-layers"/></svg></span><span class="blx-bt">Tables</span><span class="blx-bc">2</span><svg width="12" height="12" style="color:var(--blockr-color-text-muted)"><use href="#i-chev"/></svg></div><div class="blx-brow"><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-sum"/></svg></span><span class="blx-bt">Ratio by species</span><span class="blx-bv">all views</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow"><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-eye"/></svg></span><span class="blx-bt">QC glance</span><span class="blx-bv">Analysis</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div></div><div class="blx-brow cur"><span class="blx-bm" style="--c:#E69F00"><svg width="14" height="14"><use href="#z-chart"/></svg></span><span class="blx-bt">Sepal scatter</span><span class="blx-bv">all views</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-badd"><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add block</button></div></div><div class="blx-blist"><div class="blx-bh"><span>Iris report</span></div><div class="blx-brow txt"><span class="blx-bn">1</span><span class="blx-bm" style="--c:var(--blockr-color-text-muted)"><svg width="14" height="14"><use href="#z-page"/></svg></span><span class="blx-bt">Iris, two species, <b>sepal ratio</b>.</span></div><div class="blx-brow f-hover"><span class="blx-bn">2</span><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-sum"/></svg></span><span class="blx-bt">Ratio by species</span><span class="blx-bx"><button class="blx-bt24 on" data-tip="Code shown" aria-label="Code"><svg width="14" height="14"><use href="#i-code"/></svg></button><button class="blx-bt24 on" data-tip="Output shown" aria-label="Output"><svg width="14" height="14"><use href="#i-eye"/></svg></button><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow cur"><span class="blx-bn">3</span><span class="blx-bm" style="--c:#E69F00"><svg width="14" height="14"><use href="#z-chart"/></svg></span><span class="blx-bt">Sepal scatter</span><span class="blx-bx"><button class="blx-bt24" data-tip="Code hidden" aria-label="Code"><svg width="14" height="14"><use href="#i-code"/></svg></button><button class="blx-bt24 on" data-tip="Output shown" aria-label="Output"><svg width="14" height="14"><use href="#i-eye"/></svg></button><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-badd"><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add block</button></div></div><div class="blx-blist"><div class="blx-bh"><span>Iris deck</span></div><div class="blx-brow"><span class="blx-bn">1</span><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-sum"/></svg></span><span class="blx-bt">Ratio by species</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow"><span class="blx-bn">2</span><span class="blx-bm" style="--c:#E69F00"><svg width="14" height="14"><use href="#z-chart"/></svg></span><span class="blx-bt">Sepal scatter</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-badd"><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add slide</button></div></div></div>
+<div class="blx-blists"><div class="blx-blist"><div class="blx-bh"><span>Outline</span></div><div class="blx-bstack" style="--c:#2563eb"><div class="blx-brow blx-bsh"><span class="z-mk" style="color:#2563eb"><svg width="14" height="14"><use href="#z-layers"/></svg></span><span class="blx-bt">Data prep</span><span class="blx-bc">3</span><svg width="12" height="12" style="color:var(--blockr-color-text-muted)"><use href="#i-chev"/></svg></div><div class="blx-brow"><span class="z-mk" data-category="input"><svg width="14" height="14"><use href="#z-db"/></svg></span><span class="blx-bt">Iris data</span><span class="blx-bv">Analysis <b>+1</b></span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-filter"/></svg></span><span class="blx-bt">Two species</span><span class="blx-bv">Analysis</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-sliders"/></svg></span><span class="blx-bt">Sepal ratio</span><span class="blx-bv">Analysis</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div></div><div class="blx-bstack f-hover" style="--c:#7c3aed"><div class="blx-brow blx-bsh"><span class="z-mk" style="color:#7c3aed"><svg width="14" height="14"><use href="#z-layers"/></svg></span><span class="blx-bt">Tables</span><span class="blx-bc">2</span><svg width="12" height="12" style="color:var(--blockr-color-text-muted)"><use href="#i-chev"/></svg></div><div class="blx-brow"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-sum"/></svg></span><span class="blx-bt">Ratio by species</span><span class="blx-bv">all views</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-eye"/></svg></span><span class="blx-bt">QC glance</span><span class="blx-bv">Analysis</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div></div><div class="blx-brow cur"><span class="z-mk" data-category="plot"><svg width="14" height="14"><use href="#z-chart"/></svg></span><span class="blx-bt">Sepal scatter</span><span class="blx-bv">all views</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-badd"><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add block</button></div></div><div class="blx-blist"><div class="blx-bh"><span>Iris report</span></div><div class="blx-brow txt"><span class="blx-bn">1</span><span class="z-mk" style="color:var(--blockr-color-text-muted)"><svg width="14" height="14"><use href="#z-page"/></svg></span><span class="blx-bt">Iris, two species, <b>sepal ratio</b>.</span></div><div class="blx-brow f-hover"><span class="blx-bn">2</span><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-sum"/></svg></span><span class="blx-bt">Ratio by species</span><span class="blx-bx"><button class="blx-bt24 on" data-tip="Code shown" aria-label="Code"><svg width="14" height="14"><use href="#i-code"/></svg></button><button class="blx-bt24 on" data-tip="Output shown" aria-label="Output"><svg width="14" height="14"><use href="#i-eye"/></svg></button><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow cur"><span class="blx-bn">3</span><span class="z-mk" data-category="plot"><svg width="14" height="14"><use href="#z-chart"/></svg></span><span class="blx-bt">Sepal scatter</span><span class="blx-bx"><button class="blx-bt24" data-tip="Code hidden" aria-label="Code"><svg width="14" height="14"><use href="#i-code"/></svg></button><button class="blx-bt24 on" data-tip="Output shown" aria-label="Output"><svg width="14" height="14"><use href="#i-eye"/></svg></button><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-badd"><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add block</button></div></div><div class="blx-blist"><div class="blx-bh"><span>Iris deck</span></div><div class="blx-brow"><span class="blx-bn">1</span><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-sum"/></svg></span><span class="blx-bt">Ratio by species</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-brow"><span class="blx-bn">2</span><span class="z-mk" data-category="plot"><svg width="14" height="14"><use href="#z-chart"/></svg></span><span class="blx-bt">Sepal scatter</span><span class="blx-bx"><button class="blx-bt24 more" data-tip="Actions" aria-label="Actions"><svg width="14" height="14"><use href="#z-dots"/></svg></button></span></div><div class="blx-badd"><button class="b s quiet"><svg width="12" height="12"><use href="#i-plus"/></svg>Add slide</button></div></div></div>
 <p class="cap" style="margin-top:6px">Drawn: the "Tables" header hovered, "Ratio by species" hovered in the report, "Sepal scatter" open in the dock.</p>
 
 <h3 class="sh" id="links">Links in the outline</h3>
@@ -1272,7 +1282,7 @@ current row. A stack is a tinted band; the pointer on its header deepens the who
 its menu (drawn open for the link from "Two species" to "Sepal ratio"). Adding a link starts from a block: drag its dot onto another row, or click a
 free-input marker (the open circle after "Join lookup": its input y has nothing linked) and pick the block that feeds it. "∞" marks a block that takes
 any number of inputs. Removing a block with one input links its parent to its children.</p>
-<div class="blx-blists" style="min-height:250px"><div class="blx-blist" style="width:300px;position:relative"><div class="blx-bh"><span>Outline</span></div><div class="blx-rl"><svg class="blx-rail" width="40" height="170"><path d="M12 17 V51" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5" fill="none"/><path d="M12 51 V85" stroke="var(--blockr-color-border-accent)" stroke-width="3" fill="none"/><path d="M12 85 V119" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5" fill="none"/><path d="M12 51 C12 65 24 60 24 75 V153" stroke="#7c3aed" stroke-width="1.5" fill="none"/><path d="M12 85 C12 99 24 94 24 109 V153" stroke="#7c3aed" stroke-width="1.5" fill="none"/><circle cx="12" cy="17" r="4" fill="var(--blockr-color-bg-surface)" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5"/><circle cx="12" cy="51" r="4" fill="var(--blockr-color-bg-surface)" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5"/><circle cx="12" cy="85" r="4" fill="var(--blockr-color-bg-surface)" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5"/><circle cx="12" cy="119" r="4" fill="var(--blockr-color-bg-surface)" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5"/><circle cx="24" cy="153" r="4" fill="var(--blockr-color-bg-surface)" stroke="#7c3aed" stroke-width="1.5"/></svg><div class="blx-brow"><span class="blx-bm" style="--c:#0072B2"><svg width="14" height="14"><use href="#z-db"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Iris data</span><span style="flex:1"></span></div><div class="blx-brow"><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-filter"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Two species</span><span style="flex:1"></span></div><div class="blx-brow"><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-sliders"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Sepal ratio</span><span style="flex:1"></span></div><div class="blx-brow"><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-join"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Join lookup</span><span class="blx-pip" data-tip="y: not connected" aria-label="y: not connected"></span><span style="flex:1"></span></div><div class="blx-brow"><span class="blx-bm" style="--c:#009E73"><svg width="14" height="14"><use href="#z-layers"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Stack both</span><span class="blx-pip inf" data-tip="Takes any number of inputs" aria-label="Takes any number of inputs">∞</span><span style="flex:1"></span></div><div class="blx-lmenu"><div class="h"><b>Two species → Sepal ratio</b>into input data</div><div class="r">Insert a block here</div><div class="r">Rename input</div><div class="dv"></div><div class="r d">Remove link</div></div></div></div></div>
+<div class="blx-blists" style="min-height:250px"><div class="blx-blist" style="width:300px;position:relative"><div class="blx-bh"><span>Outline</span></div><div class="blx-rl"><svg class="blx-rail" width="40" height="170"><path d="M12 17 V51" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5" fill="none"/><path d="M12 51 V85" stroke="var(--blockr-color-border-accent)" stroke-width="3" fill="none"/><path d="M12 85 V119" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5" fill="none"/><path d="M12 51 C12 65 24 60 24 75 V153" stroke="#7c3aed" stroke-width="1.5" fill="none"/><path d="M12 85 C12 99 24 94 24 109 V153" stroke="#7c3aed" stroke-width="1.5" fill="none"/><circle cx="12" cy="17" r="4" fill="var(--blockr-color-bg-surface)" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5"/><circle cx="12" cy="51" r="4" fill="var(--blockr-color-bg-surface)" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5"/><circle cx="12" cy="85" r="4" fill="var(--blockr-color-bg-surface)" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5"/><circle cx="12" cy="119" r="4" fill="var(--blockr-color-bg-surface)" stroke="var(--blockr-color-text-disabled)" stroke-width="1.5"/><circle cx="24" cy="153" r="4" fill="var(--blockr-color-bg-surface)" stroke="#7c3aed" stroke-width="1.5"/></svg><div class="blx-brow"><span class="z-mk" data-category="input"><svg width="14" height="14"><use href="#z-db"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Iris data</span><span style="flex:1"></span></div><div class="blx-brow"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-filter"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Two species</span><span style="flex:1"></span></div><div class="blx-brow"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-sliders"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Sepal ratio</span><span style="flex:1"></span></div><div class="blx-brow"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-join"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Join lookup</span><span class="blx-pip" data-tip="y: not connected" aria-label="y: not connected"></span><span style="flex:1"></span></div><div class="blx-brow"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-layers"/></svg></span><span class="blx-bt" style="flex:0 1 auto">Stack both</span><span class="blx-pip inf" data-tip="Takes any number of inputs" aria-label="Takes any number of inputs">∞</span><span style="flex:1"></span></div><div class="blx-lmenu"><div class="h"><b>Two species → Sepal ratio</b>into input data</div><div class="r">Insert a block here</div><div class="r">Rename input</div><div class="dv"></div><div class="r d">Remove link</div></div></div></div></div>
 </section>
 
 <!-- ============================================================= 5 CONTROLS -->
@@ -1365,12 +1375,12 @@ grid; its tooltip names the other state and it sets <code>aria-pressed</code>. C
 <p class="z-note">Double-click a name (or pick Rename in its menu): the text becomes a field at its own size. Enter commits,
 Escape restores, a click elsewhere commits; an empty or duplicate name is refused in place. Try both.</p>
 <div class="z-grid2">
-  <div class="z-card"><div class="z-hd"><span class="z-mk z-m28" style="--c:#009E73" data-tip="filter block · blockr.dplyr"><svg width="15" height="15"><use href="#z-filter"/></svg></span><span class="z-t"><span class="z-ed" data-group="blocks">Ozone above 40</span></span></div>
+  <div class="z-card"><div class="z-hd"><span class="z-mk z-m32" data-category="transform" data-tip="filter block · blockr.dplyr"><svg width="18" height="18"><use href="#z-filter"/></svg></span><span class="z-t"><span class="z-ed" data-group="blocks">Ozone above 40</span></span></div>
     <div class="z-body"><div class="z-err"></div></div></div>
   <div class="z-card"><div class="z-rows" style="padding:6px">
-    <div class="z-row"><span class="z-mk z-m24" style="--c:#0072B2"><svg width="13" height="13"><use href="#z-db"/></svg></span><span class="z-ed" data-group="blocks">Measurements</span></div>
-    <div class="z-row"><span class="z-mk z-m24" style="--c:#009E73"><svg width="13" height="13"><use href="#z-filter"/></svg></span><span class="z-ed" data-group="blocks">Complete cases</span></div>
-    <div class="z-row"><span class="z-mk z-m24" style="--c:#E69F00"><svg width="13" height="13"><use href="#z-chart"/></svg></span><span class="z-ed" data-group="blocks">Mean ozone</span></div>
+    <div class="z-row"><span class="z-mk" data-category="input"><svg width="14" height="14"><use href="#z-db"/></svg></span><span class="z-ed" data-group="blocks">Measurements</span></div>
+    <div class="z-row"><span class="z-mk" data-category="transform"><svg width="14" height="14"><use href="#z-filter"/></svg></span><span class="z-ed" data-group="blocks">Complete cases</span></div>
+    <div class="z-row"><span class="z-mk" data-category="plot"><svg width="14" height="14"><use href="#z-chart"/></svg></span><span class="z-ed" data-group="blocks">Mean ozone</span></div>
   </div><div class="z-err" style="padding:0 14px 10px"></div></div>
 </div>
 
@@ -1481,13 +1491,15 @@ titles take the section-title style, sticky while the list scrolls; a divider se
       <div class="mr"><span class="lab">BMIBL</span><span class="meta">dbl</span></div>
       <div class="mr"><span class="lab">WEIGHTBL</span><span class="meta">dbl</span></div>
     </div></div>
-  <div><p class="cap">An action menu: the block's details head it, a divider sets off the removal</p>
+  <div><p class="cap">The block's "…" menu: the toggle for what the card shows, with its icon and a check while on, then the actions, and the removal after a divider, red only under the pointer</p>
     <div class="mn static" style="width:250px">
-      <div class="mh"><b>subset block</b><span class="badge">blockr.core</span><br>Keeps the rows that match the conditions, and the chosen columns.</div><div class="md"></div>
-      <div class="mr"><span class="lab">Rename</span></div>
-      <div class="mr hi"><span class="lab">Copy block ID</span><span class="meta">block_7f3a</span></div>
+      <div class="mr"><span class="ic"><svg><use href="#i-sliders"/></svg></span><span class="lab">Controls</span><span class="chk"><svg><use href="#i-tick"/></svg></span></div>
       <div class="md"></div>
-      <div class="mr danger"><span class="lab">Remove</span></div>
+      <div class="mr"><span class="lab">Rename</span></div>
+      <div class="mr"><span class="lab">Append block</span></div>
+      <div class="mr hi"><span class="lab">Copy block ID</span><span class="meta mono">block_7f3a</span></div>
+      <div class="md"></div>
+      <div class="mr danger"><span class="ic"><svg><use href="#i-trash"/></svg></span><span class="lab">Remove block</span></div>
     </div></div>
   <div><p class="cap">Placement</p>
     <ul class="rules" style="margin:0">
@@ -1529,8 +1541,8 @@ the icons and the cut-off names.</p>
     <div class="ctip-s"><div class="h"><i class="sw"></i>July</div><div class="r"><span>Mean ozone</span><b>59.1</b></div><div class="r"><span>Days</span><b>26</b></div></div>
   </div>
 </div>
-<p class="note" style="margin-top:14px">No popovers: a block's package and description head its "…" menu, and "Copy block ID" is
-a menu item. The block subtitle is plain text.</p>
+<p class="note" style="margin-top:14px">No popovers: the block's type and package are the tooltip on its mark, and "Copy block
+ID" is a menu item. The dock header has no subtitle.</p>
 
 <h3 class="z-h">Adding a block, and picking one on the board</h3>
 <p class="z-note">Every "+" opens the same menu: search on top, category titles, one row per block type with its mark and
@@ -1756,10 +1768,10 @@ the active line <code>bg-hover</code>, the input line a band mixed from the acce
   <div class="card">
     <h4 class="mini" style="margin-top:0">Where the code lives</h4>
     <ul class="rules" style="margin:0">
-      <li>blockr.ui owns the tokens: <code>inst/assets/css/blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>.</li>
-      <li>blockr.ui owns the shared components: badge, tag, pill and count classes, the button classes, the gear button, Blockr.Select and the one menu placement routine.</li>
-      <li>blockr.dock owns the dock header and the block category colours (<code>blk_color()</code>).</li>
-      <li>blockr.theme owns data colours (chart palettes, map markers).</li>
+      <li>Package blockr.ui owns the tokens, the block category colours among them: <code>inst/assets/css/blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>.</li>
+      <li>Package blockr.ui owns the shared components: badge, tag, pill and count classes, the button classes, the gear button, the block's mark, Blockr.Select and the one menu placement routine, and the gear tray for blocks rendered in R (<code>gear_tray()</code>).</li>
+      <li>Package blockr.dock owns the dock header.</li>
+      <li>Package blockr.theme owns data colours (chart palettes, map markers).</li>
     </ul>
   </div>
 </div>
@@ -2189,14 +2201,16 @@ document.getElementById('xf-days').innerHTML = Array.from({ length: 31 }, (_, i)
 
   // pickers
   const TYPES = [
-    ['Input', [['Dataset', 'blockr.core', '#0072B2', 'z-db'], ['Import Data', 'blockr.io', '#0072B2', 'z-file']]],
-    ['Transform', [['Arrange Rows', 'blockr.dplyr', '#009E73', 'z-sort'], ['Filter Rows', 'blockr.dplyr', '#009E73', 'z-filter'], ['Join', 'blockr.dplyr', '#009E73', 'z-join'], ['Summarize', 'blockr.dplyr', '#009E73', 'z-sum']]],
-    ['Plot', [['Chart', 'blockr.viz', '#E69F00', 'z-chart']]],
-    ['Output', [['Export Data', 'blockr.io', '#D55E00', 'z-out']]]];
-  const BOARD = [['Blocks', [['Measurements', 'Dataset', '#0072B2', 'z-db'], ['Complete cases', 'Filter Rows', '#009E73', 'z-filter'], ['Mean ozone', 'Chart', '#E69F00', 'z-chart']]],
-    ['Extensions', [['Outline', 'extension', '#6b7280', 'z-page']]]];
-  function row(n, meta, c, ic, badge) {
-    return '<div class="z-mi" data-n="' + n.toLowerCase() + '"><span class="z-mk z-m24" style="--c:' + c + '"><svg width="13" height="13"><use href="#' + ic + '"/></svg></span>' + n +
+    ['Input', [['Dataset', 'blockr.core', 'input', 'z-db'], ['Import Data', 'blockr.io', 'input', 'z-file']]],
+    ['Transform', [['Arrange Rows', 'blockr.dplyr', 'transform', 'z-sort'], ['Filter Rows', 'blockr.dplyr', 'transform', 'z-filter'], ['Join', 'blockr.dplyr', 'transform', 'z-join'], ['Summarize', 'blockr.dplyr', 'transform', 'z-sum']]],
+    ['Plot', [['Chart', 'blockr.viz', 'plot', 'z-chart']]],
+    ['Output', [['Export Data', 'blockr.io', 'output', 'z-out']]]];
+  const BOARD = [['Blocks', [['Measurements', 'Dataset', 'input', 'z-db'], ['Complete cases', 'Filter Rows', 'transform', 'z-filter'], ['Mean ozone', 'Chart', 'plot', 'z-chart']]],
+    ['Extensions', [['Outline', 'extension', null, 'z-page']]]];
+  // A row's mark takes its block's category; an extension is not a block, and its mark is muted.
+  function row(n, meta, cat, ic, badge) {
+    const mark = cat ? ' data-category="' + cat + '"' : ' style="color:var(--blockr-color-text-muted)"';
+    return '<div class="z-mi" data-n="' + n.toLowerCase() + '"><span class="z-mk"' + mark + '><svg width="14" height="14"><use href="#' + ic + '"/></svg></span>' + n +
       (badge ? '<span class="z-badge">' + meta + '</span>' : '<span class="z-meta2">' + meta + '</span>') + '</div>';
   }
   function setup(btnId, menuId, qId, listId, data, badge) {

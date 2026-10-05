@@ -11,7 +11,7 @@ test_that("controls_dep ships the controls after the tokens", {
     c("blockr-tokens", "blockr-icons", "blockr-ui-js", "blockr-blocks-css",
       "blockr-menu-css", "blockr-tooltip-css", "blockr-buttons-css",
       "blockr-settings-band", "blockr-select-js", "blockr-select-css",
-      "blockr-input-js", "blockr-input-css")
+      "blockr-input-js", "blockr-input-css", "blockr-shiny-js")
   )
 
   assets <- system.file("assets", package = "blockr.ui")
@@ -49,21 +49,12 @@ test_that("the browser tests' page loads what controls_dep() attaches", {
   )
 
   expect_identical(loaded, attached)
-
-  # The icons the dependency writes into the head come first, from the
-  # snapshot test-icons.R keeps of them.
-  icons <- grep("_snaps/icons/icons.js", html, fixed = TRUE)
-  expect_length(icons, 1L)
-  expect_lt(icons, grep("inst/assets/js/blockr-ui.js", html, fixed = TRUE))
 })
 
 test_that("the controls read only meaning tokens this package defines", {
 
   # Every stylesheet controls_dep() ships, read off the dependency, so a
-  # sheet added to it is held to this at once. A property a component sets
-  # for itself (the menu mark's colour, set inline by Blockr.menu) is not a
-  # token and is named here.
-  local <- "--blockr-menu-mark"
+  # sheet added to it is held to this at once.
   sheets <- blockr.core::unlst(
     blockr.core::lst_xtr(htmltools::findDependencies(controls_dep()),
                          "stylesheet")
@@ -71,9 +62,7 @@ test_that("the controls read only meaning tokens this package defines", {
   sheets <- basename(sheets[!grepl("tokens", sheets)])
 
   sites <- token_references("blockr.ui")
-  controls <- sites[
-    basename(sites$file) %in% sheets & !sites$token %in% local,
-  ]
+  controls <- sites[basename(sites$file) %in% sheets, ]
   stray <- grepl(palette_token, controls$token) |
     controls$token %in% names(legacy_tokens())
 

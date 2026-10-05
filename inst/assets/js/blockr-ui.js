@@ -10,9 +10,10 @@
  *
  * Load it first. It holds nothing block-specific: the block protocol
  * (Blockr.registerBlock and the restore queue) is blockr.dplyr's
- * blockr-core.js. Nor does it hold the icons it draws: Blockr.icons is the
- * list small_icon() reads in R, which controls_dep() writes into the page
- * ahead of this file.
+ * blockr-core.js. Nor does it hold the icons it draws: Blockr.icons comes
+ * from the files small_icon() reads in R, one SVG per icon in
+ * inst/assets/icons, and controls_dep() writes it into the page ahead of
+ * this file.
  */
 window.Blockr = window.Blockr || /** @type {BlockrNamespace} */ ({});
 
@@ -448,8 +449,10 @@ Blockr.textCommit = (input, opts) => {
  *
  * Markup built in R cannot call `set()`, so an element can also carry its
  * tooltip as an attribute: `data-blockr-tooltip="Download"`, plus
- * `data-blockr-tooltip-overflow` for the cut-off-only case. A `set()` on the
- * same element wins over the attribute.
+ * `data-blockr-tooltip-badge` for a badge after the name (the dock header's
+ * mark: "filter block" with "blockr.dplyr") and `data-blockr-tooltip-overflow`
+ * for the cut-off-only case. A `set()` on the same element wins over the
+ * attributes.
  *
  * One set of document listeners serves every tooltip, added when this file
  * loads, so no instance adds or leaks its own. The card shows after the
@@ -489,11 +492,23 @@ Blockr.tooltip = (() => {
   const ATTR = 'data-blockr-tooltip';
 
   /**
-   * The tooltip `el` carries: one given by set(), else its attribute.
+   * The line `el`'s attributes give: the name, then its badge if it has one.
+   * An empty name shows nothing, badge or not.
+   * @param {Element} el
+   * @returns {BlockrTooltipLine}
+   */
+  const attrLine = (el) => {
+    const name = el.getAttribute(ATTR) || '';
+    const badge = el.getAttribute(ATTR + '-badge');
+    return name && badge ? { name, badge } : name;
+  };
+
+  /**
+   * The tooltip `el` carries: one given by set(), else its attributes.
    * @param {Element} el
    */
   const tipOf = (el) => tips.get(el) || (el.hasAttribute(ATTR)
-    ? { content: el.getAttribute(ATTR) || '', overflow: el.hasAttribute(ATTR + '-overflow') }
+    ? { content: attrLine(el), overflow: el.hasAttribute(ATTR + '-overflow') }
     : null);
 
   /**
@@ -863,11 +878,13 @@ Blockr.tooltip = (() => {
    * after a gap or a divider, so a label with an icon never sits right under
    * one without.
    *
-   * A row may also carry `mark` ({ icon, color }: a block's glyph on a tint
-   * of its category colour), `badge` (a neutral badge at the end, as a
-   * package) and `keywords` (more text the filter matches). `config.caption`
-   * is one muted line on top ("Append to Dataset"); `config.filter` (true, or
-   * the placeholder) adds a filter box that narrows the rows as you type and
+   * A row may also carry `mark` ({ icon, category, color? }: a block's mark,
+   * its glyph in its category's colour on a tint of it, as block_mark()
+   * draws it in R; `color` draws it in a colour of its own, such as a
+   * stack's), `badge` (a neutral badge at the end, as a package) and
+   * `keywords` (more text the filter matches). A `config.caption` is one
+   * muted line on top ("Append to Dataset"); `config.filter` (true, or the
+   * placeholder) adds a filter box that narrows the rows as you type and
    * holds the focus; `config.minWidth` widens the panel.
    *
    * `config.head` ({ title, badge?, text? }) puts a block of text above the
@@ -995,8 +1012,9 @@ Blockr.tooltip = (() => {
       }
       if (item.mark) {
         const mk = document.createElement('span');
-        mk.className = 'blockr-menu__mark';
-        if (item.mark.color) mk.style.setProperty('--blockr-menu-mark', item.mark.color);
+        mk.className = 'blockr-block-mark';
+        if (item.mark.category) mk.dataset.category = item.mark.category;
+        if (item.mark.color) mk.style.color = item.mark.color;
         mk.innerHTML = item.mark.icon || '';
         row.appendChild(mk);
       }
@@ -1227,11 +1245,6 @@ Blockr.tooltip = (() => {
 (function () {
   'use strict';
 
-  var CHECK_SVG =
-    '<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">' +
-    '<path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 ' +
-    '0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0"/></svg>';
-
   /**
    * Build a design-system checkbox.
    * @param {string} label
@@ -1248,7 +1261,7 @@ Blockr.tooltip = (() => {
     input.checked = !!checked;
     var box = document.createElement('span');
     box.className = 'blockr-checkbox__box';
-    box.innerHTML = CHECK_SVG;
+    box.innerHTML = Blockr.icons.confirm;
     var txt = document.createElement('span');
     txt.className = 'blockr-checkbox__label';
     txt.textContent = label;
@@ -1270,10 +1283,11 @@ Blockr.tooltip = (() => {
    * the content below is seen moving; Escape inside it, or on the gear,
    * closes it and returns focus to the gear. The gear carries the tooltip "Settings", reports its
    * state in aria-expanded and takes the accent tint while open
-   * (.blockr-gear-active).
+   * (.blockr-gear-active). `open: true` starts it open, without the slide:
+   * a tray drawn again keeps the state it had.
    * @param {HTMLElement} band
    * @param {HTMLButtonElement} gear
-   * @param {{ label?: string }} [opts]
+   * @param {{ label?: string, open?: boolean }} [opts]
    * @returns {BlockrGearTrayHandle}
    */
   function gearTray(band, gear, opts) {
@@ -1290,6 +1304,24 @@ Blockr.tooltip = (() => {
     Blockr.tooltip.set(gear, 'Settings');
     gear.setAttribute('aria-label', 'Settings');
     gear.setAttribute('aria-expanded', 'false');
+    // Open, the tray is a layer (Blockr.layer) in the page: an Escape
+    // pressed in the band or on the gear closes it, and a click outside
+    // leaves it open.
+    function addLayer() {
+      layer = Blockr.layer(band, {
+        from: gear,
+        inPage: true,
+        escape: function () { set(false); gear.focus(); }
+      });
+    }
+
+    if (opts && opts.open) {
+      open = true;
+      gear.classList.add('blockr-gear-active');
+      gear.setAttribute('aria-expanded', 'true');
+      band.classList.add('blockr-settings--open');
+      addLayer();
+    }
 
     /** @param {boolean} next */
     function set(next) {
@@ -1297,15 +1329,8 @@ Blockr.tooltip = (() => {
       open = next;
       gear.classList.toggle('blockr-gear-active', open);
       gear.setAttribute('aria-expanded', open ? 'true' : 'false');
-      // Open, the tray is a layer (Blockr.layer) in the page: an Escape
-      // pressed in the band or on the gear closes it, and a click outside
-      // leaves it open.
       if (open) {
-        layer = Blockr.layer(band, {
-          from: gear,
-          inPage: true,
-          escape: function () { set(false); gear.focus(); }
-        });
+        addLayer();
       } else if (layer) {
         layer.remove();
         layer = null;

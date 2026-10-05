@@ -16,6 +16,32 @@
   as a drag ghost or a drop line: above the content, under the navbar and
   everything that floats.
 
+* The new `shiny_input_batch_dep()` dependency skips the empty input messages
+  Shiny has sent after every deferred input since 1.7.5: its batcher never
+  records that a send is queued, so each deferred `setInput` queues one, and
+  all but the first go out empty. The server runs a full input cycle for each,
+  and on a dock board the dock's own messages queue behind them. Attach it
+  once at the page level. Reported upstream as rstudio/shiny#4436.
+
+* The small icons ship as files, one SVG per icon in `assets/icons`, which
+  `small_icon()` and `Blockr.icons` are built from (#80). JavaScript that
+  runs without R, such as a package's test harness, reads them there: an
+  icon is its file without its comment, which carries the icon's note, and
+  without the whitespace between tags.
+
+* The block's mark is drawn here, in the design system's four sizes (#65).
+  In R, `block_mark()` builds it from a block's glyph and category as the
+  `.blockr-block-mark` class: 24px, or 32, 20 and 16px through its `--32`,
+  `--20` and `--16` modifiers, with the glyph half the mark plus 2px and the
+  corners a quarter of it. For a place that needs an image, such as the DAG's
+  canvas, `block_mark_svg()` draws the same mark as an SVG or its `data:`
+  URI. The category colours are tokens, `--blockr-category-<category>`, with
+  the spec's fixed Okabe-Ito values, and blockr.ui owns them in place of
+  blockr.dock's `blk_color()`. In R, `category_color()` reads them. A
+  `Blockr.menu` row's `mark` takes the block's `category` and draws the same
+  mark at 24px, in place of the menu's own `.blockr-menu__mark` class and its
+  `--blockr-menu-mark` property.
+
 * The new `small_icon()` draws the design system's small icons in markup
   built in R (#64), from the list `Blockr.icons` is now built from:
   `controls_dep()` writes the list into the page ahead of `blockr-ui.js`,
@@ -63,9 +89,18 @@
 * The new `tool_button()` is the design system's 26px icon button, named
   by a tooltip.
 
+* The new `gear_tray()` with `tray_section()` draws the gear and its tray
+  for a block whose UI is written in R. The tray lays out Shiny's own inputs
+  at the design system's sizes.
+
+* The dropdown of a selectize input, as `selectInput()` draws it, is a layer
+  on the dismiss stack while it is open, so Escape closes it before the gear
+  tray, modal or panel around it.
+
 * An element built in R can carry its tooltip as a `data-blockr-tooltip`
-  attribute; `Blockr.tooltip` shows it as the light card, in place of the
-  native `title` box.
+  attribute, and a badge after the name as `data-blockr-tooltip-badge`
+  (#63); `Blockr.tooltip` shows it as the light card, in place of the native
+  `title` box.
 
 * Text marked `data-blockr-editable` shows the text cursor and a tooltip
   naming the gesture, "Double-click to edit" unless the attribute names

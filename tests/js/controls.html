@@ -2,15 +2,14 @@
 <!-- The page the browser tests (browser.js) build their controls on: the
      shipped stylesheets and scripts, in the order controls_dep() attaches
      them, and no controls of its own. The icons, which controls_dep()
-     writes into the head from R, come from the snapshot test-icons.R keeps
-     of that script. -->
+     writes into the head, come from browser.js, which sets them ahead of
+     every script here. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Controls</title>
 <link rel="stylesheet" href="../../inst/assets/css/blockr-tokens.css">
 <link rel="stylesheet" href="../../inst/assets/css/blockr-tokens-dark.css">
-<script src="../testthat/_snaps/icons/icons.js"></script>
 <script src="../../inst/assets/js/blockr-ui.js"></script>
 <link rel="stylesheet" href="../../inst/assets/css/blockr-blocks.css">
 <link rel="stylesheet" href="../../inst/assets/css/blockr-menu.css">
@@ -21,6 +20,7 @@
 <link rel="stylesheet" href="../../inst/assets/css/blockr-select.css">
 <script src="../../inst/assets/js/blockr-input.js"></script>
 <link rel="stylesheet" href="../../inst/assets/css/blockr-input.css">
+<script src="../../inst/assets/js/blockr-shiny.js"></script>
 <style>
   /* What the host gives a control in an app: the box model of Bootstrap's
      reboot, which bslib puts on every page, and a block's surface and text
