@@ -148,8 +148,6 @@ interface BlockrSelectHandleBase {
    * Disabling an open select closes it first.
    */
   setDisabled(flag: boolean): void;
-  /** What a screen reader calls the combobox and its list, as `label`. */
-  setLabel(text: string): void;
   /**
    * Enter/leave server-search mode from a column-values response:
    * `truncated` activates the onSearch hook and the "N values — type to
@@ -460,8 +458,8 @@ interface BlockrNamespace {
     gear: HTMLButtonElement,
     opts?: { label?: string; open?: boolean }
   ): BlockrGearTrayHandle;
-  /** The Shiny input bindings' mount, value and update steps
-   *  (blockr-inputs.js), keyed by control. */
+  /** The Shiny input bindings' mount and value steps (blockr-inputs.js),
+   *  keyed by control. */
   inputs?: Record<string, BlockrInputSpec>;
   /** Toggle the canonical required-empty amber cue on a field wrapper. */
   setRequiredEmpty(el: Element, empty: boolean): void;
@@ -493,11 +491,8 @@ interface BlockrSegmentedHandle {
 /** One control's part of a Shiny input binding (blockr-inputs.js). */
 interface BlockrInputSpec {
   selector: string;
-  type?: string;
   mount(el: HTMLElement): void;
   value(el: HTMLElement): any;
-  receive?(el: HTMLElement, data: Record<string, any>): void;
-  unmount?(el: HTMLElement): void;
 }
 
 /** Handle returned by Blockr.gearTray (blockr-ui.js). */

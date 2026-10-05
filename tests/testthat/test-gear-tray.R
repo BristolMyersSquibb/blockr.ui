@@ -1,97 +1,10 @@
 html_of <- function(x) htmltools::renderTags(x)$html
 
-# A session that records what update_select_input() sends.
-recording_session <- function() {
-  env <- new.env()
-  env$sent <- list()
-  env$sendInputMessage <- function(inputId, message) { # nolint
-    env$sent[[length(env$sent) + 1L]] <- list(id = inputId, message = message)
-  }
-  env
-}
-
-test_that("select_input() writes its settings for the binding", {
-
-  html <- html_of(
-    select_input("col", "Column", c("mpg", Displacement = "disp"),
-                 selected = "disp")
-  )
-
-  expect_match(html, 'class="blockr-settings__field"', fixed = TRUE)
-  expect_match(
-    html, '<label id="col-label" class="blockr-label">Column</label>',
-    fixed = TRUE
-  )
-  expect_match(html, 'id="col" class="blockr-ui-select"', fixed = TRUE)
-  expect_match(html, 'data-multiple="false"', fixed = TRUE)
-  expect_match(
-    html,
-    paste0(
-      'data-options="[&quot;mpg&quot;,{&quot;value&quot;:',
-      '&quot;disp&quot;,&quot;label&quot;:&quot;Displacement&quot;}]"'
-    ),
-    fixed = TRUE
-  )
-  expect_match(html, 'data-selected="[&quot;disp&quot;]"', fixed = TRUE)
-  expect_no_match(html, "data-placeholder")
-
-  # One choice and one pick still go as arrays.
-  multi <- html_of(select_input("cols", NULL, "mpg", "mpg", multiple = TRUE,
-                                placeholder = "Pick"))
-  expect_match(multi, 'data-options="[&quot;mpg&quot;]"', fixed = TRUE)
-  expect_match(multi, 'data-selected="[&quot;mpg&quot;]"', fixed = TRUE)
-  expect_match(multi, "blockr-settings__field--full", fixed = TRUE)
-  expect_match(multi, 'data-placeholder="Pick"', fixed = TRUE)
-  expect_no_match(multi, "<label")
-
-  expect_match(html_of(select_input("x", "X", c("a", "b"))),
-               'data-selected="[]"', fixed = TRUE)
-
-  expect_error(select_input("x", "X", c("a", "b"), c("a", "b")), "one")
-
-  # A list of single values is fine; option groups are refused, not garbled.
-  expect_match(html_of(select_input("x", "X", list("a", "b"))),
-               'data-options="[&quot;a&quot;,&quot;b&quot;]"', fixed = TRUE)
-  groups <- list(Cars = c("mpg", "cyl"), Other = "hp")
-  expect_error(select_input("x", "X", groups), "option groups")
-  expect_error(update_select_input(recording_session(), "x", choices = groups),
-               "option groups")
-})
-
-test_that("a select reports a character vector, or NULL for no pick", {
-
-  expect_identical(select_value(list("a", "b")), c("a", "b"))
-  expect_identical(select_value("a"), "a")
-  expect_identical(select_value(""), "")
-  expect_null(select_value(list()))
-  expect_null(select_value(NULL))
-})
-
-test_that("update_select_input() sends only what it is given", {
-
-  s <- recording_session()
-
-  # Shiny's order: the session first, so a converted call works as it is.
-  update_select_input(s, "col", choices = c("a", b = "B"), selected = "a")
-  update_select_input(s, "col", selected = character())
-  update_select_input(s, "col", label = "Columns")
-
-  msgs <- lapply(s$sent, `[[`, "message")
-
-  expect_identical(msgs[[1L]], list(
-    choices = list("a", list(value = "B", label = "b")),
-    selected = list("a")
-  ))
-  expect_identical(msgs[[2L]], list(selected = list()))
-  expect_identical(msgs[[3L]], list(label = "Columns"))
-  expect_identical(s$sent[[1L]]$id, "col")
-})
-
 test_that("gear_tray() draws the gear last in the header row, and the tray", {
 
   tray <- gear_tray(
     "gear",
-    tray_section("Format", select_input("sep", "Separator", c(",", ";"))),
+    tray_section("Format", shiny::selectInput("sep", "Separator", c(",", ";"))),
     tray_section("Skip", shiny::numericInput("skip", "Rows", 0),
                  toggle = "skip_on"),
     tools = tool_button(htmltools::HTML("D"), "Download")

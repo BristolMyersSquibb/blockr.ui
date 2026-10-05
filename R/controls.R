@@ -10,7 +10,7 @@
 #' floating panels (`Blockr.place`) and the small icons (`Blockr.icons`), all
 #' on the `window.Blockr` namespace, together with the rows, pills, labels,
 #' fields and buttons (`.blockr-btn`) they draw, and the Shiny input bindings
-#' of the controls rendered from R ([select_input()] and [gear_tray()]).
+#' of the gear tray rendered from R ([gear_tray()]).
 #'
 #' The small icons are not in `blockr-ui.js`: the dependency writes them into
 #' the page's head ahead of it, from the files `small_icon()` reads, so markup

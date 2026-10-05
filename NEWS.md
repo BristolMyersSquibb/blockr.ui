@@ -73,12 +73,13 @@
 * The new `tool_button()` is the design system's 26px icon button, named
   by a tooltip.
 
-* The new `select_input()` draws `Blockr.Select` for a block whose UI is
-  written in R, and `update_select_input()` changes it from the server as
-  `updateSelectInput()` does: the new value comes back to `input$x`. The new
-  `gear_tray()` with `tray_section()` draws the gear and its tray, which lays
-  out Shiny's own inputs as well, so text, numbers and checkboxes need no
-  control of their own.
+* The new `gear_tray()` with `tray_section()` draws the gear and its tray
+  for a block whose UI is written in R. The tray lays out Shiny's own inputs
+  at the design system's sizes, so the fields need no controls of their own.
+
+* The dropdown of a selectize input, as `selectInput()` draws it, is a layer
+  on the dismiss stack while it is open, so Escape closes it before the gear
+  tray, modal or panel around it.
 
 * An element built in R can carry its tooltip as a `data-blockr-tooltip`
   attribute, and a badge after the name as `data-blockr-tooltip-badge`

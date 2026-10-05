@@ -1,97 +1,3 @@
-#' Select input in the design system
-#'
-#' The design system's select, `Blockr.Select`, for a block whose UI is
-#' rendered in R: single, or multi with tags, as a bordered 42px field. It
-#' renders the select's markup, with its label, and a Shiny input binding (in
-#' `blockr-inputs.js`, loaded by [controls_dep()]) mounts `Blockr.Select` on
-#' it and reports its value as `input[[inputId]]`.
-#'
-#' A single select without a `placeholder` takes the first choice when
-#' `selected` is `NULL`, as [shiny::selectInput()] does; with one, it shows
-#' the placeholder until something is picked, and its value is `""`. A multi
-#' select's value is a character vector, or `NULL` when nothing is picked.
-#'
-#' The field comes in the tray's field grid class
-#' (`.blockr-settings__field`): a select takes two columns, a multi select
-#' the whole row. Text, numbers and checkboxes need no control of their own:
-#' use Shiny's, with `updateOn = "blur"` for [shiny::textInput()] and
-#' [shiny::numericInput()], so their value changes on Enter or blur only.
-#'
-#' To change the select from the server, `update_select_input()` takes the
-#' arguments of [shiny::updateSelectInput()]. As with Shiny's own inputs, the
-#' select then sends its value back, so `input[[inputId]]` follows what it
-#' shows. That includes a pick it settles on by itself: new `choices` keep
-#' the pick while the list still has it, and otherwise fall back to the first
-#' choice, or to the placeholder. A block that copies the input into its
-#' state and pushes the state back pushes only when the two differ, so the
-#' value sent back does not loop.
-#'
-#' @param inputId The input's id.
-#' @param label The field label (12px, muted, above the control), or `NULL`
-#'   for none.
-#' @param choices The values to choose from, as a character vector. Names,
-#'   where given, are shown muted after the value, as a column's label is.
-#'   Option groups are not supported.
-#' @param selected The initial pick: one value, or several for a multi
-#'   select.
-#' @param multiple Pick several, shown as tags.
-#' @param placeholder Text shown while the field is empty.
-#' @param session The Shiny session.
-#'
-#' @return The field, a [htmltools::tag] carrying [controls_dep()].
-#'   `update_select_input()` returns nothing.
-#'
-#' @examples
-#' select_input("col", "Column",
-#'              c("Miles per gallon" = "mpg", Cylinders = "cyl"))
-#' select_input("cols", "Columns", c("mpg", "cyl", "disp"),
-#'              selected = "mpg", multiple = TRUE)
-#'
-#' @export
-select_input <- function(inputId, label, choices, selected = NULL,
-                         multiple = FALSE, placeholder = NULL) {
-
-  stopifnot(
-    is_string(inputId),
-    isTRUE(multiple) || isFALSE(multiple),
-    is.null(placeholder) || is.character(placeholder)
-  )
-
-  selected <- if (!is.null(selected)) as.character(selected)
-
-  if (!multiple && length(selected) > 1L) {
-    stop("A single select takes one `selected` value.", call. = FALSE)
-  }
-
-  input_field(
-    if (multiple) "full" else "large",
-    field_label(label, inputId),
-    tags$div(
-      id = inputId,
-      class = "blockr-ui-select",
-      role = "group",
-      `aria-labelledby` = if (!is.null(label)) label_id(inputId),
-      `data-multiple` = if (multiple) "true" else "false",
-      `data-options` = to_json(select_options(choices)),
-      `data-selected` = to_json(as.list(selected)),
-      `data-placeholder` = placeholder
-    )
-  )
-}
-
-#' @rdname select_input
-#' @export
-update_select_input <- function(session = shiny::getDefaultReactiveDomain(),
-                                inputId, label = NULL, choices = NULL,
-                                selected = NULL) {
-  send_update(session, inputId, list(
-    choices = if (!is.null(choices)) select_options(choices),
-    # A list, so one value still arrives as an array.
-    selected = if (!is.null(selected)) as.list(as.character(selected)),
-    label = label
-  ))
-}
-
 #' Gear and settings tray
 #'
 #' The gear button and the tray it opens, for a block whose UI is rendered
@@ -108,12 +14,17 @@ update_select_input <- function(session = shiny::getDefaultReactiveDomain(),
 #' while it is checked; the checkbox is an input of its own,
 #' `input[[toggle]]`.
 #'
+#' The fields are Shiny's own inputs, with `updateOn = "blur"` for
+#' [shiny::textInput()] and [shiny::numericInput()], so their value changes
+#' on Enter or blur only. An open [shiny::selectInput()] closes on Escape
+#' before the tray does.
+#'
 #' @param inputId The gear's id. The tray's is `<inputId>_tray`.
 #' @param ... For `gear_tray()`, `tray_section()`s, or fields for a tray of
-#'   one section. For `tray_section()`, its fields: [select_input()],
-#'   Shiny's own inputs, or any other tag. Each goes in a grid cell at the
-#'   size the design system gives it: a number or a checkbox takes one
-#'   column, a multi select the whole row, anything else two.
+#'   one section. For `tray_section()`, its fields: Shiny's inputs, or any
+#'   other tag. Each goes in a grid cell at the size the design system gives
+#'   it: a number or a checkbox takes one column, a multi select the whole
+#'   row, anything else two.
 #' @param tools Tool buttons ([tool_button()], an [action_menu()]) that
 #'   stand left of the gear in the header row.
 #' @param label The tray's accessible name.
@@ -127,7 +38,7 @@ update_select_input <- function(session = shiny::getDefaultReactiveDomain(),
 #'   "gear",
 #'   tray_section(
 #'     "Format",
-#'     select_input("sep", "Separator", c(",", ";", "\t")),
+#'     shiny::selectInput("sep", "Separator", c(",", ";", "\t")),
 #'     shiny::checkboxInput("header", "First row is a header", TRUE)
 #'   ),
 #'   tray_section(
@@ -252,18 +163,8 @@ input_field <- function(size, ...) {
   ))
 }
 
-field_label <- function(label, inputId, ...) {
-  if (is.null(label)) {
-    return(NULL)
-  }
-  tags$label(id = label_id(inputId), class = "blockr-label", ..., label)
-}
-
-label_id <- function(inputId) paste0(inputId, "-label")
-
-# The grid size for a field that is not one of ours, read off the inputs in
-# it: one number or one checkbox takes one column, a multi select the whole
-# row, anything else two.
+# The grid size for a field, read off the inputs in it: one number or one
+# checkbox takes one column, a multi select the whole row, anything else two.
 field_size <- function(f) {
 
   if (!inherits(f, c("shiny.tag", "shiny.tag.list"))) {
@@ -304,45 +205,6 @@ checkbox_tag <- function(inputId, label, value) {
     tags$span(class = "blockr-checkbox__box", small_icon("confirm")),
     tags$span(class = "blockr-checkbox__label", label)
   )
-}
-
-# Blockr.Select's options: a bare value, or a value with its label.
-select_options <- function(choices) {
-
-  if (is.list(choices) && any(lengths(choices) != 1L)) {
-    stop("A select takes its `choices` as a character vector; option groups ",
-         "are not supported.", call. = FALSE)
-  }
-
-  values <- as.character(unname(choices))
-  labels <- names(choices)
-
-  if (is.null(labels)) {
-    return(as.list(values))
-  }
-
-  unname(Map(
-    function(v, l) {
-      if (is.na(l) || !nzchar(l) || l == v) v else list(value = v, label = l)
-    },
-    values, as.character(labels)
-  ))
-}
-
-send_update <- function(session, inputId, message) {
-  stopifnot(is_string(inputId))
-  session$sendInputMessage(inputId, Filter(Negate(is.null), message))
-  invisible()
-}
-
-to_json <- function(x) {
-  as.character(jsonlite::toJSON(x, auto_unbox = TRUE, null = "null"))
-}
-
-# What a select reports: a character vector, NULL for no pick.
-select_value <- function(x, shinysession, name) {
-  x <- unlist(x)
-  if (!length(x)) NULL else as.character(x)
 }
 
 is_string <- function(x) {

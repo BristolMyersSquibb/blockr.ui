@@ -1,7 +1,7 @@
-/* The Shiny input bindings of blockr-inputs.js, driven the way Shiny drives
- * them: find the element, initialize, subscribe, read the value, apply a
- * server update. Shiny is a stub that records what the bindings
- * register; the markup is what the R functions write.
+/* blockr-inputs.js: the gear's binding, driven the way Shiny drives it
+ * (find the element, initialize, subscribe, read the value), and Shiny's
+ * selects on the dismiss stack. Shiny is a stub that records what the
+ * bindings register; the markup is what the R functions write.
  */
 'use strict';
 
@@ -49,91 +49,9 @@ const click = (win, el) => el.dispatchEvent(new win.MouseEvent('click', { bubble
 const key = (win, el, k) =>
   el.dispatchEvent(new win.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
 
-const esc = (x) => JSON.stringify(x).replace(/"/g, '&quot;');
-
-test('inputs: every control registers a binding', (newWindow) => {
+test('inputs: the gear registers a binding', (newWindow) => {
   const ctx = shinyWindow(newWindow);
-  assert.deepStrictEqual(Object.keys(ctx.bindings).sort(), [
-    'blockr.ui.gear', 'blockr.ui.select'
-  ]);
-  ctx.win.close();
-});
-
-test('select: mounts a bordered Blockr.Select and reports picks and pushes', (newWindow) => {
-  const ctx = shinyWindow(newWindow);
-  const { win } = ctx;
-  const s = bind(ctx, 'select',
-    `<label id="col-label" class="blockr-label">Column</label>
-    <div id="col" class="blockr-ui-select" data-multiple="false"
-      data-options="${esc(['a', { value: 'b', label: 'Bee' }, 'c'])}"
-      data-selected="${esc(['b'])}"></div>`);
-  const name = () => s.el.querySelector('[role="combobox"]').getAttribute('aria-label');
-
-  assert.ok(s.el.querySelector('.blockr-select--bordered'), 'bordered');
-  assert.strictEqual(name(), 'Column', 'the combobox is named by its label');
-  assert.strictEqual(s.b.getType(s.el), 'blockr.ui.select');
-  assert.strictEqual(s.value(), 'b');
-
-  // A pick is reported.
-  click(win, s.el.querySelector('.blockr-select__control'));
-  const row = [...win.document.querySelectorAll('.blockr-select__option')]
-    .find((r) => r.getAttribute('data-value') === 'c');
-  click(win, row);
-  assert.strictEqual(s.value(), 'c');
-  assert.strictEqual(s.calls.n, 1);
-
-  // A push from the server is shown and sent back, as Shiny's own inputs
-  // send theirs.
-  s.b.receiveMessage(s.el, { choices: ['x', 'y'], selected: ['y'] });
-  assert.strictEqual(s.value(), 'y');
-  assert.strictEqual(s.calls.n, 2);
-
-  // New choices alone keep the pick while the list has it; without it the
-  // select falls back to the first choice, and that is sent back too. One
-  // choice may arrive unboxed.
-  s.b.receiveMessage(s.el, { choices: ['y', 'z'] });
-  assert.strictEqual(s.value(), 'y');
-  s.b.receiveMessage(s.el, { choices: 'z' });
-  assert.strictEqual(s.value(), 'z');
-  assert.strictEqual(s.calls.n, 4);
-
-  // A new label renames the field and the combobox.
-  s.b.receiveMessage(s.el, { label: 'Columns' });
-  assert.strictEqual(win.document.getElementById('col-label').textContent, 'Columns');
-  assert.strictEqual(name(), 'Columns');
-  win.close();
-});
-
-test('select: a placeholder holds until a pick; multi reports an array', (newWindow) => {
-  const ctx = shinyWindow(newWindow);
-  const single = bind(ctx, 'select',
-    `<div id="one" class="blockr-ui-select" data-multiple="false"
-      data-options="${esc(['a', 'b'])}" data-selected="[]" data-placeholder="Pick"></div>`);
-  assert.strictEqual(single.value(), '');
-
-  const plain = bind(ctx, 'select',
-    `<div id="two" class="blockr-ui-select" data-multiple="false"
-      data-options="${esc(['a', 'b'])}" data-selected="[]"></div>`);
-  assert.strictEqual(plain.value(), 'a', 'no placeholder: the first choice');
-
-  const multi = bind(ctx, 'select',
-    `<div id="cols" class="blockr-ui-select" data-multiple="true"
-      data-options="${esc(['a', 'b', 'c'])}" data-selected="${esc(['c', 'a'])}"></div>`);
-  assert.deepStrictEqual(multi.value(), ['c', 'a']);
-  multi.b.receiveMessage(multi.el, { selected: 'b' });
-  assert.deepStrictEqual(multi.value(), ['b']);
-  multi.b.receiveMessage(multi.el, { selected: [] });
-  assert.deepStrictEqual(multi.value(), []);
-  assert.strictEqual(multi.calls.n, 2);
-  ctx.win.close();
-});
-
-test('select: binding twice keeps one control', (newWindow) => {
-  const ctx = shinyWindow(newWindow);
-  const s = bind(ctx, 'select',
-    `<div id="col" class="blockr-ui-select" data-options="${esc(['a'])}"></div>`);
-  s.b.initialize(s.el);
-  assert.strictEqual(s.el.querySelectorAll('.blockr-select').length, 1);
+  assert.deepStrictEqual(Object.keys(ctx.bindings).sort(), ['blockr.ui.gear']);
   ctx.win.close();
 });
 
