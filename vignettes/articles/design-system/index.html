@@ -750,12 +750,19 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
   <div class="mr"><span class="lab">Just now</span><span class="meta">567d4 (current)</span></div>
   <div class="mr"><span class="lab">All versions →</span></div></template>
 <template id="m-nav-views"><div class="mt">Views</div>
-  <div class="mr cur"><span class="lab">Overview</span></div>
+  <div class="mr cur"><span class="lab">Overview</span><span class="chk"><svg><use href="#i-tick"/></svg></span></div>
   <div class="mr"><span class="lab">Ozone</span></div>
   <div class="mr"><span class="lab">Data</span></div>
   <div class="md"></div>
   <div class="mr"><span class="lab">New view</span></div>
   <div class="mr"><span class="lab">Show views as tabs</span></div></template>
+<template id="m-nav-views-tabs"><div class="mt">Views</div>
+  <div class="mr cur"><span class="lab">Overview</span><span class="chk"><svg><use href="#i-tick"/></svg></span></div>
+  <div class="mr"><span class="lab">Ozone</span></div>
+  <div class="mr"><span class="lab">Data</span></div>
+  <div class="md"></div>
+  <div class="mr"><span class="lab">New view</span></div>
+  <div class="mr"><span class="lab">Show views as tabs</span><span class="chk"><svg><use href="#i-tick"/></svg></span></div></template>
 
 <div class="wrap">
 <header class="top">
@@ -835,7 +842,7 @@ view menu shrinks to its chevron, kept for managing views.</p>
   <span class="z-av" data-tip="Signed in as Christoph">C</span>
   <span class="z-break"></span>
   <span class="z-vtabs"><button class="z-vtab on">Overview</button><button class="z-vtab">Ozone</button><button class="z-vtab">Data</button></span>
-  <button class="z-ib" data-menu="m-nav-views" data-place="right" aria-label="Views"><span class="z-car"></span></button>
+  <button class="z-ib" data-menu="m-nav-views-tabs" data-place="right" data-tip="Views" aria-label="Views"><span class="z-car"></span></button>
 </div>
 </section>
 
