@@ -140,3 +140,34 @@ test_that("a tray of one section has no title, unless it is a toggle", {
                "tray_section")
   expect_error(tray_section(NULL, toggle = "on"), "title")
 })
+
+test_that("Shiny's own inputs take the design system's sizes in the tray", {
+
+  expect_identical(field_size(shiny::numericInput("n", "Rows", 1)), "small")
+  expect_identical(field_size(shiny::checkboxInput("h", "Header")), "small")
+  expect_identical(field_size(htmltools::tags$input(type = "number")), "small")
+  expect_identical(
+    field_size(shiny::selectInput("c", "C", c("a", "b"), multiple = TRUE)),
+    "full"
+  )
+  expect_identical(field_size(shiny::selectInput("c", "C", c("a", "b"))),
+                   "large")
+  expect_identical(field_size(shiny::textInput("t", "T")), "large")
+  expect_identical(
+    field_size(shiny::checkboxGroupInput("g", "G", c("a", "b"))), "large"
+  )
+  expect_identical(field_size(htmltools::span("x")), "large")
+  expect_identical(field_size("x"), "large")
+
+  html <- html_of(gear_tray(
+    "g",
+    shiny::numericInput("n", "Rows", 1, updateOn = "blur"),
+    shiny::textInput("t", "Name", updateOn = "blur")
+  ))
+  expect_match(
+    html, 'blockr-settings__field--small">\\s*<div class="form-group'
+  )
+  expect_match(
+    html, '<div class="blockr-settings__field">\\s*<div class="form-group'
+  )
+})

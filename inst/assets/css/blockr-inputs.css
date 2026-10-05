@@ -18,3 +18,21 @@
 .blockr-settings__title--toggle:has(input:not(:checked)) + .blockr-settings__grid {
   display: none;
 }
+
+/* Shiny's own inputs in the tray's grid: the cell gives the width and the
+   grid's gap the spacing, in place of Shiny's 300px and Bootstrap's margin. */
+.blockr-settings__field > .shiny-input-container {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+/* ...and its fields sit on the surface colour, as the tray's own do. The
+   theme sets selectize's fill with !important. */
+.blockr-settings .shiny-input-container .form-control,
+.blockr-settings .shiny-input-container .form-select {
+  background-color: var(--blockr-color-bg-surface);
+}
+
+.blockr-settings .shiny-input-container .selectize-input {
+  background-color: var(--blockr-color-bg-surface) !important;
+}

@@ -107,8 +107,9 @@ update_select_input <- function(inputId, choices = NULL, selected = NULL,
 #' @param inputId The gear's id. The tray's is `<inputId>_tray`.
 #' @param ... For `gear_tray()`, `tray_section()`s, or fields for a tray of
 #'   one section. For `tray_section()`, its fields: [select_input()],
-#'   Shiny's own inputs, or any other tag, which is put in a grid cell of two
-#'   columns.
+#'   Shiny's own inputs, or any other tag. Each goes in a grid cell at the
+#'   size the design system gives it: a number or a checkbox takes one
+#'   column, a multi select the whole row, anything else two.
 #' @param tools Tool buttons ([tool_button()], an [action_menu()]) that
 #'   stand left of the gear in the header row.
 #' @param label The tray's accessible name.
@@ -228,7 +229,7 @@ render_section <- function(x) {
     if (!is.null(cls) && grepl("blockr-settings__field", cls, fixed = TRUE)) {
       f
     } else {
-      tags$div(class = "blockr-settings__field", f)
+      input_field(field_size(f), f)
     }
   })
 
@@ -254,6 +255,33 @@ field_label <- function(label, inputId, ...) {
 }
 
 label_id <- function(inputId) paste0(inputId, "-label")
+
+# The grid size for a field that is not one of ours, read off the inputs in
+# it: one number or one checkbox takes one column, a multi select the whole
+# row, anything else two.
+field_size <- function(f) {
+
+  if (!inherits(f, c("shiny.tag", "shiny.tag.list"))) {
+    return("large")
+  }
+
+  # Wrapped, so a field that is a bare input is searched too.
+  q <- htmltools::tagQuery(tags$div(f))
+  attr_of <- function(sel, name) {
+    lapply(q$find(sel)$selectedTags(), htmltools::tagGetAttribute, name)
+  }
+
+  types <- unlist(attr_of("input", "type"))
+  multiple <- !vapply(attr_of("select", "multiple"), is.null, logical(1L))
+
+  if (length(types) == 1L && types %in% c("number", "checkbox")) {
+    "small"
+  } else if (any(multiple)) {
+    "full"
+  } else {
+    "large"
+  }
+}
 
 # The markup of Blockr.checkbox, for a section's toggle. Shiny's own
 # checkbox binding reports it.
