@@ -5,7 +5,7 @@
 #' the tray opens in flow under it, slides open and closed, and closes on
 #' the gear or Escape. `Blockr.gearTray` (in `blockr-ui.js`) does this; a
 #' Shiny input binding wires it up, so there is no inline script, and
-#' `input[[inputId]]` is `TRUE` while the tray is open. A tray drawn again
+#' `input[[id]]` is `TRUE` while the tray is open. A tray drawn again
 #' (a `renderUI()`) keeps the state it had, for the session.
 #'
 #' The tray holds sections, each a title over a grid of fields. A tray with
@@ -19,7 +19,7 @@
 #' on Enter or blur only. An open [shiny::selectInput()] closes on Escape
 #' before the tray does.
 #'
-#' @param inputId The gear's id. The tray's is `<inputId>_tray`.
+#' @param id The gear's id, an input id. The tray's is `<id>_tray`.
 #' @param ... For `gear_tray()`, `tray_section()`s, or fields for a tray of
 #'   one section. For `tray_section()`, its fields: Shiny's inputs, or any
 #'   other tag. Each goes in a grid cell at the size the design system gives
@@ -49,9 +49,9 @@
 #' )
 #'
 #' @export
-gear_tray <- function(inputId, ..., tools = NULL, label = "Settings") {
+gear_tray <- function(id, ..., tools = NULL, label = "Settings") {
 
-  stopifnot(is_string(inputId), is_string(label))
+  stopifnot(is_string(id), is_string(label))
 
   sections <- Filter(Negate(is.null), list(...))
   is_section <- vapply(sections, inherits, logical(1L), "blockr_tray_section")
@@ -74,14 +74,14 @@ gear_tray <- function(inputId, ..., tools = NULL, label = "Settings") {
     sections[[1L]]$title <- NULL
   }
 
-  tray_id <- paste0(inputId, "_tray")
+  tray_id <- paste0(id, "_tray")
 
   with_controls(tagList(
     tags$div(
       class = "blockr-gear-header",
       tools,
       tags$button(
-        id = inputId,
+        id = id,
         type = "button",
         class = "blockr-gear-btn blockr-ui-gear",
         `aria-controls` = tray_id,
@@ -191,14 +191,14 @@ field_size <- function(f) {
 
 # The markup of Blockr.checkbox, for a section's toggle, with its check from
 # the same icon. Shiny's own checkbox binding reports it.
-checkbox_tag <- function(inputId, label, value) {
+checkbox_tag <- function(id, label, value) {
 
-  stopifnot(is_string(inputId), isTRUE(value) || isFALSE(value))
+  stopifnot(is_string(id), isTRUE(value) || isFALSE(value))
 
   tags$label(
     class = "blockr-checkbox",
     tags$input(
-      id = inputId,
+      id = id,
       type = "checkbox",
       checked = if (value) NA
     ),

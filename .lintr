@@ -1,9 +1,4 @@
-linters: linters_with_defaults(
-    object_name_linter = object_name_linter(
-      styles = c("snake_case", "symbols"),
-      regexes = c(shiny = "^inputId$")
-    )
-  )
+linters: linters_with_defaults()
 exclusions: list(
     "vignettes" = list(
       object_usage_linter = Inf

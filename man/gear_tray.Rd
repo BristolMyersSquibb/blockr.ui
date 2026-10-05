@@ -5,12 +5,12 @@
 \alias{tray_section}
 \title{Gear and settings tray}
 \usage{
-gear_tray(inputId, ..., tools = NULL, label = "Settings")
+gear_tray(id, ..., tools = NULL, label = "Settings")
 
 tray_section(title = NULL, ..., toggle = NULL, value = FALSE)
 }
 \arguments{
-\item{inputId}{The gear's id. The tray's is \verb{<inputId>_tray}.}
+\item{id}{The gear's id, an input id. The tray's is \verb{<id>_tray}.}
 
 \item{...}{For \code{gear_tray()}, \code{tray_section()}s, or fields for a tray of
 one section. For \code{tray_section()}, its fields: Shiny's inputs, or any
@@ -42,7 +42,7 @@ in R. The gear is the last thing in the header row, after any \code{tools};
 the tray opens in flow under it, slides open and closed, and closes on
 the gear or Escape. \code{Blockr.gearTray} (in \code{blockr-ui.js}) does this; a
 Shiny input binding wires it up, so there is no inline script, and
-\code{input[[inputId]]} is \code{TRUE} while the tray is open. A tray drawn again
+\code{input[[id]]} is \code{TRUE} while the tray is open. A tray drawn again
 (a \code{renderUI()}) keeps the state it had, for the session.
 }
 \details{
