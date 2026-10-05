@@ -13,9 +13,9 @@ tray_section(title = NULL, ..., toggle = NULL, value = FALSE)
 \item{inputId}{The gear's id. The tray's is \verb{<inputId>_tray}.}
 
 \item{...}{For \code{gear_tray()}, \code{tray_section()}s, or fields for a tray of
-one section. For \code{tray_section()}, its fields: the inputs of
-\code{\link[=select_input]{select_input()}} and its siblings, or any tag, which is put in a grid
-cell of two columns.}
+one section. For \code{tray_section()}, its fields: \code{\link[=select_input]{select_input()}},
+Shiny's own inputs, or any other tag, which is put in a grid cell of two
+columns.}
 
 \item{tools}{Tool buttons (\code{\link[=tool_button]{tool_button()}}, an \code{\link[=action_menu]{action_menu()}}) that
 stand left of the gear in the header row.}
@@ -57,11 +57,11 @@ gear_tray(
   tray_section(
     "Format",
     select_input("sep", "Separator", c(",", ";", "\t")),
-    checkbox_input("header", "First row is a header", TRUE)
+    shiny::checkboxInput("header", "First row is a header", TRUE)
   ),
   tray_section(
     "Skip rows",
-    number_input("skip", "Rows", 0),
+    shiny::numericInput("skip", "Rows", 0, updateOn = "blur"),
     toggle = "skip_on"
   )
 )

@@ -69,3 +69,18 @@ test_that("the theme layer hides only chrome the host cannot reach", {
     ".popover .btn-close"
   )
 })
+
+test_that("the theme maps every Bootstrap button kind it names", {
+
+  css <- css_source("blockr-theme.css")
+
+  for (cls in c("btn-primary", "btn-default", "btn-secondary",
+                "btn-outline-secondary", "btn-light", "btn-link",
+                "btn-danger")) {
+    expect_match(css, paste0(":root:root .btn.", cls, "[ ,{]"), info = cls)
+  }
+  expect_match(css, ":root .btn-sm {", fixed = TRUE)
+
+  # The solid accent button is gone.
+  expect_no_match(css, "text-on-accent|color: #ffffff")
+})

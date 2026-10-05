@@ -1,31 +1,23 @@
-#' Shiny inputs in the design system's controls
+#' Select input in the design system
 #'
-#' The shared controls for a block whose UI is rendered in R: each renders
-#' the control's markup, with its label, and a Shiny input binding (in
-#' `blockr-inputs.js`, loaded by [controls_dep()]) mounts the JS control on
+#' The design system's select, `Blockr.Select`, for a block whose UI is
+#' rendered in R: single, or multi with tags, as a bordered 42px field. It
+#' renders the select's markup, with its label, and a Shiny input binding (in
+#' `blockr-inputs.js`, loaded by [controls_dep()]) mounts `Blockr.Select` on
 #' it and reports its value as `input[[inputId]]`.
 #'
-#' * `select_input()` is `Blockr.Select`, single or multi with tags, as a
-#'   bordered 42px field. A single select without a `placeholder` takes the
-#'   first choice when `selected` is `NULL`, as [shiny::selectInput()] does;
-#'   with one, it shows the placeholder until something is picked, and its
-#'   value is `""`. A multi select's value is a character vector, or `NULL`
-#'   when nothing is picked.
-#' * `text_input()` and `number_input()` commit on Enter or blur: the
-#'   "Enter" button is armed while the field differs from its value, and
-#'   Escape reverts. The input changes only on a commit, never while typing.
-#'   A number's value is numeric, `NA` when the field is empty.
-#' * `checkbox_input()` is `Blockr.checkbox`: on or off, the label naming
-#'   the "on" state.
-#' * `segmented_input()` is `Blockr.segmented`, for two or three fixed short
-#'   values.
+#' A single select without a `placeholder` takes the first choice when
+#' `selected` is `NULL`, as [shiny::selectInput()] does; with one, it shows
+#' the placeholder until something is picked, and its value is `""`. A multi
+#' select's value is a character vector, or `NULL` when nothing is picked.
 #'
-#' Each field comes in the tray's field grid class
-#' (`.blockr-settings__field`) at the size the design system gives it:
-#' numbers and checkboxes take one column, selects, text and segmented
-#' controls two, a multi select the whole row.
+#' The field comes in the tray's field grid class
+#' (`.blockr-settings__field`): a select takes two columns, a multi select
+#' the whole row. Text, numbers and checkboxes need no control of their own:
+#' use Shiny's, with `updateOn = "blur"` for [shiny::textInput()] and
+#' [shiny::numericInput()], so their value changes on Enter or blur only.
 #'
-#' The `update_*()` functions change a control from the server. The update
+#' `update_select_input()` changes the select from the server. The update
 #' is not sent back as a new input value: `input[[inputId]]` keeps the last
 #' value the user gave until they change it again. Echoing a push loops as
 #' soon as two pushes are in flight, so the server keeps track of what it
@@ -34,33 +26,23 @@
 #'
 #' @param inputId The input's id.
 #' @param label The field label (12px, muted, above the control), or `NULL`
-#'   for none. A checkbox's label is the text after its box.
+#'   for none.
 #' @param choices The values to choose from, as a character vector. Names,
 #'   where given, are shown muted after the value, as a column's label is.
-#'   For `segmented_input()`, names are the segments' text.
 #' @param selected The initial pick: one value, or several for a multi
 #'   select.
 #' @param multiple Pick several, shown as tags.
 #' @param placeholder Text shown while the field is empty.
-#' @param value The initial value.
 #' @param session The Shiny session.
 #'
-#' @return The field, a [htmltools::tag] carrying [controls_dep()]. The
-#'   `update_*()` functions return nothing.
+#' @return The field, a [htmltools::tag] carrying [controls_dep()].
+#'   `update_select_input()` returns nothing.
 #'
 #' @examples
 #' select_input("col", "Column", c("mpg", "cyl", disp = "Displacement"))
 #' select_input("cols", "Columns", c("mpg", "cyl", "disp"),
 #'              selected = "mpg", multiple = TRUE)
-#' text_input("name", "Name", placeholder = "data.csv")
-#' number_input("n", "Rows", value = 10)
-#' checkbox_input("header", "First row is a header", value = TRUE)
-#' segmented_input("from", "From", c(First = "head", Last = "tail"))
 #'
-#' @name inputs
-NULL
-
-#' @rdname inputs
 #' @export
 select_input <- function(inputId, label, choices, selected = NULL,
                          multiple = FALSE, placeholder = NULL) {
@@ -93,7 +75,7 @@ select_input <- function(inputId, label, choices, selected = NULL,
   )
 }
 
-#' @rdname inputs
+#' @rdname select_input
 #' @export
 update_select_input <- function(inputId, choices = NULL, selected = NULL,
                                 label = NULL,
@@ -104,131 +86,6 @@ update_select_input <- function(inputId, choices = NULL, selected = NULL,
     selected = if (!is.null(selected)) as.list(as.character(selected)),
     label = label
   ))
-}
-
-#' @rdname inputs
-#' @export
-text_input <- function(inputId, label, value = "", placeholder = NULL) {
-
-  stopifnot(is_string(inputId), is.character(value), length(value) == 1L)
-
-  commit_field(inputId, label, "large", tags$input(
-    id = inputId,
-    type = "text",
-    class = "blockr-text-input blockr-ui-text",
-    value = value,
-    placeholder = placeholder,
-    autocomplete = "off"
-  ))
-}
-
-#' @rdname inputs
-#' @export
-update_text_input <- function(inputId, value = NULL, label = NULL,
-                              placeholder = NULL,
-                              session = shiny::getDefaultReactiveDomain()) {
-  send_update(session, inputId, list(
-    value = value,
-    label = label,
-    placeholder = placeholder
-  ))
-}
-
-#' @param min,max,step The number's bounds and the step of its arrow keys;
-#'   `NA` for none.
-#' @rdname inputs
-#' @export
-number_input <- function(inputId, label, value = NA, min = NA, max = NA,
-                         step = NA, placeholder = NULL) {
-
-  stopifnot(is_string(inputId), length(value) == 1L,
-            is.na(value) || is.numeric(value))
-
-  num <- function(x) if (!is.na(x)) format(x, scientific = FALSE)
-
-  commit_field(inputId, label, "small", tags$input(
-    id = inputId,
-    type = "number",
-    class = "blockr-text-input blockr-ui-number",
-    value = num(value),
-    min = num(min),
-    max = num(max),
-    step = num(step),
-    placeholder = placeholder,
-    autocomplete = "off"
-  ))
-}
-
-#' @rdname inputs
-#' @export
-update_number_input <- function(inputId, value = NULL, label = NULL,
-                                session = shiny::getDefaultReactiveDomain()) {
-  send_update(session, inputId, list(
-    # An empty field, where an NA would reach the page as the text "NA".
-    value = if (!is.null(value)) {
-      if (is.na(value)) "" else format(value, scientific = FALSE)
-    },
-    label = label
-  ))
-}
-
-#' @rdname inputs
-#' @export
-checkbox_input <- function(inputId, label, value = FALSE) {
-  input_field("small", checkbox_tag(inputId, label, value))
-}
-
-#' @rdname inputs
-#' @export
-update_checkbox_input <- function(inputId, value = NULL, label = NULL,
-                                  session = shiny::getDefaultReactiveDomain()) {
-  send_update(session, inputId, list(value = value, label = label))
-}
-
-#' @param size A segmented control's height: `"m"` (42px) in the field grid,
-#'   `"xs"` (26px) inside a row or a bar.
-#' @rdname inputs
-#' @export
-segmented_input <- function(inputId, label, choices, selected = NULL,
-                            size = c("m", "xs")) {
-
-  size <- match.arg(size)
-  stopifnot(is_string(inputId))
-
-  if (!length(choices) %in% 2:3) {
-    stop("A segmented control holds two or three values; use ",
-         "select_input() for more.", call. = FALSE)
-  }
-
-  values <- as.character(unname(choices))
-  labels <- names(choices) %||% values
-  labels[!nzchar(labels)] <- values[!nzchar(labels)]
-
-  selected <- if (is.null(selected)) values[1L] else as.character(selected)
-  stopifnot(length(selected) == 1L, selected %in% values)
-
-  input_field(
-    "large",
-    field_label(label, inputId),
-    tags$div(
-      id = inputId,
-      class = "blockr-ui-segmented",
-      `data-choices` = to_json(unname(Map(
-        function(v, l) list(value = v, label = l), values, labels
-      ))),
-      `data-selected` = to_json(selected),
-      `data-size` = if (size == "xs") "xs"
-    )
-  )
-}
-
-#' @rdname inputs
-#' @export
-update_segmented_input <- function(
-  inputId, selected = NULL, label = NULL,
-  session = shiny::getDefaultReactiveDomain()
-) {
-  send_update(session, inputId, list(selected = selected, label = label))
 }
 
 #' Gear and settings tray
@@ -249,9 +106,9 @@ update_segmented_input <- function(
 #'
 #' @param inputId The gear's id. The tray's is `<inputId>_tray`.
 #' @param ... For `gear_tray()`, `tray_section()`s, or fields for a tray of
-#'   one section. For `tray_section()`, its fields: the inputs of
-#'   [select_input()] and its siblings, or any tag, which is put in a grid
-#'   cell of two columns.
+#'   one section. For `tray_section()`, its fields: [select_input()],
+#'   Shiny's own inputs, or any other tag, which is put in a grid cell of two
+#'   columns.
 #' @param tools Tool buttons ([tool_button()], an [action_menu()]) that
 #'   stand left of the gear in the header row.
 #' @param label The tray's accessible name.
@@ -266,11 +123,11 @@ update_segmented_input <- function(
 #'   tray_section(
 #'     "Format",
 #'     select_input("sep", "Separator", c(",", ";", "\t")),
-#'     checkbox_input("header", "First row is a header", TRUE)
+#'     shiny::checkboxInput("header", "First row is a header", TRUE)
 #'   ),
 #'   tray_section(
 #'     "Skip rows",
-#'     number_input("skip", "Rows", 0),
+#'     shiny::numericInput("skip", "Rows", 0, updateOn = "blur"),
 #'     toggle = "skip_on"
 #'   )
 #' )
@@ -389,15 +246,6 @@ input_field <- function(size, ...) {
   ))
 }
 
-commit_field <- function(inputId, label, size, input) {
-  input_field(
-    size,
-    field_label(label, inputId, `for` = inputId),
-    # The Enter button goes inside the field's right edge.
-    tags$div(class = "blockr-commit-field", input)
-  )
-}
-
 field_label <- function(label, inputId, ...) {
   if (is.null(label)) {
     return(NULL)
@@ -407,7 +255,8 @@ field_label <- function(label, inputId, ...) {
 
 label_id <- function(inputId) paste0(inputId, "-label")
 
-# The markup of Blockr.checkbox, with the same check.
+# The markup of Blockr.checkbox, for a section's toggle. Shiny's own
+# checkbox binding reports it.
 checkbox_tag <- function(inputId, label, value) {
 
   stopifnot(is_string(inputId), isTRUE(value) || isFALSE(value))
@@ -417,7 +266,6 @@ checkbox_tag <- function(inputId, label, value) {
     tags$input(
       id = inputId,
       type = "checkbox",
-      class = "blockr-ui-checkbox",
       checked = if (value) NA
     ),
     tags$span(
@@ -465,4 +313,8 @@ to_json <- function(x) {
 select_value <- function(x, shinysession, name) {
   x <- unlist(x)
   if (!length(x)) NULL else as.character(x)
+}
+
+is_string <- function(x) {
+  is.character(x) && length(x) == 1L && !is.na(x) && nzchar(x)
 }

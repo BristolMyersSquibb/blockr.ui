@@ -1,9 +1,9 @@
 /**
- * blockr-inputs.js: Shiny input bindings for the shared controls, for blocks
- * whose UI is rendered in R (select_input(), text_input(), number_input(),
- * checkbox_input(), segmented_input(), gear_tray()). R writes the markup and
- * the settings as data-* attributes; the binding mounts the control from
- * blockr-ui.js or blockr-select.js on it and reports its value.
+ * blockr-inputs.js: Shiny input bindings for the controls R renders for a
+ * block whose UI is written in R (select_input(), gear_tray()). R writes the
+ * markup and the settings as data-* attributes; the binding mounts the
+ * control from blockr-select.js or blockr-ui.js on it and reports its value.
+ * Text, numbers and checkboxes are Shiny's own inputs.
  *
  * Every control is written once, as a spec in Blockr.inputs: `mount` builds
  * it (and does nothing the second time, so a panel that Shiny unbinds and
@@ -95,89 +95,6 @@
     }
   };
 
-  /* --- Text and number fields: commit on Enter or blur ------------------- */
-
-  const field = (numeric) => ({
-    selector: numeric ? 'input.blockr-ui-number' : 'input.blockr-ui-text',
-    type: numeric ? 'shiny.number' : undefined,
-    mount(el) {
-      if (el._blockrText) return;
-      el._blockrCommitted = el.value;
-      el._blockrText = Blockr.textCommit(el, {
-        onCommit: (value) => {
-          el._blockrCommitted = value;
-          notify(el);
-        }
-      });
-    },
-    value(el) {
-      const v = el._blockrCommitted;
-      if (!numeric) return v;
-      const n = v === '' ? NaN : Number(v);
-      return Number.isFinite(n) ? n : null;
-    },
-    receive(el, data) {
-      if ('value' in data) {
-        const v = data.value == null ? '' : String(data.value);
-        el._blockrCommitted = v;
-        el._blockrText.sync(v);
-      }
-      if ('placeholder' in data) el.placeholder = data.placeholder || '';
-      if ('label' in data) setLabel(el, data.label);
-    }
-  });
-
-  /* --- Checkbox ---------------------------------------------------------- */
-
-  const checkbox = {
-    selector: 'input.blockr-ui-checkbox',
-    mount(el) {
-      if (el._blockrCheckbox) return;
-      el._blockrCheckbox = true;
-      el.addEventListener('change', () => notify(el));
-    },
-    value(el) {
-      return el.checked;
-    },
-    receive(el, data) {
-      if ('value' in data) el.checked = !!data.value;
-      if ('label' in data) {
-        const wrap = el.closest('.blockr-checkbox');
-        const lab = wrap && wrap.querySelector('.blockr-checkbox__label');
-        if (lab) lab.textContent = data.label;
-      }
-    }
-  };
-
-  /* --- Segmented control ------------------------------------------------- */
-
-  const segmented = {
-    selector: '.blockr-ui-segmented',
-    mount(el) {
-      if (el._blockrSegmented) return;
-      const choices = toArray(json(el, 'data-choices', []));
-      const selected = json(el, 'data-selected', null);
-      const lab = document.getElementById(el.id + '-label');
-      el._blockrSegmented = Blockr.segmented(
-        choices,
-        selected != null ? selected : (choices[0] && choices[0].value),
-        () => notify(el),
-        {
-          size: el.getAttribute('data-size') === 'xs' ? 'xs' : undefined,
-          label: lab ? lab.textContent : undefined
-        }
-      );
-      el.appendChild(el._blockrSegmented.el);
-    },
-    value(el) {
-      return el._blockrSegmented.get();
-    },
-    receive(el, data) {
-      if ('selected' in data) el._blockrSegmented.set(toArray(data.selected)[0]);
-      if ('label' in data) setLabel(el, data.label);
-    }
-  };
-
   /* --- Gear and tray ----------------------------------------------------- */
 
   // Open trays by gear id: the tray stays open when its block draws it
@@ -212,10 +129,6 @@
 
   Blockr.inputs = {
     select: select,
-    text: field(false),
-    number: field(true),
-    checkbox: checkbox,
-    segmented: segmented,
     gear: gear
   };
 
@@ -247,8 +160,6 @@
           if (Shiny.forgetLastInputValue) Shiny.forgetLastInputValue(binding.getId(el));
         }
       });
-      // Registered after Shiny's own, so these bind first: Shiny's text,
-      // number and checkbox bindings would take the same <input>s.
       Shiny.inputBindings.register(binding, 'blockr.ui.' + name);
     });
   };

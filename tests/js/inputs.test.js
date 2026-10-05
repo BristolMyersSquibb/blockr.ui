@@ -50,18 +50,13 @@ const bind = (ctx, name, html) => {
 const click = (win, el) => el.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
 const key = (win, el, k) =>
   el.dispatchEvent(new win.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
-const typeIn = (win, input, text) => {
-  input.value = text;
-  input.dispatchEvent(new win.Event('input', { bubbles: true }));
-};
 
 const esc = (x) => JSON.stringify(x).replace(/"/g, '&quot;');
 
 test('inputs: every control registers a binding', (newWindow) => {
   const ctx = shinyWindow(newWindow);
   assert.deepStrictEqual(Object.keys(ctx.bindings).sort(), [
-    'blockr.ui.checkbox', 'blockr.ui.gear', 'blockr.ui.number',
-    'blockr.ui.segmented', 'blockr.ui.select', 'blockr.ui.text'
+    'blockr.ui.gear', 'blockr.ui.select'
   ]);
   ctx.win.close();
 });
@@ -135,106 +130,6 @@ test('select: binding twice keeps one control', (newWindow) => {
   ctx.win.close();
 });
 
-test('text: the value changes on Enter or blur only, and Escape reverts', (newWindow) => {
-  const ctx = shinyWindow(newWindow);
-  const { win } = ctx;
-  const t = bind(ctx, 'text',
-    `<label id="name-label" for="name">Name</label>
-     <div class="blockr-commit-field"><input id="name" type="text"
-       class="blockr-text-input blockr-ui-text" value="a.csv"></div>`);
-
-  assert.strictEqual(t.value(), 'a.csv');
-  typeIn(win, t.el, 'b.csv');
-  assert.strictEqual(t.value(), 'a.csv', 'typing reports nothing');
-  assert.strictEqual(t.calls.n, 0);
-  assert.equal(t.el.nextSibling.textContent, '↵');
-
-  key(win, t.el, 'Enter');
-  assert.strictEqual(t.value(), 'b.csv');
-  assert.strictEqual(t.calls.n, 1);
-
-  typeIn(win, t.el, 'c.csv');
-  key(win, t.el, 'Escape');
-  assert.strictEqual(t.el.value, 'b.csv', 'Escape reverts the field');
-  assert.strictEqual(t.calls.n, 1);
-
-  typeIn(win, t.el, 'd.csv');
-  t.el.dispatchEvent(new win.Event('blur'));
-  assert.strictEqual(t.value(), 'd.csv');
-  assert.strictEqual(t.calls.n, 2);
-
-  t.b.receiveMessage(t.el, { value: 'e.csv', label: 'File', placeholder: 'x' });
-  assert.strictEqual(t.value(), 'e.csv');
-  assert.strictEqual(t.el.value, 'e.csv');
-  assert.strictEqual(t.el.placeholder, 'x');
-  assert.strictEqual(win.document.getElementById('name-label').textContent, 'File');
-  assert.strictEqual(t.calls.n, 2, 'a push is not reported');
-  assert.deepStrictEqual(ctx.forgotten, ['name']);
-  win.close();
-});
-
-test('number: reports a number, null when empty, as shiny.number', (newWindow) => {
-  const ctx = shinyWindow(newWindow);
-  const { win } = ctx;
-  const n = bind(ctx, 'number',
-    `<div class="blockr-commit-field"><input id="n" type="number"
-       class="blockr-text-input blockr-ui-number" value="10"></div>`);
-
-  assert.strictEqual(n.b.getType(n.el), 'shiny.number');
-  assert.strictEqual(n.value(), 10);
-  typeIn(win, n.el, '2.5');
-  key(win, n.el, 'Enter');
-  assert.strictEqual(n.value(), 2.5);
-  typeIn(win, n.el, '');
-  key(win, n.el, 'Enter');
-  assert.strictEqual(n.value(), null);
-  n.b.receiveMessage(n.el, { value: '7' });
-  assert.strictEqual(n.value(), 7);
-  assert.strictEqual(n.calls.n, 2);
-  win.close();
-});
-
-test('checkbox: reports on change; a push sets it and its label', (newWindow) => {
-  const ctx = shinyWindow(newWindow);
-  const { win } = ctx;
-  const c = bind(ctx, 'checkbox',
-    `<label class="blockr-checkbox"><input id="h" type="checkbox"
-       class="blockr-ui-checkbox" checked><span class="blockr-checkbox__box"></span>
-       <span class="blockr-checkbox__label">Header</span></label>`);
-
-  assert.strictEqual(c.value(), true);
-  click(win, c.el);
-  assert.strictEqual(c.value(), false);
-  assert.strictEqual(c.calls.n, 1);
-  c.b.receiveMessage(c.el, { value: true, label: 'First row is a header' });
-  assert.strictEqual(c.value(), true);
-  assert.strictEqual(c.el.parentElement.querySelector('.blockr-checkbox__label').textContent,
-    'First row is a header');
-  assert.strictEqual(c.calls.n, 1);
-  win.close();
-});
-
-test('segmented: mounts Blockr.segmented and reports the segment clicked', (newWindow) => {
-  const ctx = shinyWindow(newWindow);
-  const { win } = ctx;
-  const s = bind(ctx, 'segmented',
-    `<label id="from-label">From</label><div id="from" class="blockr-ui-segmented"
-      data-choices="${esc([{ value: 'head', label: 'First' }, { value: 'tail', label: 'Last' }])}"
-      data-selected="${esc('head')}" data-size="xs"></div>`);
-
-  const wrap = s.el.querySelector('.blockr-segmented');
-  assert.ok(wrap.classList.contains('blockr-segmented--xs'));
-  assert.strictEqual(wrap.getAttribute('aria-label'), 'From');
-  assert.strictEqual(s.value(), 'head');
-  click(win, wrap.querySelectorAll('.blockr-segmented__seg')[1]);
-  assert.strictEqual(s.value(), 'tail');
-  assert.strictEqual(s.calls.n, 1);
-  s.b.receiveMessage(s.el, { selected: 'head' });
-  assert.strictEqual(s.value(), 'head');
-  assert.strictEqual(s.calls.n, 1);
-  win.close();
-});
-
 test('gear: opens its tray, reports the state, and stays open when drawn again', async (newWindow) => {
   const ctx = shinyWindow(newWindow);
   const { win } = ctx;
@@ -269,15 +164,4 @@ test('gear: opens its tray, reports the state, and stays open when drawn again',
   assert.strictEqual(again.value(), false);
   assert.strictEqual(again.calls.n, 1);
   win.close();
-});
-
-test('Blockr.keys writes the platform form', (newWindow) => {
-  const win = newWindow();
-  const B = win.Blockr;
-  B.isMac = true;
-  assert.equal(B.keys('Mod+Shift+S'), '⌘⇧S');
-  assert.equal(B.keys('Mod+Enter'), '⌘↵');
-  B.isMac = false;
-  assert.equal(B.keys('Mod+Shift+S'), 'Ctrl+Shift+S');
-  assert.equal(B.keys('Mod+Enter'), 'Ctrl+↵');
 });

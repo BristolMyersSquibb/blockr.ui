@@ -1,6 +1,6 @@
 html_of <- function(x) htmltools::renderTags(x)$html
 
-# A session that records what update_*() sends.
+# A session that records what update_select_input() sends.
 recording_session <- function() {
   env <- new.env()
   env$sent <- list()
@@ -59,76 +59,14 @@ test_that("a select reports a character vector, or NULL for no pick", {
   expect_null(select_value(NULL))
 })
 
-test_that("text and number fields sit in the commit field", {
-
-  html <- html_of(text_input("name", "Name", "x.csv", placeholder = "file"))
-
-  expect_match(html, '<label id="name-label" class="blockr-label" for="name">',
-               fixed = TRUE)
-  expect_match(html, '<div class="blockr-commit-field">', fixed = TRUE)
-  expect_match(html, 'class="blockr-text-input blockr-ui-text" value="x.csv"',
-               fixed = TRUE)
-
-  num <- html_of(number_input("n", "Rows", 10, min = 0, step = 5))
-  expect_match(num, "blockr-settings__field--small", fixed = TRUE)
-  expect_match(num, 'type="number"', fixed = TRUE)
-  expect_match(num, 'value="10" min="0" step="5"', fixed = TRUE)
-  expect_no_match(num, "max=")
-
-  expect_no_match(html_of(number_input("n", "Rows")), "value=")
-})
-
-test_that("checkbox_input() draws Blockr.checkbox's markup", {
-
-  html <- html_of(checkbox_input("header", "First row is a header", TRUE))
-
-  expect_match(html, '<label class="blockr-checkbox">', fixed = TRUE)
-  expect_match(
-    html, 'id="header" type="checkbox" class="blockr-ui-checkbox" checked',
-    fixed = TRUE
-  )
-  expect_match(html, '<span class="blockr-checkbox__box"><svg', fixed = TRUE)
-  expect_match(html, "blockr-checkbox__label\">First row is a header",
-               fixed = TRUE)
-  expect_no_match(html_of(checkbox_input("h", "H")), "checked")
-})
-
-test_that("segmented_input() takes two or three values", {
-
-  html <- html_of(
-    segmented_input("from", "From", c(First = "head", Last = "tail"),
-                    size = "xs")
-  )
-
-  expect_match(
-    html,
-    paste0(
-      'data-choices="[{&quot;value&quot;:&quot;head&quot;,',
-      "&quot;label&quot;:&quot;First&quot;},{&quot;value&quot;:",
-      '&quot;tail&quot;,&quot;label&quot;:&quot;Last&quot;}]"'
-    ),
-    fixed = TRUE
-  )
-  expect_match(html, 'data-selected="&quot;head&quot;"', fixed = TRUE)
-  expect_match(html, 'data-size="xs"', fixed = TRUE)
-
-  expect_error(segmented_input("x", "X", "a"), "two or three")
-  expect_error(segmented_input("x", "X", letters[1:4]), "two or three")
-  expect_error(segmented_input("x", "X", c("a", "b"), selected = "c"))
-})
-
-test_that("the update functions send only what they are given", {
+test_that("update_select_input() sends only what it is given", {
 
   s <- recording_session()
 
   update_select_input("col", choices = c("a", b = "B"), selected = "a",
                       session = s)
   update_select_input("col", selected = character(), session = s)
-  update_text_input("name", value = "y", session = s)
-  update_number_input("n", value = NA, session = s)
-  update_number_input("n", value = 2.5, label = "Rows", session = s)
-  update_checkbox_input("header", value = FALSE, session = s)
-  update_segmented_input("from", selected = "tail", session = s)
+  update_select_input("col", label = "Columns", session = s)
 
   msgs <- lapply(s$sent, `[[`, "message")
 
@@ -137,11 +75,7 @@ test_that("the update functions send only what they are given", {
     selected = list("a")
   ))
   expect_identical(msgs[[2L]], list(selected = list()))
-  expect_identical(msgs[[3L]], list(value = "y"))
-  expect_identical(msgs[[4L]], list(value = ""))
-  expect_identical(msgs[[5L]], list(value = "2.5", label = "Rows"))
-  expect_identical(msgs[[6L]], list(value = FALSE))
-  expect_identical(msgs[[7L]], list(selected = "tail"))
+  expect_identical(msgs[[3L]], list(label = "Columns"))
   expect_identical(s$sent[[1L]]$id, "col")
 })
 
@@ -150,7 +84,8 @@ test_that("gear_tray() draws the gear last in the header row, and the tray", {
   tray <- gear_tray(
     "gear",
     tray_section("Format", select_input("sep", "Separator", c(",", ";"))),
-    tray_section("Skip", number_input("skip", "Rows", 0), toggle = "skip_on"),
+    tray_section("Skip", shiny::numericInput("skip", "Rows", 0),
+                 toggle = "skip_on"),
     tools = tool_button(htmltools::HTML("D"), "Download")
   )
   html <- html_of(tray)
@@ -186,20 +121,22 @@ test_that("gear_tray() draws the gear last in the header row, and the tray", {
 
 test_that("a tray of one section has no title, unless it is a toggle", {
 
-  one <- html_of(gear_tray("g", tray_section("Format", text_input("a", "A"))))
+  text <- function(id) shiny::textInput(id, toupper(id), updateOn = "blur")
+
+  one <- html_of(gear_tray("g", tray_section("Format", text("a"))))
   expect_no_match(one, "blockr-settings__title")
 
-  loose <- html_of(gear_tray("g", text_input("a", "A"), htmltools::span("x")))
+  loose <- html_of(gear_tray("g", text("a"), htmltools::span("x")))
   expect_no_match(loose, "blockr-settings__title")
   # Loose tags get a grid cell.
   expect_match(loose, '<div class="blockr-settings__field">\\s*<span>x</span>')
 
-  toggled <- html_of(gear_tray("g", tray_section("Skip", text_input("a", "A"),
+  toggled <- html_of(gear_tray("g", tray_section("Skip", text("a"),
                                                  toggle = "on")))
   expect_match(toggled, "blockr-settings__title--toggle", fixed = TRUE)
 
   expect_error(gear_tray("g"), "no options")
-  expect_error(gear_tray("g", tray_section("A", text_input("a", "A")),
-                         text_input("b", "B")), "tray_section")
+  expect_error(gear_tray("g", tray_section("A", text("a")), text("b")),
+               "tray_section")
   expect_error(tray_section(NULL, toggle = "on"), "title")
 })

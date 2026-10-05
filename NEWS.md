@@ -73,13 +73,12 @@
 * The new `tool_button()` is the design system's 26px icon button, named
   by a tooltip.
 
-* `select_input()`, `text_input()`, `number_input()`, `checkbox_input()` and
-  `segmented_input()`, each with an `update_*()` function, and `gear_tray()`
-  with `tray_section()` draw the design system's controls for a block whose
-  UI is written in R. An update does not echo back to `input$x`.
-
-* `blockr_button()` and `blockr_download_button()` write the `.blockr-btn`
-  kinds and sizes for Shiny's action and download buttons.
+* The new `select_input()` draws `Blockr.Select` for a block whose UI is
+  written in R, and `update_select_input()` changes it from the server. An
+  update does not echo back to `input$x`. The new `gear_tray()` with
+  `tray_section()` draws the gear and its tray, which lays out Shiny's own
+  inputs as well, so text, numbers and checkboxes need no control of their
+  own.
 
 * An element built in R can carry its tooltip as a `data-blockr-tooltip`
   attribute, and a badge after the name as `data-blockr-tooltip-badge`

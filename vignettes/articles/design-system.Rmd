@@ -415,6 +415,9 @@ There is no 16px section heading inside a block.
   chart's prepare script).
 - The crossfilter's settings and the patient profile's gear panel use the same
   tray.
+- In a block rendered in R, `gear_tray()` and `tray_section()` draw it. Its
+  fields are `select_input()` and Shiny's own inputs, with `updateOn = "blur"`
+  on `textInput()` and `numericInput()`.
 
 ### The output
 
@@ -823,7 +826,6 @@ Four kinds. All are weight 500 and show the focus outline on `:focus-visible`.
 The classes are `.blockr-btn` with a kind, `.blockr-btn--main`,
 `--secondary`, `--quiet` or `--danger`, and a size, `.blockr-btn--m`, `--s` or
 `--xs` (`blockr-buttons.css`); a bare `.blockr-btn` is a secondary m.
-`blockr_button()` and `blockr_download_button()` write them for Shiny.
 
 There is no solid accent button. `blockr-theme.css` maps Bootstrap's button
 classes onto the kinds: `btn-primary` is main; `btn-default`,
@@ -1577,10 +1579,9 @@ shared components: the params grid (moving from blockr.extra),
 and pill styles, the slot and offer rules (today declared twice, in
 blockr.viz `chart.css` and blockr.dm `crossfilter-block.css`), the gear
 button, the tool button and the action menu (`tool_button()`,
-`action_menu()`), the button classes (`.blockr-btn`, `blockr_button()`), the
-Shiny-side controls for blocks rendered in R (`select_input()`,
-`text_input()`, `number_input()`, `checkbox_input()`, `segmented_input()`,
-`gear_tray()`, each with its update function), the small icons
+`action_menu()`), the button classes (`.blockr-btn`), the select and the
+gear tray for blocks rendered in R (`select_input()`, `gear_tray()`), the
+small icons
 (`Blockr.icons`, `small_icon()` in R), the block's mark (`block_mark()`,
 `block_mark_svg()`), and the column-label reader. Package blockr.dock owns
 the dock header, the "…" menu, the block status dot and its spec
