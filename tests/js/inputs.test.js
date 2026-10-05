@@ -63,11 +63,14 @@ test('select: mounts a bordered Blockr.Select and reports picks and pushes', (ne
   const ctx = shinyWindow(newWindow);
   const { win } = ctx;
   const s = bind(ctx, 'select',
-    `<div id="col" class="blockr-ui-select" data-multiple="false"
+    `<label id="col-label" class="blockr-label">Column</label>
+    <div id="col" class="blockr-ui-select" data-multiple="false"
       data-options="${esc(['a', { value: 'b', label: 'Bee' }, 'c'])}"
       data-selected="${esc(['b'])}"></div>`);
+  const name = () => s.el.querySelector('[role="combobox"]').getAttribute('aria-label');
 
   assert.ok(s.el.querySelector('.blockr-select--bordered'), 'bordered');
+  assert.strictEqual(name(), 'Column', 'the combobox is named by its label');
   assert.strictEqual(s.b.getType(s.el), 'blockr.ui.select');
   assert.strictEqual(s.value(), 'b');
 
@@ -93,6 +96,11 @@ test('select: mounts a bordered Blockr.Select and reports picks and pushes', (ne
   s.b.receiveMessage(s.el, { choices: 'z' });
   assert.strictEqual(s.value(), 'z');
   assert.strictEqual(s.calls.n, 4);
+
+  // A new label renames the field and the combobox.
+  s.b.receiveMessage(s.el, { label: 'Columns' });
+  assert.strictEqual(win.document.getElementById('col-label').textContent, 'Columns');
+  assert.strictEqual(name(), 'Columns');
   win.close();
 });
 

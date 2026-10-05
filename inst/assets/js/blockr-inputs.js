@@ -51,6 +51,7 @@
       const multiple = el.getAttribute('data-multiple') === 'true';
       const placeholder = el.getAttribute('data-placeholder') || '';
       const selected = toArray(json(el, 'data-selected', null));
+      const lab = document.getElementById(el.id + '-label');
       const slot = document.createElement('div');
       el.appendChild(slot);
       const factory = multiple ? Blockr.Select.multi : Blockr.Select.single;
@@ -58,6 +59,8 @@
         options: toArray(json(el, 'data-options', [])),
         selected: multiple ? selected : (selected.length ? selected[0] : null),
         placeholder: placeholder,
+        // A screen reader calls the combobox by the field's label.
+        label: lab ? lab.textContent : '',
         bordered: true,
         // With a placeholder, a single select shows it until something is
         // picked; without one it takes the first option, as selectInput().
@@ -79,7 +82,10 @@
       } else if ('selected' in data) {
         sel.setValue(pick(data.selected));
       }
-      if ('label' in data) setLabel(el, data.label);
+      if ('label' in data) {
+        setLabel(el, data.label);
+        sel.setLabel(data.label);
+      }
     },
     unmount(el) {
       // Shiny unbinds before it removes; a panel that is only rebound stays.

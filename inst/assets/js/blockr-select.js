@@ -921,6 +921,14 @@
         if (st.disabled) { collapse(); close(); }
         render();
       },
+      /**
+       * What a screen reader calls the combobox and its list, as `label`.
+       * @param {string} text
+       */
+      setLabel(text) {
+        input.setAttribute('aria-label', text);
+        listbox.setAttribute('aria-label', text);
+      },
       // Enter or leave server-search mode from a column-values response.
       // `truncated` means the full value list exceeds the server's limit
       // (sticky across queries); `total` is the full distinct count.

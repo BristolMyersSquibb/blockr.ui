@@ -148,6 +148,8 @@ interface BlockrSelectHandleBase {
    * Disabling an open select closes it first.
    */
   setDisabled(flag: boolean): void;
+  /** What a screen reader calls the combobox and its list, as `label`. */
+  setLabel(text: string): void;
   /**
    * Enter/leave server-search mode from a column-values response:
    * `truncated` activates the onSearch hook and the "N values — type to
