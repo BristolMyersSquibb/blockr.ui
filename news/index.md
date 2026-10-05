@@ -100,6 +100,17 @@
   [`tool_button()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/tool_button.md)
   is the design system’s 26px icon button, named by a tooltip.
 
+- The new
+  [`gear_tray()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)
+  with
+  [`tray_section()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)
+  draws the gear and its tray for a block whose UI is written in R. The
+  tray lays out Shiny’s own inputs at the design system’s sizes.
+
+- The dropdown of a selectize input, as `selectInput()` draws it, is a
+  layer on the dismiss stack while it is open, so Escape closes it
+  before the gear tray, modal or panel around it.
+
 - An element built in R can carry its tooltip as a `data-blockr-tooltip`
   attribute, and a badge after the name as `data-blockr-tooltip-badge`
   ([\#63](https://github.com/BristolMyersSquibb/blockr.ui/issues/63));

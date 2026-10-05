@@ -429,6 +429,12 @@ There is no 16px section heading inside a block.
   Apply on the chart’s prepare script).
 - The crossfilter’s settings and the patient profile’s gear panel use
   the same tray.
+- In a block rendered in R,
+  [`gear_tray()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)
+  and
+  [`tray_section()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)
+  draw it. Its fields are Shiny’s own inputs, with `updateOn = "blur"`
+  on `textInput()` and `numericInput()`.
 
 ### The output
 
@@ -1689,7 +1695,10 @@ blockr.viz `chart.css` and blockr.dm `crossfilter-block.css`), the gear
 button, the tool button and the action menu
 ([`tool_button()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/tool_button.md),
 [`action_menu()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)),
-the button classes (`.blockr-btn`), the small icons (`Blockr.icons`,
+the button classes (`.blockr-btn`), the gear tray for blocks rendered in
+R
+([`gear_tray()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)),
+the small icons (`Blockr.icons`,
 [`small_icon()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
 in R), the block’s mark
 ([`block_mark()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block_mark.md),

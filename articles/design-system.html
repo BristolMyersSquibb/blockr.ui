@@ -1101,6 +1101,10 @@ and commits on its own button (Run in the code and function blocks,
 Apply on the chart’s prepare script).</li>
 <li>The crossfilter’s settings and the patient profile’s gear panel use
 the same tray.</li>
+<li>In a block rendered in R, <code><a href="../reference/gear_tray.html">gear_tray()</a></code> and
+<code><a href="../reference/gear_tray.html">tray_section()</a></code> draw it. Its fields are Shiny’s own inputs,
+with <code>updateOn = "blur"</code> on <code>textInput()</code> and
+<code>numericInput()</code>.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -3015,7 +3019,8 @@ and offer rules (today declared twice, in blockr.viz
 <code>crossfilter-block.css</code>), the gear button, the tool button
 and the action menu (<code><a href="../reference/tool_button.html">tool_button()</a></code>,
 <code><a href="../reference/action_menu.html">action_menu()</a></code>), the button classes
-(<code>.blockr-btn</code>), the small icons (<code>Blockr.icons</code>,
+(<code>.blockr-btn</code>), the gear tray for blocks rendered in R
+(<code><a href="../reference/gear_tray.html">gear_tray()</a></code>), the small icons (<code>Blockr.icons</code>,
 <code><a href="../reference/controls_dep.html">small_icon()</a></code> in R), the block’s mark
 (<code><a href="../reference/block_mark.html">block_mark()</a></code>, <code><a href="../reference/block_mark.html">block_mark_svg()</a></code>), and the
 column-label reader. Package blockr.dock owns the dock header, the “…”

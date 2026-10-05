@@ -26,6 +26,10 @@
   [`small_icon()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
   : Shared block controls
 
+- [`gear_tray()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)
+  [`tray_section()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)
+  : Gear and settings tray
+
 - [`html_table_render()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md)
   [`html_table_result()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md)
   [`html_table_display`](https://bristolmyerssquibb.github.io/blockr.ui/reference/html_table_render.md)
