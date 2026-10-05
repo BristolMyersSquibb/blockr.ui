@@ -458,9 +458,6 @@ interface BlockrNamespace {
     gear: HTMLButtonElement,
     opts?: { label?: string; open?: boolean }
   ): BlockrGearTrayHandle;
-  /** The Shiny input bindings' mount and value steps (blockr-inputs.js),
-   *  keyed by control. */
-  inputs?: Record<string, BlockrInputSpec>;
   /** Toggle the canonical required-empty amber cue on a field wrapper. */
   setRequiredEmpty(el: Element, empty: boolean): void;
   /** Whether this is a Mac; decided once, with `.blockr-mac` on the root. */
@@ -486,13 +483,6 @@ interface BlockrSegmentedHandle {
   el: HTMLDivElement;
   set(value: string): void;
   get(): string;
-}
-
-/** One control's part of a Shiny input binding (blockr-inputs.js). */
-interface BlockrInputSpec {
-  selector: string;
-  mount(el: HTMLElement): void;
-  value(el: HTMLElement): any;
 }
 
 /** Handle returned by Blockr.gearTray (blockr-ui.js). */

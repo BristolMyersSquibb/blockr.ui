@@ -32,8 +32,9 @@ actions (\code{Blockr.menu} for those built in JavaScript, \code{Blockr.actionMe
 for those \code{\link[=action_menu]{action_menu()}} builds in R), the placement routine for
 floating panels (\code{Blockr.place}) and the small icons (\code{Blockr.icons}), all
 on the \code{window.Blockr} namespace, together with the rows, pills, labels,
-fields and buttons (\code{.blockr-btn}) they draw, and the Shiny input bindings
-of the gear tray rendered from R (\code{\link[=gear_tray]{gear_tray()}}).
+fields and buttons (\code{.blockr-btn}) they draw, and the Shiny side of the
+controls: the binding of the gear tray R renders (\code{\link[=gear_tray]{gear_tray()}}), and
+Shiny's selectize dropdowns on the dismiss stack.
 }
 \details{
 The small icons are not in \code{blockr-ui.js}: the dependency writes them into

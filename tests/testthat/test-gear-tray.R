@@ -45,7 +45,7 @@ test_that("gear_tray() draws the gear last in the header row, and the tray", {
 
   names <- vapply(htmltools::findDependencies(tray), `[[`, character(1L),
                   "name")
-  expect_true("blockr-inputs-js" %in% names)
+  expect_true("blockr-shiny-js" %in% names)
 })
 
 test_that("a tray of one section has no title, unless it is a toggle", {

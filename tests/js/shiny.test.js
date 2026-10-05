@@ -1,7 +1,7 @@
-/* blockr-inputs.js: the gear's binding, driven the way Shiny drives it
+/* blockr-shiny.js: the gear's binding, driven the way Shiny drives it
  * (find the element, initialize, subscribe, read the value), and Shiny's
- * selects on the dismiss stack. Shiny is a stub that records what the
- * bindings register; the markup is what the R functions write.
+ * selects on the dismiss stack. Shiny is a stub that records the binding;
+ * the markup is what the R functions write.
  */
 'use strict';
 
@@ -10,10 +10,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { test } = require('./select-impls');
 
-const inputsJs = fs.readFileSync(
-  path.join(__dirname, '..', '..', 'inst', 'assets', 'js', 'blockr-inputs.js'), 'utf8');
+const shinyJs = fs.readFileSync(
+  path.join(__dirname, '..', '..', 'inst', 'assets', 'js', 'blockr-shiny.js'), 'utf8');
 
-/* A window with Blockr, a Shiny stub and blockr-inputs.js. */
+/* A window with Blockr, a Shiny stub and blockr-shiny.js. */
 const shinyWindow = (newWindow) => {
   const win = newWindow();
   const bindings = {};
@@ -25,7 +25,7 @@ const shinyWindow = (newWindow) => {
     inputBindings: { register: (b, name) => { bindings[name] = b; } }
   };
   win.jQuery = (scope) => ({ find: (sel) => Array.from(scope.querySelectorAll(sel)) });
-  win.eval(inputsJs);
+  win.eval(shinyJs);
   return { win, bindings };
 };
 
@@ -49,7 +49,7 @@ const click = (win, el) => el.dispatchEvent(new win.MouseEvent('click', { bubble
 const key = (win, el, k) =>
   el.dispatchEvent(new win.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
 
-test('inputs: the gear registers a binding', (newWindow) => {
+test('shiny: the gear registers a binding', (newWindow) => {
   const ctx = shinyWindow(newWindow);
   assert.deepStrictEqual(Object.keys(ctx.bindings).sort(), ['blockr.ui.gear']);
   ctx.win.close();

@@ -9,8 +9,9 @@
 #' for those [action_menu()] builds in R), the placement routine for
 #' floating panels (`Blockr.place`) and the small icons (`Blockr.icons`), all
 #' on the `window.Blockr` namespace, together with the rows, pills, labels,
-#' fields and buttons (`.blockr-btn`) they draw, and the Shiny input bindings
-#' of the gear tray rendered from R ([gear_tray()]).
+#' fields and buttons (`.blockr-btn`) they draw, and the Shiny side of the
+#' controls: the binding of the gear tray R renders ([gear_tray()]), and
+#' Shiny's selectize dropdowns on the dismiss stack.
 #'
 #' The small icons are not in `blockr-ui.js`: the dependency writes them into
 #' the page's head ahead of it, from the files `small_icon()` reads, so markup
@@ -80,11 +81,7 @@ controls_dep <- function() {
       controls_asset("blockr-select-css", stylesheet = "css/blockr-select.css"),
       controls_asset("blockr-input-js", script = "js/blockr-input.js"),
       controls_asset("blockr-input-css", stylesheet = "css/blockr-input.css"),
-      controls_asset("blockr-inputs-js", script = "js/blockr-inputs.js"),
-      controls_asset(
-        "blockr-inputs-css",
-        stylesheet = "css/blockr-inputs.css"
-      )
+      controls_asset("blockr-shiny-js", script = "js/blockr-shiny.js")
     )
   }
 
