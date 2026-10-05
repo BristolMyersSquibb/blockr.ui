@@ -1,6 +1,6 @@
 # blockr.ui (development version)
 
-* `small_icon()` has `"eye"`, `"dots"`, `"minus"`, `"info"`, `"warning"`,
+* The small icons gain `"eye"`, `"dots"`, `"minus"`, `"info"`, `"warning"`,
   `"maximize"` and `"restore"`, the icons blockr.dock and blockr.extra still
   took from Font Awesome, through `shiny::icon()` or dockViewR's defaults
   (#85).
