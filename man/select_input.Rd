@@ -29,7 +29,8 @@ update_select_input(
 for none.}
 
 \item{choices}{The values to choose from, as a character vector. Names,
-where given, are shown muted after the value, as a column's label is.}
+where given, are shown muted after the value, as a column's label is.
+Option groups are not supported.}
 
 \item{selected}{The initial pick: one value, or several for a multi
 select.}
@@ -73,7 +74,8 @@ state and pushes the state back pushes only when the two differ, so the
 value sent back does not loop.
 }
 \examples{
-select_input("col", "Column", c("mpg", "cyl", disp = "Displacement"))
+select_input("col", "Column",
+             c("Miles per gallon" = "mpg", Cylinders = "cyl"))
 select_input("cols", "Columns", c("mpg", "cyl", "disp"),
              selected = "mpg", multiple = TRUE)
 

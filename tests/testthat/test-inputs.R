@@ -13,7 +13,7 @@ recording_session <- function() {
 test_that("select_input() writes its settings for the binding", {
 
   html <- html_of(
-    select_input("col", "Column", c("mpg", disp = "Displacement"),
+    select_input("col", "Column", c("mpg", Displacement = "disp"),
                  selected = "disp")
   )
 
@@ -28,7 +28,7 @@ test_that("select_input() writes its settings for the binding", {
     html,
     paste0(
       'data-options="[&quot;mpg&quot;,{&quot;value&quot;:',
-      '&quot;Displacement&quot;,&quot;label&quot;:&quot;disp&quot;}]"'
+      '&quot;disp&quot;,&quot;label&quot;:&quot;Displacement&quot;}]"'
     ),
     fixed = TRUE
   )
@@ -48,6 +48,14 @@ test_that("select_input() writes its settings for the binding", {
                'data-selected="[]"', fixed = TRUE)
 
   expect_error(select_input("x", "X", c("a", "b"), c("a", "b")), "one")
+
+  # A list of single values is fine; option groups are refused, not garbled.
+  expect_match(html_of(select_input("x", "X", list("a", "b"))),
+               'data-options="[&quot;a&quot;,&quot;b&quot;]"', fixed = TRUE)
+  groups <- list(Cars = c("mpg", "cyl"), Other = "hp")
+  expect_error(select_input("x", "X", groups), "option groups")
+  expect_error(update_select_input(recording_session(), "x", choices = groups),
+               "option groups")
 })
 
 test_that("a select reports a character vector, or NULL for no pick", {

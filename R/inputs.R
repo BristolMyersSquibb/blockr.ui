@@ -31,6 +31,7 @@
 #'   for none.
 #' @param choices The values to choose from, as a character vector. Names,
 #'   where given, are shown muted after the value, as a column's label is.
+#'   Option groups are not supported.
 #' @param selected The initial pick: one value, or several for a multi
 #'   select.
 #' @param multiple Pick several, shown as tags.
@@ -41,7 +42,8 @@
 #'   `update_select_input()` returns nothing.
 #'
 #' @examples
-#' select_input("col", "Column", c("mpg", "cyl", disp = "Displacement"))
+#' select_input("col", "Column",
+#'              c("Miles per gallon" = "mpg", Cylinders = "cyl"))
 #' select_input("cols", "Columns", c("mpg", "cyl", "disp"),
 #'              selected = "mpg", multiple = TRUE)
 #'
@@ -313,6 +315,11 @@ checkbox_tag <- function(inputId, label, value) {
 
 # Blockr.Select's options: a bare value, or a value with its label.
 select_options <- function(choices) {
+
+  if (is.list(choices) && any(lengths(choices) != 1L)) {
+    stop("A select takes its `choices` as a character vector; option groups ",
+         "are not supported.", call. = FALSE)
+  }
 
   values <- as.character(unname(choices))
   labels <- names(choices)
