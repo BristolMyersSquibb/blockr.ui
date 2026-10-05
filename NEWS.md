@@ -1,5 +1,12 @@
 # blockr.ui (development version)
 
+* The new `shiny_input_batch_dep()` dependency skips the empty input messages
+  Shiny has sent after every deferred input since 1.7.5: its batcher never
+  records that a send is queued, so each deferred `setInput` queues one, and
+  all but the first go out empty. The server runs a full input cycle for each,
+  and on a dock board the dock's own messages queue behind them. Attach it
+  once at the page level. Reported upstream as rstudio/shiny#4436.
+
 * The small icons ship as files, one SVG per icon in `assets/icons`, which
   `small_icon()` and `Blockr.icons` are built from (#80). JavaScript that
   runs without R, such as a package's test harness, reads them there: an
