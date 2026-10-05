@@ -97,3 +97,21 @@ test_that("the theme draws Bootstrap's checkboxes as the blockr checkbox", {
   # Radios are not checkboxes and keep their own look.
   expect_no_match(css, 'input[type="radio"]', fixed = TRUE)
 })
+
+test_that("the theme's checkbox draws its check from the confirm icon", {
+
+  # A stylesheet cannot read Blockr.icons, so the check is the confirm
+  # icon's path written into a mask. The token colour fills it, which
+  # follows the scheme and a theme.
+  confirm <- icon_set()[["confirm"]]
+  path <- regmatches(confirm, regexpr('(?<= d=")[^"]+', confirm, perl = TRUE))
+
+  css <- css_source("blockr-theme.css")
+  masks <- css_matches(css, 'mask: url\\("data:image/svg\\+xml,[^"]+"\\)')
+
+  expect_length(path, 1L)
+  expect_length(masks, 1L)
+  expect_match(utils::URLdecode(masks), path, fixed = TRUE)
+  expect_match(css, "background-color: var(--blockr-color-text-on-accent)",
+               fixed = TRUE)
+})
