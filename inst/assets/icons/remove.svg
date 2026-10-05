@@ -1,0 +1,6 @@
+<!-- A tag's x: a thin stroke, like every small icon (design system, "Small
+     icons"); at 1.5 it read bold beside the row's remove button. -->
+<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true">
+  <line x1="2.5" y1="2.5" x2="7.5" y2="7.5"></line>
+  <line x1="7.5" y1="2.5" x2="2.5" y2="7.5"></line>
+</svg>

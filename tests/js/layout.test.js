@@ -1,6 +1,6 @@
 /* Where the controls land, checked in Chrome (browser.js): the placement,
- * stacking and scrolling that happy-dom cannot lay out. The first two were
- * bugs found by hand in a browser.
+ * sizes, stacking and scrolling that happy-dom cannot lay out. The first two
+ * were bugs found by hand in a browser.
  */
 'use strict';
 
@@ -92,3 +92,17 @@ test('a dropdown stays 8px inside the window wherever its control sits, above it
   // control at every height, so every placement can keep the margin.
   assert.deepStrictEqual(wrong.slice(0, 3), [], `${wrong.length} of ${placements.placements.length} placements`);
 }, { viewport: { width: 400, height: 600 } });
+
+test('a checkbox draws its check from Blockr.icons.confirm, at 10px', async (page) => {
+  const check = await page.evaluate(() => {
+    const { el } = Blockr.checkbox('Show totals', true, () => {});
+    document.body.appendChild(el);
+    const svg = el.querySelector('.blockr-checkbox__box svg');
+    const icon = document.createElement('template');
+    icon.innerHTML = Blockr.icons.confirm;
+    const r = svg.getBoundingClientRect();
+    return { confirm: svg.isEqualNode(icon.content.firstChild), size: [r.width, r.height] };
+  });
+  // The icon is 14px of its own: the stylesheet sets the 10px.
+  assert.deepStrictEqual(check, { confirm: true, size: [10, 10] });
+});

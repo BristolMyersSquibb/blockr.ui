@@ -155,12 +155,33 @@ test('markup from R carries its tooltip as an attribute', async (newWindow) => {
   win.close();
 });
 
-test('an empty attribute shows nothing', (newWindow) => {
+test('markup from R carries a badge after the name as a second attribute', (newWindow) => {
+  const win = newWindow();
+  const mark = button(win);
+  mark.setAttribute('data-blockr-tooltip', 'filter block');
+  mark.setAttribute('data-blockr-tooltip-badge', 'blockr.dplyr');
+  mark.focus();
+  const badge = card(win).querySelector('.blockr-tooltip__badge');
+  assert.ok(badge, 'badge drawn');
+  assert.strictEqual(badge.textContent, 'blockr.dplyr');
+  assert.strictEqual(win.Blockr.tooltip.text(mark), 'filter block · blockr.dplyr');
+  win.close();
+});
+
+test('an empty attribute shows nothing, badge or not', (newWindow) => {
   const win = newWindow();
   const b = button(win);
   b.setAttribute('data-blockr-tooltip', '');
   b.focus();
   assert.ok(!card(win));
+  b.blur();
+  b.setAttribute('data-blockr-tooltip-badge', 'blockr.dplyr');
+  b.focus();
+  assert.ok(!card(win), 'a badge is no name');
+  b.blur();
+  b.removeAttribute('data-blockr-tooltip');
+  b.focus();
+  assert.ok(!card(win), 'nor without the name\'s attribute');
   win.close();
 });
 

@@ -1,0 +1,7 @@
+<!-- A row's remove button: the same thin stroke as a tag's x (remove.svg), at
+     14px. It was Bootstrap's filled x, which read heavier than every other
+     small icon. -->
+<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true">
+  <line x1="3.5" y1="3.5" x2="10.5" y2="10.5"></line>
+  <line x1="10.5" y1="3.5" x2="3.5" y2="10.5"></line>
+</svg>

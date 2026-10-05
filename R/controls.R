@@ -12,12 +12,18 @@
 #' fields and buttons (`.blockr-btn`) they draw.
 #'
 #' The small icons are not in `blockr-ui.js`: the dependency writes them into
-#' the page's head ahead of it, from the list `small_icon()` reads, so markup
+#' the page's head ahead of it, from the files `small_icon()` reads, so markup
 #' built in R and markup built in JavaScript draw one copy of each, and
 #' `small_icon("gear")` is `Blockr.icons.gear`. An icon draws in
 #' `currentColor`, so it takes the colour of the text around it, and is
 #' hidden from screen readers: the control that holds it carries the name, as
 #' [tool_button()] does.
+#'
+#' Each icon is a file of its own, `assets/icons/<name>.svg` in the installed
+#' package, so JavaScript that runs without R, such as a package's test
+#' harness, can build `Blockr.icons` from the files: an icon is its file
+#' without its comment, which carries the icon's note, and without the
+#' whitespace between tags.
 #'
 #' The stylesheets read the design tokens without fallbacks, so the
 #' dependency brings the tokens along, but not the theme layer that

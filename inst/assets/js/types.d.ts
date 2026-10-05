@@ -303,8 +303,11 @@ interface BlockrMenuItem {
   /** Tooltip on a disabled row saying why. */
   reason?: string;
   onSelect?: () => void;
-  /** A block's glyph on a tint of its category colour, before the label. */
-  mark?: { icon?: string; color?: string };
+  /**
+   * A block's mark before the label: its glyph (SVG) in its category's colour
+   * on a tint of it, or in a `color` of its own (a stack's).
+   */
+  mark?: { icon?: string; category?: string; color?: string };
   /** A neutral badge at the end of the row (a package). */
   badge?: string;
   /** More text the filter box matches. */
@@ -420,7 +423,7 @@ interface BlockrNamespace {
   removeNode(node: Node | null | undefined): void;
   contentWidth(el: Element): number;
   _measureEl?: HTMLDivElement;
-  /** The small icons by name, from the list small_icon() reads in R. */
+  /** The small icons by name, from the files small_icon() reads in R (inst/assets/icons). */
   icons: Record<string, string>;
   /** The dismiss stack: what Escape and a click outside close (blockr-ui.js). */
   layer: BlockrLayer;

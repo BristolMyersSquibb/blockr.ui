@@ -192,7 +192,10 @@
   outline: var(--blockr-focus-outline);
   outline-offset: var(--blockr-focus-offset);
 }
+/* The check is Blockr.icons.confirm, drawn at 10px. */
 .blockr-checkbox__box svg {
+  width: 10px;
+  height: 10px;
   opacity: 0;
   transform: scale(0.5);
   transition: opacity var(--blockr-transition), transform var(--blockr-transition);

@@ -1,20 +1,44 @@
-test_that("small_icon() draws an icon of the list, by name", {
+test_that("small_icon() draws an icon of the set, by name", {
 
   gear <- small_icon("gear")
 
   expect_s3_class(gear, "html")
-  expect_identical(as.character(gear), icon_set[["gear"]])
+  expect_identical(as.character(gear), icon_set()[["gear"]])
 
-  expect_error(small_icon("cog"), '"chevron", "remove", "x"', fixed = TRUE)
+  expect_error(small_icon("cog"), '"check", "chevron", "code"', fixed = TRUE)
   expect_error(small_icon(c("x", "plus")))
 })
 
 test_that("every icon is one svg in the text colour, hidden from readers", {
 
-  expect_match(icon_set, '^<svg [^>]*aria-hidden="true">')
-  expect_match(icon_set, "</svg>$")
-  expect_no_match(substring(icon_set, 2L), "<svg", fixed = TRUE)
-  expect_match(icon_set, "currentColor", fixed = TRUE)
+  icons <- icon_set()
+
+  expect_match(icons, '^<svg [^>]*aria-hidden="true">')
+  expect_match(icons, "</svg>$")
+  expect_no_match(substring(icons, 2L), "<svg", fixed = TRUE)
+  expect_match(icons, "currentColor", fixed = TRUE)
+})
+
+test_that("an icon is its file, without the note and the space between tags", {
+
+  file <- withr::local_tempfile(
+    lines = c(
+      "<!-- A note on the icon,",
+      "     over two lines. -->",
+      '<svg viewBox="0 0 8 8" aria-hidden="true">',
+      '  <circle cx="4" cy="4" r="1"></circle>',
+      "</svg>"
+    ),
+    fileext = ".svg"
+  )
+
+  expect_identical(
+    read_icon(file),
+    paste0(
+      '<svg viewBox="0 0 8 8" aria-hidden="true">',
+      '<circle cx="4" cy="4" r="1"></circle></svg>'
+    )
+  )
 })
 
 test_that("the icons go into the page wherever blockr-ui.js goes, ahead", {
@@ -37,13 +61,29 @@ test_that("the icons go into the page wherever blockr-ui.js goes, ahead", {
   )
 })
 
-test_that("the JavaScript tests run the icons controls_dep() writes", {
+test_that("the scripts draw no icon of their own", {
 
-  # The tests in tests/js load Blockr.icons from this snapshot, so they run
-  # the script an app gets. After changing an icon, accept the new snapshot
-  # with testthat::snapshot_accept("icons/").
-  script <- withr::local_tempfile(fileext = ".js")
-  writeLines(icons_js(), script)
+  # A script draws its icons from Blockr.icons. One written into the script
+  # is a copy small_icon() cannot read, and other packages copy it from
+  # there.
+  scripts <- list.files(
+    system.file("assets", "js", package = "blockr.ui"),
+    pattern = "\\.js$",
+    full.names = TRUE
+  )
+  src <- blockr.core::unlst(lapply(scripts, readLines, warn = FALSE))
 
-  expect_snapshot_file(script, "icons.js", compare = compare_file_text)
+  expect_identical(grep("<svg", src, fixed = TRUE, value = TRUE), character())
+})
+
+test_that("the page's script sets every icon by name, and cannot end early", {
+
+  # Each name is quoted, as a file's name need not be a JavaScript
+  # identifier, and no "</" in an icon can close the script it sits in.
+  js <- icons_js()
+
+  for (name in names(icon_set())) {
+    expect_match(js, paste0('\n  "', name, '": "<svg '), fixed = TRUE)
+  }
+  expect_no_match(js, "</", fixed = TRUE)
 })

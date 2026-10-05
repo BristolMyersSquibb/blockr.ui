@@ -1,0 +1,5 @@
+<!-- A menu icon: the bin of a destructive row. It is drawn at 1.25 stroke, as
+     the sliders are, so the few rows that carry one read as one set. -->
+<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M2.5 4.5h11M6.5 4.5V3h3v1.5M4 4.5l.7 9h6.6l.7-9"></path>
+</svg>
