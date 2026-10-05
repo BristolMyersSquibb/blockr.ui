@@ -11,9 +11,10 @@ test_that("small_icon() draws an icon of the set, by name", {
 
 test_that("the set has the icons packages took from Font Awesome", {
 
-  expect_true(
-    all(c("eye", "dots", "minus", "plus", "trash", "check", "info",
-          "warning", "maximize", "restore") %in% names(icon_set()))
+  expect_contains(
+    names(icon_set()),
+    c("eye", "dots", "minus", "plus", "trash", "check", "info", "warning",
+      "maximize", "restore")
   )
 })
 
