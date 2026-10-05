@@ -152,12 +152,13 @@ label:has(input[type="file"]) {
    Checkbox). Shiny's checkboxInput() and checkboxGroupInput() and bslib's
    input_switch() draw Bootstrap's; these rules give them the checkbox's
    look, so R code keeps calling them. Shiny puts the input inside its label
-   (.checkbox), bslib next to it (.form-check, .form-switch). The box is the
-   input itself and the check its ::before: the confirm icon's path as a
-   mask over text-on-accent, so the check follows the scheme and a theme,
-   and fades and scales in as Blockr.checkbox's does. Radios are left
-   alone. */
+   (.checkbox, or .checkbox-inline in an inline group), bslib next to it
+   (.form-check, .form-switch). The box is the input itself and the check
+   its ::before: the confirm icon's path as a mask over text-on-accent, so
+   the check follows the scheme and a theme, and fades and scales in as
+   Blockr.checkbox's does. Radios are left alone. */
 :root .checkbox > label:has(> input[type="checkbox"]),
+:root label.checkbox-inline:has(> input[type="checkbox"]),
 :root .form-check:has(> input[type="checkbox"]) {
   display: inline-flex;
   align-items: center;
@@ -181,7 +182,17 @@ label:has(input[type="file"]) {
   cursor: pointer;
 }
 
+/* An inline group is a wrapping row of checkboxes, spaced as a
+   .blockr-checkbox-row. */
+:root .shiny-options-group:has(> .checkbox-inline > input[type="checkbox"]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 18px;
+}
+
 :root .checkbox > label > input[type="checkbox"],
+:root label.checkbox-inline > input[type="checkbox"],
 :root .form-check > input.form-check-input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
@@ -204,11 +215,13 @@ label:has(input[type="file"]) {
 }
 
 :root .checkbox > label:hover > input[type="checkbox"],
+:root label.checkbox-inline:hover > input[type="checkbox"],
 :root .form-check:hover > input.form-check-input[type="checkbox"] {
   border-color: var(--blockr-color-text-muted);
 }
 
 :root .checkbox > label > input[type="checkbox"]:checked,
+:root label.checkbox-inline > input[type="checkbox"]:checked,
 :root .form-check > input.form-check-input[type="checkbox"]:checked {
   border-color: var(--blockr-color-bg-accent);
   background-color: var(--blockr-color-bg-accent);
@@ -218,6 +231,7 @@ label:has(input[type="file"]) {
    icon, so its path is written out here, and a test holds it to the icon's
    file. */
 :root .checkbox > label > input[type="checkbox"]::before,
+:root label.checkbox-inline > input[type="checkbox"]::before,
 :root .form-check > input.form-check-input[type="checkbox"]::before {
   content: "";
   width: 10px;
@@ -232,24 +246,28 @@ label:has(input[type="file"]) {
 }
 
 :root .checkbox > label > input[type="checkbox"]:checked::before,
+:root label.checkbox-inline > input[type="checkbox"]:checked::before,
 :root .form-check > input.form-check-input[type="checkbox"]:checked::before {
   opacity: 1;
   transform: scale(1);
 }
 
 :root .checkbox > label > input[type="checkbox"]:focus,
+:root label.checkbox-inline > input[type="checkbox"]:focus,
 :root .form-check > input.form-check-input[type="checkbox"]:focus {
   outline: none;
   box-shadow: none;
 }
 
 :root .checkbox > label > input[type="checkbox"]:focus-visible,
+:root label.checkbox-inline > input[type="checkbox"]:focus-visible,
 :root .form-check > input.form-check-input[type="checkbox"]:focus-visible {
   outline: var(--blockr-focus-outline);
   outline-offset: var(--blockr-focus-offset);
 }
 
 :root .checkbox > label > input[type="checkbox"]:disabled,
+:root label.checkbox-inline > input[type="checkbox"]:disabled,
 :root .form-check > input.form-check-input[type="checkbox"]:disabled {
   opacity: 0.5;
   border-color: var(--blockr-color-border-strong);
@@ -257,6 +275,7 @@ label:has(input[type="file"]) {
 }
 
 :root .checkbox > label:has(> input:disabled),
+:root label.checkbox-inline:has(> input:disabled),
 :root .form-check:has(> input:disabled) {
   color: var(--blockr-color-text-disabled);
   cursor: default;

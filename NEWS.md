@@ -1,8 +1,9 @@
 # blockr.ui (development version)
 
-* `theme_dep()` draws Shiny's `checkboxInput()` and `checkboxGroupInput()`
-  and bslib's `input_switch()` as the design system's checkbox, so R code
-  keeps calling them and on/off looks the same everywhere.
+* The theme layer, `theme_dep()`, draws Shiny's `checkboxInput()` and
+  `checkboxGroupInput()`, inline or not, and bslib's `input_switch()` as the
+  design system's checkbox, so R code keeps calling them and on/off looks
+  the same everywhere.
 
 * A gear tray shows no heading, as the design system says: the heading
   blockr.viz writes (`.dd-popover-title`, "Chart settings") is kept for

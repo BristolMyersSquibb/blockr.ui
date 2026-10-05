@@ -74,10 +74,12 @@ test_that("the theme draws Bootstrap's checkboxes as the blockr checkbox", {
 
   css <- css_source("blockr-theme.css")
 
-  # Shiny puts the input inside its label, bslib next to it; both boxes are
-  # 16px at radius-sm, filled with the accent when checked.
+  # Shiny puts the input inside its label, in an inline group too, and bslib
+  # next to it; the boxes are 16px at radius-sm, filled with the accent when
+  # checked.
   for (sel in c(
     ':root .checkbox > label > input[type="checkbox"]',
+    ':root label.checkbox-inline > input[type="checkbox"]',
     ':root .form-check > input.form-check-input[type="checkbox"]'
   )) {
     expect_match(css, sel, fixed = TRUE, info = sel)
