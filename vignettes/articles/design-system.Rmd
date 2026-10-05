@@ -966,10 +966,13 @@ it, every control 30px, tokens only.
   the board options (the side panel icon), and the account avatar last: a
   28px circle with the accent fill (`border-accent` at 14%) and a
   `text-accent-strong` initial.
-- The board option "Show views as tabs" puts the views on a second line
-  under a `border-default` rule, one tab per view, the current one in
-  weight 600 over a 2px `border-accent` line. The view menu then shows only
-  its chevron and moves to the end of the tab line, for managing views.
+- The board option "Views as tabs", under Theme options, off by default
+  and saved with the workflow, puts the views on a second line under a
+  `border-default` rule, one tab per view, the current one in weight 600
+  over a 2px `border-accent` line. Its row at the foot of the view menu,
+  "Show views as tabs", sets the same option and shows a check while it is
+  on. The view menu then shows only its chevron and moves to the end of the
+  tab line, for managing views.
 - Every chevron is the one from [Chevrons](#chevrons): muted, `text-default`
   on hover, turned while its menu is open. Hover on every navbar control is
   `bg-hover`.
