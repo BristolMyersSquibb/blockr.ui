@@ -452,11 +452,11 @@ interface BlockrNamespace {
   ): BlockrSegmentedHandle;
   /** The gear tray behaviour (blockr-ui.js): the gear toggles the band,
    *  which slides open and closed; Escape inside the band or on the gear
-   *  closes it. */
+   *  closes it. `open` starts it open, without the slide. */
   gearTray(
     band: HTMLElement,
     gear: HTMLButtonElement,
-    opts?: { label?: string }
+    opts?: { label?: string; open?: boolean }
   ): BlockrGearTrayHandle;
   /** Toggle the canonical required-empty amber cue on a field wrapper. */
   setRequiredEmpty(el: Element, empty: boolean): void;

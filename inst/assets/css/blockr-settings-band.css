@@ -38,12 +38,19 @@
   background: var(--blockr-color-bg-page);
 }
 
-/* Fields inside the tray sit on the surface colour. */
+/* Fields inside the tray sit on the surface colour, Shiny's included; the
+   theme sets selectize's fill with !important. */
 .blockr-settings .blockr-text-input,
 .blockr-settings .blockr-select--bordered .blockr-select__control,
 .blockr-settings .blockr-segmented,
-.blockr-settings .blockr-row {
+.blockr-settings .blockr-row,
+.blockr-settings .shiny-input-container .form-control,
+.blockr-settings .shiny-input-container .form-select {
   background-color: var(--blockr-color-bg-surface);
+}
+
+.blockr-settings .shiny-input-container .selectize-input {
+  background-color: var(--blockr-color-bg-surface) !important;
 }
 
 /* ...except a required field that is still empty, which keeps its amber
@@ -267,4 +274,45 @@
   .blockr-settings .dd-row-controls > .dd-picker-wrap { flex: 1 1 140px; }
   .blockr-settings .dd-type-group { flex-wrap: wrap; }
   .blockr-settings .dd-cfg-types { flex-wrap: wrap; }
+}
+
+/* --- Shiny's inputs in the tray (gear_tray()) -------------------------- */
+
+/* A tray section switched on by a checkbox: the checkbox, Shiny's, stands
+   before the title and the title is its label, so it reads as a section
+   title. Its fields show only while it is checked. */
+.blockr-settings__title--toggle .shiny-input-container {
+  width: auto;
+  margin: 0;
+}
+
+.blockr-settings__title--toggle .checkbox,
+.blockr-settings__title--toggle .checkbox label {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+.blockr-settings__title--toggle:has(input:not(:checked)) + .blockr-settings__grid {
+  display: none;
+}
+
+/* Shiny's own inputs in the tray's grid: the cell gives the width and the
+   grid's gap the spacing, in place of Shiny's 300px and Bootstrap's margin. */
+.blockr-settings__field > .shiny-input-container {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+/* The design system's sizes: one number or one checkbox takes one column, a
+   multi select the whole row, anything else the field's two. */
+.blockr-settings__field:has(> .shiny-input-container input[type="number"]),
+.blockr-settings__field:has(> .shiny-input-container > .checkbox) {
+  grid-column: span 1;
+}
+
+.blockr-settings__field:has(> .shiny-input-container select[multiple]) {
+  grid-column: 1 / -1;
 }
