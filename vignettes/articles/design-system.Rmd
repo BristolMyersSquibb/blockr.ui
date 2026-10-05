@@ -962,9 +962,10 @@ it, every control 30px, tokens only.
   Save (`Mod+S`), Save as new workflow… (`Mod+Shift+S`), Download, then the
   versions once there is one. No save state is shown as text.
 - Right: the view menu (the current view's name with a chevron), a 20px
-  `border-default` rule, help, the board options (the side panel icon), and
-  the account avatar last: a 28px circle with the accent fill
-  (`border-accent` at 14%) and a `text-accent-strong` initial.
+  `border-default` rule, the read-only indicator on a locked board, help,
+  the board options (the side panel icon), and the account avatar last: a
+  28px circle with the accent fill (`border-accent` at 14%) and a
+  `text-accent-strong` initial.
 - The board option "Show views as tabs" puts the views on a second line
   under a `border-default` rule, one tab per view, the current one in
   weight 600 over a 2px `border-accent` line. The view menu then shows only
