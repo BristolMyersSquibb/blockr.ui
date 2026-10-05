@@ -96,6 +96,15 @@ test_that("the theme draws Bootstrap's checkboxes as the blockr checkbox", {
   expect_match(css, "background-color: var(--blockr-color-bg-accent)",
                fixed = TRUE)
 
+  # Bootstrap fades a disabled checkbox's words to half on top of the
+  # text-disabled colour; the theme keeps the colour alone.
+  words <- css_matches(
+    css,
+    ":root \\.checkbox > label > input:disabled ~ span,[^{]*\\{[^}]*\\}"
+  )
+  expect_length(words, 1L)
+  expect_match(words, "opacity: 1;", fixed = TRUE)
+
   # Radios are not checkboxes and keep their own look.
   expect_no_match(css, 'input[type="radio"]', fixed = TRUE)
 })

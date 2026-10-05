@@ -281,6 +281,14 @@ label:has(input[type="file"]) {
   cursor: default;
 }
 
+/* Bootstrap also fades a disabled checkbox's words to half; text-disabled
+   is all the design system takes off them. */
+:root .checkbox > label > input:disabled ~ span,
+:root label.checkbox-inline > input:disabled ~ span,
+:root .form-check > input:disabled ~ .form-check-label {
+  opacity: 1;
+}
+
 /* --- Buttons: Bootstrap's classes onto the design system's kinds ---
    The values of blockr-buttons.css, set through Bootstrap's own button
    variables so its hover, active, focus and disabled rules draw them.
