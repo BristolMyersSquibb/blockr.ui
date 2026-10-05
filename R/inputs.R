@@ -176,7 +176,8 @@ gear_tray <- function(inputId, ..., tools = NULL, label = "Settings") {
         `aria-controls` = tray_id,
         `aria-expanded` = "false",
         `aria-label` = "Settings",
-        `data-blockr-tooltip` = "Settings"
+        `data-blockr-tooltip` = "Settings",
+        small_icon("gear")
       )
     ),
     tags$div(
@@ -287,8 +288,8 @@ field_size <- function(f) {
   }
 }
 
-# The markup of Blockr.checkbox, for a section's toggle. Shiny's own
-# checkbox binding reports it.
+# The markup of Blockr.checkbox, for a section's toggle, with its check from
+# the same icon. Shiny's own checkbox binding reports it.
 checkbox_tag <- function(inputId, label, value) {
 
   stopifnot(is_string(inputId), isTRUE(value) || isFALSE(value))
@@ -300,15 +301,7 @@ checkbox_tag <- function(inputId, label, value) {
       type = "checkbox",
       checked = if (value) NA
     ),
-    tags$span(
-      class = "blockr-checkbox__box",
-      htmltools::HTML(paste0(
-        '<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">',
-        '<path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-',
-        '3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0"/>',
-        "</svg>"
-      ))
-    ),
+    tags$span(class = "blockr-checkbox__box", small_icon("confirm")),
     tags$span(class = "blockr-checkbox__label", label)
   )
 }

@@ -7,8 +7,9 @@
  *
  * Every control is written once, as a spec in Blockr.inputs: `mount` builds
  * it (and does nothing the second time, so a panel that Shiny unbinds and
- * binds again keeps its control), `value` is what Shiny sends, and `receive`
- * applies an update from the server. The tests drive the specs directly.
+ * binds again keeps its control), `value` is what Shiny sends, and
+ * `receive`, where the control takes updates, applies one from the server.
+ * The tests drive the specs directly.
  *
  * An update from the server is sent back, as Shiny's own inputs send theirs,
  * so the input follows what the control shows, a pick the select settles on
@@ -110,7 +111,6 @@
       if (el._blockrTray) return;
       const band = document.getElementById(el.getAttribute('aria-controls'));
       if (!band) return;
-      if (!el.firstElementChild) el.innerHTML = Blockr.icons.gear;
       el._blockrTray = Blockr.gearTray(band, el, {
         label: band.getAttribute('aria-label') || 'Settings',
         open: !!openTrays[el.id]
@@ -124,9 +124,6 @@
     },
     value(el) {
       return el._blockrTray ? el._blockrTray.isOpen() : false;
-    },
-    receive(el, data) {
-      if ('open' in data && el._blockrTray) el._blockrTray.set(!!data.open);
     }
   };
 
@@ -158,6 +155,7 @@
           if (spec.unmount) spec.unmount(el);
         },
         receiveMessage: (el, data) => {
+          if (!spec.receive) return;
           spec.mount(el);
           spec.receive(el, data || {});
           notify(el);

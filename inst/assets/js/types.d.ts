@@ -496,7 +496,7 @@ interface BlockrInputSpec {
   type?: string;
   mount(el: HTMLElement): void;
   value(el: HTMLElement): any;
-  receive(el: HTMLElement, data: Record<string, any>): void;
+  receive?(el: HTMLElement, data: Record<string, any>): void;
   unmount?(el: HTMLElement): void;
 }
 

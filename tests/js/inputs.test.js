@@ -148,7 +148,6 @@ test('gear: opens its tray, reports the state, and stays open when drawn again',
   const tray = () => win.document.getElementById('g_tray');
   const tick = () => new Promise((r) => win.setTimeout(r, 0));
 
-  assert.ok(g.el.querySelector('svg'), 'the gear icon');
   assert.strictEqual(tray().getAttribute('aria-label'), 'Read settings');
   assert.strictEqual(g.value(), false);
 

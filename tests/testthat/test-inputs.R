@@ -104,10 +104,15 @@ test_that("gear_tray() draws the gear last in the header row, and the tray", {
       '<button id="gear" type="button" ',
       'class="blockr-gear-btn blockr-ui-gear" aria-controls="gear_tray" ',
       'aria-expanded="false" aria-label="Settings" ',
-      'data-blockr-tooltip="Settings"></button>'
+      'data-blockr-tooltip="Settings"><svg'
     ),
     fixed = TRUE
   )
+  # The icons are the shared ones: the gear's, and the toggle's check.
+  expect_match(html, as.character(small_icon("gear")), fixed = TRUE)
+  expect_match(html, paste0('<span class="blockr-checkbox__box">',
+                            as.character(small_icon("confirm"))),
+               fixed = TRUE)
   expect_match(html, "blockr-tool.*blockr-gear-btn")
   expect_match(html, paste0('id="gear_tray" class="blockr-settings ',
                             'blockr-settings--beak" role="region" ',
