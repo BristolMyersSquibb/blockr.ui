@@ -945,8 +945,8 @@ joins and no fill.
 The board's toolbar: 48px high, `bg-surface`, a `border-default` rule under
 it, every control 30px, tokens only.
 
-- Left: the blockr mark, then the workflow's name, then Save.
-- The mark is the logo in its own green and the board's busy indicator. It
+- Left: the logo, then the workflow's name, then Save.
+- The logo is blockr's, in its own green, and the board's busy indicator. It
   has no menu. While blocks compute, its seven squares fade and fill again
   in turn, in the order the R is drawn, and the moment the work ends the
   logo is whole again. It waits `--blockr-dock-spinner-delay` (500ms)
