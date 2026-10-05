@@ -300,8 +300,10 @@
   margin: 0;
 }
 
+/* The label outranks the theme layer's rule for a checkbox's words
+   (blockr-theme.css), which would draw the title at 14px in text-default. */
 .blockr-settings__title--toggle .checkbox,
-.blockr-settings__title--toggle .checkbox label {
+.blockr-settings .blockr-settings__title--toggle .checkbox > label:has(> input[type="checkbox"]) {
   margin: 0;
   font: inherit;
   letter-spacing: inherit;
