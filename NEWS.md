@@ -5,10 +5,6 @@
   design system's checkbox, so R code keeps calling them and on/off looks
   the same everywhere.
 
-* A gear tray shows no heading, as the design system says: the heading
-  blockr.viz writes (`.dd-popover-title`, "Chart settings") is kept for
-  screen readers but no longer drawn as a second section title.
-
 * Rows in a menu of actions (`Blockr.menu`, `action_menu()`) take radius 4,
   like the rows of a Select list, instead of 6.
 
