@@ -63,10 +63,10 @@ test_that("update_select_input() sends only what it is given", {
 
   s <- recording_session()
 
-  update_select_input("col", choices = c("a", b = "B"), selected = "a",
-                      session = s)
-  update_select_input("col", selected = character(), session = s)
-  update_select_input("col", label = "Columns", session = s)
+  # Shiny's order: the session first, so a converted call works as it is.
+  update_select_input(s, "col", choices = c("a", b = "B"), selected = "a")
+  update_select_input(s, "col", selected = character())
+  update_select_input(s, "col", label = "Columns")
 
   msgs <- lapply(s$sent, `[[`, "message")
 

@@ -10,12 +10,9 @@
  * binds again keeps its control), `value` is what Shiny sends, and `receive`
  * applies an update from the server. The tests drive the specs directly.
  *
- * An update from the server is not reported back. The server knows what it
- * sent, and reporting it echoes every push as a user gesture: with two
- * pushes in flight the echoes alternate, Shiny's dedup no longer drops them,
- * and a server that reacts to its input pushes again, forever. The binding
- * tells Shiny to forget the last value it sent instead, so a later pick of
- * that same value still goes through.
+ * An update from the server is sent back, as Shiny's own inputs send theirs,
+ * so the input follows what the control shows, a pick the select settles on
+ * by itself included. Shiny drops a value that did not change.
  *
  * Depends on: blockr-ui.js, blockr-select.js, and Shiny.
  */
@@ -157,7 +154,7 @@
         receiveMessage: (el, data) => {
           spec.mount(el);
           spec.receive(el, data || {});
-          if (Shiny.forgetLastInputValue) Shiny.forgetLastInputValue(binding.getId(el));
+          notify(el);
         }
       });
       Shiny.inputBindings.register(binding, 'blockr.ui.' + name);

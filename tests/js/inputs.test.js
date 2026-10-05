@@ -1,7 +1,7 @@
 /* The Shiny input bindings of blockr-inputs.js, driven the way Shiny drives
  * them: find the element, initialize, subscribe, read the value, apply a
- * server update. Shiny is a stub that records what the bindings register
- * and forget; the markup is what the R functions write.
+ * server update. Shiny is a stub that records what the bindings
+ * register; the markup is what the R functions write.
  */
 'use strict';
 
@@ -17,18 +17,16 @@ const inputsJs = fs.readFileSync(
 const shinyWindow = (newWindow) => {
   const win = newWindow();
   const bindings = {};
-  const forgotten = [];
   class InputBinding {
     getId(el) { return el.getAttribute('data-input-id') || el.id; }
   }
   win.Shiny = {
     InputBinding,
-    inputBindings: { register: (b, name) => { bindings[name] = b; } },
-    forgetLastInputValue: (id) => forgotten.push(id)
+    inputBindings: { register: (b, name) => { bindings[name] = b; } }
   };
   win.jQuery = (scope) => ({ find: (sel) => Array.from(scope.querySelectorAll(sel)) });
   win.eval(inputsJs);
-  return { win, bindings, forgotten };
+  return { win, bindings };
 };
 
 /* Put R's markup on the page and bind it as Shiny would. Returns the bound
@@ -61,7 +59,7 @@ test('inputs: every control registers a binding', (newWindow) => {
   ctx.win.close();
 });
 
-test('select: mounts a bordered Blockr.Select and reports picks, not pushes', (newWindow) => {
+test('select: mounts a bordered Blockr.Select and reports picks and pushes', (newWindow) => {
   const ctx = shinyWindow(newWindow);
   const { win } = ctx;
   const s = bind(ctx, 'select',
@@ -81,19 +79,20 @@ test('select: mounts a bordered Blockr.Select and reports picks, not pushes', (n
   assert.strictEqual(s.value(), 'c');
   assert.strictEqual(s.calls.n, 1);
 
-  // A push from the server is shown, not reported, and Shiny forgets the
-  // last value it sent.
+  // A push from the server is shown and sent back, as Shiny's own inputs
+  // send theirs.
   s.b.receiveMessage(s.el, { choices: ['x', 'y'], selected: ['y'] });
   assert.strictEqual(s.value(), 'y');
-  assert.strictEqual(s.calls.n, 1);
-  assert.deepStrictEqual(ctx.forgotten, ['col']);
+  assert.strictEqual(s.calls.n, 2);
 
-  // New choices alone keep the pick while the list has it; one choice may
-  // arrive unboxed.
+  // New choices alone keep the pick while the list has it; without it the
+  // select falls back to the first choice, and that is sent back too. One
+  // choice may arrive unboxed.
   s.b.receiveMessage(s.el, { choices: ['y', 'z'] });
   assert.strictEqual(s.value(), 'y');
   s.b.receiveMessage(s.el, { choices: 'z' });
   assert.strictEqual(s.value(), 'z');
+  assert.strictEqual(s.calls.n, 4);
   win.close();
 });
 
@@ -117,7 +116,7 @@ test('select: a placeholder holds until a pick; multi reports an array', (newWin
   assert.deepStrictEqual(multi.value(), ['b']);
   multi.b.receiveMessage(multi.el, { selected: [] });
   assert.deepStrictEqual(multi.value(), []);
-  assert.strictEqual(multi.calls.n, 0);
+  assert.strictEqual(multi.calls.n, 2);
   ctx.win.close();
 });
 

@@ -17,12 +17,14 @@
 #' use Shiny's, with `updateOn = "blur"` for [shiny::textInput()] and
 #' [shiny::numericInput()], so their value changes on Enter or blur only.
 #'
-#' `update_select_input()` changes the select from the server. The update
-#' is not sent back as a new input value: `input[[inputId]]` keeps the last
-#' value the user gave until they change it again. Echoing a push loops as
-#' soon as two pushes are in flight, so the server keeps track of what it
-#' set. Send `selected` with new `choices` when the pick matters; without
-#' it, the pick is kept while the new list still has it.
+#' To change the select from the server, `update_select_input()` takes the
+#' arguments of [shiny::updateSelectInput()]. As with Shiny's own inputs, the
+#' select then sends its value back, so `input[[inputId]]` follows what it
+#' shows. That includes a pick it settles on by itself: new `choices` keep
+#' the pick while the list still has it, and otherwise fall back to the first
+#' choice, or to the placeholder. A block that copies the input into its
+#' state and pushes the state back pushes only when the two differ, so the
+#' value sent back does not loop.
 #'
 #' @param inputId The input's id.
 #' @param label The field label (12px, muted, above the control), or `NULL`
@@ -77,9 +79,9 @@ select_input <- function(inputId, label, choices, selected = NULL,
 
 #' @rdname select_input
 #' @export
-update_select_input <- function(inputId, choices = NULL, selected = NULL,
-                                label = NULL,
-                                session = shiny::getDefaultReactiveDomain()) {
+update_select_input <- function(session = shiny::getDefaultReactiveDomain(),
+                                inputId, label = NULL, choices = NULL,
+                                selected = NULL) {
   send_update(session, inputId, list(
     choices = if (!is.null(choices)) select_options(choices),
     # A list, so one value still arrives as an array.

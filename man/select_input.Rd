@@ -15,11 +15,11 @@ select_input(
 )
 
 update_select_input(
+  session = shiny::getDefaultReactiveDomain(),
   inputId,
-  choices = NULL,
-  selected = NULL,
   label = NULL,
-  session = shiny::getDefaultReactiveDomain()
+  choices = NULL,
+  selected = NULL
 )
 }
 \arguments{
@@ -63,12 +63,14 @@ the whole row. Text, numbers and checkboxes need no control of their own:
 use Shiny's, with \code{updateOn = "blur"} for \code{\link[shiny:textInput]{shiny::textInput()}} and
 \code{\link[shiny:numericInput]{shiny::numericInput()}}, so their value changes on Enter or blur only.
 
-\code{update_select_input()} changes the select from the server. The update
-is not sent back as a new input value: \code{input[[inputId]]} keeps the last
-value the user gave until they change it again. Echoing a push loops as
-soon as two pushes are in flight, so the server keeps track of what it
-set. Send \code{selected} with new \code{choices} when the pick matters; without
-it, the pick is kept while the new list still has it.
+To change the select from the server, \code{update_select_input()} takes the
+arguments of \code{\link[shiny:updateSelectInput]{shiny::updateSelectInput()}}. As with Shiny's own inputs, the
+select then sends its value back, so \code{input[[inputId]]} follows what it
+shows. That includes a pick it settles on by itself: new \code{choices} keep
+the pick while the list still has it, and otherwise fall back to the first
+choice, or to the placeholder. A block that copies the input into its
+state and pushes the state back pushes only when the two differ, so the
+value sent back does not loop.
 }
 \examples{
 select_input("col", "Column", c("mpg", "cyl", disp = "Displacement"))

@@ -74,11 +74,11 @@
   by a tooltip.
 
 * The new `select_input()` draws `Blockr.Select` for a block whose UI is
-  written in R, and `update_select_input()` changes it from the server. An
-  update does not echo back to `input$x`. The new `gear_tray()` with
-  `tray_section()` draws the gear and its tray, which lays out Shiny's own
-  inputs as well, so text, numbers and checkboxes need no control of their
-  own.
+  written in R, and `update_select_input()` changes it from the server as
+  `updateSelectInput()` does: the new value comes back to `input$x`. The new
+  `gear_tray()` with `tray_section()` draws the gear and its tray, which lays
+  out Shiny's own inputs as well, so text, numbers and checkboxes need no
+  control of their own.
 
 * An element built in R can carry its tooltip as a `data-blockr-tooltip`
   attribute, and a badge after the name as `data-blockr-tooltip-badge`
