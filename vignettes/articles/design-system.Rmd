@@ -947,7 +947,12 @@ it, every control 30px, tokens only.
 
 - Left: the blockr mark, then the workflow's name, then Save.
 - The mark is the logo in its own green and the board's busy indicator. It
-  has no menu.
+  has no menu. While blocks compute, its seven squares fade and fill again
+  in turn, in the order the R is drawn, and the moment the work ends the
+  logo is whole again. It waits `--blockr-dock-spinner-delay` (500ms)
+  first, so a short update shows nothing, and under reduced motion it slows
+  rather than stops. While it is busy, its label "Computing" is the light
+  tooltip.
 - The workflow's name is its ID: chosen in a dialog at the first save,
   unique, like a file name (spaces allowed). It is shown in the body face,
   weight 600, never monospace, with a chevron. It opens the workflow
