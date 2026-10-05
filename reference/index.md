@@ -36,6 +36,9 @@
 
   Strip a redundant `:has(> *)` guard from Shiny's recalculating fade
 
+- [`shiny_input_batch_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/shiny_input_batch_dep.md)
+  : Skip the empty input messages Shiny sends after deferred inputs
+
 - [`shortcut()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/shortcut.md)
   : A keyboard shortcut hint
 
