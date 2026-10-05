@@ -3,7 +3,8 @@
  * block whose UI is written in R (select_input(), gear_tray()). R writes the
  * markup and the settings as data-* attributes; the binding mounts the
  * control from blockr-select.js or blockr-ui.js on it and reports its value.
- * Text, numbers and checkboxes are Shiny's own inputs.
+ * Text, numbers and checkboxes are Shiny's own inputs, and the dropdown of
+ * Shiny's selectize input joins the dismiss stack while it is open.
  *
  * Every control is written once, as a spec in Blockr.inputs: `mount` builds
  * it (and does nothing the second time, so a panel that Shiny unbinds and
@@ -131,6 +132,38 @@
     select: select,
     gear: gear
   };
+
+  /* --- Shiny's selects on the dismiss stack ------------------------------ */
+
+  // The dropdown of a selectize input, as Shiny's selectInput() draws it, is
+  // a layer while it is open, as the design system's lists are, so Escape
+  // closes it before the gear tray, modal or panel around it. An instance is
+  // hooked when its control first takes the focus, which comes before the
+  // dropdown can open. Shiny replaces the instance when its options change,
+  // and the new one is hooked the same way.
+
+  /** @param {any} s A selectize instance. */
+  const layerSelectize = (s) => {
+    if (s._blockrLayered) return;
+    s._blockrLayered = true;
+    /** @type {BlockrLayerHandle | null} */
+    let layer = null;
+    s.on('dropdown_open', () => {
+      layer = Blockr.layer([s.$wrapper[0], s.$dropdown[0]], {
+        escape: () => s.close()
+      });
+    });
+    s.on('dropdown_close', () => {
+      if (layer) { layer.remove(); layer = null; }
+    });
+  };
+
+  document.addEventListener('focusin', (e) => {
+    const ctl = e.target instanceof Element && e.target.closest('.selectize-control');
+    const sel = ctl && ctl.parentElement && ctl.parentElement.querySelector('.selectized');
+    const s = sel && /** @type {any} */ (sel).selectize;
+    if (s) layerSelectize(s);
+  }, true);
 
   /* --- Shiny ------------------------------------------------------------- */
 

@@ -137,6 +137,39 @@ test('select: binding twice keeps one control', (newWindow) => {
   ctx.win.close();
 });
 
+test('selectize: an open dropdown is a layer, so Escape closes it first', (newWindow) => {
+  const ctx = shinyWindow(newWindow);
+  const { win } = ctx;
+  const host = win.document.createElement('div');
+  host.innerHTML = `<select id="sep" class="selectized"></select>
+    <div class="selectize-control"><div class="selectize-input"><input type="text"></div>
+      <div class="selectize-dropdown"></div></div>`;
+  win.document.body.appendChild(host);
+
+  // A stand-in for the selectize instance Shiny puts on the <select>.
+  const handlers = {};
+  let closed = 0;
+  const control = host.querySelector('.selectize-control');
+  win.document.getElementById('sep').selectize = {
+    $wrapper: [control],
+    $dropdown: [control.querySelector('.selectize-dropdown')],
+    on: (name, fn) => { handlers[name] = fn; },
+    close: () => { closed++; handlers.dropdown_close(); }
+  };
+
+  const input = control.querySelector('input');
+  input.dispatchEvent(new win.Event('focusin', { bubbles: true }));
+  assert.ok(handlers.dropdown_open, 'hooked when the control takes the focus');
+
+  const before = win.Blockr.layer.count();
+  handlers.dropdown_open();
+  assert.strictEqual(win.Blockr.layer.count(), before + 1);
+  key(win, input, 'Escape');
+  assert.strictEqual(closed, 1, 'Escape closes the dropdown');
+  assert.strictEqual(win.Blockr.layer.count(), before);
+  win.close();
+});
+
 test('gear: opens its tray, reports the state, and stays open when drawn again', async (newWindow) => {
   const ctx = shinyWindow(newWindow);
   const { win } = ctx;
