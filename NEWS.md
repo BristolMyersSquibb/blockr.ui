@@ -75,7 +75,7 @@
 
 * The new `gear_tray()` with `tray_section()` draws the gear and its tray
   for a block whose UI is written in R. The tray lays out Shiny's own inputs
-  at the design system's sizes, so the fields need no controls of their own.
+  at the design system's sizes.
 
 * The dropdown of a selectize input, as `selectInput()` draws it, is a layer
   on the dismiss stack while it is open, so Escape closes it before the gear

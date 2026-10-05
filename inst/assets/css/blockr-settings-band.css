@@ -38,12 +38,19 @@
   background: var(--blockr-color-bg-page);
 }
 
-/* Fields inside the tray sit on the surface colour. */
+/* Fields inside the tray sit on the surface colour, Shiny's included; the
+   theme sets selectize's fill with !important. */
 .blockr-settings .blockr-text-input,
 .blockr-settings .blockr-select--bordered .blockr-select__control,
 .blockr-settings .blockr-segmented,
-.blockr-settings .blockr-row {
+.blockr-settings .blockr-row,
+.blockr-settings .shiny-input-container .form-control,
+.blockr-settings .shiny-input-container .form-select {
   background-color: var(--blockr-color-bg-surface);
+}
+
+.blockr-settings .shiny-input-container .selectize-input {
+  background-color: var(--blockr-color-bg-surface) !important;
 }
 
 /* ...except a required field that is still empty, which keeps its amber
@@ -308,15 +315,4 @@
 
 .blockr-settings__field:has(> .shiny-input-container select[multiple]) {
   grid-column: 1 / -1;
-}
-
-/* ...and its fields sit on the surface colour, as the tray's own do. The
-   theme sets selectize's fill with !important. */
-.blockr-settings .shiny-input-container .form-control,
-.blockr-settings .shiny-input-container .form-select {
-  background-color: var(--blockr-color-bg-surface);
-}
-
-.blockr-settings .shiny-input-container .selectize-input {
-  background-color: var(--blockr-color-bg-surface) !important;
 }
