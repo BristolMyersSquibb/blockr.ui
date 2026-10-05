@@ -954,7 +954,7 @@ it, every control 30px, tokens only.
   switcher: the saved workflows, then New workflow. There is no separate
   title.
 - Save is the word in `text-muted` with a chevron. It opens the save menu:
-  Save (Ctrl+S), Save as new workflow (Ctrl+Shift+S), Download, then the
+  Save (`Mod+S`), Save as new workflow… (`Mod+Shift+S`), Download, then the
   versions once there is one. No save state is shown as text.
 - Right: the view menu (the current view's name with a chevron), a 20px
   `border-default` rule, help, the board options (the side panel icon), and
