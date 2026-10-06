@@ -12,8 +12,11 @@ small_icon(name)
 \arguments{
 \item{name}{The icon: \code{"chevron"}, \code{"remove"} (a tag's x, 10px), \code{"x"} (a
 row's remove button, 14px), \code{"grip"} (a drag handle), \code{"plus"},
-\code{"trash"}, \code{"sliders"}, \code{"check"} (a menu's current item), \code{"confirm"}
-(a committed field, a picked option), \code{"code"} or \code{"gear"}.}
+\code{"minus"}, \code{"trash"}, \code{"sliders"}, \code{"check"} (a menu's current item),
+\code{"confirm"} (a committed field, a picked option), \code{"code"}, \code{"gear"},
+\code{"eye"} (a preview toggle), \code{"dots"} (a "…" menu's trigger), \code{"info"},
+\code{"warning"}, \code{"maximize"} or \code{"restore"} (a dock group's maximise
+button).}
 }
 \value{
 For \code{controls_dep()}, an \code{\link[htmltools:tagList]{htmltools::tagList()}} of

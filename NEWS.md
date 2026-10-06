@@ -13,6 +13,11 @@
   as a drag ghost or a drop line: above the content, under the navbar and
   everything that floats.
 
+* The small icons gain `"eye"`, `"dots"`, `"minus"`, `"info"`, `"warning"`,
+  `"maximize"` and `"restore"`, the icons blockr.dock and blockr.extra still
+  took from Font Awesome, through `shiny::icon()` or dockViewR's defaults
+  (#85).
+
 * The new `shiny_input_batch_dep()` dependency skips the empty input messages
   Shiny has sent after every deferred input since 1.7.5: its batcher never
   records that a send is queued, so each deferred `setInput` queues one, and
