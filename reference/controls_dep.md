@@ -29,9 +29,12 @@ small_icon(name)
 - name:
 
   The icon: `"chevron"`, `"remove"` (a tag's x, 10px), `"x"` (a row's
-  remove button, 14px), `"grip"` (a drag handle), `"plus"`, `"trash"`,
-  `"sliders"`, `"check"` (a menu's current item), `"confirm"` (a
-  committed field, a picked option), `"code"` or `"gear"`.
+  remove button, 14px), `"grip"` (a drag handle), `"plus"`, `"minus"`,
+  `"trash"`, `"sliders"`, `"check"` (a menu's current item), `"confirm"`
+  (a committed field, a picked option), `"code"`, `"gear"`, `"eye"` (a
+  preview toggle), `"dots"` (a "…" menu's trigger), `"info"`,
+  `"warning"`, `"maximize"` or `"restore"` (a dock group's maximise
+  button).
 
 ## Value
 

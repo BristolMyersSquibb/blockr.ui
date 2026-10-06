@@ -1874,7 +1874,9 @@ stay visible. The crossfilter’s filter cards are the exception (see <a href="#
 <p>The icons are blockr.ui’s, one SVG file each, read two ways:
 <code>Blockr.icons</code> in JavaScript and <code><a href="../reference/controls_dep.html">small_icon()</a></code> in
 R. A package draws them from there rather than keeping a copy of the
-SVG.</p>
+SVG, and rather than from Font Awesome through
+<code><a href="https://rdrr.io/pkg/shiny/man/icon.html" class="external-link">shiny::icon()</a></code>, which loads two stylesheets of about 2,400
+rules (26 KB compressed) and a 156 KB font for one glyph.</p>
 </div>
 <div class="section level3">
 <h3 id="chevrons">Chevrons<a class="anchor" aria-label="anchor" href="#chevrons"></a>

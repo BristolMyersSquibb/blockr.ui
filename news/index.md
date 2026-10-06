@@ -2,6 +2,13 @@
 
 ## blockr.ui (development version)
 
+- The small icons gain `"eye"`, `"dots"`, `"minus"`, `"info"`,
+  `"warning"`, `"maximize"` and `"restore"`, the icons blockr.dock and
+  blockr.extra still took from Font Awesome, through
+  [`shiny::icon()`](https://rdrr.io/pkg/shiny/man/icon.html) or
+  dockViewR’s defaults
+  ([\#85](https://github.com/BristolMyersSquibb/blockr.ui/issues/85)).
+
 - The new
   [`shiny_input_batch_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/shiny_input_batch_dep.md)
   dependency skips the empty input messages Shiny has sent after every

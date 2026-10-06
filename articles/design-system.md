@@ -928,7 +928,10 @@ The icons are blockr.ui’s, one SVG file each, read two ways:
 `Blockr.icons` in JavaScript and
 [`small_icon()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
 in R. A package draws them from there rather than keeping a copy of the
-SVG.
+SVG, and rather than from Font Awesome through
+[`shiny::icon()`](https://rdrr.io/pkg/shiny/man/icon.html), which loads
+two stylesheets of about 2,400 rules (26 KB compressed) and a 156 KB
+font for one glyph.
 
 ### Chevrons
 
