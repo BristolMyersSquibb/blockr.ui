@@ -69,3 +69,60 @@ test_that("the theme layer hides only chrome the host cannot reach", {
     ".popover .btn-close"
   )
 })
+
+test_that("the theme draws Bootstrap's checkboxes as the blockr checkbox", {
+
+  css <- css_source("blockr-theme.css")
+
+  # Shiny puts the input inside its label, in an inline group too, and bslib
+  # next to it; the boxes are 16px at radius-sm, filled with the accent when
+  # checked.
+  for (sel in c(
+    ':root .checkbox > label > input[type="checkbox"]',
+    ':root label.checkbox-inline > input[type="checkbox"]',
+    ':root .form-check > input.form-check-input[type="checkbox"]'
+  )) {
+    expect_match(css, sel, fixed = TRUE, info = sel)
+  }
+
+  box <- css_matches(
+    css,
+    ':root \\.checkbox > label > input\\[type="checkbox"\\],[^{]*\\{[^}]*\\}'
+  )
+  expect_length(box, 1L)
+  expect_match(box, "appearance: none", fixed = TRUE)
+  expect_match(box, "width: 16px", fixed = TRUE)
+  expect_match(box, "border-radius: var(--blockr-radius-sm)", fixed = TRUE)
+  expect_match(css, "background-color: var(--blockr-color-bg-accent)",
+               fixed = TRUE)
+
+  # Bootstrap fades a disabled checkbox's words to half on top of the
+  # text-disabled colour; the theme keeps the colour alone.
+  words <- css_matches(
+    css,
+    ":root \\.checkbox > label > input:disabled ~ span,[^{]*\\{[^}]*\\}"
+  )
+  expect_length(words, 1L)
+  expect_match(words, "opacity: 1;", fixed = TRUE)
+
+  # Radios are not checkboxes and keep their own look.
+  expect_no_match(css, 'input[type="radio"]', fixed = TRUE)
+})
+
+test_that("the theme's checkbox draws its check from the confirm icon", {
+
+  # A stylesheet cannot read Blockr.icons, so the check is the confirm
+  # icon's path written into a mask. The token colour fills it, which
+  # follows the scheme and a theme.
+  confirm <- icon_set()[["confirm"]]
+  path <- regmatches(confirm, regexpr('(?<= d=")[^"]+', confirm, perl = TRUE))
+
+  css <- css_source("blockr-theme.css")
+  masks <- css_matches(css, 'mask: url\\("data:image/svg\\+xml,[^"]+"\\)')
+
+  expect_length(path, 1L)
+  expect_length(masks, 1L)
+  expect_match(utils::URLdecode(masks), path, fixed = TRUE)
+  expect_match(css, "background-color: var(--blockr-color-text-on-accent)",
+               fixed = TRUE)
+})

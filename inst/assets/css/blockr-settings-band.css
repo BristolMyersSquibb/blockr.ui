@@ -92,9 +92,7 @@
 }
 
 /* Section title (design system, "Section titles"): 12px, weight 600,
-   uppercase, 0.05em, muted; 10px above its first field. The engine's title
-   element keeps its dd-popover-title class; restyle it as the band heading. */
-.blockr-settings .dd-popover-title,
+   uppercase, 0.05em, muted; 10px above its first field. */
 .blockr-settings__title {
   flex: 1 1 100%;
   font-size: var(--blockr-font-size-xs);
@@ -286,8 +284,10 @@
   margin: 0;
 }
 
+/* The label outranks the theme layer's rule for a checkbox's words
+   (blockr-theme.css), which would draw the title at 14px in text-default. */
 .blockr-settings__title--toggle .checkbox,
-.blockr-settings__title--toggle .checkbox label {
+.blockr-settings .blockr-settings__title--toggle .checkbox > label:has(> input[type="checkbox"]) {
   margin: 0;
   font: inherit;
   letter-spacing: inherit;
