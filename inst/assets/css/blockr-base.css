@@ -6,13 +6,16 @@
    Shiny's own inputs emit, which carries Bootstrap's class names whatever the
    page loads (`form-group`, `form-control`, `control-label`, `checkbox`,
    `btn btn-default`). A page that loads Bootstrap must not load this sheet;
-   base_dep() is for the others.
+   base_dep() is for the others, and brings the theme layer after it.
 
    The button rules read the `--bs-btn-*` properties blockr-theme.css sets
    for each kind, the same properties Bootstrap's own `.btn` reads, so the
    kinds are defined once, in the theme layer, for both kinds of page.
-   Everything is inside :where() or a single class, so any component rule
-   outranks it. */
+   The selectors weigh what Bootstrap's do: the reset is inside :where(),
+   the rest a class or two. So the theme layer restyles over this sheet as
+   it does over Bootstrap, and a rule of two classes here, such as
+   `.form-control:disabled`, outranks a component's single class there as
+   well. */
 
 /* --- Reset --- */
 
@@ -31,7 +34,6 @@ body {
   margin: 0;
   font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: var(--blockr-font-size-base);
   font-weight: var(--blockr-font-weight-normal);
   line-height: 1.5;
   color: var(--blockr-color-text-default);
@@ -167,7 +169,8 @@ body {
 /* --- Shiny's inputs ---
    textInput(), selectInput(), numericInput() and the rest: a
    `.form-group.shiny-input-container` holding a `.control-label` and a
-   `.form-control`. Shiny's own sheet sets the container's width. */
+   `.form-control`. Shiny's own sheet sets the container's width, and the
+   theme layer the field's padding, border, colours and text. */
 
 .form-group {
   margin-bottom: 1rem;
@@ -177,14 +180,8 @@ body {
   display: block;
   width: 100%;
   min-height: var(--blockr-control-h);
-  padding: 10px 14px;
-  font-size: var(--blockr-font-size-base);
   line-height: 20px;
-  color: var(--blockr-color-text-default);
-  background-color: var(--blockr-color-bg-field);
   background-clip: padding-box;
-  border: 1px solid var(--blockr-color-border-default);
-  border-radius: var(--blockr-radius-lg);
   -webkit-appearance: none;
   appearance: none;
 }
