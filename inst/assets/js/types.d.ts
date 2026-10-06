@@ -238,6 +238,12 @@ interface BlockrPlaceHandle {
   stop(): void;
 }
 
+/** Handle returned by Blockr.portal (blockr-ui.js). */
+interface BlockrPortalHandle {
+  /** Put the panel back where it was, or unbind and remove it if that left the page. */
+  restore(): void;
+}
+
 interface BlockrPlaceOptions {
   /** Span the anchor (default), or size to content within bounds. */
   width?: 'anchor' | { min: number; max: number };
@@ -446,6 +452,11 @@ interface BlockrNamespace {
    * and size changes of anchor and panel (blockr-ui.js).
    */
   place(panel: HTMLElement, anchor: HTMLElement, opts?: BlockrPlaceOptions): BlockrPlaceHandle;
+  /**
+   * Carry a panel rendered in R to <body> while it floats; `gone` runs if
+   * `anchor` leaves the page meanwhile (blockr-ui.js).
+   */
+  portal(panel: HTMLElement, anchor: HTMLElement, gone: () => void): BlockrPortalHandle;
   /** Blockr.Select (blockr-select.js). */
   Select?: BlockrSelectStatic;
   /** Blockr.Input, the code field with completions (blockr-input.js). */
