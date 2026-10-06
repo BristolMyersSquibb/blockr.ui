@@ -147,6 +147,148 @@ label:has(input[type="file"]) {
   color: var(--blockr-color-text-default) !important;
 }
 
+/* --- Checkboxes and switches: Bootstrap's onto the blockr checkbox ---
+   On/off is one control, the bare checkbox (design system, Controls,
+   Checkbox). Shiny's checkboxInput() and checkboxGroupInput() and bslib's
+   input_switch() draw Bootstrap's; these rules give them the checkbox's
+   look, so R code keeps calling them. Shiny puts the input inside its label
+   (.checkbox, or .checkbox-inline in an inline group), bslib next to it
+   (.form-check, .form-switch). The box is the input itself and the check
+   its ::before: the confirm icon's path as a mask over text-on-accent, so
+   the check follows the scheme and a theme, and fades and scales in as
+   Blockr.checkbox's does. Radios are left alone. */
+:root .checkbox > label:has(> input[type="checkbox"]),
+:root label.checkbox-inline:has(> input[type="checkbox"]),
+:root .form-check:has(> input[type="checkbox"]) {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: var(--blockr-control-h-xs);
+  margin: 0;
+  padding-left: 0;
+  font-size: var(--blockr-font-size-base);
+  font-weight: var(--blockr-font-weight-normal);
+  color: var(--blockr-color-text-default);
+  cursor: pointer;
+}
+
+/* The checkbox's words, not a field label: the label rule above would draw
+   them 12px muted. */
+:root .form-check:has(> input[type="checkbox"]) > .form-check-label {
+  margin: 0;
+  font-size: var(--blockr-font-size-base);
+  font-weight: var(--blockr-font-weight-normal);
+  color: inherit;
+  cursor: pointer;
+}
+
+/* An inline group is a wrapping row of checkboxes, spaced as a
+   .blockr-checkbox-row. */
+:root .shiny-options-group:has(> .checkbox-inline > input[type="checkbox"]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 18px;
+}
+
+:root .checkbox > label > input[type="checkbox"],
+:root label.checkbox-inline > input[type="checkbox"],
+:root .form-check > input.form-check-input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  place-content: center;
+  position: static;
+  float: none;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--blockr-color-border-strong);
+  border-radius: var(--blockr-radius-sm);
+  background-color: var(--blockr-color-bg-surface);
+  background-image: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color var(--blockr-transition),
+    border-color var(--blockr-transition);
+}
+
+:root .checkbox > label:hover > input[type="checkbox"],
+:root label.checkbox-inline:hover > input[type="checkbox"],
+:root .form-check:hover > input.form-check-input[type="checkbox"] {
+  border-color: var(--blockr-color-text-muted);
+}
+
+:root .checkbox > label > input[type="checkbox"]:checked,
+:root label.checkbox-inline > input[type="checkbox"]:checked,
+:root .form-check > input.form-check-input[type="checkbox"]:checked {
+  border-color: var(--blockr-color-bg-accent);
+  background-color: var(--blockr-color-bg-accent);
+}
+
+/* The check, Blockr.icons.confirm at 10px. A stylesheet cannot read the
+   icon, so its path is written out here, and a test holds it to the icon's
+   file. */
+:root .checkbox > label > input[type="checkbox"]::before,
+:root label.checkbox-inline > input[type="checkbox"]::before,
+:root .form-check > input.form-check-input[type="checkbox"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background-color: var(--blockr-color-text-on-accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0'/%3E%3C/svg%3E") no-repeat center / 10px 10px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0'/%3E%3C/svg%3E") no-repeat center / 10px 10px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity var(--blockr-transition),
+    transform var(--blockr-transition);
+}
+
+:root .checkbox > label > input[type="checkbox"]:checked::before,
+:root label.checkbox-inline > input[type="checkbox"]:checked::before,
+:root .form-check > input.form-check-input[type="checkbox"]:checked::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+:root .checkbox > label > input[type="checkbox"]:focus,
+:root label.checkbox-inline > input[type="checkbox"]:focus,
+:root .form-check > input.form-check-input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+:root .checkbox > label > input[type="checkbox"]:focus-visible,
+:root label.checkbox-inline > input[type="checkbox"]:focus-visible,
+:root .form-check > input.form-check-input[type="checkbox"]:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}
+
+:root .checkbox > label > input[type="checkbox"]:disabled,
+:root label.checkbox-inline > input[type="checkbox"]:disabled,
+:root .form-check > input.form-check-input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  border-color: var(--blockr-color-border-strong);
+  cursor: default;
+}
+
+:root .checkbox > label:has(> input:disabled),
+:root label.checkbox-inline:has(> input:disabled),
+:root .form-check:has(> input:disabled) {
+  color: var(--blockr-color-text-disabled);
+  cursor: default;
+}
+
+/* Bootstrap also fades a disabled checkbox's words to half; text-disabled
+   is all the design system takes off them. */
+:root .checkbox > label > input:disabled ~ span,
+:root label.checkbox-inline > input:disabled ~ span,
+:root .form-check > input:disabled ~ .form-check-label {
+  opacity: 1;
+}
+
 /* --- Buttons: Bootstrap's classes onto the design system's kinds ---
    The values of blockr-buttons.css, set through Bootstrap's own button
    variables so its hover, active, focus and disabled rules draw them.

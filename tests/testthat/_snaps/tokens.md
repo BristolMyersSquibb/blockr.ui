@@ -94,6 +94,7 @@
       --blockr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1)
       --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25)
       --blockr-transition: 0.15s ease
+      --blockr-z-overlay: 1000
       --blockr-z-sticky: 1020
       --blockr-z-fixed: 1030
       --blockr-z-offcanvas: 1045
@@ -203,6 +204,7 @@
       --blockr-control-h-sm: 30px
       --blockr-control-h-xs: 26px
       --blockr-transition: 0.15s ease
+      --blockr-z-overlay: 1000
       --blockr-z-sticky: 1020
       --blockr-z-fixed: 1030
       --blockr-z-offcanvas: 1045

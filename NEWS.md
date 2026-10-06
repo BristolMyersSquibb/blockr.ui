@@ -12,10 +12,30 @@
   place), for the navbar menus that were Bootstrap dropdowns. The markup is
   `.blockr-dropdown` > `.blockr-dropdown__toggle` + `.blockr-dropdown__panel`.
 
-* `small_icon()` has `"eye"`, `"dots"`, `"minus"`, `"info"`, `"warning"`,
+* The theme layer, `theme_dep()`, draws Shiny's `checkboxInput()` and
+  `checkboxGroupInput()`, inline or not, and bslib's `input_switch()` as the
+  design system's checkbox, so R code keeps calling them and on/off looks
+  the same everywhere.
+
+* Rows in a menu of actions (`Blockr.menu`, `action_menu()`) take radius 4,
+  like the rows of a Select list, instead of 6.
+
+* A new layer, `--blockr-z-overlay` (1000, Bootstrap's `$zindex-dropdown`),
+  for an overlay that belongs to the content but is fixed on `<body>`, such
+  as a drag ghost or a drop line: above the content, under the navbar and
+  everything that floats.
+
+* The small icons gain `"eye"`, `"dots"`, `"minus"`, `"info"`, `"warning"`,
   `"maximize"` and `"restore"`, the icons blockr.dock and blockr.extra still
   took from Font Awesome, through `shiny::icon()` or dockViewR's defaults
   (#85).
+
+* The new `shiny_input_batch_dep()` dependency skips the empty input messages
+  Shiny has sent after every deferred input since 1.7.5: its batcher never
+  records that a send is queued, so each deferred `setInput` queues one, and
+  all but the first go out empty. The server runs a full input cycle for each,
+  and on a dock board the dock's own messages queue behind them. Attach it
+  once at the page level. Reported upstream as rstudio/shiny#4436.
 
 * The small icons ship as files, one SVG per icon in `assets/icons`, which
   `small_icon()` and `Blockr.icons` are built from (#80). JavaScript that
@@ -82,6 +102,14 @@
 
 * The new `tool_button()` is the design system's 26px icon button, named
   by a tooltip.
+
+* The new `gear_tray()` with `tray_section()` draws the gear and its tray
+  for a block whose UI is written in R. The tray lays out Shiny's own inputs
+  at the design system's sizes.
+
+* The dropdown of a selectize input, as `selectInput()` draws it, is a layer
+  on the dismiss stack while it is open, so Escape closes it before the gear
+  tray, modal or panel around it.
 
 * An element built in R can carry its tooltip as a `data-blockr-tooltip`
   attribute, and a badge after the name as `data-blockr-tooltip-badge`

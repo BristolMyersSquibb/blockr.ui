@@ -74,10 +74,10 @@
   padding-top: 4px;
 }
 
-/* Rows: 34px at 14px, radius 6, 10px side padding, a little more air than a
-   Select list, which is read top to bottom where a menu is scanned for one
-   verb. Hover and the keyboard row share one look, where meta text and icons
-   turn default. */
+/* Rows: 34px at 14px, radius 4 like every list row, 10px side padding. A
+   little more air than a Select list, which is read top to bottom where a
+   menu is scanned for one verb. Hover and the keyboard row share one look,
+   where meta text and icons turn default. */
 .blockr-menu__item,
 .dropdown-item.blockr-menu__item {
   display: flex;
@@ -88,7 +88,7 @@
   box-sizing: border-box;
   padding: 7px 10px;
   border: none;
-  border-radius: var(--blockr-radius-md);
+  border-radius: var(--blockr-radius-sm);
   background: transparent;
   color: var(--blockr-color-text-default);
   font: inherit;

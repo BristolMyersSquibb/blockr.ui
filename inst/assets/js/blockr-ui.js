@@ -1283,10 +1283,11 @@ Blockr.tooltip = (() => {
    * the content below is seen moving; Escape inside it, or on the gear,
    * closes it and returns focus to the gear. The gear carries the tooltip "Settings", reports its
    * state in aria-expanded and takes the accent tint while open
-   * (.blockr-gear-active).
+   * (.blockr-gear-active). `open: true` starts it open, without the slide:
+   * a tray drawn again keeps the state it had.
    * @param {HTMLElement} band
    * @param {HTMLButtonElement} gear
-   * @param {{ label?: string }} [opts]
+   * @param {{ label?: string, open?: boolean }} [opts]
    * @returns {BlockrGearTrayHandle}
    */
   function gearTray(band, gear, opts) {
@@ -1303,6 +1304,24 @@ Blockr.tooltip = (() => {
     Blockr.tooltip.set(gear, 'Settings');
     gear.setAttribute('aria-label', 'Settings');
     gear.setAttribute('aria-expanded', 'false');
+    // Open, the tray is a layer (Blockr.layer) in the page: an Escape
+    // pressed in the band or on the gear closes it, and a click outside
+    // leaves it open.
+    function addLayer() {
+      layer = Blockr.layer(band, {
+        from: gear,
+        inPage: true,
+        escape: function () { set(false); gear.focus(); }
+      });
+    }
+
+    if (opts && opts.open) {
+      open = true;
+      gear.classList.add('blockr-gear-active');
+      gear.setAttribute('aria-expanded', 'true');
+      band.classList.add('blockr-settings--open');
+      addLayer();
+    }
 
     /** @param {boolean} next */
     function set(next) {
@@ -1310,15 +1329,8 @@ Blockr.tooltip = (() => {
       open = next;
       gear.classList.toggle('blockr-gear-active', open);
       gear.setAttribute('aria-expanded', open ? 'true' : 'false');
-      // Open, the tray is a layer (Blockr.layer) in the page: an Escape
-      // pressed in the band or on the gear closes it, and a click outside
-      // leaves it open.
       if (open) {
-        layer = Blockr.layer(band, {
-          from: gear,
-          inPage: true,
-          escape: function () { set(false); gear.focus(); }
-        });
+        addLayer();
       } else if (layer) {
         layer.remove();
         layer = null;
