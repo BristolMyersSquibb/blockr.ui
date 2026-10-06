@@ -6,8 +6,9 @@
 #' commits on Enter, the required-empty cue, the checkbox, the segmented
 #' control, the gear tray, the tooltip (`Blockr.tooltip`), the menus of
 #' actions (`Blockr.menu` for those built in JavaScript, `Blockr.actionMenu`
-#' for those [action_menu()] builds in R), the placement routine for
-#' floating panels (`Blockr.place`) and the small icons (`Blockr.icons`), all
+#' for those [action_menu()] builds in R), the dropdown [dropdown()] builds
+#' (`Blockr.dropdown`), the placement routine for floating panels
+#' (`Blockr.place`) and the small icons (`Blockr.icons`), all
 #' on the `window.Blockr` namespace, together with the rows, pills, labels,
 #' fields and buttons (`.blockr-btn`) they draw, and the Shiny side of the
 #' controls: the binding of the gear tray R renders ([gear_tray()]), and
