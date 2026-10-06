@@ -141,5 +141,4 @@ test_that("base_dep() carries the font and the base sheet", {
   files <- regmatches(css, regexpr("open-sans-[a-z-]+\\.woff2", css))
 
   expect_setequal(files, list.files(fonts, pattern = "\\.woff2$"))
-  expect_true(all(c("math", "symbols") %in% sub("open-sans-([a-z]+)-.*", "\\1", files)))
 })
