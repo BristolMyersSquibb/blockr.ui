@@ -218,35 +218,28 @@ textarea.form-control {
 }
 
 /* checkboxInput(), checkboxGroupInput(), radioButtons(): a `.checkbox` or
-   `.radio` holding a label around the box and a span. */
+   `.radio` holding a label around the box and a span. The theme layer
+   draws a checkbox, and the words beside a checkbox or a radio; a radio it
+   leaves to Bootstrap, so here the browser draws it, in the accent. */
 .checkbox,
 .radio {
   margin-bottom: 0.5rem;
 }
 
-/* The label beside a box reads as text, not as a field's label: the theme
-   layer's small grey `label` rule is for the label above a field. */
-.checkbox label,
 .radio label,
-.checkbox-inline,
 .radio-inline {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 0;
-  font-size: var(--blockr-font-size-base);
-  color: var(--blockr-color-text-default);
   cursor: pointer;
 }
 
-.checkbox-inline,
 .radio-inline {
   margin-right: 1rem;
 }
 
-.checkbox input,
 .radio input,
-.checkbox-inline input,
 .radio-inline input {
   margin: 0;
   accent-color: var(--blockr-color-border-accent);
