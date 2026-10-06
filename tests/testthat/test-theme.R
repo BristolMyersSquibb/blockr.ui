@@ -127,13 +127,13 @@ test_that("the theme's checkbox draws its check from the confirm icon", {
                fixed = TRUE)
 })
 
-test_that("base_dep() carries the font and the base sheet", {
+test_that("base_dep() carries the font and the base sheet, then the theme", {
 
   deps <- htmltools::findDependencies(base_dep())
 
   expect_identical(
     blockr.core::chr_xtr(deps, "name"),
-    c("blockr-font", "blockr-base")
+    c("blockr-font", "blockr-base", "blockr-tokens", "blockr-theme")
   )
 
   fonts <- system.file("assets", "fonts", package = "blockr.ui")

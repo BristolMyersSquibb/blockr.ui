@@ -7,8 +7,9 @@
 base_dep()
 }
 \value{
-An \code{\link[htmltools:tagList]{htmltools::tagList()}} of two \link[htmltools:htmlDependency]{htmltools::htmlDependency}
-objects: the font and the base sheet.
+An \code{\link[htmltools:tagList]{htmltools::tagList()}} of \link[htmltools:htmlDependency]{htmltools::htmlDependency} objects:
+the font, the base sheet, then the tokens and the theme layer of
+\code{\link[=theme_dep]{theme_dep()}}.
 }
 \description{
 What a blockr page needs from Bootstrap when it does not load it: the
@@ -20,14 +21,16 @@ the page loads. The button rules read the \verb{--bs-btn-*} properties that
 page.
 }
 \details{
-Attach it once, from a page that does not load Bootstrap, before
-\code{\link[=theme_dep]{theme_dep()}}. On a page that does load Bootstrap it restyles what
-Bootstrap already styles and must be left out.
+The base sheet is written against the theme layer, so it brings
+\code{\link[=theme_dep]{theme_dep()}} along, after itself: the theme restyles over it as it does
+over Bootstrap. Attach it once, from a page that does not load Bootstrap;
+a \code{\link[=theme_dep]{theme_dep()}} attached elsewhere on the page is the same dependency. On
+a page that does load Bootstrap it restyles what Bootstrap already styles
+and must be left out.
 }
 \examples{
 htmltools::tagList(
   base_dep(),
-  theme_dep(),
   shiny::textInput("name", "Name")
 )
 

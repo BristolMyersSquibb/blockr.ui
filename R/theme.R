@@ -76,17 +76,20 @@ tokens_dep <- function() {
 #' [theme_dep()] sets per kind, so a button looks the same on either kind of
 #' page.
 #'
-#' Attach it once, from a page that does not load Bootstrap, before
-#' [theme_dep()]. On a page that does load Bootstrap it restyles what
-#' Bootstrap already styles and must be left out.
+#' The base sheet is written against the theme layer, so it brings
+#' [theme_dep()] along, after itself: the theme restyles over it as it does
+#' over Bootstrap. Attach it once, from a page that does not load Bootstrap;
+#' a [theme_dep()] attached elsewhere on the page is the same dependency. On
+#' a page that does load Bootstrap it restyles what Bootstrap already styles
+#' and must be left out.
 #'
-#' @return An [htmltools::tagList()] of two [htmltools::htmlDependency]
-#'   objects: the font and the base sheet.
+#' @return An [htmltools::tagList()] of [htmltools::htmlDependency] objects:
+#'   the font, the base sheet, then the tokens and the theme layer of
+#'   [theme_dep()].
 #'
 #' @examples
 #' htmltools::tagList(
 #'   base_dep(),
-#'   theme_dep(),
 #'   shiny::textInput("name", "Name")
 #' )
 #'
@@ -108,7 +111,8 @@ base_dep <- function() {
       src = "assets",
       stylesheet = "css/blockr-base.css",
       all_files = FALSE
-    )
+    ),
+    theme_dep()
   )
 }
 
