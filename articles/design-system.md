@@ -723,8 +723,11 @@ On/off is a bare checkbox everywhere: in the gear tray, on a block’s
 face and in the board options. Core’s
 [`bslib::input_switch`](https://rstudio.github.io/bslib/reference/input_switch.html)
 calls, Shiny’s `checkboxInput`s, the pharma header switch and the on/off
-pills all become `Blockr.checkbox`; a Bootstrap `.form-check` override
-covers the R side.
+pills all become `Blockr.checkbox`. On the R side the theme layer does
+it:
+[`theme_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/theme_dep.md)
+draws Shiny’s `checkboxInput()` and `checkboxGroupInput()` and bslib’s
+`input_switch()` as this checkbox, so R code keeps calling them.
 
 - Box: 16px, radius 4, 1px `border-strong`, `bg-surface`. Hover: border
   `text-muted`.
@@ -1035,20 +1038,24 @@ A z-index is one of two things, and no other number is written:
   page, so a blockr layer lands between Bootstrap’s own instead of
   guessing past them.
 
-| Layer                    | Token                  | Value | Bootstrap           |
-|--------------------------|------------------------|-------|---------------------|
-| Sticky header            | `--blockr-z-sticky`    | 1020  | `$zindex-sticky`    |
-| Fixed bar                | `--blockr-z-fixed`     | 1030  | `$zindex-fixed`     |
-| Side panel over the page | `--blockr-z-offcanvas` | 1045  | `$zindex-offcanvas` |
-| Modal                    | `--blockr-z-modal`     | 1055  | `$zindex-modal`     |
-| Menu                     | `--blockr-z-menu`      | 1070  | `$zindex-popover`   |
-| Tooltip                  | `--blockr-z-tooltip`   | 1080  | `$zindex-tooltip`   |
-| Toast                    | `--blockr-z-toast`     | 1090  | `$zindex-toast`     |
+| Layer | Token | Value | Bootstrap |
+|----|----|----|----|
+| Overlay in the content (a drag ghost, a drop line) | `--blockr-z-overlay` | 1000 | `$zindex-dropdown` |
+| Sticky header | `--blockr-z-sticky` | 1020 | `$zindex-sticky` |
+| Fixed bar | `--blockr-z-fixed` | 1030 | `$zindex-fixed` |
+| Side panel over the page | `--blockr-z-offcanvas` | 1045 | `$zindex-offcanvas` |
+| Modal | `--blockr-z-modal` | 1055 | `$zindex-modal` |
+| Menu | `--blockr-z-menu` | 1070 | `$zindex-popover` |
+| Tooltip | `--blockr-z-tooltip` | 1080 | `$zindex-tooltip` |
+| Toast | `--blockr-z-toast` | 1090 | `$zindex-toast` |
 
 A layer sits above everything it can open from: a menu opens from a
-modal or a side panel, and a tooltip names a menu’s rows. The tests in
-blockr.ui hold its stylesheets to these two forms and the layers to
-Bootstrap’s values.
+modal or a side panel, and a tooltip names a menu’s rows. The overlay
+layer is for something that belongs to the content but has to be fixed
+on `<body>` (Shiny’s output wrappers can leave nothing to position
+against): it covers the content it is dragged over and stays under the
+navbar and everything that floats. The tests in blockr.ui hold its
+stylesheets to these two forms and the layers to Bootstrap’s values.
 
 ### Dismissing
 
@@ -1101,8 +1108,8 @@ Every menu, dropdown and list that floats uses one surface:
 
 - Menus of actions are `Blockr.menu` (blockr.ui): rows, gaps, dividers,
   group titles and an optional head. A menu of actions is a little
-  airier than a Select list: 6px panel padding and rows 34px at radius 6
-  (`radius-md`), in the same radius-8 panel.
+  airier than a Select list: 6px panel padding and rows 34px, at the
+  same radius 4 in the same radius-8 panel.
 
 - Plain actions have no icon. A row gets one only when it is more than a
   plain action: it opens a mode or another surface (“Manage pages”), or

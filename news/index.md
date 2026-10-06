@@ -2,6 +2,21 @@
 
 ## blockr.ui (development version)
 
+- The theme layer,
+  [`theme_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/theme_dep.md),
+  draws Shiny’s `checkboxInput()` and `checkboxGroupInput()`, inline or
+  not, and bslib’s `input_switch()` as the design system’s checkbox, so
+  R code keeps calling them and on/off looks the same everywhere.
+
+- Rows in a menu of actions (`Blockr.menu`,
+  [`action_menu()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md))
+  take radius 4, like the rows of a Select list, instead of 6.
+
+- A new layer, `--blockr-z-overlay` (1000, Bootstrap’s
+  `$zindex-dropdown`), for an overlay that belongs to the content but is
+  fixed on `<body>`, such as a drag ghost or a drop line: above the
+  content, under the navbar and everything that floats.
+
 - The small icons gain `"eye"`, `"dots"`, `"minus"`, `"info"`,
   `"warning"`, `"maximize"` and `"restore"`, the icons blockr.dock and
   blockr.extra still took from Font Awesome, through

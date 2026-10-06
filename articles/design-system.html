@@ -1551,8 +1551,11 @@ opened.</li>
 <p>On/off is a bare checkbox everywhere: in the gear tray, on a block’s
 face and in the board options. Core’s <code><a href="https://rstudio.github.io/bslib/reference/input_switch.html" class="external-link">bslib::input_switch</a></code>
 calls, Shiny’s <code>checkboxInput</code>s, the pharma header switch and
-the on/off pills all become <code>Blockr.checkbox</code>; a Bootstrap
-<code>.form-check</code> override covers the R side.</p>
+the on/off pills all become <code>Blockr.checkbox</code>. On the R side
+the theme layer does it: <code><a href="../reference/theme_dep.html">theme_dep()</a></code> draws Shiny’s
+<code>checkboxInput()</code> and <code>checkboxGroupInput()</code> and
+bslib’s <code>input_switch()</code> as this checkbox, so R code keeps
+calling them.</p>
 <ul>
 <li>Box: 16px, radius 4, 1px <code>border-strong</code>,
 <code>bg-surface</code>. Hover: border <code>text-muted</code>.</li>
@@ -2037,42 +2040,48 @@ Bootstrap’s own instead of guessing past them.</li>
 </tr></thead>
 <tbody>
 <tr class="odd">
+<td>Overlay in the content (a drag ghost, a drop line)</td>
+<td><code>--blockr-z-overlay</code></td>
+<td>1000</td>
+<td><code>$zindex-dropdown</code></td>
+</tr>
+<tr class="even">
 <td>Sticky header</td>
 <td><code>--blockr-z-sticky</code></td>
 <td>1020</td>
 <td><code>$zindex-sticky</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Fixed bar</td>
 <td><code>--blockr-z-fixed</code></td>
 <td>1030</td>
 <td><code>$zindex-fixed</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Side panel over the page</td>
 <td><code>--blockr-z-offcanvas</code></td>
 <td>1045</td>
 <td><code>$zindex-offcanvas</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Modal</td>
 <td><code>--blockr-z-modal</code></td>
 <td>1055</td>
 <td><code>$zindex-modal</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Menu</td>
 <td><code>--blockr-z-menu</code></td>
 <td>1070</td>
 <td><code>$zindex-popover</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Tooltip</td>
 <td><code>--blockr-z-tooltip</code></td>
 <td>1080</td>
 <td><code>$zindex-tooltip</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Toast</td>
 <td><code>--blockr-z-toast</code></td>
 <td>1090</td>
@@ -2081,9 +2090,13 @@ Bootstrap’s own instead of guessing past them.</li>
 </tbody>
 </table>
 <p>A layer sits above everything it can open from: a menu opens from a
-modal or a side panel, and a tooltip names a menu’s rows. The tests in
-blockr.ui hold its stylesheets to these two forms and the layers to
-Bootstrap’s values.</p>
+modal or a side panel, and a tooltip names a menu’s rows. The overlay
+layer is for something that belongs to the content but has to be fixed
+on <code>&lt;body&gt;</code> (Shiny’s output wrappers can leave nothing
+to position against): it covers the content it is dragged over and stays
+under the navbar and everything that floats. The tests in blockr.ui hold
+its stylesheets to these two forms and the layers to Bootstrap’s
+values.</p>
 </div>
 <div class="section level3">
 <h3 id="dismissing">Dismissing<a class="anchor" aria-label="anchor" href="#dismissing"></a>
@@ -2162,8 +2175,8 @@ actions is mostly a short list and gets more room.</li>
 menu move to it. The beak belongs to the gear tray only.</p></li>
 <li><p>Menus of actions are <code>Blockr.menu</code> (blockr.ui): rows,
 gaps, dividers, group titles and an optional head. A menu of actions is
-a little airier than a Select list: 6px panel padding and rows 34px at
-radius 6 (<code>radius-md</code>), in the same radius-8 panel.</p></li>
+a little airier than a Select list: 6px panel padding and rows 34px, at
+the same radius 4 in the same radius-8 panel.</p></li>
 <li><p>Plain actions have no icon. A row gets one only when it is more
 than a plain action: it opens a mode or another surface (“Manage
 pages”), or it destroys something (“Remove”, a bin). Such a row sits in
