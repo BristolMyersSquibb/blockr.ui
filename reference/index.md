@@ -11,6 +11,9 @@
 - [`apply_table_sort()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/apply_table_sort.md)
   : Sort a data frame for the table preview
 
+- [`base_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/base_dep.md)
+  : Base stylesheet for a page without Bootstrap
+
 - [`block_mark()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block_mark.md)
   [`block_mark_svg()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block_mark.md)
   [`category_color()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/block_mark.md)
@@ -25,6 +28,9 @@
 - [`controls_dep()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
   [`small_icon()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/controls_dep.md)
   : Shared block controls
+
+- [`dropdown()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/dropdown.md)
+  : Dropdown
 
 - [`gear_tray()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)
   [`tray_section()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)

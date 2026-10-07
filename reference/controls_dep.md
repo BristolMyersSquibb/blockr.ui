@@ -8,11 +8,13 @@ control, the gear tray, the tooltip (`Blockr.tooltip`), the menus of
 actions (`Blockr.menu` for those built in JavaScript,
 `Blockr.actionMenu` for those
 [`action_menu()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)
-builds in R), the placement routine for floating panels (`Blockr.place`)
-and the small icons (`Blockr.icons`), all on the `window.Blockr`
-namespace, together with the rows, pills, labels, fields and buttons
-(`.blockr-btn`) they draw, and the Shiny side of the controls: the
-binding of the gear tray R renders
+builds in R), the dropdown
+[`dropdown()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/dropdown.md)
+builds (`Blockr.dropdown`), the placement routine for floating panels
+(`Blockr.place`) and the small icons (`Blockr.icons`), all on the
+`window.Blockr` namespace, together with the rows, pills, labels, fields
+and buttons (`.blockr-btn`) they draw, and the Shiny side of the
+controls: the binding of the gear tray R renders
 ([`gear_tray()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/gear_tray.md)),
 and Shiny's selectize dropdowns on the dismiss stack.
 
