@@ -182,6 +182,15 @@ label:has(input[type="file"]) {
   cursor: pointer;
 }
 
+/* A radio's words are not a field label either. The radio itself is left
+   to Bootstrap, or to the base sheet without it, so only the words change. */
+:root .radio > label,
+:root label.radio-inline {
+  font-size: var(--blockr-font-size-base);
+  font-weight: var(--blockr-font-weight-normal);
+  color: var(--blockr-color-text-default);
+}
+
 /* An inline group is a wrapping row of checkboxes, spaced as a
    .blockr-checkbox-row. */
 :root .shiny-options-group:has(> .checkbox-inline > input[type="checkbox"]) {
@@ -298,11 +307,11 @@ label:has(input[type="file"]) {
    kinds are one class, the sizes two with `:root`, and the kinds four,
    past bslib's `[data-bs-theme="dark"] .btn-default:not(...)`.
 
-     .btn-primary                             main
+     .btn-primary, .btn-outline-primary       main
      .btn-default, .btn-secondary,
      .btn-outline-secondary, .btn-light       secondary
      .btn-link                                quiet
-     .btn-danger                              destructive
+     .btn-danger, .btn-outline-danger         destructive
      .btn                                     size m (42px)
      .btn-sm                                  size s (30px)             */
 :root .btn {
@@ -354,7 +363,8 @@ label:has(input[type="file"]) {
   --bs-btn-active-border-color: var(--blockr-color-border-strong);
 }
 
-:root:root .btn.btn-primary {
+:root:root .btn.btn-primary,
+:root:root .btn.btn-outline-primary {
   --bs-btn-color: var(--blockr-color-text-accent-strong);
   --bs-btn-bg: var(--blockr-color-bg-accent-subtle);
   --bs-btn-border-color: var(--blockr-color-border-accent-subtle);
@@ -380,7 +390,8 @@ label:has(input[type="file"]) {
   text-decoration: none;
 }
 
-:root:root .btn.btn-danger {
+:root:root .btn.btn-danger,
+:root:root .btn.btn-outline-danger {
   --bs-btn-color: var(--blockr-color-text-danger);
   --bs-btn-bg: color-mix(in srgb, var(--blockr-color-border-danger) 6%, transparent);
   --bs-btn-border-color: var(--blockr-color-border-danger-subtle);

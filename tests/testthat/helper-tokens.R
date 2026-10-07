@@ -271,7 +271,8 @@ relative_luminance <- function(hex) {
 }
 
 # The selectors a stylesheet styles, one per comma-separated part, with the
-# rules inside an at-rule read like any other.
+# rules inside an at-rule read like any other. A comma inside parentheses,
+# as in `:where(h1, h2)`, belongs to its selector.
 css_selectors <- function(file) {
 
   css <- read_css(file)
@@ -279,7 +280,11 @@ css_selectors <- function(file) {
     css,
     gregexpr("[^{}@;]+\\{[^{}]*\\}", css, perl = TRUE)
   )[[1L]]
-  selectors <- strsplit(sub("\\{[\\s\\S]*$", "", rules, perl = TRUE), ",")
+  selectors <- strsplit(
+    sub("\\{[\\s\\S]*$", "", rules, perl = TRUE),
+    ",(?![^(]*\\))",
+    perl = TRUE
+  )
 
   unique(trimws(gsub("\\s+", " ", blockr.core::unlst(selectors))))
 }

@@ -323,3 +323,24 @@
   font-size: var(--blockr-font-size-sm);
   color: var(--blockr-color-text-muted);
 }
+
+/* ============================================================
+   Dropdown (Blockr.dropdown)
+   ============================================================
+   A panel under its toggle that stays open while it is worked in. Closed,
+   it waits hidden beside its toggle; open, it is on <body> (Blockr.place),
+   so no panel's overflow clips it, as an action menu's list is. The panel
+   takes the menu surface when it also carries `.blockr-menu`, as dropdown()
+   builds it. */
+
+.blockr-dropdown {
+  display: inline-flex;
+}
+
+.blockr-dropdown__panel {
+  z-index: var(--blockr-z-menu);
+}
+
+.blockr-dropdown:not(.is-open) > .blockr-dropdown__panel {
+  display: none;
+}

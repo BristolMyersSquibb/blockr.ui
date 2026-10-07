@@ -126,3 +126,19 @@ test_that("the theme's checkbox draws its check from the confirm icon", {
   expect_match(css, "background-color: var(--blockr-color-text-on-accent)",
                fixed = TRUE)
 })
+
+test_that("base_dep() carries the font and the base sheet, then the theme", {
+
+  deps <- htmltools::findDependencies(base_dep())
+
+  expect_identical(
+    blockr.core::chr_xtr(deps, "name"),
+    c("blockr-font", "blockr-base", "blockr-tokens", "blockr-theme")
+  )
+
+  fonts <- system.file("assets", "fonts", package = "blockr.ui")
+  css <- readLines(file.path(fonts, "open-sans.css"), warn = FALSE)
+  files <- regmatches(css, regexpr("open-sans-[a-z-]+\\.woff2", css))
+
+  expect_setequal(files, list.files(fonts, pattern = "\\.woff2$"))
+})

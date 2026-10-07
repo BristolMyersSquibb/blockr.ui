@@ -302,6 +302,48 @@ Blockr.place = (panel, anchor, opts) => {
 };
 
 /**
+ * Carry a panel rendered in R to <body> while it floats, and back.
+ *
+ * The action menu's list and the dropdown's panel hold Shiny markup and
+ * float over every ancestor's overflow and stacking (dock panels, offcanvas,
+ * modals), so while open they sit on <body>, and closed they go back where
+ * they were, to leave the page with their owner. Shiny's bindings go with
+ * the node. Blockr.portal(panel, anchor, gone) moves `panel` to <body>; the
+ * handle's restore() puts it back. If `anchor` leaves the page meanwhile (a
+ * block removed, a dropdown rendered again), `gone` runs to close the panel,
+ * and restore() unbinds the panel and removes it: there is nothing to go
+ * back to.
+ *
+ * @param {HTMLElement} panel
+ * @param {HTMLElement} anchor
+ * @param {() => void} gone
+ * @returns {BlockrPortalHandle}
+ */
+Blockr.portal = (panel, anchor, gone) => {
+  const home = panel.parentNode;
+  const next = panel.nextSibling;
+  document.body.appendChild(panel);
+  /** @type {MutationObserver | null} */
+  let watch = null;
+  if (typeof MutationObserver !== 'undefined') {
+    watch = new MutationObserver(() => { if (!anchor.isConnected) gone(); });
+    watch.observe(document.body, { childList: true, subtree: true });
+  }
+  return {
+    restore: () => {
+      if (watch) { watch.disconnect(); watch = null; }
+      if (home && home.isConnected) {
+        home.insertBefore(panel, next && next.parentNode === home ? next : null);
+      } else {
+        const shiny = /** @type {any} */ (window).Shiny;
+        if (shiny && shiny.unbindAll) shiny.unbindAll(panel);
+        panel.remove();
+      }
+    }
+  };
+};
+
+/**
  * Toggle the canonical required-empty amber cue (blockr-blocks.css
  * .blockr-field--required-empty) on a field wrapper or standalone input.
  * One name keeps call sites greppable for the blockr.ui move.
@@ -1182,10 +1224,7 @@ Blockr.tooltip = (() => {
     const panel = /** @type {HTMLElement | null} */ (
       wrap && wrap.querySelector(':scope > .blockr-menu'));
     if (!wrap || !panel) return;
-    const next = panel.nextSibling;
-    /** @type {MutationObserver | null} */
-    let watch = null;
-    document.body.appendChild(panel);
+    const lifted = Blockr.portal(panel, trigger, () => d.close());
     panel.hidden = false;
     const d = drive({
       panel,
@@ -1196,24 +1235,12 @@ Blockr.tooltip = (() => {
       byKeyboard,
       onPick: () => { setTimeout(() => d.close(true), 0); },
       detach: () => {
-        if (watch) watch.disconnect();
         if (shown && shown.trigger === trigger) shown = null;
         panel.hidden = true;
-        if (wrap.isConnected) {
-          wrap.insertBefore(panel, next && next.parentNode === wrap ? next : null);
-        } else {
-          // The block went while the menu was open: nothing to go back to.
-          const shiny = /** @type {any} */ (window).Shiny;
-          if (shiny && shiny.unbindAll) shiny.unbindAll(panel);
-          panel.remove();
-        }
+        lifted.restore();
       }
     });
     shown = { trigger, close: d.close };
-    if (typeof MutationObserver !== 'undefined') {
-      watch = new MutationObserver(() => { if (!trigger.isConnected) d.close(); });
-      watch.observe(document.body, { childList: true, subtree: true });
-    }
   };
 
   document.addEventListener('click', (e) => {
@@ -1428,4 +1455,116 @@ Blockr.tooltip = (() => {
   Blockr.checkbox = checkbox;
   Blockr.gearTray = gearTray;
   Blockr.segmented = segmented;
+})();
+
+/**
+ * Blockr.dropdown: a panel that opens under its toggle and stays open while
+ * it is worked in, for a menu that holds more than rows to pick (a search
+ * field, a list that is edited in place, a checkbox). A click outside,
+ * Escape or opening another dropdown closes it; a click inside does not.
+ * Blockr.actionMenu is the other kind, a list of rows that closes on a pick.
+ *
+ * The markup comes from R, from dropdown():
+ *
+ *   <div class="blockr-dropdown" data-align="end">
+ *     <button class="blockr-dropdown__toggle" aria-expanded="false">...</button>
+ *     <div class="blockr-dropdown__panel blockr-menu">...</div>
+ *   </div>
+ *
+ * Closed, the panel waits hidden beside its toggle. Open, it is on <body>
+ * (Blockr.portal), placed under the toggle with Blockr.place, so no
+ * ancestor's overflow or stacking clips it, as an action menu's list is;
+ * closing moves it back. Shiny's bindings go with the node, so the inputs
+ * and outputs in it work while it is open, and a dropdown that leaves the
+ * page while open (its markup rendered again) closes, its panel unbound and
+ * removed. The open
+ * panel is a layer on the dismiss stack (Blockr.layer), which closes it on
+ * Escape and on a click outside. The wrapper carries `.is-open` while it
+ * is open and fires `blockr:dropdown-shown` and `blockr:dropdown-hidden`,
+ * which bubble.
+ */
+Blockr.dropdown = (() => {
+  /** @type {{ wrap: HTMLElement, toggle: HTMLElement, panel: HTMLElement,
+   *           layer: BlockrLayerHandle, placed: BlockrPlaceHandle,
+   *           lifted: BlockrPortalHandle } | null} */
+  let open = null;
+
+  /** @param {Element | null} el */
+  const wrapOf = (el) => /** @type {HTMLElement | null} */ (
+    el && el.closest('.blockr-dropdown'));
+
+  /** @param {HTMLElement} wrap @param {string} part */
+  const partOf = (wrap, part) => /** @type {HTMLElement | null} */ (
+    wrap.querySelector(`:scope > .blockr-dropdown__${part}`));
+
+  /** @param {HTMLElement} wrap @param {string} name */
+  const fire = (wrap, name) => {
+    wrap.dispatchEvent(new CustomEvent(name, { bubbles: true }));
+  };
+
+  /** @param {boolean} [refocus] */
+  const hide = (refocus) => {
+    if (!open) return;
+    const { wrap, toggle, layer, placed, lifted } = open;
+    open = null;
+    layer.remove();
+    placed.stop();
+    wrap.classList.remove('is-open');
+    lifted.restore();
+    toggle.setAttribute('aria-expanded', 'false');
+    if (refocus && toggle.isConnected) toggle.focus();
+    fire(wrap, 'blockr:dropdown-hidden');
+  };
+
+  /** @param {HTMLElement} wrap */
+  const show = (wrap) => {
+    if (open && open.wrap === wrap) return;
+    hide();
+    const toggle = partOf(wrap, 'toggle');
+    const panel = partOf(wrap, 'panel');
+    if (!toggle || !panel) return;
+    wrap.classList.add('is-open');
+    const lifted = Blockr.portal(panel, toggle, () => hide());
+    const placed = Blockr.place(panel, toggle, {
+      width: { min: 180, max: 320 },
+      align: wrap.getAttribute('data-align') === 'end' ? 'end' : 'start'
+    });
+    // The stack has taken the layer off before these run; removing it again
+    // in hide() does nothing.
+    const layer = Blockr.layer(panel, {
+      from: toggle,
+      escape: () => hide(true),
+      outside: () => hide()
+    });
+    open = { wrap, toggle, panel, layer, placed, lifted };
+    toggle.setAttribute('aria-expanded', 'true');
+    fire(wrap, 'blockr:dropdown-shown');
+  };
+
+  document.addEventListener('click', (e) => {
+    const target = e.target instanceof Element ? e.target : null;
+    const toggle = target && target.closest('.blockr-dropdown__toggle');
+    const wrap = toggle ? wrapOf(toggle) : null;
+    if (!wrap || !toggle || toggle.parentElement !== wrap) return;
+    if (open && open.wrap === wrap) hide();
+    else show(wrap);
+  });
+
+  return {
+    /**
+     * Close the dropdown that holds `el` (or is `el`), or whichever is open.
+     * @param {Element} [el]
+     */
+    hide: (el) => {
+      if (!el || (open && (open.wrap === el || open.wrap.contains(el) ||
+                           open.panel.contains(el)))) hide();
+    },
+    /** @param {Element} el the dropdown, or anything inside it */
+    show: (el) => {
+      const wrap = wrapOf(el);
+      if (wrap) show(wrap);
+    },
+    /** The dropdown that is open, or null. */
+    current: () => (open ? open.wrap : null)
+  };
 })();
