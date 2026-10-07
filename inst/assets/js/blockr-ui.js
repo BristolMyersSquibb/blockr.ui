@@ -940,6 +940,8 @@ Blockr.tooltip = (() => {
    *
    * Blockr.menu.bind(trigger, config) wires a button to open and close its
    * menu; `config` may be a function, read on each open.
+   * Blockr.menu.delegate(selector, config) does the same for every trigger
+   * that matches `selector`, including those added to the page later.
    *
    * @param {HTMLElement} anchor
    * @param {BlockrMenuConfig} config
@@ -1167,25 +1169,90 @@ Blockr.tooltip = (() => {
   const menu = (anchor, config) => build(anchor, config);
 
   /**
+   * A click or the down arrow on a trigger, wired by bind() or matched by
+   * delegate(): it closes the trigger's menu if that is the one open, and
+   * otherwise opens it, on its first row if the keyboard opened it.
+   * @param {HTMLElement} trigger
+   * @param {BlockrMenuSource} config
+   * @param {boolean} keyboard
+   */
+  const toggle = (trigger, config, keyboard) => {
+    if (open && open.anchor === trigger) { open.close(); return; }
+    build(trigger, typeof config === 'function' ? config(trigger) : config, keyboard);
+  };
+
+  /**
    * @param {HTMLElement} trigger
    * @param {BlockrMenuConfig | (() => BlockrMenuConfig)} config
    */
   menu.bind = (trigger, config) => {
-    const read = () => (typeof config === 'function' ? config() : config);
-    /** @param {boolean} keyboard */
-    const toggle = (keyboard) => {
-      if (open && open.anchor === trigger) { open.close(); return; }
-      build(trigger, read(), keyboard);
-    };
     trigger.setAttribute('aria-haspopup', 'menu');
     trigger.setAttribute('aria-expanded', 'false');
     // A click the keyboard made (Enter or Space on the button) has no
     // pointer position: detail is 0.
-    trigger.addEventListener('click', (e) => { e.preventDefault(); toggle(e.detail === 0); });
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggle(trigger, config, e.detail === 0);
+    });
     trigger.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowDown') { e.preventDefault(); toggle(true); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); toggle(trigger, config, true); }
     });
   };
+
+  /*
+   * The menus of triggers that come and go, as the dock's block cards do:
+   * bind() wires one trigger, and one added to the page after it ran has no
+   * menu. Blockr.menu.delegate(selector, config) serves every trigger that
+   * matches `selector` from one pair of document listeners, as the action
+   * menu's triggers are served, so a trigger added later needs nothing but
+   * to match. A click and the down arrow act on it as on a trigger wired
+   * with bind(). A function `config` is given the trigger, so one selector
+   * serves triggers whose menus differ.
+   *
+   * Nothing marks a trigger before its first open, so its markup carries
+   * aria-haspopup="menu" and aria-expanded="false", as action_menu()'s
+   * does. Where triggers nest, the innermost one opens. Delegating a
+   * selector again replaces its config. The listeners run in the capture
+   * phase, so a handler between the document and the trigger that stops
+   * the event cannot keep the menu shut.
+   */
+
+  /** @type {Map<string, BlockrMenuSource>} */
+  const delegated = new Map();
+
+  /**
+   * The nearest element, from `target` up, that matches a delegated
+   * selector, with that selector's config.
+   * @param {EventTarget | null} target
+   */
+  const delegateOf = (target) => {
+    if (!delegated.size || !(target instanceof Element)) return null;
+    for (let el = /** @type {Element | null} */ (target); el; el = el.parentElement) {
+      for (const [selector, config] of delegated) {
+        if (el.matches(selector)) return { trigger: /** @type {HTMLElement} */ (el), config };
+      }
+    }
+    return null;
+  };
+
+  /** @param {string} selector @param {BlockrMenuSource} config */
+  menu.delegate = (selector, config) => {
+    delegated.set(selector, config);
+  };
+
+  document.addEventListener('click', (e) => {
+    const hit = delegateOf(e.target);
+    if (!hit) return;
+    e.preventDefault();
+    toggle(hit.trigger, hit.config, e.detail === 0);
+  }, true);
+
+  document.addEventListener('keydown', (e) => {
+    const hit = e.key === 'ArrowDown' ? delegateOf(e.target) : null;
+    if (!hit) return;
+    e.preventDefault();
+    toggle(hit.trigger, hit.config, true);
+  }, true);
 
   /*
    * The action menu: a list of actions opened by a button, built in R by

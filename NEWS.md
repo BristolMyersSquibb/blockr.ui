@@ -1,5 +1,14 @@
 # blockr.ui (development version)
 
+* The new `Blockr.menu.delegate(selector, config)` opens and closes the
+  menu of every trigger that matches `selector`, including triggers added
+  to the page later, such as the "…" buttons on the dock's block cards
+  (#79). A click and the down arrow act as on a trigger wired with
+  `Blockr.menu.bind()`, so a menu opened from the keyboard starts on its
+  first row. A function `config` is read on each open and is given the
+  trigger. Nothing marks a trigger before its first open, so its markup
+  carries `aria-haspopup="menu"` and `aria-expanded="false"`.
+
 * The new `base_dep()` is the stylesheet for a page that does not load
   Bootstrap (#85): a reset of the browser's defaults, Open Sans (bundled:
   latin, latin-ext, greek, and math for operators such as ≤, ≥ and ≠), and

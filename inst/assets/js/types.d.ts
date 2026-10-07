@@ -337,10 +337,18 @@ interface BlockrMenuConfig {
   onClose?: () => void;
 }
 
+/** A menu's config, or a function that returns it on each open, given the trigger. */
+type BlockrMenuSource = BlockrMenuConfig | ((trigger: HTMLElement) => BlockrMenuConfig);
+
 interface BlockrMenu {
   (anchor: HTMLElement, config: BlockrMenuConfig): { el: HTMLDivElement; close: () => void };
   /** Wire `trigger` to open and close its menu; a function config is read on each open. */
   bind(trigger: HTMLElement, config: BlockrMenuConfig | (() => BlockrMenuConfig)): void;
+  /**
+   * Open and close the menu of every trigger that matches `selector`, including
+   * those added to the page later; delegating a selector again replaces its config.
+   */
+  delegate(selector: string, config: BlockrMenuSource): void;
 }
 
 /** What drives an open menu of actions, of either kind (blockr-ui.js). */
