@@ -306,7 +306,7 @@ interface BlockrMenuItem {
   mono?: boolean;
   /** The item in use (the active view): weight 600. */
   current?: boolean;
-  /** A toggle row; true shows a check (role menuitemcheckbox). */
+  /** A toggle row; true shows a check (role menuitemcheckbox). In a multi menu: ticked on opening. */
   checked?: boolean;
   /** A destructive action: red under the pointer. */
   danger?: boolean;
@@ -341,6 +341,13 @@ interface BlockrMenuConfig {
   filter?: boolean | string;
   /** The panel's least width in px (default 180). */
   minWidth?: number;
+  /**
+   * The rows are ticks: a pick ticks or unticks and the menu stays open. The
+   * ticks reach `onChange` once, when the menu closes, unless Escape closed it.
+   */
+  multi?: boolean;
+  /** A multi menu's ticked items, in menu order, when it closes with them changed. */
+  onChange?: (items: BlockrMenuItem[]) => void;
   onClose?: () => void;
 }
 
@@ -377,7 +384,8 @@ interface BlockrMenuDrive {
   /** Takes the panel down once the menu has closed. */
   detach(): void;
   /** Runs last, once, whichever way the menu closed. */
-  onClose?: () => void;
+  /** After it closed; `how` is 'escape' when Escape closed it. */
+  onClose?: (how?: 'escape') => void;
 }
 
 /* --- Blockr.actionMenu (blockr-ui.js) --- */

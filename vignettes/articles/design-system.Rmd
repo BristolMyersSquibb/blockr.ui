@@ -681,6 +681,10 @@ selected row, the active group's front tab.
 - A pick keeps the dropdown open and keeps the filter text, so one search
   serves several picks ("blood", then each blood test). The filter clears
   when the dropdown closes.
+- The picks apply once, when the dropdown closes: a click outside, Tab or
+  the chevron. While it is open the tags show the picks and the block does
+  not recompute. Escape puts back what the dropdown opened with. A tag
+  removed or dragged while the dropdown is closed applies at once.
 - A tag's × appears on the tag under the pointer or with keyboard focus,
   never on every tag at once, and turns `text-danger` on its own hover. Its
   space stays reserved, so nothing moves.
@@ -1121,7 +1125,9 @@ actions the pointer moves the same row, Home and End jump, and Space picks
 too; opened from the keyboard, the menu starts on its first row, and the down
 arrow on its trigger opens it. Escape closes and returns focus to the
 trigger; Tab and an outside click close. A pick closes the menu; a multi pick
-keeps it open and keeps the filter text.
+keeps it open and keeps the filter text. A multi menu applies its picks once,
+when it closes by Tab or an outside click, and Escape drops them, as in the
+multi select. There is no Apply button in either.
 
 ### The block's "…" menu
 

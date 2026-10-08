@@ -143,6 +143,20 @@
   color: var(--blockr-color-text-accent);
 }
 
+/* A multi menu's tick (design system, Menus: "multi pick"): 14px in
+   text-accent, in a slot every row keeps so the names line up. */
+.blockr-menu__tick {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 14px;
+  color: var(--blockr-color-text-accent);
+  visibility: hidden;
+}
+
+.blockr-menu__item[aria-checked="true"] > .blockr-menu__tick {
+  visibility: visible;
+}
+
 .blockr-menu__item[aria-disabled="true"] {
   color: var(--blockr-color-text-disabled);
   background: transparent;

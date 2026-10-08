@@ -1,5 +1,18 @@
 # blockr.ui (development version)
 
+* A multi select (`Blockr.Select.multi()`, and `Blockr.Select.menu()` with
+  `mode: 'multi'`) reports its picks once, when its list closes by a click
+  outside, Tab or the chevron, instead of on every pick. A block that
+  recomputes on each change now recomputes once per visit to the list.
+  Escape puts back the picks the list opened with and reports nothing. A tag
+  removed or dragged while the list is closed still reports at once.
+
+* `Blockr.menu()` takes `multi: true`: a pick ticks or unticks its row and
+  the menu stays open, with a tick in a slot every row keeps. When the menu
+  closes by a click outside or Tab with the ticks changed, `onChange` gets
+  the ticked items in menu order; Escape drops them. Rows start ticked where
+  `checked` is set.
+
 * The new `Blockr.menu.delegate(selector, config)` opens and closes the
   menu of every trigger that matches `selector`, including triggers added
   to the page later, such as the "…" buttons on the dock's block cards

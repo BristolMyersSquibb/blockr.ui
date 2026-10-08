@@ -466,3 +466,95 @@ chrome('in Chrome, a delegated trigger opens from the pointer, from Enter and fr
   await page.keyboard.press('Enter');
   assert.deepStrictEqual(await state(), { open: false, row: null, focus: 'more', ran: ['remove more'] });
 });
+
+/* --- multi --------------------------------------------------------------- */
+
+const outside = (win) =>
+  win.document.body.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+const rowEls = (win) => [...panel(win).querySelectorAll('.blockr-menu__item')];
+
+test('multi: a pick ticks the row and keeps the menu open', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const seen = [];
+  win.Blockr.menu(t, {
+    multi: true,
+    onChange: (items) => seen.push(items.map((i) => i.label)),
+    items: [{ label: 'Dataset' }, { label: 'Head', checked: true }, { label: 'Plot' }]
+  });
+  const rows = rowEls(win);
+  assert.deepStrictEqual(rows.map((r) => r.getAttribute('role')), Array(3).fill('menuitemcheckbox'));
+  assert.deepStrictEqual(rows.map((r) => r.getAttribute('aria-checked')), ['false', 'true', 'false']);
+  assert.ok(rows.every((r) => r.firstElementChild.classList.contains('blockr-menu__tick')), 'every row keeps the slot');
+  rows[0].click();
+  assert.ok(panel(win), 'still open');
+  assert.strictEqual(rows[0].getAttribute('aria-checked'), 'true');
+  assert.deepStrictEqual(seen, [], 'nothing applied while open');
+  win.close();
+});
+
+test('multi: a click outside applies the ticks once, in menu order', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const seen = [];
+  let closed = 0;
+  win.Blockr.menu(t, {
+    multi: true,
+    onChange: (items) => seen.push(items.map((i) => i.label)),
+    onClose: () => { closed++; },
+    items: [{ label: 'Dataset' }, { label: 'Head' }, { label: 'Plot' }]
+  });
+  const rows = rowEls(win);
+  rows[2].click();
+  rows[0].click();
+  outside(win);
+  assert.ok(!panel(win), 'closed');
+  // The labels come in an array from the page's realm; compare its content.
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(seen)), [['Dataset', 'Plot']]);
+  assert.strictEqual(closed, 1);
+  win.close();
+});
+
+test('multi: Escape drops the ticks', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const seen = [];
+  win.Blockr.menu(t, {
+    multi: true,
+    onChange: (items) => seen.push(items),
+    items: [{ label: 'Dataset' }, { label: 'Head' }]
+  });
+  rowEls(win)[0].click();
+  key(win, panel(win), 'Escape');
+  assert.ok(!panel(win), 'closed');
+  assert.deepStrictEqual(seen, []);
+  win.close();
+});
+
+test('multi: ticks that end where they started apply nothing, and the caller\'s items are untouched', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const seen = [];
+  const items = [{ label: 'Dataset' }, { label: 'Head', checked: true }];
+  win.Blockr.menu(t, { multi: true, onChange: (x) => seen.push(x), items });
+  const rows = rowEls(win);
+  rows[0].click();
+  rows[0].click();
+  outside(win);
+  assert.deepStrictEqual(seen, []);
+  assert.strictEqual(items[0].checked, undefined);
+  assert.strictEqual(items[1].checked, true);
+  win.close();
+});
+
+test('multi: Space ticks the keyboard row', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, { multi: true, items: [{ label: 'Dataset' }, { label: 'Head' }] });
+  const p = panel(win);
+  key(win, p, 'ArrowDown');
+  key(win, p, ' ');
+  assert.ok(panel(win), 'still open');
+  assert.strictEqual(rowEls(win)[0].getAttribute('aria-checked'), 'true');
+  win.close();
+});

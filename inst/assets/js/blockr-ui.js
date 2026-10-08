@@ -813,8 +813,10 @@ Blockr.tooltip = (() => {
     };
 
     let closed = false;
-    /** @param {boolean} [refocus] */
-    const close = (refocus) => {
+    // `how` is 'escape' when Escape closed it: a multi menu drops its ticks
+    // then, and applies them on any other close.
+    /** @param {boolean} [refocus] @param {'escape'} [how] */
+    const close = (refocus, how) => {
       if (closed) return;
       closed = true;
       if (layer) layer.remove();
@@ -826,7 +828,7 @@ Blockr.tooltip = (() => {
       if (open && open.close === close) open = null;
       m.detach();
       if (refocus && anchor.isConnected) anchor.focus();
-      if (m.onClose) m.onClose();
+      if (m.onClose) m.onClose(how);
     };
 
     // In the capture phase, so an inert row is stopped before a handler of
@@ -878,7 +880,7 @@ Blockr.tooltip = (() => {
     // its own click is its binding's.
     layer = Blockr.layer(panel, {
       from: anchor,
-      escape: () => close(true),
+      escape: () => close(true, 'escape'),
       outside: () => close(false)
     });
     focus.focus({ preventScroll: true });
@@ -938,6 +940,13 @@ Blockr.tooltip = (() => {
    * the trigger, above when there is no room below, 180 to 320px wide. A pick
    * closes it and runs the row's `onSelect`.
    *
+   * `config.multi` makes the rows ticks: a pick ticks or unticks its row and
+   * the menu stays open, keeping the filter text. Rows start ticked where
+   * `checked` is set. When the menu closes by anything but Escape (a click
+   * outside, Tab) and the ticks changed, `config.onChange` gets the ticked
+   * items, in menu order. Escape drops them. A multi row's `onSelect` is not
+   * called.
+   *
    * Blockr.menu.bind(trigger, config) wires a button to open and close its
    * menu; `config` may be a function, read on each open.
    * Blockr.menu.delegate(selector, config) does the same for every trigger
@@ -952,6 +961,10 @@ Blockr.tooltip = (() => {
     const panel = document.createElement('div');
     panel.className = 'blockr-menu';
     panel.id = Blockr.uid('blockr-menu');
+    // A multi menu ticks rows and stays open; the ticks apply once, when it
+    // closes (design system, Menus).
+    const multi = config.multi === true;
+    if (multi) panel.classList.add('blockr-menu--multi');
 
     if (config.head) {
       const head = document.createElement('div');
@@ -1054,6 +1067,17 @@ Blockr.tooltip = (() => {
         row.setAttribute('aria-disabled', 'true');
         if (item.reason) Blockr.tooltip.set(row, item.reason);
       }
+      // A multi row leads with a tick in a slot every row keeps, so the
+      // names line up whether or not they are ticked.
+      if (multi) {
+        row.setAttribute('role', 'menuitemcheckbox');
+        row.setAttribute('aria-checked', item.checked ? 'true' : 'false');
+        const tick = document.createElement('span');
+        tick.className = 'blockr-menu__tick';
+        tick.setAttribute('aria-hidden', 'true');
+        tick.innerHTML = iconFor('check');
+        row.appendChild(tick);
+      }
       if (item.mark) {
         const mk = document.createElement('span');
         mk.className = 'blockr-block-mark';
@@ -1074,7 +1098,7 @@ Blockr.tooltip = (() => {
       row.appendChild(label);
       // `checked`: a toggle that is on (a check, no weight); `current`: the
       // item in use (weight 600 and a check).
-      if ('checked' in item) {
+      if (!multi && 'checked' in item) {
         row.setAttribute('role', 'menuitemcheckbox');
         row.setAttribute('aria-checked', item.checked ? 'true' : 'false');
       }
@@ -1092,7 +1116,7 @@ Blockr.tooltip = (() => {
       }
       // The check of the current item or a toggle that is on: at the end of
       // the row (design system, "Menus"), after its meta text and badge.
-      if (item.current || item.checked) {
+      if (!multi && (item.current || item.checked)) {
         const check = document.createElement('span');
         check.className = 'blockr-menu__check';
         check.innerHTML = iconFor('check');
@@ -1104,6 +1128,14 @@ Blockr.tooltip = (() => {
       rows.set(row, { item, search });
       list.appendChild(row);
     }
+
+    // A multi menu's ticks live here, not on the caller's items, so a menu
+    // opened again from the same config starts from what the caller passed.
+    // The opening set tells a changed set from one ticked and unticked again.
+    /** @type {Set<HTMLElement>} */
+    const ticks = new Set();
+    rows.forEach((r, row) => { if (multi && r.item.checked) ticks.add(row); });
+    const ticks0 = Array.from(rows.keys()).filter((row) => ticks.has(row));
 
     const empty = document.createElement('div');
     empty.className = 'blockr-menu__empty';
@@ -1122,12 +1154,26 @@ Blockr.tooltip = (() => {
       byKeyboard,
       onPick: (row, e) => {
         e.stopPropagation();
-        d.close(true);
         const r = rows.get(row);
+        if (multi) {
+          if (!r) return;
+          const on = !ticks.has(row);
+          if (on) ticks.add(row); else ticks.delete(row);
+          row.setAttribute('aria-checked', on ? 'true' : 'false');
+          return;
+        }
+        d.close(true);
         if (r && r.item.onSelect) r.item.onSelect();
       },
       detach: () => panel.remove(),
-      onClose: config.onClose
+      onClose: (how) => {
+        if (multi && how !== 'escape' && config.onChange) {
+          const now = Array.from(rows.keys()).filter((row) => ticks.has(row));
+          const changed = now.length !== ticks0.length || now.some((row, i) => row !== ticks0[i]);
+          if (changed) config.onChange(now.map((row) => /** @type {any} */ (rows.get(row)).item));
+        }
+        if (config.onClose) config.onClose();
+      }
     });
 
     // Typing filters the rows by label, keywords, badge and meta text (every
