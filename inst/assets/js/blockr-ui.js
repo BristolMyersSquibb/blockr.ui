@@ -934,7 +934,7 @@ Blockr.tooltip = (() => {
    * `config.head` ({ title, badge?, text? }) puts a block of text above the
    * rows, as a link's menu in the outline names the link. `align` is 'start'
    * (default) or 'end', for a trigger in a header row. `onClose` runs once
-   * whichever way the menu closes.
+   * whichever way the menu closes, given 'escape' when Escape closed it.
    *
    * The panel is portalled to <body> and placed with Blockr.place: 4px under
    * the trigger, above when there is no room below, 180 to 320px wide. A pick
@@ -1172,7 +1172,7 @@ Blockr.tooltip = (() => {
           const changed = now.length !== ticks0.length || now.some((row, i) => row !== ticks0[i]);
           if (changed) config.onChange(now.map((row) => /** @type {any} */ (rows.get(row)).item));
         }
-        if (config.onClose) config.onClose();
+        if (config.onClose) config.onClose(how);
       }
     });
 

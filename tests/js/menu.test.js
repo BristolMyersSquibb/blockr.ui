@@ -558,3 +558,15 @@ test('multi: Space ticks the keyboard row', (newWindow) => {
   assert.strictEqual(rowEls(win)[0].getAttribute('aria-checked'), 'true');
   win.close();
 });
+
+test('onClose is told when Escape closed the menu', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const hows = [];
+  win.Blockr.menu(t, { onClose: (how) => hows.push(how), items: [{ label: 'One' }] });
+  key(win, panel(win), 'Escape');
+  win.Blockr.menu(t, { onClose: (how) => hows.push(how), items: [{ label: 'One' }] });
+  outside(win);
+  assert.deepStrictEqual(hows, ['escape', undefined]);
+  win.close();
+});

@@ -348,7 +348,8 @@ interface BlockrMenuConfig {
   multi?: boolean;
   /** A multi menu's ticked items, in menu order, when it closes with them changed. */
   onChange?: (items: BlockrMenuItem[]) => void;
-  onClose?: () => void;
+  /** Runs once however the menu closes; `how` is 'escape' when Escape closed it. */
+  onClose?: (how?: 'escape') => void;
 }
 
 /** A menu's config, or a function that returns it on each open, given the trigger. */
