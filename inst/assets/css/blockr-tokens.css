@@ -8,7 +8,7 @@
      meaning   --blockr-color-<property>-<role>[-<state>], --blockr-font-*,
                --blockr-radius-*, --blockr-control-*, --blockr-shadow-*,
                --blockr-focus-*, --blockr-transition, --blockr-mark-*,
-               --blockr-category-*
+               --blockr-category-*, --blockr-logo
      local     --blockr-<owner>-*        one component's or package's own
                                          setting, read only in its own sheet
 
@@ -240,6 +240,14 @@
   --blockr-category-output: #d55e00;
   --blockr-category-utility: #cccccc;
   --blockr-category-uncategorized: #999999;
+
+  /* ------------------------------------------------------------- logo */
+
+  /* The green of the blockr logo. It sits outside the palette on the terms
+     of the category colours: the same under every theme, and the dark file
+     does not restate it. On the surface it is 3.4:1 in light and 5.1:1 in
+     dark. */
+  --blockr-logo: #089e76;
 
   /* ------------------------------------------------- legacy (aliases) */
 

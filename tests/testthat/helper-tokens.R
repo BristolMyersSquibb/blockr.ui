@@ -36,7 +36,8 @@ token_grammar <- c(
   "^--blockr-control-h(-[a-z]+)?$",
   "^--blockr-transition$",
   "^--blockr-mark(-[a-z]+)+$",
-  "^--blockr-category-[a-z]+$"
+  "^--blockr-category-[a-z]+$",
+  "^--blockr-logo$"
 )
 
 legacy_tokens <- function() {
