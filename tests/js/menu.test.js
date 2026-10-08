@@ -418,6 +418,106 @@ test('a checked row carries a check and its state, without the current weight', 
   win.close();
 });
 
+test('a tool sits at the end of the caption line, named by its tooltip', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, {
+    caption: 'Append to Dataset',
+    filter: true,
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: () => {} },
+    items: [{ label: 'Filter rows' }]
+  });
+  const cap = panel(win).querySelector('.blockr-menu__caption');
+  assert.ok(cap.classList.contains('blockr-menu__caption--tool'));
+  assert.strictEqual(cap.querySelector('.blockr-menu__caption-text').textContent, 'Append to Dataset');
+  const tool = cap.lastElementChild;
+  assert.ok(tool.matches('button.blockr-tool.blockr-menu__tool'), 'the last thing on the line');
+  assert.strictEqual(tool.getAttribute('aria-label'), 'Open in the sidebar');
+  assert.strictEqual(tool.innerHTML, win.Blockr.icons.open, 'the icon by its name');
+  assert.ok(!panel(win).querySelector('[role="menu"]').contains(tool), 'outside the list of rows');
+  win.close();
+});
+
+test('a tool takes the caption line of a menu with no caption', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, {
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: () => {} },
+    items: [{ label: 'One' }]
+  });
+  const cap = panel(win).querySelector('.blockr-menu__caption--tool');
+  assert.strictEqual(cap.textContent, '');
+  assert.ok(cap.querySelector('.blockr-menu__tool'));
+  win.close();
+});
+
+test('a click on the tool closes the menu and hands on the filter box\'s text', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const got = [];
+  let closed = 0;
+  win.Blockr.menu(t, {
+    caption: 'Add a block',
+    filter: true,
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: (q) => got.push(q) },
+    items: [{ label: 'Merge', onSelect: () => got.push('picked') }],
+    onClose: () => { closed++; }
+  });
+  const input = panel(win).querySelector('.blockr-menu__filter-input');
+  input.value = 'merge';
+  input.dispatchEvent(new win.Event('input', { bubbles: true }));
+  panel(win).querySelector('.blockr-menu__tool').click();
+  assert.deepStrictEqual(got, ['merge'], 'the text, and no row picked');
+  assert.ok(!panel(win), 'closed');
+  assert.strictEqual(closed, 1);
+  assert.strictEqual(win.document.activeElement, t, 'focus back on the trigger');
+  win.close();
+});
+
+test('Tab stops at the tool, Shift+Tab goes back, and Tab from the tool closes', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const got = [];
+  win.Blockr.menu(t, {
+    filter: true,
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: (q) => got.push(q) },
+    items: [{ label: 'One', onSelect: () => got.push('one') }]
+  });
+  const p = panel(win);
+  const box = p.querySelector('.blockr-menu__filter-input');
+  const tool = p.querySelector('.blockr-menu__tool');
+  key(win, box, 'ArrowDown');
+  key(win, box, 'Tab');
+  assert.ok(panel(win), 'still open');
+  assert.strictEqual(win.document.activeElement, tool);
+  // Enter belongs to the button there, not to the keyboard row.
+  key(win, tool, 'Enter');
+  assert.deepStrictEqual(got, [], 'no row picked');
+  tool.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }));
+  assert.strictEqual(win.document.activeElement, box);
+  key(win, box, 'Tab');
+  key(win, tool, 'Tab');
+  assert.ok(!panel(win), 'closed');
+  assert.strictEqual(win.document.activeElement, t);
+  assert.deepStrictEqual(got, []);
+  win.close();
+});
+
+test('Shift+Tab from the filter box closes a menu with a tool, as without one', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, {
+    filter: true,
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: () => {} },
+    items: [{ label: 'One' }]
+  });
+  const box = panel(win).querySelector('.blockr-menu__filter-input');
+  box.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }));
+  assert.ok(!panel(win));
+  assert.strictEqual(win.document.activeElement, t);
+  win.close();
+});
+
 /* --- In Chrome ------------------------------------------------------------ */
 
 /* Real keys and a real pointer (browser.js): a click the keyboard makes
@@ -465,4 +565,46 @@ chrome('in Chrome, a delegated trigger opens from the pointer, from Enter and fr
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
   assert.deepStrictEqual(await state(), { open: false, row: null, focus: 'more', ran: ['remove more'] });
+});
+
+chrome('in Chrome, Tab reaches the tool, Enter opens it with the filter\'s text, and it sits in the corner', async (page) => {
+  await page.evaluate(() => {
+    window.got = [];
+    const b = document.createElement('button');
+    b.id = 'add';
+    b.textContent = 'Add';
+    document.body.appendChild(b);
+    Blockr.menu(b, {
+      caption: 'Insert between a long block name and another long block name',
+      filter: 'Search blocks',
+      minWidth: 300,
+      tool: { icon: 'open', label: 'Open in the sidebar', onSelect: (q) => window.got.push(q) },
+      items: [{ label: 'Merge', onSelect: () => window.got.push('picked') }]
+    });
+  });
+  const box = await page.evaluate(() => {
+    const r = (sel) => document.querySelector(sel).getBoundingClientRect();
+    const p = r('.blockr-menu');
+    const tool = r('.blockr-menu__tool');
+    const filter = r('.blockr-menu__filter-input');
+    const text = document.querySelector('.blockr-menu__caption-text');
+    return {
+      right: Math.round(p.right - tool.right),
+      top: Math.round(tool.top - p.top),
+      size: [Math.round(tool.width), Math.round(tool.height)],
+      clear: tool.bottom <= filter.top,
+      cut: text.scrollWidth > text.clientWidth
+    };
+  });
+  // 6px of panel padding and its 1px border.
+  assert.deepStrictEqual(box, { right: 7, top: 7, size: [24, 24], clear: true, cut: true });
+  await page.keyboard.type('mer');
+  await page.keyboard.press('Tab');
+  assert.strictEqual(await page.evaluate(() => document.activeElement.getAttribute('aria-label')), 'Open in the sidebar');
+  await page.keyboard.press('Enter');
+  assert.deepStrictEqual(await page.evaluate(() => ({
+    open: !!document.querySelector('.blockr-menu'),
+    got: window.got,
+    focus: document.activeElement.id
+  })), { open: false, got: ['mer'], focus: 'add' });
 });
