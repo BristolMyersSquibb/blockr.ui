@@ -2192,6 +2192,10 @@ menu move to it. The beak belongs to the gear tray only.</p></li>
 gaps, dividers, group titles and an optional head. A menu of actions is
 a little airier than a Select list: 6px panel padding and rows 34px, at
 the same radius 4 in the same radius-8 panel.</p></li>
+<li><p>A menu can carry one tool, at the end of its caption line in the
+top right corner: a 24px icon button, named by its tooltip, that opens
+the menu’s list somewhere fuller and takes what was typed in the filter
+box along. The block actions’ menu has one, “Open in the sidebar” (<a href="#floating">Picking a block</a>).</p></li>
 <li><p>Plain actions have no icon. A row gets one only when it is more
 than a plain action: it opens a mode or another surface (“Manage
 pages”), or it destroys something (“Remove”, a bin). Such a row sits in
@@ -2298,9 +2302,10 @@ values and a menu of actions alike. Arrows move the row, Enter picks,
 typing filters. In a menu of actions the pointer moves the same row,
 Home and End jump, and Space picks too; opened from the keyboard, the
 menu starts on its first row, and the down arrow on its trigger opens
-it. Escape closes and returns focus to the trigger; Tab and an outside
-click close. A pick closes the menu; a multi pick keeps it open and
-keeps the filter text.</p>
+it. Escape closes and returns focus to the trigger; an outside click
+closes, and so does Tab, after stopping at the menu’s tool where there
+is one. A pick closes the menu; a multi pick keeps it open and keeps the
+filter text.</p>
 </div>
 <div class="section level3">
 <h3 id="the-blocks-menu">The block’s “…” menu<a class="anchor" aria-label="anchor" href="#the-blocks-menu"></a>
@@ -2355,10 +2360,12 @@ in place of <code>title</code>.</li>
 <strong>Adding a block</strong> is one menu at the “+”, everywhere:
 the outline, a block’s append, the board’s Add block. Search on top,
 category titles, one row per block type with its 24px mark, its name and
-the package as a badge. Rows carry no description. The block’s ID is
-generated, and its title is renamed on the block after it is added. The
-dock’s block browser sidebar and its “configure before adding” step
-go.</li>
+the package as a badge. Rows carry no description. A pick adds the block
+with a generated ID, and its link with a generated ID on the first free
+input. The menu’s tool, “Open in the sidebar”, opens the same list as
+the dock’s block browser, whose rows unfold into a form that sets the
+block’s ID and title, its links’ IDs and the input a link lands on
+before the block is added: an ID cannot be changed afterwards.</li>
 <li>
 <strong>Picking a block already on the board</strong> (add a panel,
 link to, add to a stack) uses the same menu, listing the board’s blocks:
