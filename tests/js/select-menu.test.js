@@ -248,12 +248,14 @@ test('a pick keeps the multi menu open, adds a tag and ticks the row', (newWindo
   const opt = [...win.document.querySelectorAll('.blockr-select__option')]
     .find((e) => e.getAttribute('data-value') === 'AETOXGR');
   opt.dispatchEvent(new win.Event('click', { bubbles: true }));
-  assert.deepStrictEqual(picked, [['AESOC', 'AETOXGR']], 'the whole selection travels');
+  assert.deepStrictEqual(picked, [], 'nothing reported while the menu is open');
   assert.strictEqual(closed, 0, 'the panel stays: the next pick is one click away');
   assert.ok(dropdown(win), 'still on screen');
   assert.deepStrictEqual(tagValues(win), ['AESOC', 'AETOXGR']);
   assert.deepStrictEqual(optionTexts(win), ['AESOC', 'AEDECOD', 'AETOXGR']);
   assert.deepStrictEqual(ticked(win), ['AESOC', 'AETOXGR']);
+  win.document.body.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+  assert.deepStrictEqual(picked, [['AESOC', 'AETOXGR']], 'the whole selection travels, once, as the menu closes');
   m.close();
   win.close();
 });
@@ -268,16 +270,17 @@ test('the x on a tag removes it, and unticks its row', (newWindow) => {
   const x = win.document
     .querySelector('.blockr-select__tag[data-value="AESOC"] .blockr-select__tag-remove');
   x.dispatchEvent(new win.Event('click', { bubbles: true }));
-  assert.deepStrictEqual(picked, [['AEDECOD']]);
+  assert.deepStrictEqual(picked, [], 'a tag removed in an open menu is one more pick');
   assert.deepStrictEqual(tagValues(win), ['AEDECOD']);
   assert.deepStrictEqual(ticked(win), ['AEDECOD']);
-  // Emptying it sends [], not [''] -- the slot is unset, and a blank tag is
-  // what the old path drew when it was handed one.
   win.document
     .querySelector('.blockr-select__tag[data-value="AEDECOD"] .blockr-select__tag-remove')
     .dispatchEvent(new win.Event('click', { bubbles: true }));
-  assert.deepStrictEqual(picked[1], []);
   assert.deepStrictEqual(tagValues(win), []);
+  // Emptying it sends [], not [''] -- the slot is unset, and a blank tag is
+  // what the old path drew when it was handed one.
+  win.document.body.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+  assert.deepStrictEqual(picked, [[]]);
   m.close();
   win.close();
 });

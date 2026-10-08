@@ -618,6 +618,8 @@ test('opened with the mouse, Enter shows the keyboard row instead of picking', (
   assert.strictEqual(highlighted(win, sel), 'a');
   assert.deepStrictEqual(seen, [], 'nothing picked');
   press(win, search(sel), 'Enter');
+  assert.deepStrictEqual(seen, [], 'picked, reported when the list closes');
+  clickOutside(win);
   // onChange hands over an array from the page's realm; compare its content.
   assert.deepStrictEqual(JSON.parse(JSON.stringify(seen)), [['a']]);
   win.close();
@@ -646,8 +648,10 @@ test('Backspace in an empty search input removes the last tag', (newWindow) => {
   type(win, search(sel), '');
   press(win, search(sel), 'Backspace');
   assert.deepStrictEqual(tags(sel), ['a']);
-  assert.deepStrictEqual(json(seen), [['a']]);
+  assert.deepStrictEqual(json(seen), [], 'reported when the list closes');
   assert.deepStrictEqual(ticked(win, sel), ['a'], 'its row is unticked');
+  clickOutside(win);
+  assert.deepStrictEqual(json(seen), [['a']]);
   win.close();
 });
 
@@ -703,6 +707,8 @@ test('multi: a pick appends, keeps the query and the list open, and reports a co
   assert.deepStrictEqual(rows(win, sel), ['c']);
   assert.deepStrictEqual(ticked(win, sel), ['c']);
   assert.deepStrictEqual(tags(sel), ['a', 'c']);
+  assert.deepStrictEqual(json(seen), [], 'nothing reported while the list is open');
+  clickOutside(win);
   assert.deepStrictEqual(json(seen), [['a', 'c']]);
   seen[0].push('zzz');
   assert.deepStrictEqual(values(sel), ['a', 'c'], 'the caller got a copy');
@@ -728,10 +734,11 @@ test('multi: one search serves several picks, a ticked row unticks, closing clea
   clickRow(win, sel, 'Occult blood');
   assert.deepStrictEqual(values(sel), ['Blood glucose', 'Blood urea nitrogen']);
   assert.deepStrictEqual(ticked(win, sel), ['Blood glucose', 'Blood urea nitrogen']);
-  assert.strictEqual(seen.length, 4);
+  assert.strictEqual(seen.length, 0, 'four picks, none reported yet');
   clickOutside(win);
   assert.ok(!isOpen(sel));
   assert.strictEqual(search(sel).value, '');
+  assert.deepStrictEqual(json(seen), [['Blood glucose', 'Blood urea nitrogen']], 'one report, on close');
   win.close();
 });
 
@@ -805,7 +812,7 @@ test('multi menu: picks are tags in the head, above the filter box, and the prom
   assert.ok(tagsEl && box, 'both in the panel');
   assert.ok(tagsEl.compareDocumentPosition(box) & win.Node.DOCUMENT_POSITION_FOLLOWING, 'tags first');
   click(win, dd.querySelector('.blockr-select__option[data-value="d"]'));
-  assert.deepStrictEqual(json(seen), [['b', 'd']]);
+  assert.deepStrictEqual(json(seen), [], 'reported when the menu closes');
   assert.deepStrictEqual(
     [...dd.querySelectorAll('.blockr-select__tag')].map((t) => t.getAttribute('data-value')),
     ['b', 'd']
@@ -1199,5 +1206,45 @@ test('the combobox input names its list and its role', (newWindow) => {
   assert.strictEqual(input.getAttribute('autocomplete'), 'off');
   assert.ok(input.getAttribute('aria-controls'));
   assert.strictEqual(win.document.getElementById(input.getAttribute('aria-controls')), dropdown(win, sel));
+  win.close();
+});
+
+/* --- reporting on close ----------------------------------------------------- */
+
+test('multi: Escape puts back the picks the list opened with, and reports nothing', (newWindow) => {
+  const win = newWindow();
+  const seen = [];
+  const sel = multi(win, { options: ABC, selected: ['a'], onChange: (v) => seen.push(v) });
+  click(win, control(sel));
+  clickRow(win, sel, 'b');
+  clickRow(win, sel, 'a');
+  assert.deepStrictEqual(tags(sel), ['b']);
+  press(win, search(sel), 'Escape');
+  assert.ok(!isOpen(sel));
+  assert.deepStrictEqual(tags(sel), ['a'], 'back to what it opened with');
+  assert.deepStrictEqual(seen, []);
+  win.close();
+});
+
+test('multi: closing with the picks unchanged reports nothing', (newWindow) => {
+  const win = newWindow();
+  const seen = [];
+  const sel = multi(win, { options: ABC, selected: ['a'], onChange: (v) => seen.push(v) });
+  click(win, control(sel));
+  clickRow(win, sel, 'b');
+  clickRow(win, sel, 'b');
+  clickOutside(win);
+  assert.deepStrictEqual(seen, []);
+  win.close();
+});
+
+test('multi: a tag removed with the list closed reports at once', (newWindow) => {
+  const win = newWindow();
+  const seen = [];
+  const sel = multi(win, { options: ABC, selected: ['a', 'b'], onChange: (v) => seen.push(v) });
+  const x = sel.el.querySelector('.blockr-select__tag[data-value="a"] .blockr-select__tag-remove');
+  x.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  assert.ok(!isOpen(sel));
+  assert.deepStrictEqual(json(seen), [['b']]);
   win.close();
 });
