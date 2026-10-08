@@ -325,6 +325,13 @@ interface BlockrMenuItem {
   badge?: string;
   /** More text the filter box matches. */
   keywords?: string;
+  /**
+   * A second target at the row's end (a Blockr.icons name, a right chevron
+   * by default), shown in place of the meta and badge on the row under the
+   * pointer and the keyboard row: a click on it, or the right arrow, closes
+   * the menu and runs `onSelect` instead of the row's.
+   */
+  tool?: { icon?: string; label?: string; onSelect: () => void };
 }
 
 type BlockrMenuEntry = BlockrMenuItem | { gap: true } | { divider: true } | { title: string };

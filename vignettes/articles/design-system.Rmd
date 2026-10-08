@@ -1129,6 +1129,14 @@ keeps it open and keeps the filter text. A multi menu applies its picks once,
 when it closes by Tab or an outside click, and Escape drops them, as in the
 multi select. There is no Apply button in either.
 
+A menu row may carry a second target at its end, as a block list's row
+carries its "…": the "+" menu's rows open the block's options before it is
+added. It takes no room at rest; on the row under the pointer and the
+keyboard row it appears, 24px, and the meta text and badge give way to it.
+It is the chevron as a "go to" arrow, pointing right, `text-default`. A
+click on it, or the right arrow, closes the menu and opens the next one; a
+click on the row still does the row's job.
+
 ### The block's "…" menu
 
 Controls (the sliders, a check when on), a divider, then Rename, Append

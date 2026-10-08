@@ -143,6 +143,43 @@
   color: var(--blockr-color-text-accent);
 }
 
+/* A row's tool (the "+" menu's options): a 24px target at the row's end.
+   It takes no room at rest; on the row under the pointer and the keyboard
+   row it appears and the row's meta text and badge give way to it, as the
+   "…" of a block list's row does. */
+.blockr-menu__tool {
+  display: none;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin: -4px -4px -4px auto;
+  border-radius: var(--blockr-radius-sm);
+  /* The chevron on the row it belongs to (design system, Chevrons). */
+  color: var(--blockr-color-text-default);
+}
+
+.blockr-menu__item--tool:hover > .blockr-menu__tool,
+.blockr-menu__item--tool.blockr-menu__item--active > .blockr-menu__tool {
+  display: inline-grid;
+}
+
+.blockr-menu__item--tool:hover > .blockr-menu__badge,
+.blockr-menu__item--tool:hover > .blockr-menu__meta,
+.blockr-menu__item--tool.blockr-menu__item--active > .blockr-menu__badge,
+.blockr-menu__item--tool.blockr-menu__item--active > .blockr-menu__meta {
+  display: none;
+}
+
+.blockr-menu__tool--next svg {
+  transform: rotate(-90deg);
+}
+
+.blockr-menu__tool:hover {
+  background: var(--blockr-color-border-default);
+  color: var(--blockr-color-text-default);
+}
+
 /* A multi menu's tick (design system, Menus: "multi pick"): 14px in
    text-accent, in a slot every row keeps so the names line up. */
 .blockr-menu__tick {

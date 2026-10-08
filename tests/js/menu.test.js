@@ -570,3 +570,34 @@ test('onClose is told when Escape closed the menu', (newWindow) => {
   assert.deepStrictEqual(hows, ['escape', undefined]);
   win.close();
 });
+
+/* --- tool ---------------------------------------------------------------- */
+
+test('a row\'s tool runs instead of the row, from a click or the right arrow', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const ran = [];
+  const items = () => [
+    { label: 'merge block', onSelect: () => ran.push('row'), tool: { label: 'Options', onSelect: () => ran.push('tool') } },
+    { label: 'filter block', onSelect: () => ran.push('row2') }
+  ];
+  win.Blockr.menu(t, { items: items() });
+  const tool = panel(win).querySelector('.blockr-menu__tool');
+  assert.ok(tool, 'drawn');
+  assert.ok(tool.classList.contains('blockr-menu__tool--next'), 'a right chevron by default');
+  assert.ok(rowEls(win)[0].classList.contains('blockr-menu__item--tool'));
+  assert.ok(!rowEls(win)[1].classList.contains('blockr-menu__item--tool'));
+  tool.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  assert.ok(!panel(win), 'closed');
+  assert.deepStrictEqual(ran, ['tool']);
+
+  win.Blockr.menu(t, { items: items() });
+  key(win, panel(win), 'ArrowDown');
+  key(win, panel(win), 'ArrowRight');
+  assert.deepStrictEqual(ran, ['tool', 'tool']);
+
+  win.Blockr.menu(t, { items: items() });
+  rowEls(win)[0].click();
+  assert.deepStrictEqual(ran, ['tool', 'tool', 'row'], 'the row itself does the row');
+  win.close();
+});

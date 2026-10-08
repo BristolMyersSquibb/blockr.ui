@@ -1,5 +1,12 @@
 # blockr.ui (development version)
 
+* A `Blockr.menu()` row takes a `tool` ({ icon, label, onSelect }): a
+  second target at the row's end, a right chevron by default. It takes no
+  room at rest; on the row under the pointer and the keyboard row it shows
+  in place of the row's meta text and badge. A click on it, or the right arrow on the keyboard row,
+  closes the menu and runs the tool instead of the row. The dock's "+" menu
+  uses it for a block's options before adding.
+
 * A multi select (`Blockr.Select.multi()`, and `Blockr.Select.menu()` with
   `mode: 'multi'`) reports its picks once, when its list closes by a click
   outside, Tab or the chevron, instead of on every pick. A block that

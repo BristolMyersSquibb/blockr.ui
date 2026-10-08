@@ -940,6 +940,13 @@ Blockr.tooltip = (() => {
    * the trigger, above when there is no room below, 180 to 320px wide. A pick
    * closes it and runs the row's `onSelect`.
    *
+   * A row's `tool` ({ icon?, label?, onSelect }) is a second target at the
+   * row's end, a right chevron unless `icon` names another, shown in place
+   * of the meta text and badge on the row under the pointer and the
+   * keyboard row: a
+   * click on it, or the right arrow on the keyboard row, closes the menu and
+   * runs the tool's `onSelect` instead of the row's.
+   *
    * `config.multi` makes the rows ticks: a pick ticks or unticks its row and
    * the menu stays open, keeping the filter text. Rows start ticked where
    * `checked` is set. When the menu closes by anything but Escape (a click
@@ -1114,6 +1121,24 @@ Blockr.tooltip = (() => {
         badge.textContent = item.badge;
         row.appendChild(badge);
       }
+      // A tool at the row's end does the row's second job (the "+" menu's
+      // options before adding): a pointer target inside the row, as a button
+      // cannot sit in a button, reached from the keyboard with the right
+      // arrow. It shows on the row under the pointer and the keyboard row,
+      // where the row's meta text and badge give way to it, as the "…" of a
+      // block list's row does.
+      if (item.tool) {
+        const tool = document.createElement('span');
+        const icon = item.tool.icon || 'chevron';
+        // The chevron points right here: the tool leads one step further.
+        tool.className = 'blockr-menu__tool' + (icon === 'chevron' ? ' blockr-menu__tool--next' : '');
+        tool.setAttribute('aria-hidden', 'true');
+        tool.innerHTML = iconFor(icon);
+        row.classList.add('blockr-menu__item--tool');
+        if (item.tool.label) Blockr.tooltip.set(tool, item.tool.label);
+        row.appendChild(tool);
+        if (item.tool.label) row.setAttribute('aria-description', item.tool.label + ': right arrow');
+      }
       // The check of the current item or a toggle that is on: at the end of
       // the row (design system, "Menus"), after its meta text and badge.
       if (!multi && (item.current || item.checked)) {
@@ -1155,6 +1180,12 @@ Blockr.tooltip = (() => {
       onPick: (row, e) => {
         e.stopPropagation();
         const r = rows.get(row);
+        const onTool = e.target instanceof Element && e.target.closest('.blockr-menu__tool');
+        if (r && r.item.tool && onTool) {
+          d.close(false);
+          r.item.tool.onSelect();
+          return;
+        }
         if (multi) {
           if (!r) return;
           const on = !ticks.has(row);
@@ -1207,6 +1238,20 @@ Blockr.tooltip = (() => {
       d.setActive(terms.length && left.length ? (byLabel || left[0]) : null);
     };
     if (filterInput) filterInput.addEventListener('input', applyFilter);
+
+    // The right arrow runs the keyboard row's tool; in the filter box only
+    // with the caret at the end of the text, where it would move nowhere.
+    panel.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight') return;
+      const box = e.target instanceof HTMLInputElement ? e.target : null;
+      if (box && box.selectionStart !== box.value.length) return;
+      const row = /** @type {HTMLElement | null} */ (panel.querySelector('.' + ACTIVE));
+      const r = row ? rows.get(row) : null;
+      if (!r || !r.item.tool) return;
+      e.preventDefault();
+      d.close(false);
+      r.item.tool.onSelect();
+    });
 
     return { el: panel, close: () => d.close(false) };
   };
