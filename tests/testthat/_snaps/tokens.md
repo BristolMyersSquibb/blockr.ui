@@ -114,6 +114,7 @@
       --blockr-category-output: #d55e00
       --blockr-category-utility: #cccccc
       --blockr-category-uncategorized: #999999
+      --blockr-logo: #089e76
       --blockr-color-text-primary: #111827
       --blockr-color-text-secondary: #374151
       --blockr-color-text-subtle: #9ca3af
@@ -224,6 +225,7 @@
       --blockr-category-output: #d55e00
       --blockr-category-utility: #cccccc
       --blockr-category-uncategorized: #999999
+      --blockr-logo: #089e76
       --blockr-color-text-primary: #f0f3f7
       --blockr-color-text-secondary: #c2c9d3
       --blockr-color-text-subtle: #6b7686

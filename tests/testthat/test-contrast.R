@@ -27,18 +27,22 @@ test_that("text on the accent tint is text-accent-strong", {
   )
 })
 
-test_that("icons and status borders clear 3:1 on the surface", {
+test_that("icons, status borders and the logo clear 3:1 on the surface", {
 
   # What marks a control or its state (an icon, a status border, the status
   # dot drawn in one) needs 3:1 against the surface (WCAG 1.4.11), which the
   # Chrome check's axe does not cover. The disabled colour is exempt, as it is
-  # for text.
-  marks <- paste0(
-    "--blockr-color-",
-    c(
-      "text-muted", "text-default", "border-accent",
-      "border-danger", "border-warning", "border-success"
-    )
+  # for text. The logo's green is held to it too, because the logo in
+  # blockr.dock's navbar is the board's busy indicator.
+  marks <- c(
+    paste0(
+      "--blockr-color-",
+      c(
+        "text-muted", "text-default", "border-accent",
+        "border-danger", "border-warning", "border-success"
+      )
+    ),
+    "--blockr-logo"
   )
 
   for (scheme in c("light", "dark")) {
