@@ -4,7 +4,8 @@
 #'   `"confirm"` (a committed field, a picked option), `"code"`, `"gear"`,
 #'   `"eye"` (a preview toggle), `"dots"` (a "…" menu's trigger), `"info"`,
 #'   `"warning"`, `"maximize"` or `"restore"` (a dock group's maximise
-#'   button).
+#'   button), or `"open"` (a menu's tool that opens its list somewhere
+#'   fuller).
 #'
 #' @return For `small_icon()`, the icon's `<svg>` element, as
 #'   [htmltools::HTML()].

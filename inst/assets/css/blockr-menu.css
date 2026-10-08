@@ -272,6 +272,29 @@
   white-space: nowrap;
 }
 
+/* A caption with a tool at its end (config.tool): the tool sits in the
+   panel's top right corner and the text before it is cut off. The filter box
+   below pulls up over the 6px under the tool, so it never covers it. */
+.blockr-menu__caption--tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 6px 10px;
+}
+
+.blockr-menu__caption-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 24px, as a row's "…" tool is. */
+.blockr-menu__caption .blockr-menu__tool {
+  width: 24px;
+  height: 24px;
+}
+
 /* The filter box: part of the menu, not a field. 30px, 13px, no focus ring,
    since it holds the focus the whole time the menu is open. It stays on top
    while the rows scroll under it. */

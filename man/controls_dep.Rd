@@ -16,7 +16,8 @@ row's remove button, 14px), \code{"grip"} (a drag handle), \code{"plus"},
 \code{"confirm"} (a committed field, a picked option), \code{"code"}, \code{"gear"},
 \code{"eye"} (a preview toggle), \code{"dots"} (a "…" menu's trigger), \code{"info"},
 \code{"warning"}, \code{"maximize"} or \code{"restore"} (a dock group's maximise
-button).}
+button), or \code{"open"} (a menu's tool that opens its list somewhere
+fuller).}
 }
 \value{
 For \code{controls_dep()}, an \code{\link[htmltools:tagList]{htmltools::tagList()}} of

@@ -1,5 +1,15 @@
 # blockr.ui (development version)
 
+* A `Blockr.menu()` can carry a tool, `config.tool` (`{ icon, label,
+  onSelect }`), at the end of its caption line in the top right corner: an
+  icon button named by its tooltip that opens the menu's list somewhere
+  fuller (#94). Tab moves to it from the filter box, and a click closes the
+  menu and hands `onSelect` what was typed in the filter box. The menu for
+  the dock's block actions uses it to open the block browser in the
+  sidebar, with the new `open` icon, a box with an arrow out of its corner.
+  The spec's "Picking a block" now keeps the browser and its form for a
+  block's and a link's IDs, which cannot be changed after adding.
+
 * The new `Blockr.menu.delegate(selector, config)` opens and closes the
   menu of every trigger that matches `selector`, including triggers added
   to the page later, such as the "…" buttons on the dock's block cards

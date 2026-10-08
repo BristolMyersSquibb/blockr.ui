@@ -739,9 +739,10 @@ Blockr.tooltip = (() => {
  * pointer moves it too; Enter or Space clicks it, so a row does the same
  * whether it is picked by key or by pointer. A row disabled by its author is
  * passed over and does nothing. Opened from the keyboard, a menu starts on
- * its first row. Tab closes it and leaves the focus on the trigger, for the
- * browser to move on from; Escape closes it and hands the focus back, and a
- * click outside closes it. One menu, of either kind, is open at a time.
+ * its first row. Tab stops at the menu's tool where it has one, then closes
+ * it and leaves the focus on the trigger, for the browser to move on from;
+ * Escape closes it and hands the focus back, and a click outside closes it.
+ * One menu, of either kind, is open at a time.
  */
 (() => {
   const ROW = '.blockr-menu__item';
@@ -842,7 +843,15 @@ Blockr.tooltip = (() => {
       if (row && row !== active && usable(row)) setActive(row);
     }, on);
     panel.addEventListener('mouseleave', () => setActive(null), on);
+    const tool = m.tool || null;
     panel.addEventListener('keydown', (e) => {
+      // The tool is a button of its own, so Enter and Space click it. From it,
+      // Shift+Tab goes back to what holds the focus, and Tab leaves the menu.
+      if (tool && e.target === tool) {
+        if (e.key === 'Tab' && e.shiftKey) { e.preventDefault(); focus.focus(); }
+        else if (e.key === 'Tab') close(true);
+        return;
+      }
       // Home, End and Space belong to the filter box while it has the focus.
       const box = e.target instanceof HTMLInputElement ? e.target : null;
       if (e.key === 'ArrowDown') { e.preventDefault(); step(1); }
@@ -858,9 +867,14 @@ Blockr.tooltip = (() => {
         const row = active || (box && box.value ? pickable()[0] : null);
         if (row) row.click();
       }
-      // Back on the trigger first, so the browser's Tab moves on from there;
-      // from the removed panel it would start over at the top of the page.
-      else if (e.key === 'Tab') close(true);
+      // Tab stops at the menu's tool, where it has one. Otherwise the focus
+      // goes back on the trigger first, so the browser's Tab moves on from
+      // there; from the removed panel it would start over at the top of the
+      // page.
+      else if (e.key === 'Tab') {
+        if (tool && !e.shiftKey) { e.preventDefault(); tool.focus(); }
+        else close(true);
+      }
     }, on);
     panel.addEventListener('focusout', (e) => {
       const to = e.relatedTarget;
@@ -929,6 +943,13 @@ Blockr.tooltip = (() => {
    * placeholder) adds a filter box that narrows the rows as you type and
    * holds the focus; `config.minWidth` widens the panel.
    *
+   * A `config.tool` ({ icon, label, onSelect }) puts a tool at the end of the
+   * caption line, in the menu's top right corner: an icon button, named by
+   * `label` in its tooltip, that opens the menu's list somewhere fuller, as
+   * the block actions' menu opens the dock's block browser in the sidebar.
+   * Tab moves to it from the filter box. A click closes the menu and hands
+   * `onSelect` the filter box's text.
+   *
    * `config.head` ({ title, badge?, text? }) puts a block of text above the
    * rows, as a link's menu in the outline names the link. `align` is 'start'
    * (default) or 'end', for a trigger in a header row. `onClose` runs once
@@ -975,7 +996,23 @@ Blockr.tooltip = (() => {
       panel.appendChild(head);
     }
 
-    if (config.caption) {
+    /** @type {HTMLButtonElement | null} */
+    let tool = null;
+    if (config.tool) {
+      const cap = document.createElement('div');
+      cap.className = 'blockr-menu__caption blockr-menu__caption--tool';
+      const text = document.createElement('span');
+      text.className = 'blockr-menu__caption-text';
+      text.textContent = config.caption || '';
+      tool = document.createElement('button');
+      tool.type = 'button';
+      tool.className = 'blockr-tool blockr-menu__tool';
+      tool.setAttribute('aria-label', config.tool.label);
+      tool.innerHTML = iconFor(config.tool.icon);
+      Blockr.tooltip.set(tool, config.tool.label);
+      cap.append(text, tool);
+      panel.appendChild(cap);
+    } else if (config.caption) {
       const cap = document.createElement('div');
       cap.className = 'blockr-menu__caption';
       cap.textContent = config.caption;
@@ -1116,6 +1153,7 @@ Blockr.tooltip = (() => {
       panel,
       list,
       focus: filterInput || list,
+      tool,
       anchor,
       width: { min: config.minWidth || 180, max: Math.max(config.minWidth || 180, 320) },
       align: config.align || 'start',
@@ -1161,6 +1199,18 @@ Blockr.tooltip = (() => {
       d.setActive(terms.length && left.length ? (byLabel || left[0]) : null);
     };
     if (filterInput) filterInput.addEventListener('input', applyFilter);
+
+    // The tool closes the menu as a pick does, then hands on what was typed,
+    // so the fuller view can open on the same rows.
+    if (tool && config.tool) {
+      const { onSelect } = config.tool;
+      tool.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const query = filterInput ? filterInput.value : '';
+        d.close(true);
+        onSelect(query);
+      });
+    }
 
     return { el: panel, close: () => d.close(false) };
   };

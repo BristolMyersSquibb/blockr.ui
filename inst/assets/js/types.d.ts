@@ -334,6 +334,12 @@ interface BlockrMenuConfig {
   filter?: boolean | string;
   /** The panel's least width in px (default 180). */
   minWidth?: number;
+  /**
+   * A tool at the end of the caption line: an icon button, named by `label`,
+   * that opens the menu's list somewhere fuller. A click closes the menu and
+   * hands `onSelect` the filter box's text.
+   */
+  tool?: { icon: string; label: string; onSelect: (query: string) => void };
   onClose?: () => void;
 }
 
@@ -359,6 +365,8 @@ interface BlockrMenuDrive {
   list: HTMLElement;
   /** Takes the focus: the filter box, else the list. */
   focus?: HTMLElement;
+  /** The menu's tool, the one stop for Tab inside the panel. */
+  tool?: HTMLElement | null;
   /** The trigger. */
   anchor: HTMLElement;
   width: { min: number; max: number };
