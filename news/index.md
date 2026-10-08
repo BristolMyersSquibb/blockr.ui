@@ -2,6 +2,13 @@
 
 ## blockr.ui (development version)
 
+- The new token `--blockr-logo` is the blockr logo’s green, `#089e76`,
+  which the design spec now names as the third colour allowed outside
+  the palette
+  ([\#95](https://github.com/BristolMyersSquibb/blockr.ui/issues/95)).
+  Like the block category colours, it is the same under every theme and
+  in the dark scheme, and it clears 3:1 on the surface in both.
+
 - The new `Blockr.menu.delegate(selector, config)` opens and closes the
   menu of every trigger that matches `selector`, including triggers
   added to the page later, such as the “…” buttons on the dock’s block

@@ -89,8 +89,8 @@ here has an anchor of the same name there. Token values come from
 (<code>--blockr-grey-500</code>, <code>--blockr-blue-600</code>) are
 read by other tokens and never by a component.</li>
 <li>No UI colour outside the palette, and no grey that is not a ramp
-step. Data colours and block category colours are the two exceptions,
-each with its own source (see <a href="#foundations">Foundations</a>).</li>
+step. Data colours, block category colours and the logo’s green are the
+three exceptions, each with its own source (see <a href="#foundations">Foundations</a>).</li>
 <li>Tints are computed from meaning tokens with
 <code>color-mix()</code>, never from a palette token and never written
 as rgba literals, so they follow a theme and the dark scheme. The ones
@@ -190,6 +190,12 @@ system page</a>.</p>
 colours</a>)</td>
 </tr>
 <tr class="even">
+<td></td>
+<td><code>--blockr-logo</code></td>
+<td><code>--blockr-logo</code></td>
+<td>the blockr logo (<a href="#foundations">Logo</a>)</td>
+</tr>
+<tr class="odd">
 <td>Local</td>
 <td><code>--blockr-&lt;owner&gt;-&lt;thing&gt;</code></td>
 <td><code>--blockr-dock-spinner-delay</code></td>
@@ -200,11 +206,11 @@ colours</a>)</td>
 <p>A global token’s second word is one of <code>color</code>,
 <code>font</code>, <code>radius</code>, <code>control</code>,
 <code>shadow</code>, <code>focus</code>, <code>transition</code>,
-<code>mark</code>, <code>z</code>, <code>category</code>, or a palette
-hue. Anything else is local. For colour, <code>&lt;property&gt;</code>
-is <code>text</code>, <code>bg</code> or <code>border</code> and comes
-first, because a colour chosen for text is not automatically right as a
-fill.</p>
+<code>mark</code>, <code>z</code>, <code>category</code>,
+<code>logo</code>, or a palette hue. Anything else is local. For colour,
+<code>&lt;property&gt;</code> is <code>text</code>, <code>bg</code> or
+<code>border</code> and comes first, because a colour chosen for text is
+not automatically right as a fill.</p>
 </div>
 <div class="section level3">
 <h3 id="palette">Palette<a class="anchor" aria-label="anchor" href="#palette"></a>
@@ -975,6 +981,15 @@ default. Where the mark is an image, which cannot read the tokens,
 </tr>
 </tbody>
 </table>
+</div>
+<div class="section level3">
+<h3 id="logo">Logo<a class="anchor" aria-label="anchor" href="#logo"></a>
+</h3>
+<p>One token, <code>--blockr-logo</code>, <code>#089e76</code>, read by
+the logo at the left of the navbar (<a href="#actions">The navbar</a>).
+Like the block category colours, it is outside the palette and identical
+under every theme and in dark mode. It clears 3:1 on the surface, as an
+icon must: 3.4:1 in light and 5.1:1 in dark.</p>
 <p>Drawn in the <a href="design-system/index.html#foundations">design
 system page</a>.</p>
 <hr>
@@ -3025,11 +3040,11 @@ page</a>.</p>
 </h3>
 <p>Package blockr.ui owns the tokens
 (<code>inst/assets/css/blockr-tokens.css</code>,
-<code>blockr-tokens-dark.css</code>), the block category colours among
-them, and the shared components: the params grid (moving from
-blockr.extra), <code>Blockr.Select</code> and its placement routine,
-<code>Blockr.checkbox</code>, the badge, tag and pill styles, the slot
-and offer rules (today declared twice, in blockr.viz
+<code>blockr-tokens-dark.css</code>), the block category colours and the
+logo’s green among them, and the shared components: the params grid
+(moving from blockr.extra), <code>Blockr.Select</code> and its placement
+routine, <code>Blockr.checkbox</code>, the badge, tag and pill styles,
+the slot and offer rules (today declared twice, in blockr.viz
 <code>chart.css</code> and blockr.dm
 <code>crossfilter-block.css</code>), the gear button, the tool button
 and the action menu (<code><a href="../reference/tool_button.html">tool_button()</a></code>,
@@ -3045,11 +3060,12 @@ the rule that hides the gear in simplified mode. Package blockr.theme
 owns data colours.</p>
 <p>The token tests in blockr.ui check that the vocabulary changes only
 deliberately, that every name follows the grammar or is a legacy alias,
-that the controls read meaning tokens only, that icons and status
-borders clear 3:1 on the surface in both schemes, and that consumers’
-fallbacks agree with the tokens. Palette and legacy reads elsewhere in
-blockr.ui change only deliberately too. To do: warn on every palette or
-legacy read in the packages that consume the tokens.</p>
+that the controls read meaning tokens only, that icons, status borders
+and the logo clear 3:1 on the surface in both schemes, and that
+consumers’ fallbacks agree with the tokens. Palette and legacy reads
+elsewhere in blockr.ui change only deliberately too. To do: warn on
+every palette or legacy read in the packages that consume the
+tokens.</p>
 </div>
 <div class="section level3">
 <h3 id="legacy-token-aliases">Legacy token aliases<a class="anchor" aria-label="anchor" href="#legacy-token-aliases"></a>

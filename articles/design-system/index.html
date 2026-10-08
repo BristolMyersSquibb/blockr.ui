@@ -501,7 +501,7 @@ details.legacy summary { cursor: pointer; font-weight: 600; }
 .z-nav { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; background: var(--blockr-color-bg-surface); border: 1px solid var(--blockr-color-border-default); border-radius: 10px; font-size: 14px; }
 .z-nav > * { flex-shrink: 0; white-space: nowrap; }
 .z-nav .z-sp { flex: 1 1 auto; }
-.z-nav .z-logo { color: var(--blockr-color-text-muted); display: inline-flex; }
+.z-nav .z-logo { color: var(--blockr-logo); display: inline-flex; }
 .z-nav .z-nm { font-weight: 600; }
 .z-nav .z-meta { font-size: 12px; color: var(--blockr-color-text-muted); }
 .z-ib { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; border-radius: 4px; color: var(--blockr-color-text-muted); cursor: pointer; }
@@ -1064,6 +1064,11 @@ Chart and series colours come from blockr.theme; this page draws them in the acc
 <p class="note">One Okabe-Ito token per category, read by the block's mark. A fixed set, the same under every theme and in
 dark. A category outside it takes <code>uncategorized</code>.</p>
 <div class="card"><div data-tokens="block categories"></div></div>
+
+<h3 class="sh" id="logo">Logo</h3>
+<p class="note">One token, read by the logo in the navbar. Like the category colours, it is the same under every theme and in
+dark. It clears 3:1 on the surface in both schemes.</p>
+<div class="card"><div data-tokens="logo"></div></div>
 </section>
 
 <!-- ================================================================ 3 BLOCK -->
@@ -1768,7 +1773,7 @@ the active line <code>bg-hover</code>, the input line a band mixed from the acce
   <div class="card">
     <h4 class="mini" style="margin-top:0">Where the code lives</h4>
     <ul class="rules" style="margin:0">
-      <li>Package blockr.ui owns the tokens, the block category colours among them: <code>inst/assets/css/blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>.</li>
+      <li>Package blockr.ui owns the tokens, the block category colours and the logo's green among them: <code>inst/assets/css/blockr-tokens.css</code> and <code>blockr-tokens-dark.css</code>.</li>
       <li>Package blockr.ui owns the shared components: badge, tag, pill and count classes, the button classes, the gear button, the block's mark, Blockr.Select and the one menu placement routine, and the gear tray for blocks rendered in R (<code>gear_tray()</code>).</li>
       <li>Package blockr.dock owns the dock header.</li>
       <li>Package blockr.theme owns data colours (chart palettes, map markers).</li>

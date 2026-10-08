@@ -16,8 +16,9 @@ blockr.ui.
   (`--blockr-grey-500`, `--blockr-blue-600`) are read by other tokens
   and never by a component.
 - No UI colour outside the palette, and no grey that is not a ramp step.
-  Data colours and block category colours are the two exceptions, each
-  with its own source (see [Foundations](#foundations)).
+  Data colours, block category colours and the logo’s green are the
+  three exceptions, each with its own source (see
+  [Foundations](#foundations)).
 - Tints are computed from meaning tokens with `color-mix()`, never from
   a palette token and never written as rgba literals, so they follow a
   theme and the dark scheme. The ones used in many places are tokens
@@ -56,13 +57,14 @@ The second word of a token’s name says what kind it is.
 |  | `--blockr-focus-<aspect>`, `--blockr-transition`, `--blockr-mark-<aspect>` | `--blockr-focus-outline` |  |
 |  | `--blockr-z-<layer>` | `--blockr-z-menu` | anything positioned against the page ([Stacking](#floating)) |
 |  | `--blockr-category-<category>` | `--blockr-category-plot` | the block’s mark ([Block category colours](#foundations)) |
+|  | `--blockr-logo` | `--blockr-logo` | the blockr logo ([Logo](#foundations)) |
 | Local | `--blockr-<owner>-<thing>` | `--blockr-dock-spinner-delay` | its owner’s stylesheet only |
 
 A global token’s second word is one of `color`, `font`, `radius`,
-`control`, `shadow`, `focus`, `transition`, `mark`, `z`, `category`, or
-a palette hue. Anything else is local. For colour, `<property>` is
-`text`, `bg` or `border` and comes first, because a colour chosen for
-text is not automatically right as a fill.
+`control`, `shadow`, `focus`, `transition`, `mark`, `z`, `category`,
+`logo`, or a palette hue. Anything else is local. For colour,
+`<property>` is `text`, `bg` or `border` and comes first, because a
+colour chosen for text is not automatically right as a fill.
 
 ### Palette
 
@@ -326,6 +328,14 @@ gives the same values.
 | output        | `#d55e00` |
 | utility       | `#cccccc` |
 | uncategorized | `#999999` |
+
+### Logo
+
+One token, `--blockr-logo`, `#089e76`, read by the logo at the left of
+the navbar ([The navbar](#actions)). Like the block category colours, it
+is outside the palette and identical under every theme and in dark mode.
+It clears 3:1 on the surface, as an icon must: 3.4:1 in light and 5.1:1
+in dark.
 
 Drawn in the [design system
 page](https://bristolmyerssquibb.github.io/blockr.ui/articles/design-system/index.html#foundations).
@@ -1697,12 +1707,13 @@ page](https://bristolmyerssquibb.github.io/blockr.ui/articles/design-system/inde
 ### Where the code lives
 
 Package blockr.ui owns the tokens (`inst/assets/css/blockr-tokens.css`,
-`blockr-tokens-dark.css`), the block category colours among them, and
-the shared components: the params grid (moving from blockr.extra),
-`Blockr.Select` and its placement routine, `Blockr.checkbox`, the badge,
-tag and pill styles, the slot and offer rules (today declared twice, in
-blockr.viz `chart.css` and blockr.dm `crossfilter-block.css`), the gear
-button, the tool button and the action menu
+`blockr-tokens-dark.css`), the block category colours and the logo’s
+green among them, and the shared components: the params grid (moving
+from blockr.extra), `Blockr.Select` and its placement routine,
+`Blockr.checkbox`, the badge, tag and pill styles, the slot and offer
+rules (today declared twice, in blockr.viz `chart.css` and blockr.dm
+`crossfilter-block.css`), the gear button, the tool button and the
+action menu
 ([`tool_button()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/tool_button.md),
 [`action_menu()`](https://bristolmyerssquibb.github.io/blockr.ui/reference/action_menu.md)),
 the button classes (`.blockr-btn`), the gear tray for blocks rendered in
@@ -1720,11 +1731,11 @@ simplified mode. Package blockr.theme owns data colours.
 
 The token tests in blockr.ui check that the vocabulary changes only
 deliberately, that every name follows the grammar or is a legacy alias,
-that the controls read meaning tokens only, that icons and status
-borders clear 3:1 on the surface in both schemes, and that consumers’
-fallbacks agree with the tokens. Palette and legacy reads elsewhere in
-blockr.ui change only deliberately too. To do: warn on every palette or
-legacy read in the packages that consume the tokens.
+that the controls read meaning tokens only, that icons, status borders
+and the logo clear 3:1 on the surface in both schemes, and that
+consumers’ fallbacks agree with the tokens. Palette and legacy reads
+elsewhere in blockr.ui change only deliberately too. To do: warn on
+every palette or legacy read in the packages that consume the tokens.
 
 ### Legacy token aliases
 
