@@ -57,7 +57,8 @@ spec <- list(
   schema = schema,
   state = coerce_state(list(columns = list("a")), schema),
   expr = function(s) length(s$columns),
-  requests = list(echo = function(x) toupper(x))
+  requests = list(echo = list(fn = function(x) toupper(x), data = FALSE)),
+  options = stats::setNames(list(), character())
 )
 
 test_that("the server answers ready, submit and request", {
@@ -104,6 +105,70 @@ test_that("the server answers ready, submit and request", {
       expect_true(sent[[3]]$result$hasEmpty)
       expect_identical(sent[[4]]$result, "HI")
       expect_match(sent[[5]]$error, "unknown request")
+    }
+  )
+})
+
+test_that("coerce_state applies additionalProperties to keyed objects", {
+  s <- list(type = "object", properties = list(
+    filters = list(
+      type = "object",
+      additionalProperties = list(
+        type = "object",
+        additionalProperties = list(type = "array", items = list(type = "string"))
+      ),
+      default = stats::setNames(list(), character())
+    )
+  ))
+  out <- coerce_state(list(filters = list(adsl = list(SEX = "F"))), s)
+  expect_identical(out$filters$adsl$SEX, list("F"))
+  # an empty object is the same value whether R or the client made it
+  expect_identical(coerce_state(list(filters = list()), s)$filters,
+                   coerce_state(list(), s)$filters)
+  expect_match(as.character(jsonlite::toJSON(coerce_state(list(), s))),
+               '{"filters":{}}', fixed = TRUE)
+})
+
+test_that("a data request gets the inputs and its answer is kept", {
+  calls <- 0L
+  spec2 <- spec
+  spec2$requests <- list(payload = list(
+    fn = function(data, k) {
+      calls <<- calls + 1L
+      paste(nrow(data), k)
+    },
+    data = TRUE
+  ))
+  spec2$options <- list(unit = "patients")
+  spec2$expr <- function(s, data) nrow(data$data)
+  sent <- list()
+  record <- function(msg) sent[[length(sent) + 1L]] <<- msg
+  dat <- shiny::reactiveVal(data.frame(a = 1:3))
+  shiny::testServer(
+    js_block_server,
+    args = list(inputs = list(data = dat), spec = spec2, send = record),
+    {
+      session$setInputs(block = list(messages = list(list(type = "ready"))))
+      expect_identical(sent[[1]]$context$options$unit, "patients")
+      expect_identical(sent[[1]]$context$inputs$data$rev, 1L)
+      expect_identical(session$returned$expr(), 3L)
+
+      ask <- function(seq) {
+        session$setInputs(block = list(messages = list(
+          list(type = "request", seq = seq, name = "payload",
+               args = list(k = "x"))
+        )))
+        sent[[length(sent)]]
+      }
+      expect_identical(ask(1)$result, "3 x")
+      expect_identical(ask(2)$result, "3 x")
+      expect_identical(calls, 1L)
+
+      dat(data.frame(a = 1:5))
+      session$flushReact()
+      expect_identical(sent[[length(sent)]]$context$inputs$data$rev, 2L)
+      expect_identical(ask(3)$result, "5 x")
+      expect_identical(calls, 2L)
     }
   )
 })

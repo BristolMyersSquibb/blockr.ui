@@ -566,9 +566,21 @@ interface BlockrColumn {
   label: string;
 }
 
-/** What a block knows of its inputs. An input is null while it has no data. */
+/**
+ * What a block knows of an input: its columns, or for a dm its tables and
+ * their columns. `rev` changes when the input's data does: a block that asked
+ * for something computed from the data asks again.
+ */
+interface BlockrInputInfo {
+  columns?: BlockrColumn[];
+  tables?: Record<string, { columns: BlockrColumn[] }>;
+  rev: number | string;
+}
+
+/** What a block knows of its inputs (null while one has no data) and its options. */
 interface BlockrContext {
-  inputs: Record<string, { columns: BlockrColumn[] } | null>;
+  inputs: Record<string, BlockrInputInfo | null>;
+  options: Record<string, unknown>;
 }
 
 /** The answer to the host request `column_values`. */

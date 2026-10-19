@@ -12,6 +12,7 @@ new_js_block(
   expr,
   class,
   pkg = environmentName(topenv(parent.frame())),
+  options = list(),
   new = blockr.core::new_transform_block,
   expr_type = "bquoted",
   external_ctrl = TRUE,
@@ -31,11 +32,18 @@ js_block_manifest(name, pkg)
 \item{state}{Named list, the constructor's arguments. Its names must be the
 constructor's formals (other than \code{...}), for save and restore.}
 
-\item{expr}{Function of the state list returning a \code{bquoted} expression.}
+\item{expr}{Function of the state list returning a \code{bquoted} expression.
+A function of two arguments also gets the block's input data, as a list
+by input name, for an expression that depends on it (column types, the
+tables of a dm).}
 
 \item{class}{Block class.}
 
 \item{pkg}{Package holding the block's folder.}
+
+\item{options}{Named list of settings the UI reads, sent in the context as
+\code{options}. They override the manifest's \code{options}. Unlike the state they
+are not saved: they come from the constructor or the session.}
 
 \item{new}{Block constructor of blockr.core, e.g.
 \code{\link[blockr.core:new_transform_block]{blockr.core::new_transform_block()}}.}

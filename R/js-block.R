@@ -32,8 +32,14 @@
 #' @param state Named list, the constructor's arguments. Its names must be the
 #'   constructor's formals (other than `...`), for save and restore.
 #' @param expr Function of the state list returning a `bquoted` expression.
+#'   A function of two arguments also gets the block's input data, as a list
+#'   by input name, for an expression that depends on it (column types, the
+#'   tables of a dm).
 #' @param class Block class.
 #' @param pkg Package holding the block's folder.
+#' @param options Named list of settings the UI reads, sent in the context as
+#'   `options`. They override the manifest's `options`. Unlike the state they
+#'   are not saved: they come from the constructor or the session.
 #' @param new Block constructor of blockr.core, e.g.
 #'   [blockr.core::new_transform_block()].
 #' @param expr_type,external_ctrl,allow_empty_state Passed to `new`.
@@ -45,6 +51,7 @@
 #' @export
 new_js_block <- function(name, state, expr, class,
                          pkg = environmentName(topenv(parent.frame())),
+                         options = list(),
                          new = blockr.core::new_transform_block,
                          expr_type = "bquoted", external_ctrl = TRUE,
                          allow_empty_state = TRUE,
@@ -59,7 +66,10 @@ new_js_block <- function(name, state, expr, class,
     schema = manifest$state,
     state = state,
     expr = expr,
-    requests = js_block_requests(manifest)
+    requests = js_block_requests(manifest),
+    options = as_object(utils::modifyList(
+      as.list(manifest$options %||% list()), as.list(options)
+    ))
   )
 
   # blockr.core reads the initial state from the server's enclosing
@@ -109,15 +119,35 @@ js_block_server <- function(id, inputs, spec, send = NULL) {
       lapply(stats::setNames(nm = fields), function(f) r_fields[[f]]())
     )
 
+    # `rev` counts the distinct values an input has had, so a block that
+    # asked for something computed from the data knows when to ask again.
+    revs <- new.env(parent = emptyenv())
+    rev_of <- function(slot, x) {
+      last <- revs[[slot]]
+      if (is.null(last) || !identical(last$value, x)) {
+        revs[[slot]] <- list(value = x, n = (last$n %||% 0L) + 1L)
+      }
+      revs[[slot]]$n
+    }
+
     context <- shiny::reactive(
       list(
-        inputs = lapply(inputs, function(dat) {
+        inputs = lapply(stats::setNames(nm = names(inputs)), function(slot) {
           # an input throws while its upstream is unset or failing
-          tryCatch(list(columns = js_block_columns(dat())),
-                   error = function(e) NULL)
-        })
+          tryCatch(
+            {
+              x <- inputs[[slot]]()
+              c(js_block_input_info(x), list(rev = rev_of(slot, x)))
+            },
+            error = function(e) NULL
+          )
+        }),
+        options = spec$options
       )
     )
+
+    # the last answer to each request, by its arguments and its input data
+    answers <- new.env(parent = emptyenv())
 
     # `ready`: the client has bound and can take messages. `client`: the
     # state it last submitted, which is not sent back to it. `sent`: what it
@@ -158,7 +188,7 @@ js_block_server <- function(id, inputs, spec, send = NULL) {
           for (f in fields) r_fields[[f]](state[[f]])
         },
         request = send(
-          c(list(seq = msg$seq), js_block_answer(msg, spec, inputs))
+          c(list(seq = msg$seq), js_block_answer(msg, spec, inputs, answers))
         )
       )
     }
@@ -178,17 +208,27 @@ js_block_server <- function(id, inputs, spec, send = NULL) {
       if (sync$ready) send_update(context = context())
     })
 
+    with_data <- length(formals(spec$expr)) >= 2L
+
     list(
-      expr = shiny::reactive(spec$expr(r_state())),
+      expr = shiny::reactive(
+        if (with_data) {
+          spec$expr(r_state(), lapply(inputs, function(dat) dat()))
+        } else {
+          spec$expr(r_state())
+        }
+      ),
       state = r_fields
     )
   })
 }
 
-js_block_answer <- function(msg, spec, inputs) {
+js_block_answer <- function(msg, spec, inputs,
+                            answers = new.env(parent = emptyenv())) {
   tryCatch(
     {
       args <- msg$args %||% list()
+      req <- spec$requests[[msg$name %||% ""]]
       result <- if (identical(msg$name, "column_values")) {
         dat <- inputs[[args$input %||% "data"]]
         if (is.null(dat)) stop("no input ", args$input)
@@ -197,10 +237,23 @@ js_block_answer <- function(msg, spec, inputs) {
           limit = blockr.core::blockr_option("max_column_values", 1000),
           query = args$query %||% ""
         )
+      } else if (is.null(req)) {
+        stop("unknown request \"", msg$name, "\"")
       } else {
-        fn <- spec$requests[[msg$name]]
-        if (is.null(fn)) stop("unknown request \"", msg$name, "\"")
-        do.call(fn, args)
+        # A request marked `data` gets the block's inputs as arguments by
+        # their names, before its own. Its answer is kept: a block re-mounted
+        # with the same data asks again and gets it without the work.
+        if (isTRUE(req$data)) {
+          args <- c(lapply(inputs, function(dat) dat()), args)
+        }
+        last <- answers[[msg$name]]
+        if (!is.null(last) && identical(last$args, args)) {
+          last$result
+        } else {
+          out <- do.call(req$fn, args)
+          answers[[msg$name]] <- list(args = args, result = out)
+          out
+        }
       }
       list(result = result)
     },
@@ -283,13 +336,14 @@ js_block_inputs <- function(manifest) {
   if (is.null(inputs)) "data" else inputs
 }
 
-# The manifest names each request's R function as "pkg::fun".
+# The manifest names each request's R function as "pkg::fun", and whether
+# it gets the block's input data (`"data": true`).
 js_block_requests <- function(manifest) {
   reqs <- manifest$requests %||% list()
   stats::setNames(
     lapply(reqs, function(r) {
       fn <- strsplit(r$r, "::", fixed = TRUE)[[1L]]
-      getExportedValue(fn[1L], fn[2L])
+      list(fn = getExportedValue(fn[1L], fn[2L]), data = isTRUE(r$data))
     }),
     vapply(reqs, `[[`, character(1L), "name")
   )
@@ -366,14 +420,27 @@ coerce_array <- function(x, items) {
   Filter(Negate(is.null), lapply(x, coerce_scalar, type = items$type))
 }
 
+# `additionalProperties` is the schema of every field `properties` does not
+# name, for an object keyed by data (tables, columns). An empty object is a
+# named empty list in R, so it goes to the client as {} and compares equal to
+# what the client sends back.
 coerce_object <- function(x, s) {
   if (!is.list(x) || (length(x) && is.null(names(x)))) {
     return(NULL)
   }
-  for (p in intersect(names(s$properties), names(x))) {
-    if (!is.null(x[[p]])) x[[p]] <- coerce_value(x[[p]], s$properties[[p]])
+  extra <- s$additionalProperties
+  for (p in names(x)) {
+    sp <- s$properties[[p]] %||% if (is.list(extra)) extra
+    if (!is.null(sp) && !is.null(x[[p]])) x[[p]] <- coerce_value(x[[p]], sp)
   }
-  x
+  if (is.list(extra)) {
+    x <- x[!vapply(x, is.null, logical(1L))]
+  }
+  as_object(x)
+}
+
+as_object <- function(x) {
+  if (!length(x)) stats::setNames(list(), character()) else x
 }
 
 coerce_scalar <- function(x, type) {
@@ -398,12 +465,12 @@ coerce_scalar <- function(x, type) {
 
 schema_default <- function(s) {
   if (!is.null(s$default)) {
-    return(s$default)
+    return(if (identical(s$type, "object")) as_object(s$default) else s$default)
   }
   switch(
     s$type %||% "",
     array = list(),
-    object = stats::setNames(list(), character()),
+    object = as_object(list()),
     string = "",
     boolean = FALSE,
     NULL
@@ -411,6 +478,17 @@ schema_default <- function(s) {
 }
 
 # ---- the host's view of the data ------------------------------------------
+
+# What the context says about an input: its columns, or for a dm its tables
+# and their columns.
+js_block_input_info <- function(x) {
+  if (inherits(x, "dm") && requireNamespace("dm", quietly = TRUE)) {
+    return(list(tables = lapply(dm::dm_get_tables(x), function(t) {
+      list(columns = js_block_columns(t))
+    })))
+  }
+  list(columns = js_block_columns(x))
+}
 
 # Columns of an input for the context: name, type and label.
 js_block_columns <- function(df) {
