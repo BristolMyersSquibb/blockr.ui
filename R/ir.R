@@ -140,9 +140,13 @@ ir_expr_to_r <- function(e) {
   as.call(c(fn, args, named))
 }
 
+# JSON has one number type: a whole number read back from JSON is integer in
+# R, so numbers are doubles here, as blockx has them.
+ir_num <- function(x) if (is.integer(x)) as.numeric(x) else x
+
 ir_lit <- function(x) {
   x <- unlist(x)
-  if (is.null(x) || !length(x)) NA else x[[1L]]
+  if (is.null(x) || !length(x)) NA else ir_num(x[[1L]])
 }
 
 # A list of literals as one atomic vector: strings stay strings ("007" is not
@@ -150,7 +154,7 @@ ir_lit <- function(x) {
 ir_lits <- function(x) {
   vals <- lapply(as.list(x), function(v) if (is.null(v)) NA else v)
   if (!length(vals)) return(character())
-  unlist(vals)
+  ir_num(unlist(vals))
 }
 
 # The canonical R form of an IR expression, as it goes to the client: every
