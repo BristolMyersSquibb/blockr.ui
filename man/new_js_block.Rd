@@ -90,6 +90,7 @@ block whose script has not loaded.
 
 The state is kept as one \code{reactiveVal} per field, which blockr.core
 serializes and external controllers write to. Every value that enters, from
-the constructor or the client, is coerced to the manifest's schema, so an
-array is always an unnamed list and goes to the client as a JSON array.
+the constructor or the client, is coerced to the manifest's schema
+(\code{\link[=coerce_state]{coerce_state()}}), and what goes to the client keeps its arrays arrays
+(\code{\link[=state_to_client]{state_to_client()}}).
 }

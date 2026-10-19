@@ -25,8 +25,9 @@
 #'
 #' The state is kept as one `reactiveVal` per field, which blockr.core
 #' serializes and external controllers write to. Every value that enters, from
-#' the constructor or the client, is coerced to the manifest's schema, so an
-#' array is always an unnamed list and goes to the client as a JSON array.
+#' the constructor or the client, is coerced to the manifest's schema
+#' ([coerce_state()]), and what goes to the client keeps its arrays arrays
+#' ([state_to_client()]).
 #'
 #' @param name Block name, the folder under `inst/blocks`.
 #' @param state Named list, the constructor's arguments. Its names must be the
@@ -165,7 +166,8 @@ js_block_server <- function(id, inputs, spec, send = NULL) {
     send_update <- function(state = NULL, context = NULL) {
       msg <- list()
       if (!is.null(state) && !identical(state, sync$state)) {
-        sync$state <- msg$state <- state
+        sync$state <- state
+        msg$state <- to_client(state, spec$schema)
       }
       if (!is.null(context) && !identical(context, sync$context)) {
         sync$context <- msg$context <- context
@@ -357,9 +359,13 @@ js_block_requests <- function(manifest) {
 #' Coerce a block state to its schema
 #'
 #' The schema is a JSON Schema subset: `type` (`object`, `array`, `string`,
-#' `boolean`, `number`, `integer`), `properties`, `items`, `enum` and
-#' `default`. The canonical R form of a JSON array is an unnamed list, so
-#' it is sent back as an array whatever its length.
+#' `boolean`, `number`, `integer`), `properties`, `additionalProperties`,
+#' `items`, `enum` and `default`.
+#'
+#' An array of plain values (`items` of type `string`, `number`, `integer` or
+#' `boolean`) is an atomic vector in R, as R code writes it;
+#' `state_to_client()` turns arrays back into lists for the client, so a
+#' length-1 array stays an array on the wire. Other arrays are unnamed lists.
 #'
 #' The top level gets every property, a missing one its default. A nested
 #' object keeps the fields it has, each coerced if the schema names it. A
@@ -420,7 +426,43 @@ coerce_array <- function(x, items) {
   if (is.null(items$type)) {
     return(x)
   }
-  Filter(Negate(is.null), lapply(x, coerce_scalar, type = items$type))
+  # an array of plain values is an atomic vector in R, as R code writes it
+  # (c("a", "b")); state_to_client() makes it an array again
+  vals <- Filter(Negate(is.null), lapply(x, coerce_scalar, type = items$type))
+  empty <- switch(items$type, string = character(), number = numeric(),
+                  integer = integer(), boolean = logical(), list())
+  if (!length(vals)) empty else unlist(vals, use.names = FALSE)
+}
+
+#' @rdname coerce_state
+#' @return For `state_to_client()`, the state with every array a list, so it
+#'   reaches the client as a JSON array whatever its length.
+#' @export
+state_to_client <- function(x, schema) {
+  to_client(x, schema)
+}
+
+to_client <- function(x, s) {
+  if (is.null(x) || is.null(s$type)) {
+    return(x)
+  }
+  switch(
+    s$type,
+    array = {
+      items <- s$items %||% list()
+      lapply(unname(as.list(x)), to_client, s = items)
+    },
+    object = {
+      if (!is.list(x)) return(x)
+      extra <- s$additionalProperties
+      for (p in names(x)) {
+        sp <- s$properties[[p]] %||% if (is.list(extra)) extra
+        if (!is.null(sp) && !is.null(x[[p]])) x[[p]] <- to_client(x[[p]], sp)
+      }
+      as_object(x)
+    },
+    x
+  )
 }
 
 # `additionalProperties` is the schema of every field `properties` does not
@@ -468,7 +510,12 @@ coerce_scalar <- function(x, type) {
 
 schema_default <- function(s) {
   if (!is.null(s$default)) {
-    return(if (identical(s$type, "object")) as_object(s$default) else s$default)
+    return(switch(
+      s$type %||% "",
+      object = as_object(s$default),
+      array = coerce_array(s$default, s$items %||% list()),
+      s$default
+    ))
   }
   switch(
     s$type %||% "",

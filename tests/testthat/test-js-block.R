@@ -21,16 +21,17 @@ schema <- list(
 test_that("coerce_state fills defaults and keeps arrays as lists", {
   expect_identical(
     coerce_state(list(), schema),
-    list(columns = list(), exclude = FALSE, operator = "&",
+    list(columns = character(), exclude = FALSE, operator = "&",
          conditions = list())
   )
   s <- coerce_state(list(columns = "a", exclude = "TRUE", operator = "^"),
                     schema)
-  expect_identical(s$columns, list("a"))
+  expect_identical(s$columns, "a")
+  expect_identical(state_to_client(s, schema)$columns, list("a"))
   expect_true(s$exclude)
   expect_identical(s$operator, "&")
-  expect_identical(coerce_state(list(columns = c("a", "b")), schema)$columns,
-                   list("a", "b"))
+  expect_identical(coerce_state(list(columns = list("a", "b")), schema)$columns,
+                   c("a", "b"))
 })
 
 test_that("coerce_state canonicalises records", {
@@ -38,7 +39,7 @@ test_that("coerce_state canonicalises records", {
   s <- coerce_state(list(conditions = flat), schema)
   expect_identical(
     s$conditions,
-    list(list(type = "values", column = "x", values = list("a")))
+    list(list(type = "values", column = "x", values = "a"))
   )
   expect_identical(
     coerce_state(list(conditions = c("a", "b")), schema)$conditions,
@@ -55,7 +56,7 @@ spec <- list(
   name = "test",
   inputs = "data",
   schema = schema,
-  state = coerce_state(list(columns = list("a")), schema),
+  state = coerce_state(list(columns = "a"), schema),
   expr = function(s) length(s$columns),
   requests = list(echo = list(fn = function(x) toupper(x), data = FALSE)),
   options = stats::setNames(list(), character())
@@ -74,7 +75,7 @@ test_that("the server answers ready, submit and request", {
       expect_length(sent, 0L)
 
       session$setInputs(block = list(messages = list(list(type = "ready"))))
-      expect_identical(sent[[1]]$state, spec$state)
+      expect_identical(sent[[1]]$state, state_to_client(spec$state, schema))
       expect_identical(
         vapply(sent[[1]]$context$inputs$data$columns, `[[`, "", "type"),
         c("integer", "character")
@@ -83,7 +84,7 @@ test_that("the server answers ready, submit and request", {
       session$setInputs(block = list(messages = list(
         list(type = "submit", state = list(columns = list("a", "b")))
       )))
-      expect_identical(session$returned$state$columns(), list("a", "b"))
+      expect_identical(session$returned$state$columns(), c("a", "b"))
       expect_identical(session$returned$expr(), 2L)
       # no echo of what the client sent
       expect_length(sent, 1L)
@@ -121,11 +122,12 @@ test_that("coerce_state applies additionalProperties to keyed objects", {
     )
   ))
   out <- coerce_state(list(filters = list(adsl = list(SEX = "F"))), s)
-  expect_identical(out$filters$adsl$SEX, list("F"))
+  expect_identical(out$filters$adsl$SEX, "F")
+  expect_identical(state_to_client(out, s)$filters$adsl$SEX, list("F"))
   # an empty object is the same value whether R or the client made it
   expect_identical(coerce_state(list(filters = list()), s)$filters,
                    coerce_state(list(), s)$filters)
-  expect_match(as.character(jsonlite::toJSON(coerce_state(list(), s))),
+  expect_match(as.character(jsonlite::toJSON(state_to_client(coerce_state(list(), s), s))),
                '{"filters":{}}', fixed = TRUE)
 })
 

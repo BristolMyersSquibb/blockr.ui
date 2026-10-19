@@ -2,9 +2,12 @@
 % Please edit documentation in R/js-block.R
 \name{coerce_state}
 \alias{coerce_state}
+\alias{state_to_client}
 \title{Coerce a block state to its schema}
 \usage{
 coerce_state(x, schema)
+
+state_to_client(x, schema)
 }
 \arguments{
 \item{x}{State, as a named list.}
@@ -13,14 +16,21 @@ coerce_state(x, schema)
 }
 \value{
 The coerced state.
+
+For \code{state_to_client()}, the state with every array a list, so it
+reaches the client as a JSON array whatever its length.
 }
 \description{
 The schema is a JSON Schema subset: \code{type} (\code{object}, \code{array}, \code{string},
-\code{boolean}, \code{number}, \code{integer}), \code{properties}, \code{items}, \code{enum} and
-\code{default}. The canonical R form of a JSON array is an unnamed list, so
-it is sent back as an array whatever its length.
+\code{boolean}, \code{number}, \code{integer}), \code{properties}, \code{additionalProperties},
+\code{items}, \code{enum} and \code{default}.
 }
 \details{
+An array of plain values (\code{items} of type \code{string}, \code{number}, \code{integer} or
+\code{boolean}) is an atomic vector in R, as R code writes it;
+\code{state_to_client()} turns arrays back into lists for the client, so a
+length-1 array stays an array on the wire. Other arrays are unnamed lists.
+
 The top level gets every property, a missing one its default. A nested
 object keeps the fields it has, each coerced if the schema names it. A
 record that is not an object is dropped from its array, and a single
