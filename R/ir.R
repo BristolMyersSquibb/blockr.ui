@@ -12,7 +12,7 @@
 #' * `list(list = c("a", "b"))`: literals, the right-hand side of `%in%`
 #' * `list(call = "f", args = list(...), named = list(...))`: an operator
 #'   (`+`, `==`, `%in%`, `&`, `!`, `neg` for unary minus, ...) or a function
-#'   by its R name
+#'   by its R name. `&` and `|` take two or more arguments.
 #' * `list(code = "...", lang = "r")`: code the IR does not express, as typed.
 #'   R parses it; blockx parses it when it can and otherwise runs the block in
 #'   R.
@@ -126,6 +126,10 @@ ir_expr_to_r <- function(e) {
     stop("not an IR expression")
   }
   args <- lapply(e$args %||% list(), ir_expr_to_r)
+  # & and | take two or more arguments
+  if (f %in% c("&", "|") && length(args) > 2L) {
+    return(Reduce(function(a, b) call(f, a, b), args))
+  }
   if (identical(f, "neg")) {
     return(call("-", args[[1L]]))
   }

@@ -139,6 +139,10 @@ Blockr.ir = (() => {
     if ('code' in e) return { s: `(${e.code})`, p: ATOM };
     const b = BIN[e.call];
     const args = e.args || [];
+    // & and | take two or more arguments
+    if ((e.call === '&' || e.call === '|') && args.length > 2) {
+      return rx(args.slice(1).reduce((x, y) => ({ call: e.call, args: [x, y] }), args[0]));
+    }
     if (b && args.length === 2) {
       const l = rx(args[0]);
       const r = rx(args[1]);

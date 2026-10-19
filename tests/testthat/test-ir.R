@@ -78,3 +78,10 @@ test_that("IR arrays are normalized so they stay arrays", {
   expect_match(as.character(jsonlite::toJSON(out, auto_unbox = TRUE)),
                '"list":["a"]', fixed = TRUE)
 })
+
+test_that("& and | take two or more arguments", {
+  e <- ir_expr_to_r(list(call = "|", args = list(
+    list(col = "a"), list(col = "b"), list(col = "c")
+  )))
+  expect_identical(e, quote(a | b | c))
+})
