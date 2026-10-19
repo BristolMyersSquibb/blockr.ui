@@ -1,5 +1,18 @@
 # blockr.ui (development version)
 
+* `new_js_block()` builds a block from a folder `inst/blocks/<name>/` in a
+  package: `block.json` (inputs, a JSON Schema subset for the state, the
+  block's R requests, its files) and a UI written against
+  `Blockr.defineBlock({name, mount(el, host)})`. The block talks to its host
+  only through `host.submit()` and `host.request()`, and gets
+  `setState()` and `setContext()` calls; the same files run in blockx. The
+  Shiny host uses one input and one message per block, and sends nothing
+  before the client's `ready`, so state and columns arrive together and no
+  client queue is needed. `coerce_state()` keeps arrays as lists, so a
+  length-1 array stays an array on the wire. `column_values` is a request
+  every block can make; its cap is the option `blockr.max_column_values`
+  (default 1000).
+
 * A `Blockr.menu()` can carry a tool, `config.tool` (`{ icon, label,
   onSelect }`), at the end of its caption line in the top right corner: an
   icon button named by its tooltip that opens the menu's list somewhere

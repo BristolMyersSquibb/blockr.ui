@@ -446,6 +446,21 @@ interface BlockrInputStatic {
 }
 
 interface BlockrNamespace {
+  /** Blocks by name, from Blockr.defineBlock() (blockr-block.js). */
+  blocks: Record<string, BlockrBlockDef>;
+  defineBlock(def: BlockrBlockDef): void;
+  reconcileColumn(
+    select: BlockrSelectSingleHandle,
+    options: BlockrSelectOption[],
+    column: string,
+    pinned: boolean
+  ): string;
+  reconcileColumns(
+    select: BlockrSelectMultiHandle,
+    options: BlockrSelectOption[],
+    columns: string[]
+  ): string[];
+  stateKey(state: unknown): string;
   tooltip: BlockrTooltip;
   menu: BlockrMenu;
 
@@ -540,8 +555,84 @@ interface BlockrCheckboxHandle {
   get(): boolean;
 }
 
+/* --- Blocks (blockr-block.js); R: new_js_block() --- */
+
+/** A column of a block's input, as the host sends it in the context. */
+interface BlockrColumn {
+  name: string;
+  /** Factors, dates and the rest are 'character': they filter by value. */
+  type: 'numeric' | 'integer' | 'logical' | 'character';
+  /** The column's label attribute, "" when it has none. */
+  label: string;
+}
+
+/** What a block knows of its inputs. An input is null while it has no data. */
+interface BlockrContext {
+  inputs: Record<string, { columns: BlockrColumn[] } | null>;
+}
+
+/** The answer to the host request `column_values`. */
+interface BlockrColumnValues extends BlockrColumn {
+  hasNA: boolean;
+  min?: number;
+  max?: number;
+  /** numeric and integer columns */
+  uniqueValues?: Array<number | string>;
+  /** the other columns, factor levels in order */
+  values?: string[];
+  hasEmpty?: boolean;
+  /** distinct values before the query and the cap; NA when unknown */
+  total?: number | null;
+  /** the full list is longer than the host's limit: search on the server */
+  truncated?: boolean;
+}
+
+/** What the host gives a block at mount. */
+interface BlockrHost<S> {
+  /** the state at mount */
+  state: S;
+  /** the context at mount */
+  context: BlockrContext;
+  /** a user change */
+  submit(state: S): void;
+  /**
+   * Ask the host. `column_values {input, column, query?}` is answered by
+   * every host; a block's own requests are listed in its block.json.
+   */
+  request(name: string, args?: object): Promise<any>;
+}
+
+/** What a mounted block gives back. */
+interface BlockrBlockInstance {
+  /** never submits */
+  setState(state: any): void;
+  setContext(context: BlockrContext): void;
+  destroy?(): void;
+}
+
+interface BlockrBlockDef {
+  name: string;
+  mount(el: HTMLElement, host: BlockrHost<any>): BlockrBlockInstance;
+}
+
 declare var Blockr: BlockrNamespace;
 
 interface Window {
   Blockr: BlockrNamespace;
 }
+
+/* --- Ambient Shiny / jQuery, for the Shiny hosts (no @types dependency) --- */
+
+declare const Shiny: {
+  InputBinding: new () => object;
+  inputBindings: { register(binding: object, name: string): void };
+  setInputValue(
+    name: string,
+    value: unknown,
+    opts?: { priority?: 'event' | 'immediate' | 'deferred' }
+  ): void;
+};
+
+declare const $: (selector: unknown) => {
+  find(selector: string): unknown;
+};
