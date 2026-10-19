@@ -342,8 +342,11 @@ js_block_requests <- function(manifest) {
   reqs <- manifest$requests %||% list()
   stats::setNames(
     lapply(reqs, function(r) {
+      # looked up when asked, so a package can construct its blocks while it
+      # loads
       fn <- strsplit(r$r, "::", fixed = TRUE)[[1L]]
-      list(fn = getExportedValue(fn[1L], fn[2L]), data = isTRUE(r$data))
+      list(fn = function(...) getExportedValue(fn[1L], fn[2L])(...),
+           data = isTRUE(r$data))
     }),
     vapply(reqs, `[[`, character(1L), "name")
   )
