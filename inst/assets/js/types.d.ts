@@ -461,6 +461,8 @@ interface BlockrNamespace {
     columns: string[]
   ): string[];
   stateKey(state: unknown): string;
+  /** The block IR as R text (blockr-block.js). */
+  ir: { toR(e: BlockrIrExpr): string };
   tooltip: BlockrTooltip;
   menu: BlockrMenu;
 
@@ -556,6 +558,15 @@ interface BlockrCheckboxHandle {
 }
 
 /* --- Blocks (blockr-block.js); R: new_js_block() --- */
+
+/** An expression of the block IR (R: ir_to_expr(); blockx shared/ir.ts). */
+type BlockrIrLit = number | string | boolean | null;
+type BlockrIrExpr =
+  | { col: string }
+  | { lit: BlockrIrLit }
+  | { list: BlockrIrLit[] }
+  | { call: string; args: BlockrIrExpr[]; named?: Record<string, BlockrIrExpr> }
+  | { code: string; lang: string };
 
 /** A column of a block's input, as the host sends it in the context. */
 interface BlockrColumn {

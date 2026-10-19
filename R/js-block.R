@@ -33,6 +33,8 @@
 #' @param state Named list, the constructor's arguments. Its names must be the
 #'   constructor's formals (other than `...`), for save and restore.
 #' @param expr Function of the state list returning a `bquoted` expression.
+#'   Not needed for a block whose manifest names a `plan` step: its state is
+#'   that step of the IR, and [ir_to_expr()] translates it.
 #'   A function of two arguments also gets the block's input data, as a list
 #'   by input name, for an expression that depends on it (column types, the
 #'   tables of a dm).
@@ -50,7 +52,7 @@
 #'
 #' @return A block object.
 #' @export
-new_js_block <- function(name, state, expr, class,
+new_js_block <- function(name, state, expr = NULL, class,
                          pkg = environmentName(topenv(parent.frame())),
                          options = list(),
                          new = blockr.core::new_transform_block,
@@ -60,6 +62,14 @@ new_js_block <- function(name, state, expr, class,
 
   manifest <- js_block_manifest(name, pkg)
   state <- coerce_state(state, manifest$state)
+
+  if (is.null(expr)) {
+    op <- manifest$plan
+    if (is.null(op)) {
+      stop("block ", name, " has neither an expr nor a plan in its manifest")
+    }
+    expr <- function(s) ir_to_expr(c(list(op = op), s))
+  }
 
   spec <- list(
     name = name,
@@ -360,7 +370,8 @@ js_block_requests <- function(manifest) {
 #'
 #' The schema is a JSON Schema subset: `type` (`object`, `array`, `string`,
 #' `boolean`, `number`, `integer`), `properties`, `additionalProperties`,
-#' `items`, `enum` and `default`.
+#' `items`, `enum` and `default`, and `"format": "ir"` for an array of IR
+#' expressions (see [ir_to_expr()]).
 #'
 #' An array of plain values (`items` of type `string`, `number`, `integer` or
 #' `boolean`) is an atomic vector in R, as R code writes it;
@@ -410,6 +421,12 @@ coerce_value <- function(x, s) {
 }
 
 coerce_array <- function(x, items) {
+  # IR expressions (`"format": "ir"`): records, normalized
+  if (identical(items$format, "ir")) {
+    if (!is.list(x)) return(list())
+    if (!is.null(names(x))) x <- list(x)
+    return(lapply(Filter(is.list, unname(x)), ir_normalize))
+  }
   if (identical(items$type, "object")) {
     # an atomic vector holds no records
     if (!is.list(x)) {

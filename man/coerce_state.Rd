@@ -23,7 +23,8 @@ reaches the client as a JSON array whatever its length.
 \description{
 The schema is a JSON Schema subset: \code{type} (\code{object}, \code{array}, \code{string},
 \code{boolean}, \code{number}, \code{integer}), \code{properties}, \code{additionalProperties},
-\code{items}, \code{enum} and \code{default}.
+\code{items}, \code{enum} and \code{default}, and \code{"format": "ir"} for an array of IR
+expressions (see \code{\link[=ir_to_expr]{ir_to_expr()}}).
 }
 \details{
 An array of plain values (\code{items} of type \code{string}, \code{number}, \code{integer} or

@@ -9,7 +9,7 @@
 new_js_block(
   name,
   state,
-  expr,
+  expr = NULL,
   class,
   pkg = environmentName(topenv(parent.frame())),
   options = list(),
@@ -33,6 +33,8 @@ js_block_manifest(name, pkg)
 constructor's formals (other than \code{...}), for save and restore.}
 
 \item{expr}{Function of the state list returning a \code{bquoted} expression.
+Not needed for a block whose manifest names a \code{plan} step: its state is
+that step of the IR, and \code{\link[=ir_to_expr]{ir_to_expr()}} translates it.
 A function of two arguments also gets the block's input data, as a list
 by input name, for an expression that depends on it (column types, the
 tables of a dm).}
