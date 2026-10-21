@@ -689,6 +689,11 @@ selected row, the active group's front tab.
 - A pick keeps the dropdown open and keeps the filter text, so one search
   serves several picks ("blood", then each blood test). The filter clears
   when the dropdown closes.
+- The picks apply once, when the dropdown closes: a click outside, Tab,
+  the chevron or Escape. While it is open the tags show the picks and the
+  block does not recompute. Escape applies too, as people press it just to
+  close the list. A tag removed or dragged while the dropdown is closed
+  applies at once. There is no Apply button.
 - A tag's × appears on the tag under the pointer or with keyboard focus,
   never on every tag at once, and turns `text-danger` on its own hover. Its
   space stays reserved, so nothing moves.

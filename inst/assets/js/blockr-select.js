@@ -5,7 +5,7 @@
  * Three forms of one widget. `single` shows its pick in a control and closes
  * on a pick; `multi` shows its picks as tags in the control, ticks them in
  * the list and stays open, keeping the filter text so one search can serve
- * several picks;
+ * several picks, and reports them once, when the list closes;
  * `menu` is the list alone, hung under an element the caller owns (a word in
  * a block's sentence), open from the start and gone when it closes. The
  * list, the filter, the keyboard, the placement and the server search are
@@ -29,6 +29,8 @@
   const optLabel = (o) => (typeof o === 'object' && o !== null ? (o.label || '') : '');
   /** @param {BlockrSelectOption[]} opts @param {string} val */
   const findOpt = (opts, val) => opts.find((o) => optValue(o) === val);
+  /** @param {string[]} a @param {string[]} b */
+  const sameList = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
 
   /** Both facts, and `labelFirst` decides which one leads.
    *
@@ -206,6 +208,9 @@
       // combobox input carries the disabled attribute). setDisabled() flips
       // it after construction.
       disabled: config.disabled === true,
+      // A multi's picks when its list opened. The picks are reported once,
+      // as the list closes, if they differ from these.
+      openedWith: /** @type {string[] | null} */ (null),
       destroyed: false
     };
     if (!multi) {
@@ -551,6 +556,7 @@
       if (!multi && !st.query && st.selected !== '') {
         st.highlight = Math.max(0, st.options.findIndex((o) => optValue(o) === st.selected));
       }
+      if (multi) st.openedWith = /** @type {string[]} */ (st.selected).slice();
       if (list.parentElement !== document.body) document.body.appendChild(list);
       render();
       placed = Blockr.place(list, anchor || root, {
@@ -568,14 +574,22 @@
       // combobox (a menu hands it back to its anchor when it tears down). A
       // click outside the list and the control closes it too; a menu's
       // anchor is not outside, as its click is the caller's toggle.
-      listLayer = Blockr.layer(list, { from: anchor || root, escape: close, outside: close });
+      listLayer = Blockr.layer(list, {
+        from: anchor || root,
+        escape: () => close('escape'),
+        outside: () => close()
+      });
       // The pick may be far down a long column list.
       showHighlight();
       input.focus();
       if (onOpen) onOpen();
     };
 
-    const close = () => {
+    // A multi reports its picks here, once, whatever closes the list: an
+    // outside click, Tab, the chevron or Escape. A widget torn down reports
+    // nothing.
+    /** @param {'escape' | 'destroy'} [how] */
+    const close = (how) => {
       if (!st.open) return;
       st.open = false;
       st.query = '';
@@ -584,7 +598,14 @@
       if (placed) { placed.stop(); placed = null; }
       if (listLayer) { listLayer.remove(); listLayer = null; }
       root.classList.remove('blockr-select--above');
+      let changed = false;
+      if (st.openedWith) {
+        const was = st.openedWith;
+        st.openedWith = null;
+        if (how !== 'destroy') changed = !sameList(/** @type {string[]} */ (st.selected), was);
+      }
       render();
+      if (changed) emit();
       // Last, with the DOM settled: a menu tears the whole widget down from
       // here.
       if (onClose) onClose();
@@ -604,7 +625,6 @@
         if (i >= 0) sel.splice(i, 1);
         else sel.push(value);
         render();
-        emit();
       } else {
         const changed = st.selected !== value;
         st.selected = value;
@@ -614,6 +634,8 @@
       }
     };
 
+    // A tag removed or moved with the list closed reports at once; with the
+    // list open it is one more pick, reported when the list closes.
     /** @param {string} value */
     const removeTag = (value) => {
       const sel = /** @type {string[]} */ (st.selected);
@@ -621,7 +643,7 @@
       if (i < 0) return;
       sel.splice(i, 1);
       render();
-      emit();
+      if (!st.open) emit();
     };
 
     // Expanded, the control shows every tag until a click lands outside it.
@@ -835,7 +857,7 @@
         sel.splice(from, 1);
         sel.splice(sel.indexOf(/** @type {string} */ (target)) + (drop === 'after' ? 1 : 0), 0, moved);
         render();
-        emit();
+        if (!st.open) emit();
       });
     }
 
@@ -935,7 +957,7 @@
         if (searchTimer) clearTimeout(searchTimer);
         if (resizeObs) resizeObs.disconnect();
         collapse();
-        close();
+        close('destroy');
         st.destroyed = true;
         Blockr.removeNode(list);
         Blockr.removeNode(root);
