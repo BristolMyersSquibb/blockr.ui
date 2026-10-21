@@ -1,5 +1,11 @@
 # blockr.ui (development version)
 
+* A multi select (`Blockr.Select.multi()`, and `Blockr.Select.menu()` with
+  `mode: 'multi'`) reports its picks once, when its list closes by a click
+  outside, Tab, the chevron or Escape, instead of on every pick. A block
+  that recomputes on each change now recomputes once per visit to the list.
+  A tag removed or dragged while the list is closed still reports at once.
+
 * A `Blockr.menu()` can carry a tool, `config.tool` (`{ icon, label,
   onSelect }`), at the end of its caption line in the top right corner: an
   icon button named by its tooltip that opens the menu's list somewhere
