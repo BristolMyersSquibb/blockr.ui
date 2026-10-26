@@ -40,12 +40,23 @@ test_that("column labels render whole, the label a cut-off-only tooltip", {
   expect_no_match(html, "…")
 })
 
-test_that("cells carry no native title, only a cut-off-only tooltip", {
+test_that("cells carry no native title and no tooltip attributes", {
+  # blockr-table-preview.js gives a cell its cut-off-only tooltip from its
+  # text on first hover, so the value is not written twice per cell.
   df <- data.frame(x = c("Placebo", NA))
-  html <- render_chr(build_html_table(df, 1L))
+  html <- render_chr(build_html_table(df, 2L))
   expect_no_match(html, "<td[^>]* title=")
-  expect_match(html,
-               'data-blockr-tooltip="Placebo" data-blockr-tooltip-overflow',
+  expect_match(html, "<td>Placebo</td>", fixed = TRUE)
+  expect_no_match(html, "<td[^>]*data-blockr-tooltip")
+})
+
+test_that("cell values and column names are escaped", {
+  df <- data.frame(x = "<b>&</b>")
+  names(df) <- 'a"b<'
+  html <- render_chr(build_html_table(df, 1L))
+  expect_match(html, "<td>&lt;b&gt;&amp;&lt;/b&gt;</td>", fixed = TRUE)
+  expect_match(html, 'data-column="a&quot;b&lt;"', fixed = TRUE)
+  expect_match(html, '<span class="blockr-col-name">a"b&lt;</span>',
                fixed = TRUE)
 })
 
@@ -61,8 +72,28 @@ test_that("NA and negative values get their styling hooks", {
   df <- data.frame(v = c(NA, -3.2))
   html <- render_chr(build_html_table(df, 2L))
   expect_match(html, "blockr-na")
-  expect_match(html, "blockr-negative")
-  expect_match(html, "blockr-td-numeric")
+  expect_match(html, '<td class="blockr-negative">', fixed = TRUE)
+  # Numeric alignment is one rule for the column, not a class per cell.
+  expect_match(html, "td:is(:nth-child(2)){text-align:right", fixed = TRUE)
+  expect_no_match(html, "blockr-td-numeric")
+})
+
+test_that("the numeric column rule is scoped to its table and merges runs", {
+  df <- data.frame(a = 1, b = "x", c = 2, d = 3, e = 4L)
+  html <- render_chr(build_html_table(df, 1L, sort_input = "o-t_sort"))
+  expect_match(html, 'id="blockr-tbl-o-t_sort"', fixed = TRUE)
+  expect_match(html, paste0(
+    "#blockr-tbl-o-t_sort td:is(:nth-child(2),",
+    ":nth-child(n+4):nth-child(-n+6))"
+  ), fixed = TRUE)
+  expect_no_match(render_chr(build_html_table(data.frame(b = "x"), 1L)),
+                  "<style>")
+  # Without ids from the caller, two tables never share an id.
+  ids <- replicate(2L, {
+    h <- render_chr(build_html_table(df, 1L))
+    regmatches(h, regexpr('id="[^"]+"', h))
+  })
+  expect_false(identical(ids[[1L]], ids[[2L]]))
 })
 
 test_that("zero-column and zero-row frames render gracefully", {
@@ -130,13 +161,14 @@ test_that("the table label shows in the footer", {
   expect_match(html, paste0('data-blockr-tooltip="', long, '"'), fixed = TRUE)
 })
 
-test_that("the html dependency is attached (no inline style/script)", {
+test_that("the html dependency is attached (no inline stylesheet/script)", {
   df <- data.frame(x = 1)
   tag <- build_html_table(df, 1L)
   deps <- htmltools::findDependencies(tag)
   expect_true("blockr-table-preview" %in% vapply(deps, `[[`, "", "name"))
   html <- as.character(htmltools::as.tags(tag))
-  expect_no_match(html, "<style>")
+  # The only inline style is the table's own column rule.
+  expect_no_match(html, ".blockr-table-container", fixed = TRUE)
   expect_no_match(html, "<script>")
 })
 
@@ -288,8 +320,7 @@ test_that("the sort cue sits on the name's line and the header says its sort", {
   expect_match(html, paste0(
     '<span class="blockr-col-head">\\s*',
     '<span class="blockr-col-name">n</span>\\s*',
-    '<span class="blockr-sort-icon blockr-sort-icon-desc" ',
-    'aria-hidden="true"></span>'
+    '<span class="blockr-sort-icon blockr-sort-icon-desc"></span>'
   ))
   # No arrow characters any more: the cue is sort bars, drawn in CSS.
   css_file <- system.file("assets", "css", "blockr-table-preview.css",

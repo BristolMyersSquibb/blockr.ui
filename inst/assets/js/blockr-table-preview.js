@@ -33,6 +33,25 @@ if (!window.blockrShinyValueInit) {
   });
 }
 
+// A cell cut off by its column shows its whole value in a tooltip. The
+// server does not write the value a second time into every cell; a cell
+// gets its tooltip attributes from its text when the pointer first reaches
+// it. In the capture phase on window, ahead of Blockr.tooltip's listeners on
+// document, so the tooltip finds them on that same event. The row number
+// and the NA marker have none.
+if (!window.blockrCellTipInit) {
+  window.blockrCellTipInit = true;
+  window.addEventListener('pointerover', function(e) {
+    var td = e.target instanceof Element ?
+      e.target.closest('.blockr-table-container td') : null;
+    if (!td || td.hasAttribute('data-blockr-tooltip')) return;
+    if (td.classList.contains('blockr-row-number')) return;
+    if (td.querySelector('.blockr-na')) return;
+    td.setAttribute('data-blockr-tooltip', td.textContent);
+    td.setAttribute('data-blockr-tooltip-overflow', '');
+  }, true);
+}
+
 if (!window.blockrSortInit) {
   window.blockrSortInit = true;
   document.addEventListener('click', function(e) {
