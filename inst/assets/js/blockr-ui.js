@@ -1569,9 +1569,150 @@ Blockr.tooltip = (() => {
     return { el: wrap, set: set, get: function () { return current; } };
   }
 
+  /**
+   * Groups for a long gear tray (design system, "The gear tray"). The
+   * tray's sections are sorted into a few groups and one group shows at a
+   * time. A tray 560px and wider gets an index on the left, as the
+   * design-system article's sidebar: the groups, and under the open one its
+   * sections. A narrower tray gets the groups as tabs above the sections.
+   *
+   * The sections are moved into the navigation's pane; the caller keeps
+   * building them as before. A group with one section hides that section's
+   * title, since the group's name already says it. A click on a section in
+   * the index brings it into view and marks it briefly.
+   *
+   * @param {{ key: string, title: string,
+   *           sections: { el: HTMLElement, title: string, titleEl?: HTMLElement | null }[] }[]} groups
+   * @param {{ current?: string, onPick?: (key: string) => void, label?: string }} [opts]
+   * @returns {BlockrTrayNavHandle}
+   */
+  function trayNav(groups, opts) {
+    opts = opts || {};
+    var list = groups.filter(function (g) { return g.sections.length; });
+    var current = list.some(function (g) { return g.key === opts.current; })
+      ? /** @type {string} */ (opts.current)
+      : (list[0] ? list[0].key : '');
+    var id = Blockr.uid('blockr-tray-nav');
+
+    var el = document.createElement('div');
+    el.className = 'blockr-tray-nav';
+    var index = document.createElement('nav');
+    index.className = 'blockr-tray-nav__index';
+    index.setAttribute('aria-label', opts.label || 'Settings groups');
+    var body = document.createElement('div');
+    body.className = 'blockr-tray-nav__body';
+    var tabs = document.createElement('div');
+    tabs.className = 'blockr-tray-nav__tabs';
+    tabs.setAttribute('role', 'tablist');
+    tabs.setAttribute('aria-label', opts.label || 'Settings groups');
+    var pane = document.createElement('div');
+    pane.className = 'blockr-tray-nav__pane';
+    pane.id = id + '-pane';
+    pane.setAttribute('role', 'tabpanel');
+    body.appendChild(tabs);
+    body.appendChild(pane);
+    el.appendChild(index);
+    el.appendChild(body);
+
+    /** @type {Record<string, HTMLButtonElement>} */
+    var tabBtns = {};
+    list.forEach(function (g) {
+      var one = g.sections.length === 1;
+      g.sections.forEach(function (s) {
+        s.el.dataset.trayGroup = g.key;
+        if (one && s.titleEl) s.titleEl.classList.add('blockr-tray-nav__hidden-title');
+        pane.appendChild(s.el);
+      });
+      var t = document.createElement('button');
+      t.type = 'button';
+      t.className = 'blockr-tray-nav__tab';
+      t.id = id + '-tab-' + g.key;
+      t.setAttribute('role', 'tab');
+      t.setAttribute('aria-controls', pane.id);
+      t.textContent = g.title;
+      t.addEventListener('click', function () { pick(g.key); });
+      tabs.appendChild(t);
+      tabBtns[g.key] = t;
+    });
+
+    // Arrow keys move between the tabs, as in any tab list; the index is a
+    // list of buttons and takes Tab.
+    tabs.addEventListener('keydown', function (e) {
+      var keys = list.map(function (g) { return g.key; });
+      var i = keys.indexOf(current);
+      var next = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 :
+        e.key === 'Home' ? 0 : e.key === 'End' ? keys.length - 1 : null;
+      if (next === null) return;
+      e.preventDefault();
+      next = (next + keys.length) % keys.length;
+      pick(keys[next]);
+      tabBtns[keys[next]].focus();
+    });
+
+    /** @param {string} key */
+    function pick(key) {
+      if (key === current) return;
+      current = key;
+      draw();
+      if (opts && opts.onPick) opts.onPick(key);
+    }
+
+    /** @param {HTMLElement} sec */
+    function point(sec) {
+      if (typeof sec.scrollIntoView === 'function') {
+        sec.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+      sec.classList.remove('blockr-tray-nav__flash');
+      void sec.offsetWidth;   // restart the animation
+      sec.classList.add('blockr-tray-nav__flash');
+    }
+
+    function draw() {
+      index.innerHTML = '';
+      list.forEach(function (g) {
+        var on = g.key === current;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'blockr-tray-nav__group' + (on ? ' is-current' : '');
+        b.textContent = g.title;
+        if (on) b.setAttribute('aria-current', 'true');
+        b.addEventListener('click', function () { pick(g.key); });
+        index.appendChild(b);
+        if (!on || g.sections.length < 2) return;
+        g.sections.forEach(function (s) {
+          if (!s.title) return;
+          var sb = document.createElement('button');
+          sb.type = 'button';
+          sb.className = 'blockr-tray-nav__section';
+          sb.textContent = s.title;
+          sb.addEventListener('click', function () { point(s.el); });
+          index.appendChild(sb);
+        });
+      });
+      list.forEach(function (g) {
+        var on = g.key === current;
+        tabBtns[g.key].classList.toggle('is-current', on);
+        tabBtns[g.key].setAttribute('aria-selected', on ? 'true' : 'false');
+        tabBtns[g.key].tabIndex = on ? 0 : -1;
+        g.sections.forEach(function (s) {
+          s.el.classList.toggle('blockr-tray-nav__off', !on);
+        });
+      });
+      pane.setAttribute('aria-labelledby', id + '-tab-' + current);
+    }
+    draw();
+
+    return {
+      el: el,
+      show: function (key) { pick(key); },
+      current: function () { return current; }
+    };
+  }
+
   Blockr.checkbox = checkbox;
   Blockr.gearTray = gearTray;
   Blockr.segmented = segmented;
+  Blockr.trayNav = trayNav;
 })();
 
 /**

@@ -498,6 +498,16 @@ interface BlockrNamespace {
     gear: HTMLButtonElement,
     opts?: { label?: string; open?: boolean }
   ): BlockrGearTrayHandle;
+  /** Groups for a long gear tray (blockr-ui.js): an index on the left from
+   *  560px, tabs above narrower; one group shows at a time. */
+  trayNav(
+    groups: {
+      key: string;
+      title: string;
+      sections: { el: HTMLElement; title: string; titleEl?: HTMLElement | null }[];
+    }[],
+    opts?: { current?: string; onPick?: (key: string) => void; label?: string }
+  ): BlockrTrayNavHandle;
   /** Toggle the canonical required-empty amber cue on a field wrapper. */
   setRequiredEmpty(el: Element, empty: boolean): void;
   /** Whether this is a Mac; decided once, with `.blockr-mac` on the root. */
@@ -530,6 +540,13 @@ interface BlockrGearTrayHandle {
   set(open: boolean): void;
   toggle(): void;
   isOpen(): boolean;
+}
+
+/** Handle returned by Blockr.trayNav (blockr-ui.js). */
+interface BlockrTrayNavHandle {
+  el: HTMLDivElement;
+  show(key: string): void;
+  current(): string;
 }
 
 /** Handle returned by Blockr.checkbox (blockr-ui.js). */
