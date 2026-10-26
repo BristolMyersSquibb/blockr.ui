@@ -1654,14 +1654,26 @@ Blockr.tooltip = (() => {
       if (key === current) return;
       current = key;
       draw();
+      // A group opens at its top: when the pane's top has scrolled out of
+      // view, it comes back.
+      if (pane.getBoundingClientRect().top < 0) scrollTo(pane);
       if (opts && opts.onPick) opts.onPick(key);
     }
 
+    /** @param {HTMLElement} el */
+    function scrollTo(el) {
+      if (typeof el.scrollIntoView !== 'function') return;
+      var still = typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
+    }
+
+    // A section picked in the index moves to the top of the view, as far as
+    // the page can scroll, and lights up for a moment, so the eye finds it
+    // even where it could not move.
     /** @param {HTMLElement} sec */
     function point(sec) {
-      if (typeof sec.scrollIntoView === 'function') {
-        sec.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
+      scrollTo(sec);
       sec.classList.remove('blockr-tray-nav__flash');
       void sec.offsetWidth;   // restart the animation
       sec.classList.add('blockr-tray-nav__flash');
