@@ -241,3 +241,60 @@ test('gear tray: the gear toggles it and Escape on the gear closes it', (newWind
   assert.strictEqual(reached, 1);
   win.close();
 });
+
+/* --- Blockr.trayNav ------------------------------------------------------- */
+
+const navSection = (win, title) => {
+  const el = win.document.createElement('div');
+  el.className = 'dd-section';
+  const t = win.document.createElement('div');
+  t.className = 'dd-section-title';
+  t.textContent = title;
+  el.appendChild(t);
+  return { el, title, titleEl: t };
+};
+
+test('trayNav: one group shows, the index lists its sections, tabs follow', (newWindow) => {
+  const win = newWindow();
+  const s = ['Rows', 'Columns', 'Order', 'Titles'].map((t) => navSection(win, t));
+  const picks = [];
+  const nav = win.Blockr.trayNav([
+    { key: 'data', title: 'Data', sections: [s[0], s[1]] },
+    { key: 'sort', title: 'Sort', sections: [s[2]] },
+    { key: 'empty', title: 'Empty', sections: [] },
+    { key: 'titles', title: 'Titles', sections: [s[3]] }
+  ], { current: 'sort', onPick: (k) => picks.push(k) });
+  host(win).appendChild(nav.el);
+  const shown = () => s.filter((x) => !x.el.classList.contains('blockr-tray-nav__off')).map((x) => x.title);
+  const tabs = Array.from(nav.el.querySelectorAll('.blockr-tray-nav__tab'));
+
+  assert.deepStrictEqual(tabs.map((t) => t.textContent), ['Data', 'Sort', 'Titles'], 'an empty group leaves');
+  assert.strictEqual(nav.current(), 'sort');
+  assert.deepStrictEqual(shown(), ['Order']);
+  assert.ok(s[2].titleEl.classList.contains('blockr-tray-nav__hidden-title'),
+    'a group of one section shows no section title');
+  assert.ok(!s[0].titleEl.classList.contains('blockr-tray-nav__hidden-title'));
+
+  // The index: groups, and the open group's sections under it.
+  const index = () => Array.from(nav.el.querySelectorAll('.blockr-tray-nav__index button'))
+    .map((b) => (b.classList.contains('blockr-tray-nav__section') ? '  ' : '') +
+      (b.classList.contains('is-current') ? '*' : '') + b.textContent);
+  assert.deepStrictEqual(index(), ['Data', '*Sort', 'Titles']);
+  nav.el.querySelector('.blockr-tray-nav__group').click();
+  assert.deepStrictEqual(index(), ['*Data', '  Rows', '  Columns', 'Sort', 'Titles']);
+  assert.deepStrictEqual(shown(), ['Rows', 'Columns']);
+  assert.deepStrictEqual(picks, ['data']);
+  assert.strictEqual(tabs[0].getAttribute('aria-selected'), 'true');
+
+  // A section in the index lights up; the light goes once played.
+  Array.from(nav.el.querySelectorAll('.blockr-tray-nav__section'))[1].click();
+  assert.ok(s[1].el.classList.contains('blockr-tray-nav__flash'));
+  s[1].el.dispatchEvent(new win.Event('animationend'));
+  assert.ok(!s[1].el.classList.contains('blockr-tray-nav__flash'));
+
+  // Arrow keys move along the tabs, wrapping.
+  tabs[0].dispatchEvent(new win.KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+  assert.strictEqual(nav.current(), 'titles');
+  assert.deepStrictEqual(shown(), ['Titles']);
+  win.close();
+});

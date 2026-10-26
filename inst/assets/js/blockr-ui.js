@@ -1677,6 +1677,10 @@ Blockr.tooltip = (() => {
       sec.classList.remove('blockr-tray-nav__flash');
       void sec.offsetWidth;   // restart the animation
       sec.classList.add('blockr-tray-nav__flash');
+      // Off once played, or the group shown again would replay it.
+      sec.addEventListener('animationend', function () {
+        sec.classList.remove('blockr-tray-nav__flash');
+      }, { once: true });
     }
 
     function draw() {
