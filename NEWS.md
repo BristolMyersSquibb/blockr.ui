@@ -15,6 +15,18 @@
   (#95). Like the block category colours, it is the same under every theme
   and in the dark scheme, and it clears 3:1 on the surface in both.
 
+* The table preview sends less (#102). A 5-row page of a 50-column frame was
+  46.6 KB of HTML and is now 18.7 KB, and `html_table_render()` sends the
+  table's dependencies (8 KB of JSON) with the first render of each output
+  only. `build_html_table()` writes the header and body as one string
+  instead of some 2,000 htmltools tags, which takes Shiny's rendering of
+  it from 38 ms to 1 ms. The table looks and behaves as before; markup that
+  other code may have read changed: body cells carry no
+  `blockr-td-numeric` class (a rule per column, scoped by the container's
+  new id, aligns them) and no tooltip attributes (blockr-table-preview.js
+  adds them from the cell's text on first hover), and the type tag is no
+  longer wrapped in `.blockr-type-row`.
+
 * The new `Blockr.menu.delegate(selector, config)` opens and closes the
   menu of every trigger that matches `selector`, including triggers added
   to the page later, such as the "…" buttons on the dock's block cards

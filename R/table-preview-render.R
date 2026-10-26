@@ -83,7 +83,7 @@ html_table_render <- function(result, session, page_size = 5L) {
 
         pg <- table_page(result, current_sort, page, page_size, cache)
 
-        build_html_table(
+        out <- build_html_table(
           pg$dat,
           pg$total_rows,
           sort_state = current_sort,
@@ -97,6 +97,7 @@ html_table_render <- function(result, session, page_size = 5L) {
           # the result's lifetime, so sort/page renders never reflow.
           cache = cache
         )
+        deps_once(out, ns(sort_id), session)
       },
       error = function(e) {
         shiny::tags$div(
@@ -107,6 +108,25 @@ html_table_render <- function(result, session, page_size = 5L) {
       }
     )
   })
+}
+
+# The table's dependencies go with the first render of each output in a
+# session and are left off after that. The browser keeps a dependency once it
+# has it, so sending them again only costs: their JSON (8 KB, mostly the
+# inline icons) on every render of every table. Kept per output rather than
+# per session, so a first render that never reaches the page (its output
+# removed on the way) cannot leave the other tables without them.
+deps_once <- function(x, key, session) {
+  sent <- session$userData$blockr_table_deps
+  if (is.null(sent)) {
+    sent <- new.env(parent = emptyenv())
+    session$userData$blockr_table_deps <- sent
+  }
+  if (isTRUE(sent[[key]])) {
+    return(htmltools::attachDependencies(x, NULL))
+  }
+  sent[[key]] <- TRUE
+  x
 }
 
 #' @rdname html_table_render

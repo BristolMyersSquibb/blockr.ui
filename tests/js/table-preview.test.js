@@ -5,6 +5,9 @@
  * first, off); a click on a page arrow sends the page it leads to. Shiny is
  * a stub that records what it is sent; jQuery, which the scroll restore
  * hooks, is a stub too.
+ *
+ * A cell gets its cut-off-only tooltip from its text on first hover: the
+ * server does not write each value twice.
  */
 'use strict';
 
@@ -45,16 +48,18 @@ const draw = (win, { dir = 'none', page = 1, maxPage = 3 } = {}) => {
     <table class="blockr-table"><thead><tr>
       <th class="blockr-sortable${sorted}" data-column="cyl">
         <span class="blockr-col-head"><span class="blockr-col-name">cyl</span></span>
-        <span class="blockr-type-row"><span class="blockr-type-label">&lt;dbl&gt;</span></span>
+        <span class="blockr-type-label">&lt;dbl&gt;</span>
       </th>
-    </tr></thead></table>
+    </tr></thead><tbody><tr>
+      <td class="blockr-row-number">1</td><td>6.25</td><td><span class="blockr-na">NA</span></td>
+    </tr></tbody></table>
     <button class="blockr-nav-btn${page === 1 ? ' disabled' : ''}" data-direction="prev"></button>
     <button class="blockr-nav-btn${page === maxPage ? ' disabled' : ''}" data-direction="next"></button>`;
   win.document.body.appendChild(box);
   return {
     box,
     name: box.querySelector('.blockr-col-name'),
-    cue: box.querySelector('.blockr-type-row'),
+    cue: box.querySelector('.blockr-type-label'),
     prev: box.querySelector('[data-direction="prev"]'),
     next: box.querySelector('[data-direction="next"]')
   };
@@ -92,5 +97,22 @@ test('a page arrow sends the page it leads to, and a disabled one nothing', (new
   t = draw(win, { page: 1 });
   click(win, t.prev);
   assert.strictEqual(sent.length, 2, 'the first page has no previous one');
+  win.close();
+});
+
+test('a cell gets its cut-off-only tooltip from its text on first hover', (newWindow) => {
+  const { win } = load(newWindow);
+  const t = draw(win);
+  const [num, value, na] = t.box.querySelectorAll('td');
+  const hover = (el) =>
+    el.dispatchEvent(new win.Event('pointerover', { bubbles: true }));
+  hover(value);
+  assert.strictEqual(value.getAttribute('data-blockr-tooltip'), '6.25');
+  assert.ok(value.hasAttribute('data-blockr-tooltip-overflow'));
+  assert.strictEqual(win.Blockr.tooltip.text(value), '6.25');
+  hover(na.firstChild);
+  hover(num);
+  assert.ok(!na.hasAttribute('data-blockr-tooltip'), 'NA has none');
+  assert.ok(!num.hasAttribute('data-blockr-tooltip'), 'the row number has none');
   win.close();
 });
