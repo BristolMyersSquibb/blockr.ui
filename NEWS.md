@@ -1,5 +1,70 @@
 # blockr.ui (development version)
 
+* A `Blockr.menu()` can carry a tool, `config.tool` (`{ icon, label,
+  onSelect }`), at the end of its caption line in the top right corner: an
+  icon button named by its tooltip that opens the menu's list somewhere
+  fuller (#94). Tab moves to it from the filter box, and a click closes the
+  menu and hands `onSelect` what was typed in the filter box. The menu for
+  the dock's block actions uses it to open the block browser in the
+  sidebar, with the new `open` icon, a box with an arrow out of its corner.
+  The spec's "Picking a block" now keeps the browser and its form for a
+  block's and a link's IDs, which cannot be changed after adding.
+
+* The new token `--blockr-logo` is the blockr logo's green, `#089e76`, which
+  the design spec now names as the third colour allowed outside the palette
+  (#95). Like the block category colours, it is the same under every theme
+  and in the dark scheme, and it clears 3:1 on the surface in both.
+
+* The new `Blockr.menu.delegate(selector, config)` opens and closes the
+  menu of every trigger that matches `selector`, including triggers added
+  to the page later, such as the "…" buttons on the dock's block cards
+  (#79). A click and the down arrow act as on a trigger wired with
+  `Blockr.menu.bind()`, so a menu opened from the keyboard starts on its
+  first row. A function `config` is read on each open and is given the
+  trigger. Nothing marks a trigger before its first open, so its markup
+  carries `aria-haspopup="menu"` and `aria-expanded="false"`.
+
+* The new `base_dep()` is the stylesheet for a page that does not load
+  Bootstrap (#85): a reset of the browser's defaults, Open Sans (bundled:
+  latin, latin-ext, greek, and math for operators such as ≤, ≥ and ≠), and
+  the look of the markup Shiny's own inputs emit (`form-group`,
+  `form-control`, `checkbox`, `btn`). It brings `theme_dep()` along, whose
+  `--bs-btn-*` values its buttons read, so they look the same with or
+  without Bootstrap.
+
+* The new `dropdown()` builds a panel that opens under its toggle and stays
+  open while it is worked in (a search field, a list edited in place), as
+  the navbar's menus need, which are Bootstrap dropdowns today. Its script,
+  `Blockr.dropdown` in `controls_dep()`, moves the open panel to the page
+  body and places it as a menu is placed, so no panel's overflow clips it.
+
+* The theme layer draws `.btn-outline-primary` as the main kind and
+  `.btn-outline-danger` as the destructive one, so they look the same with
+  or without Bootstrap. With Bootstrap, the Download and Delete buttons of
+  blockr.session's workflow manager lose its blue and red outlines, and
+  blockr.dock's "Add panel" turns from secondary to main.
+
+* The words beside a radio button are no longer drawn as a field's label,
+  12px and muted, but as text, as a checkbox's are.
+
+* The theme layer, `theme_dep()`, draws Shiny's `checkboxInput()` and
+  `checkboxGroupInput()`, inline or not, and bslib's `input_switch()` as the
+  design system's checkbox, so R code keeps calling them and on/off looks
+  the same everywhere.
+
+* Rows in a menu of actions (`Blockr.menu`, `action_menu()`) take radius 4,
+  like the rows of a Select list, instead of 6.
+
+* A new layer, `--blockr-z-overlay` (1000, Bootstrap's `$zindex-dropdown`),
+  for an overlay that belongs to the content but is fixed on `<body>`, such
+  as a drag ghost or a drop line: above the content, under the navbar and
+  everything that floats.
+
+* The small icons gain `"eye"`, `"dots"`, `"minus"`, `"info"`, `"warning"`,
+  `"maximize"` and `"restore"`, the icons blockr.dock and blockr.extra still
+  took from Font Awesome, through `shiny::icon()` or dockViewR's defaults
+  (#85).
+
 * The new `shiny_input_batch_dep()` dependency skips the empty input messages
   Shiny has sent after every deferred input since 1.7.5: its batcher never
   records that a send is queued, so each deferred `setInput` queues one, and
@@ -72,6 +137,14 @@
 
 * The new `tool_button()` is the design system's 26px icon button, named
   by a tooltip.
+
+* The new `gear_tray()` with `tray_section()` draws the gear and its tray
+  for a block whose UI is written in R. The tray lays out Shiny's own inputs
+  at the design system's sizes.
+
+* The dropdown of a selectize input, as `selectInput()` draws it, is a layer
+  on the dismiss stack while it is open, so Escape closes it before the gear
+  tray, modal or panel around it.
 
 * An element built in R can carry its tooltip as a `data-blockr-tooltip`
   attribute, and a badge after the name as `data-blockr-tooltip-badge`

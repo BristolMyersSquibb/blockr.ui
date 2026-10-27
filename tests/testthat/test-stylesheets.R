@@ -11,11 +11,23 @@ test_that("no selector is styled in two stylesheets", {
   files <- files[!grepl("tokens", basename(files))]
 
   selectors <- lapply(files, css_selectors)
-  owners <- split(
-    rep(basename(files), lengths(selectors)),
-    blockr.core::unlst(selectors)
+  owners <- lapply(
+    split(
+      rep(basename(files), lengths(selectors)),
+      blockr.core::unlst(selectors)
+    ),
+    unique
   )
-  shared <- owners[lengths(lapply(owners, unique)) > 1L]
+  shared <- owners[lengths(owners) > 1L]
+
+  # The base sheet stands in for Bootstrap on a page without it, and the
+  # theme layer restyles over it as it does over Bootstrap, on Bootstrap's
+  # own selectors. The two set different properties there.
+  over_base <- names(shared) %in% c("html", "body", ".form-control") &
+    blockr.core::lgl_ply(
+      shared, setequal, c("blockr-base.css", "blockr-theme.css")
+    )
+  shared <- shared[!over_base]
 
   expect_gt(length(owners), 0L)
   expect_identical(

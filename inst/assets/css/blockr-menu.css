@@ -74,10 +74,10 @@
   padding-top: 4px;
 }
 
-/* Rows: 34px at 14px, radius 6, 10px side padding, a little more air than a
-   Select list, which is read top to bottom where a menu is scanned for one
-   verb. Hover and the keyboard row share one look, where meta text and icons
-   turn default. */
+/* Rows: 34px at 14px, radius 4 like every list row, 10px side padding. A
+   little more air than a Select list, which is read top to bottom where a
+   menu is scanned for one verb. Hover and the keyboard row share one look,
+   where meta text and icons turn default. */
 .blockr-menu__item,
 .dropdown-item.blockr-menu__item {
   display: flex;
@@ -88,7 +88,7 @@
   box-sizing: border-box;
   padding: 7px 10px;
   border: none;
-  border-radius: var(--blockr-radius-md);
+  border-radius: var(--blockr-radius-sm);
   background: transparent;
   color: var(--blockr-color-text-default);
   font: inherit;
@@ -272,6 +272,29 @@
   white-space: nowrap;
 }
 
+/* A caption with a tool at its end (config.tool): the tool sits in the
+   panel's top right corner and the text before it is cut off. The filter box
+   below pulls up over the 6px under the tool, so it never covers it. */
+.blockr-menu__caption--tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 6px 10px;
+}
+
+.blockr-menu__caption-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 24px, as a row's "…" tool is. */
+.blockr-menu__caption .blockr-menu__tool {
+  width: 24px;
+  height: 24px;
+}
+
 /* The filter box: part of the menu, not a field. 30px, 13px, no focus ring,
    since it holds the focus the whole time the menu is open. It stays on top
    while the rows scroll under it. */
@@ -322,4 +345,25 @@
   font-style: italic;
   font-size: var(--blockr-font-size-sm);
   color: var(--blockr-color-text-muted);
+}
+
+/* ============================================================
+   Dropdown (Blockr.dropdown)
+   ============================================================
+   A panel under its toggle that stays open while it is worked in. Closed,
+   it waits hidden beside its toggle; open, it is on <body> (Blockr.place),
+   so no panel's overflow clips it, as an action menu's list is. The panel
+   takes the menu surface when it also carries `.blockr-menu`, as dropdown()
+   builds it. */
+
+.blockr-dropdown {
+  display: inline-flex;
+}
+
+.blockr-dropdown__panel {
+  z-index: var(--blockr-z-menu);
+}
+
+.blockr-dropdown:not(.is-open) > .blockr-dropdown__panel {
+  display: none;
 }

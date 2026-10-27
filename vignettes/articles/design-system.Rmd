@@ -19,8 +19,8 @@ there. Token values come from `inst/assets/css/blockr-tokens.css` and
 - Components read meaning tokens only. Palette tokens (`--blockr-grey-500`,
   `--blockr-blue-600`) are read by other tokens and never by a component.
 - No UI colour outside the palette, and no grey that is not a ramp step. Data
-  colours and block category colours are the two exceptions, each with its own
-  source (see [Foundations](#foundations)).
+  colours, block category colours and the logo's green are the three
+  exceptions, each with its own source (see [Foundations](#foundations)).
 - Tints are computed from meaning tokens with `color-mix()`, never from a
   palette token and never written as rgba literals, so they follow a theme
   and the dark scheme. The ones used in many places are tokens themselves
@@ -58,13 +58,14 @@ The second word of a token's name says what kind it is.
 | | `--blockr-focus-<aspect>`, `--blockr-transition`, `--blockr-mark-<aspect>` | `--blockr-focus-outline` | |
 | | `--blockr-z-<layer>` | `--blockr-z-menu` | anything positioned against the page ([Stacking](#floating)) |
 | | `--blockr-category-<category>` | `--blockr-category-plot` | the block's mark ([Block category colours](#foundations)) |
+| | `--blockr-logo` | `--blockr-logo` | the blockr logo ([Logo](#foundations)) |
 | Local | `--blockr-<owner>-<thing>` | `--blockr-dock-spinner-delay` | its owner's stylesheet only |
 
 A global token's second word is one of `color`, `font`, `radius`, `control`,
-`shadow`, `focus`, `transition`, `mark`, `z`, `category`, or a palette hue.
-Anything else is local. For colour, `<property>` is `text`, `bg` or `border`
-and comes first, because a colour chosen for text is not automatically right
-as a fill.
+`shadow`, `focus`, `transition`, `mark`, `z`, `category`, `logo`, or a palette
+hue. Anything else is local. For colour, `<property>` is `text`, `bg` or
+`border` and comes first, because a colour chosen for text is not
+automatically right as a fill.
 
 ### Palette
 
@@ -318,6 +319,13 @@ the same values.
 | utility | `#cccccc` |
 | uncategorized | `#999999` |
 
+### Logo
+
+One token, `--blockr-logo`, `#089e76`, read by the logo at the left of the
+navbar ([The navbar](#actions)). Like the block category colours, it is
+outside the palette and identical under every theme and in dark mode. It
+clears 3:1 on the surface, as an icon must: 3.4:1 in light and 5.1:1 in dark.
+
 Drawn in the [design system page](design-system/index.html#foundations).
 
 ---
@@ -415,6 +423,9 @@ There is no 16px section heading inside a block.
   chart's prepare script).
 - The crossfilter's settings and the patient profile's gear panel use the same
   tray.
+- In a block rendered in R, `gear_tray()` and `tray_section()` draw it. Its
+  fields are Shiny's own inputs, with `updateOn = "blur"` on `textInput()` and
+  `numericInput()`.
 
 ### The output
 
@@ -691,7 +702,9 @@ selected row, the active group's front tab.
 On/off is a bare checkbox everywhere: in the gear tray, on a block's face and
 in the board options. Core's `bslib::input_switch` calls, Shiny's
 `checkboxInput`s, the pharma header switch and the on/off pills all become
-`Blockr.checkbox`; a Bootstrap `.form-check` override covers the R side.
+`Blockr.checkbox`. On the R side the theme layer does it: `theme_dep()` draws
+Shiny's `checkboxInput()` and `checkboxGroupInput()` and bslib's
+`input_switch()` as this checkbox, so R code keeps calling them.
 
 - Box: 16px, radius 4, 1px `border-strong`, `bg-surface`. Hover: border
   `text-muted`.
@@ -882,7 +895,9 @@ exception (see [Special blocks](#special)).
 
 The icons are blockr.ui's, one SVG file each, read two ways: `Blockr.icons`
 in JavaScript and `small_icon()` in R. A package draws them from there rather
-than keeping a copy of the SVG.
+than keeping a copy of the SVG, and rather than from Font Awesome through
+`shiny::icon()`, which loads two stylesheets of about 2,400 rules (26 KB
+compressed) and a 156 KB font for one glyph.
 
 ### Chevrons
 
@@ -1019,6 +1034,7 @@ A z-index is one of two things, and no other number is written:
 
 | Layer | Token | Value | Bootstrap |
 |---|---|---|---|
+| Overlay in the content (a drag ghost, a drop line) | `--blockr-z-overlay` | 1000 | `$zindex-dropdown` |
 | Sticky header | `--blockr-z-sticky` | 1020 | `$zindex-sticky` |
 | Fixed bar | `--blockr-z-fixed` | 1030 | `$zindex-fixed` |
 | Side panel over the page | `--blockr-z-offcanvas` | 1045 | `$zindex-offcanvas` |
@@ -1028,7 +1044,10 @@ A z-index is one of two things, and no other number is written:
 | Toast | `--blockr-z-toast` | 1090 | `$zindex-toast` |
 
 A layer sits above everything it can open from: a menu opens from a modal or a
-side panel, and a tooltip names a menu's rows. The tests in blockr.ui hold its
+side panel, and a tooltip names a menu's rows. The overlay layer is for something
+that belongs to the content but has to be fixed on `<body>` (Shiny's output
+wrappers can leave nothing to position against): it covers the content it is
+dragged over and stays under the navbar and everything that floats. The tests in blockr.ui hold its
 stylesheets to these two forms and the layers to Bootstrap's values.
 
 ### Dismissing
@@ -1078,8 +1097,13 @@ Every menu, dropdown and list that floats uses one surface:
   it. The beak belongs to the gear tray only.
 - Menus of actions are `Blockr.menu` (blockr.ui): rows, gaps, dividers,
   group titles and an optional head. A menu of actions is a little airier
-  than a Select list: 6px panel padding and rows 34px at radius 6
-  (`radius-md`), in the same radius-8 panel.
+  than a Select list: 6px panel padding and rows 34px, at the same radius 4
+  in the same radius-8 panel.
+- A menu can carry one tool, at the end of its caption line in the top right
+  corner: a 24px icon button, named by its tooltip, that opens the menu's
+  list somewhere fuller and takes what was typed in the filter box along.
+  The block actions' menu has one, "Open in the sidebar"
+  ([Picking a block](#floating)).
 - Plain actions have no icon. A row gets one only when it is more than a
   plain action: it opens a mode or another surface ("Manage pages"), or it
   destroys something ("Remove", a bin). Such a row sits in a group of its
@@ -1148,8 +1172,9 @@ actions alike. Arrows move the row, Enter picks, typing filters. In a menu of
 actions the pointer moves the same row, Home and End jump, and Space picks
 too; opened from the keyboard, the menu starts on its first row, and the down
 arrow on its trigger opens it. Escape closes and returns focus to the
-trigger; Tab and an outside click close. A pick closes the menu; a multi pick
-keeps it open and keeps the filter text.
+trigger; an outside click closes, and so does Tab, after stopping at the
+menu's tool where there is one. A pick closes the menu; a multi pick keeps it
+open and keeps the filter text.
 
 ### The block's "…" menu
 
@@ -1193,9 +1218,12 @@ Escape hides it.
 - **Adding a block** is one menu at the "+", everywhere: the outline, a
   block's append, the board's Add block. Search on top, category titles, one
   row per block type with its 24px mark, its name and the package as a badge.
-  Rows carry no description. The block's ID is generated, and its title is
-  renamed on the block after it is added. The dock's block browser sidebar and
-  its "configure before adding" step go.
+  Rows carry no description. A pick adds the block with a generated ID, and
+  its link with a generated ID on the first free input. The menu's tool,
+  "Open in the sidebar", opens the same list as the dock's block browser,
+  whose rows unfold into a form that sets the block's ID and title, its
+  links' IDs and the input a link lands on before the block is added: an ID
+  cannot be changed afterwards.
 - **Picking a block already on the board** (add a panel, link to, add to a
   stack) uses the same menu, listing the board's blocks: mark, title, and the
   block type as meta text. The Bootstrap modal with selectize goes.
@@ -1609,13 +1637,14 @@ Drawn in the [design system page](design-system/index.html#authors).
 ### Where the code lives
 
 Package blockr.ui owns the tokens (`inst/assets/css/blockr-tokens.css`,
-`blockr-tokens-dark.css`), the block category colours among them, and the
-shared components: the params grid (moving from blockr.extra),
-`Blockr.Select` and its placement routine, `Blockr.checkbox`, the badge, tag
-and pill styles, the slot and offer rules (today declared twice, in
-blockr.viz `chart.css` and blockr.dm `crossfilter-block.css`), the gear
-button, the tool button and the action menu (`tool_button()`,
-`action_menu()`), the button classes (`.blockr-btn`), the small icons
+`blockr-tokens-dark.css`), the block category colours and the logo's green
+among them, and the shared components: the params grid (moving from
+blockr.extra), `Blockr.Select` and its placement routine, `Blockr.checkbox`,
+the badge, tag and pill styles, the slot and offer rules (today declared
+twice, in blockr.viz `chart.css` and blockr.dm `crossfilter-block.css`), the
+gear button, the tool button and the action menu (`tool_button()`,
+`action_menu()`), the button classes (`.blockr-btn`), the gear tray for
+blocks rendered in R (`gear_tray()`), the small icons
 (`Blockr.icons`, `small_icon()` in R), the block's mark (`block_mark()`,
 `block_mark_svg()`), and the column-label reader. Package blockr.dock owns
 the dock header, the "…" menu, the block status dot and its spec
@@ -1624,9 +1653,9 @@ hides the gear in simplified mode. Package blockr.theme owns data colours.
 
 The token tests in blockr.ui check that the vocabulary changes only
 deliberately, that every name follows the grammar or is a legacy alias, that
-the controls read meaning tokens only, that icons and status borders clear
-3:1 on the surface in both schemes, and that consumers' fallbacks agree with
-the tokens. Palette and legacy reads elsewhere in blockr.ui change only
+the controls read meaning tokens only, that icons, status borders and the logo
+clear 3:1 on the surface in both schemes, and that consumers' fallbacks agree
+with the tokens. Palette and legacy reads elsewhere in blockr.ui change only
 deliberately too. To do: warn on every palette or legacy read in the packages
 that consume the tokens.
 

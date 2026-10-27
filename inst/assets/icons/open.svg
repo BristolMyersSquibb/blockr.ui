@@ -1,0 +1,8 @@
+<!-- A menu's tool that opens its list somewhere fuller, as the block actions'
+     menu opens the dock's block browser in the sidebar: a box with an arrow
+     out of its top right corner, after Bootstrap's box-arrow-up-right, at the
+     menu icons' 1.25 stroke. -->
+<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M7 2.5H4A1.5 1.5 0 0 0 2.5 4v8A1.5 1.5 0 0 0 4 13.5h8a1.5 1.5 0 0 0 1.5-1.5V9"></path>
+  <path d="M10 2.5h3.5V6M13.5 2.5 8 8"></path>
+</svg>

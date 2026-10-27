@@ -302,6 +302,48 @@ Blockr.place = (panel, anchor, opts) => {
 };
 
 /**
+ * Carry a panel rendered in R to <body> while it floats, and back.
+ *
+ * The action menu's list and the dropdown's panel hold Shiny markup and
+ * float over every ancestor's overflow and stacking (dock panels, offcanvas,
+ * modals), so while open they sit on <body>, and closed they go back where
+ * they were, to leave the page with their owner. Shiny's bindings go with
+ * the node. Blockr.portal(panel, anchor, gone) moves `panel` to <body>; the
+ * handle's restore() puts it back. If `anchor` leaves the page meanwhile (a
+ * block removed, a dropdown rendered again), `gone` runs to close the panel,
+ * and restore() unbinds the panel and removes it: there is nothing to go
+ * back to.
+ *
+ * @param {HTMLElement} panel
+ * @param {HTMLElement} anchor
+ * @param {() => void} gone
+ * @returns {BlockrPortalHandle}
+ */
+Blockr.portal = (panel, anchor, gone) => {
+  const home = panel.parentNode;
+  const next = panel.nextSibling;
+  document.body.appendChild(panel);
+  /** @type {MutationObserver | null} */
+  let watch = null;
+  if (typeof MutationObserver !== 'undefined') {
+    watch = new MutationObserver(() => { if (!anchor.isConnected) gone(); });
+    watch.observe(document.body, { childList: true, subtree: true });
+  }
+  return {
+    restore: () => {
+      if (watch) { watch.disconnect(); watch = null; }
+      if (home && home.isConnected) {
+        home.insertBefore(panel, next && next.parentNode === home ? next : null);
+      } else {
+        const shiny = /** @type {any} */ (window).Shiny;
+        if (shiny && shiny.unbindAll) shiny.unbindAll(panel);
+        panel.remove();
+      }
+    }
+  };
+};
+
+/**
  * Toggle the canonical required-empty amber cue (blockr-blocks.css
  * .blockr-field--required-empty) on a field wrapper or standalone input.
  * One name keeps call sites greppable for the blockr.ui move.
@@ -697,9 +739,10 @@ Blockr.tooltip = (() => {
  * pointer moves it too; Enter or Space clicks it, so a row does the same
  * whether it is picked by key or by pointer. A row disabled by its author is
  * passed over and does nothing. Opened from the keyboard, a menu starts on
- * its first row. Tab closes it and leaves the focus on the trigger, for the
- * browser to move on from; Escape closes it and hands the focus back, and a
- * click outside closes it. One menu, of either kind, is open at a time.
+ * its first row. Tab stops at the menu's tool where it has one, then closes
+ * it and leaves the focus on the trigger, for the browser to move on from;
+ * Escape closes it and hands the focus back, and a click outside closes it.
+ * One menu, of either kind, is open at a time.
  */
 (() => {
   const ROW = '.blockr-menu__item';
@@ -800,7 +843,15 @@ Blockr.tooltip = (() => {
       if (row && row !== active && usable(row)) setActive(row);
     }, on);
     panel.addEventListener('mouseleave', () => setActive(null), on);
+    const tool = m.tool || null;
     panel.addEventListener('keydown', (e) => {
+      // The tool is a button of its own, so Enter and Space click it. From it,
+      // Shift+Tab goes back to what holds the focus, and Tab leaves the menu.
+      if (tool && e.target === tool) {
+        if (e.key === 'Tab' && e.shiftKey) { e.preventDefault(); focus.focus(); }
+        else if (e.key === 'Tab') close(true);
+        return;
+      }
       // Home, End and Space belong to the filter box while it has the focus.
       const box = e.target instanceof HTMLInputElement ? e.target : null;
       if (e.key === 'ArrowDown') { e.preventDefault(); step(1); }
@@ -816,9 +867,14 @@ Blockr.tooltip = (() => {
         const row = active || (box && box.value ? pickable()[0] : null);
         if (row) row.click();
       }
-      // Back on the trigger first, so the browser's Tab moves on from there;
-      // from the removed panel it would start over at the top of the page.
-      else if (e.key === 'Tab') close(true);
+      // Tab stops at the menu's tool, where it has one. Otherwise the focus
+      // goes back on the trigger first, so the browser's Tab moves on from
+      // there; from the removed panel it would start over at the top of the
+      // page.
+      else if (e.key === 'Tab') {
+        if (tool && !e.shiftKey) { e.preventDefault(); tool.focus(); }
+        else close(true);
+      }
     }, on);
     panel.addEventListener('focusout', (e) => {
       const to = e.relatedTarget;
@@ -887,6 +943,13 @@ Blockr.tooltip = (() => {
    * placeholder) adds a filter box that narrows the rows as you type and
    * holds the focus; `config.minWidth` widens the panel.
    *
+   * A `config.tool` ({ icon, label, onSelect }) puts a tool at the end of the
+   * caption line, in the menu's top right corner: an icon button, named by
+   * `label` in its tooltip, that opens the menu's list somewhere fuller, as
+   * the block actions' menu opens the dock's block browser in the sidebar.
+   * Tab moves to it from the filter box. A click closes the menu and hands
+   * `onSelect` the filter box's text.
+   *
    * `config.head` ({ title, badge?, text? }) puts a block of text above the
    * rows, as a link's menu in the outline names the link. `align` is 'start'
    * (default) or 'end', for a trigger in a header row. `onClose` runs once
@@ -898,6 +961,8 @@ Blockr.tooltip = (() => {
    *
    * Blockr.menu.bind(trigger, config) wires a button to open and close its
    * menu; `config` may be a function, read on each open.
+   * Blockr.menu.delegate(selector, config) does the same for every trigger
+   * that matches `selector`, including those added to the page later.
    *
    * @param {HTMLElement} anchor
    * @param {BlockrMenuConfig} config
@@ -931,7 +996,23 @@ Blockr.tooltip = (() => {
       panel.appendChild(head);
     }
 
-    if (config.caption) {
+    /** @type {HTMLButtonElement | null} */
+    let tool = null;
+    if (config.tool) {
+      const cap = document.createElement('div');
+      cap.className = 'blockr-menu__caption blockr-menu__caption--tool';
+      const text = document.createElement('span');
+      text.className = 'blockr-menu__caption-text';
+      text.textContent = config.caption || '';
+      tool = document.createElement('button');
+      tool.type = 'button';
+      tool.className = 'blockr-tool blockr-menu__tool';
+      tool.setAttribute('aria-label', config.tool.label);
+      tool.innerHTML = iconFor(config.tool.icon);
+      Blockr.tooltip.set(tool, config.tool.label);
+      cap.append(text, tool);
+      panel.appendChild(cap);
+    } else if (config.caption) {
       const cap = document.createElement('div');
       cap.className = 'blockr-menu__caption';
       cap.textContent = config.caption;
@@ -1072,6 +1153,7 @@ Blockr.tooltip = (() => {
       panel,
       list,
       focus: filterInput || list,
+      tool,
       anchor,
       width: { min: config.minWidth || 180, max: Math.max(config.minWidth || 180, 320) },
       align: config.align || 'start',
@@ -1118,6 +1200,18 @@ Blockr.tooltip = (() => {
     };
     if (filterInput) filterInput.addEventListener('input', applyFilter);
 
+    // The tool closes the menu as a pick does, then hands on what was typed,
+    // so the fuller view can open on the same rows.
+    if (tool && config.tool) {
+      const { onSelect } = config.tool;
+      tool.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const query = filterInput ? filterInput.value : '';
+        d.close(true);
+        onSelect(query);
+      });
+    }
+
     return { el: panel, close: () => d.close(false) };
   };
 
@@ -1125,25 +1219,90 @@ Blockr.tooltip = (() => {
   const menu = (anchor, config) => build(anchor, config);
 
   /**
+   * A click or the down arrow on a trigger, wired by bind() or matched by
+   * delegate(): it closes the trigger's menu if that is the one open, and
+   * otherwise opens it, on its first row if the keyboard opened it.
+   * @param {HTMLElement} trigger
+   * @param {BlockrMenuSource} config
+   * @param {boolean} keyboard
+   */
+  const toggle = (trigger, config, keyboard) => {
+    if (open && open.anchor === trigger) { open.close(); return; }
+    build(trigger, typeof config === 'function' ? config(trigger) : config, keyboard);
+  };
+
+  /**
    * @param {HTMLElement} trigger
    * @param {BlockrMenuConfig | (() => BlockrMenuConfig)} config
    */
   menu.bind = (trigger, config) => {
-    const read = () => (typeof config === 'function' ? config() : config);
-    /** @param {boolean} keyboard */
-    const toggle = (keyboard) => {
-      if (open && open.anchor === trigger) { open.close(); return; }
-      build(trigger, read(), keyboard);
-    };
     trigger.setAttribute('aria-haspopup', 'menu');
     trigger.setAttribute('aria-expanded', 'false');
     // A click the keyboard made (Enter or Space on the button) has no
     // pointer position: detail is 0.
-    trigger.addEventListener('click', (e) => { e.preventDefault(); toggle(e.detail === 0); });
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggle(trigger, config, e.detail === 0);
+    });
     trigger.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowDown') { e.preventDefault(); toggle(true); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); toggle(trigger, config, true); }
     });
   };
+
+  /*
+   * The menus of triggers that come and go, as the dock's block cards do:
+   * bind() wires one trigger, and one added to the page after it ran has no
+   * menu. Blockr.menu.delegate(selector, config) serves every trigger that
+   * matches `selector` from one pair of document listeners, as the action
+   * menu's triggers are served, so a trigger added later needs nothing but
+   * to match. A click and the down arrow act on it as on a trigger wired
+   * with bind(). A function `config` is given the trigger, so one selector
+   * serves triggers whose menus differ.
+   *
+   * Nothing marks a trigger before its first open, so its markup carries
+   * aria-haspopup="menu" and aria-expanded="false", as action_menu()'s
+   * does. Where triggers nest, the innermost one opens. Delegating a
+   * selector again replaces its config. The listeners run in the capture
+   * phase, so a handler between the document and the trigger that stops
+   * the event cannot keep the menu shut.
+   */
+
+  /** @type {Map<string, BlockrMenuSource>} */
+  const delegated = new Map();
+
+  /**
+   * The nearest element, from `target` up, that matches a delegated
+   * selector, with that selector's config.
+   * @param {EventTarget | null} target
+   */
+  const delegateOf = (target) => {
+    if (!delegated.size || !(target instanceof Element)) return null;
+    for (let el = /** @type {Element | null} */ (target); el; el = el.parentElement) {
+      for (const [selector, config] of delegated) {
+        if (el.matches(selector)) return { trigger: /** @type {HTMLElement} */ (el), config };
+      }
+    }
+    return null;
+  };
+
+  /** @param {string} selector @param {BlockrMenuSource} config */
+  menu.delegate = (selector, config) => {
+    delegated.set(selector, config);
+  };
+
+  document.addEventListener('click', (e) => {
+    const hit = delegateOf(e.target);
+    if (!hit) return;
+    e.preventDefault();
+    toggle(hit.trigger, hit.config, e.detail === 0);
+  }, true);
+
+  document.addEventListener('keydown', (e) => {
+    const hit = e.key === 'ArrowDown' ? delegateOf(e.target) : null;
+    if (!hit) return;
+    e.preventDefault();
+    toggle(hit.trigger, hit.config, true);
+  }, true);
 
   /*
    * The action menu: a list of actions opened by a button, built in R by
@@ -1182,10 +1341,7 @@ Blockr.tooltip = (() => {
     const panel = /** @type {HTMLElement | null} */ (
       wrap && wrap.querySelector(':scope > .blockr-menu'));
     if (!wrap || !panel) return;
-    const next = panel.nextSibling;
-    /** @type {MutationObserver | null} */
-    let watch = null;
-    document.body.appendChild(panel);
+    const lifted = Blockr.portal(panel, trigger, () => d.close());
     panel.hidden = false;
     const d = drive({
       panel,
@@ -1196,24 +1352,12 @@ Blockr.tooltip = (() => {
       byKeyboard,
       onPick: () => { setTimeout(() => d.close(true), 0); },
       detach: () => {
-        if (watch) watch.disconnect();
         if (shown && shown.trigger === trigger) shown = null;
         panel.hidden = true;
-        if (wrap.isConnected) {
-          wrap.insertBefore(panel, next && next.parentNode === wrap ? next : null);
-        } else {
-          // The block went while the menu was open: nothing to go back to.
-          const shiny = /** @type {any} */ (window).Shiny;
-          if (shiny && shiny.unbindAll) shiny.unbindAll(panel);
-          panel.remove();
-        }
+        lifted.restore();
       }
     });
     shown = { trigger, close: d.close };
-    if (typeof MutationObserver !== 'undefined') {
-      watch = new MutationObserver(() => { if (!trigger.isConnected) d.close(); });
-      watch.observe(document.body, { childList: true, subtree: true });
-    }
   };
 
   document.addEventListener('click', (e) => {
@@ -1283,10 +1427,11 @@ Blockr.tooltip = (() => {
    * the content below is seen moving; Escape inside it, or on the gear,
    * closes it and returns focus to the gear. The gear carries the tooltip "Settings", reports its
    * state in aria-expanded and takes the accent tint while open
-   * (.blockr-gear-active).
+   * (.blockr-gear-active). `open: true` starts it open, without the slide:
+   * a tray drawn again keeps the state it had.
    * @param {HTMLElement} band
    * @param {HTMLButtonElement} gear
-   * @param {{ label?: string }} [opts]
+   * @param {{ label?: string, open?: boolean }} [opts]
    * @returns {BlockrGearTrayHandle}
    */
   function gearTray(band, gear, opts) {
@@ -1303,6 +1448,24 @@ Blockr.tooltip = (() => {
     Blockr.tooltip.set(gear, 'Settings');
     gear.setAttribute('aria-label', 'Settings');
     gear.setAttribute('aria-expanded', 'false');
+    // Open, the tray is a layer (Blockr.layer) in the page: an Escape
+    // pressed in the band or on the gear closes it, and a click outside
+    // leaves it open.
+    function addLayer() {
+      layer = Blockr.layer(band, {
+        from: gear,
+        inPage: true,
+        escape: function () { set(false); gear.focus(); }
+      });
+    }
+
+    if (opts && opts.open) {
+      open = true;
+      gear.classList.add('blockr-gear-active');
+      gear.setAttribute('aria-expanded', 'true');
+      band.classList.add('blockr-settings--open');
+      addLayer();
+    }
 
     /** @param {boolean} next */
     function set(next) {
@@ -1310,15 +1473,8 @@ Blockr.tooltip = (() => {
       open = next;
       gear.classList.toggle('blockr-gear-active', open);
       gear.setAttribute('aria-expanded', open ? 'true' : 'false');
-      // Open, the tray is a layer (Blockr.layer) in the page: an Escape
-      // pressed in the band or on the gear closes it, and a click outside
-      // leaves it open.
       if (open) {
-        layer = Blockr.layer(band, {
-          from: gear,
-          inPage: true,
-          escape: function () { set(false); gear.focus(); }
-        });
+        addLayer();
       } else if (layer) {
         layer.remove();
         layer = null;
@@ -1416,4 +1572,116 @@ Blockr.tooltip = (() => {
   Blockr.checkbox = checkbox;
   Blockr.gearTray = gearTray;
   Blockr.segmented = segmented;
+})();
+
+/**
+ * Blockr.dropdown: a panel that opens under its toggle and stays open while
+ * it is worked in, for a menu that holds more than rows to pick (a search
+ * field, a list that is edited in place, a checkbox). A click outside,
+ * Escape or opening another dropdown closes it; a click inside does not.
+ * Blockr.actionMenu is the other kind, a list of rows that closes on a pick.
+ *
+ * The markup comes from R, from dropdown():
+ *
+ *   <div class="blockr-dropdown" data-align="end">
+ *     <button class="blockr-dropdown__toggle" aria-expanded="false">...</button>
+ *     <div class="blockr-dropdown__panel blockr-menu">...</div>
+ *   </div>
+ *
+ * Closed, the panel waits hidden beside its toggle. Open, it is on <body>
+ * (Blockr.portal), placed under the toggle with Blockr.place, so no
+ * ancestor's overflow or stacking clips it, as an action menu's list is;
+ * closing moves it back. Shiny's bindings go with the node, so the inputs
+ * and outputs in it work while it is open, and a dropdown that leaves the
+ * page while open (its markup rendered again) closes, its panel unbound and
+ * removed. The open
+ * panel is a layer on the dismiss stack (Blockr.layer), which closes it on
+ * Escape and on a click outside. The wrapper carries `.is-open` while it
+ * is open and fires `blockr:dropdown-shown` and `blockr:dropdown-hidden`,
+ * which bubble.
+ */
+Blockr.dropdown = (() => {
+  /** @type {{ wrap: HTMLElement, toggle: HTMLElement, panel: HTMLElement,
+   *           layer: BlockrLayerHandle, placed: BlockrPlaceHandle,
+   *           lifted: BlockrPortalHandle } | null} */
+  let open = null;
+
+  /** @param {Element | null} el */
+  const wrapOf = (el) => /** @type {HTMLElement | null} */ (
+    el && el.closest('.blockr-dropdown'));
+
+  /** @param {HTMLElement} wrap @param {string} part */
+  const partOf = (wrap, part) => /** @type {HTMLElement | null} */ (
+    wrap.querySelector(`:scope > .blockr-dropdown__${part}`));
+
+  /** @param {HTMLElement} wrap @param {string} name */
+  const fire = (wrap, name) => {
+    wrap.dispatchEvent(new CustomEvent(name, { bubbles: true }));
+  };
+
+  /** @param {boolean} [refocus] */
+  const hide = (refocus) => {
+    if (!open) return;
+    const { wrap, toggle, layer, placed, lifted } = open;
+    open = null;
+    layer.remove();
+    placed.stop();
+    wrap.classList.remove('is-open');
+    lifted.restore();
+    toggle.setAttribute('aria-expanded', 'false');
+    if (refocus && toggle.isConnected) toggle.focus();
+    fire(wrap, 'blockr:dropdown-hidden');
+  };
+
+  /** @param {HTMLElement} wrap */
+  const show = (wrap) => {
+    if (open && open.wrap === wrap) return;
+    hide();
+    const toggle = partOf(wrap, 'toggle');
+    const panel = partOf(wrap, 'panel');
+    if (!toggle || !panel) return;
+    wrap.classList.add('is-open');
+    const lifted = Blockr.portal(panel, toggle, () => hide());
+    const placed = Blockr.place(panel, toggle, {
+      width: { min: 180, max: 320 },
+      align: wrap.getAttribute('data-align') === 'end' ? 'end' : 'start'
+    });
+    // The stack has taken the layer off before these run; removing it again
+    // in hide() does nothing.
+    const layer = Blockr.layer(panel, {
+      from: toggle,
+      escape: () => hide(true),
+      outside: () => hide()
+    });
+    open = { wrap, toggle, panel, layer, placed, lifted };
+    toggle.setAttribute('aria-expanded', 'true');
+    fire(wrap, 'blockr:dropdown-shown');
+  };
+
+  document.addEventListener('click', (e) => {
+    const target = e.target instanceof Element ? e.target : null;
+    const toggle = target && target.closest('.blockr-dropdown__toggle');
+    const wrap = toggle ? wrapOf(toggle) : null;
+    if (!wrap || !toggle || toggle.parentElement !== wrap) return;
+    if (open && open.wrap === wrap) hide();
+    else show(wrap);
+  });
+
+  return {
+    /**
+     * Close the dropdown that holds `el` (or is `el`), or whichever is open.
+     * @param {Element} [el]
+     */
+    hide: (el) => {
+      if (!el || (open && (open.wrap === el || open.wrap.contains(el) ||
+                           open.panel.contains(el)))) hide();
+    },
+    /** @param {Element} el the dropdown, or anything inside it */
+    show: (el) => {
+      const wrap = wrapOf(el);
+      if (wrap) show(wrap);
+    },
+    /** The dropdown that is open, or null. */
+    current: () => (open ? open.wrap : null)
+  };
 })();

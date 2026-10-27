@@ -12,8 +12,12 @@ small_icon(name)
 \arguments{
 \item{name}{The icon: \code{"chevron"}, \code{"remove"} (a tag's x, 10px), \code{"x"} (a
 row's remove button, 14px), \code{"grip"} (a drag handle), \code{"plus"},
-\code{"trash"}, \code{"sliders"}, \code{"check"} (a menu's current item), \code{"confirm"}
-(a committed field, a picked option), \code{"code"} or \code{"gear"}.}
+\code{"minus"}, \code{"trash"}, \code{"sliders"}, \code{"check"} (a menu's current item),
+\code{"confirm"} (a committed field, a picked option), \code{"code"}, \code{"gear"},
+\code{"eye"} (a preview toggle), \code{"dots"} (a "…" menu's trigger), \code{"info"},
+\code{"warning"}, \code{"maximize"} or \code{"restore"} (a dock group's maximise
+button), or \code{"open"} (a menu's tool that opens its list somewhere
+fuller).}
 }
 \value{
 For \code{controls_dep()}, an \code{\link[htmltools:tagList]{htmltools::tagList()}} of
@@ -29,10 +33,13 @@ with column and function completions), the Enter button of a field that
 commits on Enter, the required-empty cue, the checkbox, the segmented
 control, the gear tray, the tooltip (\code{Blockr.tooltip}), the menus of
 actions (\code{Blockr.menu} for those built in JavaScript, \code{Blockr.actionMenu}
-for those \code{\link[=action_menu]{action_menu()}} builds in R), the placement routine for
-floating panels (\code{Blockr.place}) and the small icons (\code{Blockr.icons}), all
+for those \code{\link[=action_menu]{action_menu()}} builds in R), the dropdown \code{\link[=dropdown]{dropdown()}} builds
+(\code{Blockr.dropdown}), the placement routine for floating panels
+(\code{Blockr.place}) and the small icons (\code{Blockr.icons}), all
 on the \code{window.Blockr} namespace, together with the rows, pills, labels,
-fields and buttons (\code{.blockr-btn}) they draw.
+fields and buttons (\code{.blockr-btn}) they draw, and the Shiny side of the
+controls: the binding of the gear tray R renders (\code{\link[=gear_tray]{gear_tray()}}), and
+Shiny's selectize dropdowns on the dismiss stack.
 }
 \details{
 The small icons are not in \code{blockr-ui.js}: the dependency writes them into

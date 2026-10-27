@@ -238,6 +238,12 @@ interface BlockrPlaceHandle {
   stop(): void;
 }
 
+/** Handle returned by Blockr.portal (blockr-ui.js). */
+interface BlockrPortalHandle {
+  /** Put the panel back where it was, or unbind and remove it if that left the page. */
+  restore(): void;
+}
+
 interface BlockrPlaceOptions {
   /** Span the anchor (default), or size to content within bounds. */
   width?: 'anchor' | { min: number; max: number };
@@ -328,13 +334,27 @@ interface BlockrMenuConfig {
   filter?: boolean | string;
   /** The panel's least width in px (default 180). */
   minWidth?: number;
+  /**
+   * A tool at the end of the caption line: an icon button, named by `label`,
+   * that opens the menu's list somewhere fuller. A click closes the menu and
+   * hands `onSelect` the filter box's text.
+   */
+  tool?: { icon: string; label: string; onSelect: (query: string) => void };
   onClose?: () => void;
 }
+
+/** A menu's config, or a function that returns it on each open, given the trigger. */
+type BlockrMenuSource = BlockrMenuConfig | ((trigger: HTMLElement) => BlockrMenuConfig);
 
 interface BlockrMenu {
   (anchor: HTMLElement, config: BlockrMenuConfig): { el: HTMLDivElement; close: () => void };
   /** Wire `trigger` to open and close its menu; a function config is read on each open. */
   bind(trigger: HTMLElement, config: BlockrMenuConfig | (() => BlockrMenuConfig)): void;
+  /**
+   * Open and close the menu of every trigger that matches `selector`, including
+   * those added to the page later; delegating a selector again replaces its config.
+   */
+  delegate(selector: string, config: BlockrMenuSource): void;
 }
 
 /** What drives an open menu of actions, of either kind (blockr-ui.js). */
@@ -345,6 +365,8 @@ interface BlockrMenuDrive {
   list: HTMLElement;
   /** Takes the focus: the filter box, else the list. */
   focus?: HTMLElement;
+  /** The menu's tool, the one stop for Tab inside the panel. */
+  tool?: HTMLElement | null;
   /** The trigger. */
   anchor: HTMLElement;
   width: { min: number; max: number };
@@ -367,6 +389,18 @@ interface BlockrActionMenu {
   current(): HTMLElement | null;
   /** Close the open menu, if any. */
   close(): void;
+}
+
+/* --- Blockr.dropdown (blockr-ui.js) --- */
+
+/** The document-level controller of the .blockr-dropdown panels. */
+interface BlockrDropdown {
+  /** Close the dropdown holding `el`, or whichever is open when `el` is omitted. */
+  hide(el?: Element): void;
+  /** Open the dropdown that is, or holds, `el`. */
+  show(el: Element): void;
+  /** The open dropdown's wrapper, or null. */
+  current(): HTMLElement | null;
 }
 
 /* --- Blockr.Input (blockr-input.js) --- */
@@ -416,6 +450,7 @@ interface BlockrNamespace {
   menu: BlockrMenu;
 
   actionMenu: BlockrActionMenu;
+  dropdown: BlockrDropdown;
   uid(prefix?: string): string;
   /** Whether `el`, or anything in it, is cut off by its box. */
   cutOff(el: Element): boolean;
@@ -433,6 +468,11 @@ interface BlockrNamespace {
    * and size changes of anchor and panel (blockr-ui.js).
    */
   place(panel: HTMLElement, anchor: HTMLElement, opts?: BlockrPlaceOptions): BlockrPlaceHandle;
+  /**
+   * Carry a panel rendered in R to <body> while it floats; `gone` runs if
+   * `anchor` leaves the page meanwhile (blockr-ui.js).
+   */
+  portal(panel: HTMLElement, anchor: HTMLElement, gone: () => void): BlockrPortalHandle;
   /** Blockr.Select (blockr-select.js). */
   Select?: BlockrSelectStatic;
   /** Blockr.Input, the code field with completions (blockr-input.js). */
@@ -452,11 +492,11 @@ interface BlockrNamespace {
   ): BlockrSegmentedHandle;
   /** The gear tray behaviour (blockr-ui.js): the gear toggles the band,
    *  which slides open and closed; Escape inside the band or on the gear
-   *  closes it. */
+   *  closes it. `open` starts it open, without the slide. */
   gearTray(
     band: HTMLElement,
     gear: HTMLButtonElement,
-    opts?: { label?: string }
+    opts?: { label?: string; open?: boolean }
   ): BlockrGearTrayHandle;
   /** Toggle the canonical required-empty amber cue on a field wrapper. */
   setRequiredEmpty(el: Element, empty: boolean): void;

@@ -11,7 +11,7 @@ test_that("controls_dep ships the controls after the tokens", {
     c("blockr-tokens", "blockr-icons", "blockr-ui-js", "blockr-blocks-css",
       "blockr-menu-css", "blockr-tooltip-css", "blockr-buttons-css",
       "blockr-settings-band", "blockr-select-js", "blockr-select-css",
-      "blockr-input-js", "blockr-input-css")
+      "blockr-input-js", "blockr-input-css", "blockr-shiny-js")
   )
 
   assets <- system.file("assets", package = "blockr.ui")

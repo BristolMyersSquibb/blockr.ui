@@ -94,6 +94,7 @@
       --blockr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1)
       --blockr-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25)
       --blockr-transition: 0.15s ease
+      --blockr-z-overlay: 1000
       --blockr-z-sticky: 1020
       --blockr-z-fixed: 1030
       --blockr-z-offcanvas: 1045
@@ -113,6 +114,7 @@
       --blockr-category-output: #d55e00
       --blockr-category-utility: #cccccc
       --blockr-category-uncategorized: #999999
+      --blockr-logo: #089e76
       --blockr-color-text-primary: #111827
       --blockr-color-text-secondary: #374151
       --blockr-color-text-subtle: #9ca3af
@@ -203,6 +205,7 @@
       --blockr-control-h-sm: 30px
       --blockr-control-h-xs: 26px
       --blockr-transition: 0.15s ease
+      --blockr-z-overlay: 1000
       --blockr-z-sticky: 1020
       --blockr-z-fixed: 1030
       --blockr-z-offcanvas: 1045
@@ -222,6 +225,7 @@
       --blockr-category-output: #d55e00
       --blockr-category-utility: #cccccc
       --blockr-category-uncategorized: #999999
+      --blockr-logo: #089e76
       --blockr-color-text-primary: #f0f3f7
       --blockr-color-text-secondary: #c2c9d3
       --blockr-color-text-subtle: #6b7686

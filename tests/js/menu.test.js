@@ -3,7 +3,9 @@
  * What a caller can see: the panel opens under its trigger with role menu,
  * draws rows, dividers, titles and a head; arrows move the keyboard row past
  * disabled rows; Enter picks, runs onSelect and closes; Escape closes and
- * hands focus back to the trigger; a click outside closes; bind() toggles.
+ * hands focus back to the trigger; a click outside closes; bind() toggles,
+ * and delegate() does the same for every trigger that matches a selector,
+ * including one added later.
  */
 'use strict';
 
@@ -180,6 +182,109 @@ test('bind(): a click from the keyboard opens on the first row, one from the poi
   win.close();
 });
 
+/* Blockr.menu.delegate(): every trigger that matches a selector, added before
+ * the call or after it. */
+
+/** A "…" button with an icon inside, as a block card draws it. */
+const more = (win, id) => {
+  const b = trigger(win);
+  b.id = id;
+  b.className = 'more';
+  b.innerHTML = '<span class="icon">…</span>';
+  return b;
+};
+const click = (win, el, detail = 1) => {
+  const e = new win.MouseEvent('click', { bubbles: true, cancelable: true, detail });
+  el.dispatchEvent(e);
+  return e;
+};
+const press = (win, el, k) => {
+  const e = new win.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true });
+  el.dispatchEvent(e);
+  return e;
+};
+const list = (win) => panel(win).querySelector('[role="menu"]');
+
+test('delegate() opens the menu of a trigger added after it, from a click anywhere on it', (newWindow) => {
+  const win = newWindow();
+  const reads = [];
+  win.Blockr.menu.delegate('.more', (t) => {
+    reads.push(t.id);
+    return { items: [{ label: `Rename ${t.id}` }, { label: 'Remove' }] };
+  });
+  const a = more(win, 'a');
+  assert.ok(click(win, a.querySelector('.icon')).defaultPrevented);
+  assert.ok(panel(win), 'open after a click on the icon inside it');
+  assert.strictEqual(panel(win).querySelector('.blockr-menu__label').textContent, 'Rename a',
+    'the config read for that trigger');
+  assert.strictEqual(a.getAttribute('aria-expanded'), 'true');
+  assert.strictEqual(list(win).getAttribute('aria-activedescendant'), null,
+    'a click from the pointer marks no row');
+  click(win, a);
+  assert.ok(!panel(win), 'a second click closes it');
+  assert.strictEqual(a.getAttribute('aria-expanded'), 'false');
+
+  const b = more(win, 'b');
+  click(win, a);
+  click(win, b);
+  assert.strictEqual(win.document.querySelectorAll('.blockr-menu').length, 1, 'one menu at a time');
+  assert.strictEqual(panel(win).querySelector('.blockr-menu__label').textContent, 'Rename b');
+  assert.deepStrictEqual(reads, ['a', 'a', 'b'], 'config read on each open');
+  win.close();
+});
+
+test('delegate(): a click from the keyboard or the down arrow opens on the first row', (newWindow) => {
+  const win = newWindow();
+  win.Blockr.menu.delegate('.more', { items: [{ label: 'Rename' }, { label: 'Remove' }] });
+  const a = more(win, 'a');
+  const first = () => panel(win).querySelector('.blockr-menu__item');
+  click(win, a, 0);
+  assert.strictEqual(list(win).getAttribute('aria-activedescendant'), first().id,
+    'Enter or Space on the trigger starts on the first row');
+  press(win, list(win), 'Escape');
+  assert.ok(!panel(win));
+  assert.strictEqual(win.document.activeElement, a, 'focus back on the trigger');
+
+  assert.ok(press(win, a, 'ArrowDown').defaultPrevented, 'the page does not scroll');
+  assert.strictEqual(win.document.activeElement, list(win), 'the down arrow opens it');
+  assert.strictEqual(list(win).getAttribute('aria-activedescendant'), first().id);
+  press(win, list(win), 'ArrowDown');
+  assert.strictEqual(panel(win).querySelector('.blockr-menu__item--active').textContent, 'Remove',
+    'and moves the keyboard row in the open menu');
+  win.close();
+});
+
+test('delegate(): a click or a key elsewhere is left to the page', (newWindow) => {
+  const win = newWindow();
+  win.Blockr.menu.delegate('.more', { items: [{ label: 'Rename' }] });
+  const a = more(win, 'a');
+  const other = trigger(win);
+  assert.ok(!click(win, other).defaultPrevented);
+  assert.ok(!press(win, other, 'ArrowDown').defaultPrevented);
+  assert.ok(!press(win, a, 'ArrowUp').defaultPrevented, 'only the down arrow opens');
+  assert.ok(!panel(win));
+  win.close();
+});
+
+test('delegate(): the trigger nearest the click opens, and a selector delegated again takes its new config', (newWindow) => {
+  const win = newWindow();
+  win.Blockr.menu.delegate('.card', { items: [{ label: 'Card' }] });
+  win.Blockr.menu.delegate('.more', { items: [{ label: 'More' }] });
+  const card = win.document.createElement('div');
+  card.className = 'card';
+  win.document.body.appendChild(card);
+  const a = more(win, 'a');
+  card.appendChild(a);
+  click(win, a.querySelector('.icon'));
+  assert.strictEqual(panel(win).textContent, 'More', 'the button, not the card around it');
+  click(win, card);
+  assert.strictEqual(panel(win).textContent, 'Card');
+  win.Blockr.menu.delegate('.more', { items: [{ label: 'Again' }] });
+  click(win, a);
+  assert.strictEqual(panel(win).textContent, 'Again');
+  win.close();
+});
+
 test('opening a second menu closes the first', (newWindow) => {
   const win = newWindow();
   const a = trigger(win);
@@ -311,4 +416,195 @@ test('a checked row carries a check and its state, without the current weight', 
   assert.strictEqual(rows[1].getAttribute('aria-checked'), 'false');
   assert.ok(!rows[1].querySelector('.blockr-menu__check'));
   win.close();
+});
+
+test('a tool sits at the end of the caption line, named by its tooltip', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, {
+    caption: 'Append to Dataset',
+    filter: true,
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: () => {} },
+    items: [{ label: 'Filter rows' }]
+  });
+  const cap = panel(win).querySelector('.blockr-menu__caption');
+  assert.ok(cap.classList.contains('blockr-menu__caption--tool'));
+  assert.strictEqual(cap.querySelector('.blockr-menu__caption-text').textContent, 'Append to Dataset');
+  const tool = cap.lastElementChild;
+  assert.ok(tool.matches('button.blockr-tool.blockr-menu__tool'), 'the last thing on the line');
+  assert.strictEqual(tool.getAttribute('aria-label'), 'Open in the sidebar');
+  assert.strictEqual(tool.innerHTML, win.Blockr.icons.open, 'the icon by its name');
+  assert.ok(!panel(win).querySelector('[role="menu"]').contains(tool), 'outside the list of rows');
+  win.close();
+});
+
+test('a tool takes the caption line of a menu with no caption', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, {
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: () => {} },
+    items: [{ label: 'One' }]
+  });
+  const cap = panel(win).querySelector('.blockr-menu__caption--tool');
+  assert.strictEqual(cap.textContent, '');
+  assert.ok(cap.querySelector('.blockr-menu__tool'));
+  win.close();
+});
+
+test('a click on the tool closes the menu and hands on the filter box\'s text', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const got = [];
+  let closed = 0;
+  win.Blockr.menu(t, {
+    caption: 'Add a block',
+    filter: true,
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: (q) => got.push(q) },
+    items: [{ label: 'Merge', onSelect: () => got.push('picked') }],
+    onClose: () => { closed++; }
+  });
+  const input = panel(win).querySelector('.blockr-menu__filter-input');
+  input.value = 'merge';
+  input.dispatchEvent(new win.Event('input', { bubbles: true }));
+  panel(win).querySelector('.blockr-menu__tool').click();
+  assert.deepStrictEqual(got, ['merge'], 'the text, and no row picked');
+  assert.ok(!panel(win), 'closed');
+  assert.strictEqual(closed, 1);
+  assert.strictEqual(win.document.activeElement, t, 'focus back on the trigger');
+  win.close();
+});
+
+test('Tab stops at the tool, Shift+Tab goes back, and Tab from the tool closes', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  const got = [];
+  win.Blockr.menu(t, {
+    filter: true,
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: (q) => got.push(q) },
+    items: [{ label: 'One', onSelect: () => got.push('one') }]
+  });
+  const p = panel(win);
+  const box = p.querySelector('.blockr-menu__filter-input');
+  const tool = p.querySelector('.blockr-menu__tool');
+  key(win, box, 'ArrowDown');
+  key(win, box, 'Tab');
+  assert.ok(panel(win), 'still open');
+  assert.strictEqual(win.document.activeElement, tool);
+  // Enter belongs to the button there, not to the keyboard row.
+  key(win, tool, 'Enter');
+  assert.deepStrictEqual(got, [], 'no row picked');
+  tool.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }));
+  assert.strictEqual(win.document.activeElement, box);
+  key(win, box, 'Tab');
+  key(win, tool, 'Tab');
+  assert.ok(!panel(win), 'closed');
+  assert.strictEqual(win.document.activeElement, t);
+  assert.deepStrictEqual(got, []);
+  win.close();
+});
+
+test('Shift+Tab from the filter box closes a menu with a tool, as without one', (newWindow) => {
+  const win = newWindow();
+  const t = trigger(win);
+  win.Blockr.menu(t, {
+    filter: true,
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: () => {} },
+    items: [{ label: 'One' }]
+  });
+  const box = panel(win).querySelector('.blockr-menu__filter-input');
+  box.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }));
+  assert.ok(!panel(win));
+  assert.strictEqual(win.document.activeElement, t);
+  win.close();
+});
+
+/* --- In Chrome ------------------------------------------------------------ */
+
+/* Real keys and a real pointer (browser.js): a click the keyboard makes
+ * reaches the page with detail 0, which is how a delegated trigger tells a
+ * keyboard open from a pointer's. */
+const chrome = require('./browser').test;
+
+chrome('in Chrome, a delegated trigger opens from the pointer, from Enter and from the down arrow', async (page) => {
+  await page.evaluate(() => {
+    window.ran = [];
+    Blockr.menu.delegate('.more', (t) => ({
+      items: [
+        { label: 'Rename', onSelect: () => window.ran.push(`rename ${t.id}`) },
+        { label: 'Remove', onSelect: () => window.ran.push(`remove ${t.id}`) }
+      ]
+    }));
+    // Added after delegate() ran, as a block card is.
+    const b = document.createElement('button');
+    b.id = 'more';
+    b.className = 'more';
+    b.setAttribute('aria-haspopup', 'menu');
+    b.setAttribute('aria-expanded', 'false');
+    b.textContent = '…';
+    document.body.appendChild(b);
+  });
+  const state = () => page.evaluate(() => {
+    const list = document.querySelector('.blockr-menu__list');
+    const row = list && list.getAttribute('aria-activedescendant');
+    return {
+      open: !!list,
+      row: row ? document.getElementById(row).textContent : null,
+      focus: document.activeElement.className,
+      ran: window.ran
+    };
+  });
+  await page.click('#more');
+  assert.deepStrictEqual(await state(), { open: true, row: null, focus: 'blockr-menu__list', ran: [] });
+  await page.click('#more');
+  assert.deepStrictEqual(await state(), { open: false, row: null, focus: 'more', ran: [] });
+  await page.keyboard.press('Enter');
+  assert.deepStrictEqual(await state(), { open: true, row: 'Rename', focus: 'blockr-menu__list', ran: [] });
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('ArrowDown');
+  assert.deepStrictEqual(await state(), { open: true, row: 'Rename', focus: 'blockr-menu__list', ran: [] });
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  assert.deepStrictEqual(await state(), { open: false, row: null, focus: 'more', ran: ['remove more'] });
+});
+
+chrome('in Chrome, Tab reaches the tool, Enter opens it with the filter\'s text, and it sits in the corner', async (page) => {
+  await page.evaluate(() => {
+    window.got = [];
+    const b = document.createElement('button');
+    b.id = 'add';
+    b.textContent = 'Add';
+    document.body.appendChild(b);
+    Blockr.menu(b, {
+      caption: 'Insert between a long block name and another long block name',
+      filter: 'Search blocks',
+      minWidth: 300,
+      tool: { icon: 'open', label: 'Open in the sidebar', onSelect: (q) => window.got.push(q) },
+      items: [{ label: 'Merge', onSelect: () => window.got.push('picked') }]
+    });
+  });
+  const box = await page.evaluate(() => {
+    const r = (sel) => document.querySelector(sel).getBoundingClientRect();
+    const p = r('.blockr-menu');
+    const tool = r('.blockr-menu__tool');
+    const filter = r('.blockr-menu__filter-input');
+    const text = document.querySelector('.blockr-menu__caption-text');
+    return {
+      right: Math.round(p.right - tool.right),
+      top: Math.round(tool.top - p.top),
+      size: [Math.round(tool.width), Math.round(tool.height)],
+      clear: tool.bottom <= filter.top,
+      cut: text.scrollWidth > text.clientWidth
+    };
+  });
+  // 6px of panel padding and its 1px border.
+  assert.deepStrictEqual(box, { right: 7, top: 7, size: [24, 24], clear: true, cut: true });
+  await page.keyboard.type('mer');
+  await page.keyboard.press('Tab');
+  assert.strictEqual(await page.evaluate(() => document.activeElement.getAttribute('aria-label')), 'Open in the sidebar');
+  await page.keyboard.press('Enter');
+  assert.deepStrictEqual(await page.evaluate(() => ({
+    open: !!document.querySelector('.blockr-menu'),
+    got: window.got,
+    focus: document.activeElement.id
+  })), { open: false, got: ['mer'], focus: 'add' });
 });

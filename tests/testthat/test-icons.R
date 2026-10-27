@@ -9,6 +9,15 @@ test_that("small_icon() draws an icon of the set, by name", {
   expect_error(small_icon(c("x", "plus")))
 })
 
+test_that("the set has the icons packages took from Font Awesome", {
+
+  expect_contains(
+    names(icon_set()),
+    c("eye", "dots", "minus", "plus", "trash", "check", "info", "warning",
+      "maximize", "restore")
+  )
+})
+
 test_that("every icon is one svg in the text colour, hidden from readers", {
 
   icons <- icon_set()

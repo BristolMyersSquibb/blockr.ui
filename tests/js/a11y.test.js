@@ -116,6 +116,7 @@ test('the menus pass axe while open, with a head, a filter and every kind of row
     head: { title: 'Filter rows', badge: 'blockr.dplyr', text: 'Keeps the rows that match.' },
     caption: 'Append to Dataset',
     filter: true,
+    tool: { icon: 'open', label: 'Open in the sidebar', onSelect: () => {} },
     items: [
       { title: 'Views' },
       { label: 'Page 1', current: true },

@@ -6,7 +6,13 @@ shipped <- function(dir, pattern) {
   )
 }
 
-layers <- c("sticky", "fixed", "offcanvas", "modal", "menu", "tooltip", "toast")
+layers <- c(
+  "overlay", "sticky", "fixed", "offcanvas", "modal", "menu", "tooltip",
+  "toast"
+)
+
+# Bootstrap names two layers differently.
+bootstrap_name <- c(overlay = "dropdown", menu = "popover")
 
 test_that("a z-index names a layer, or orders siblings within -1 to 3", {
 
@@ -55,5 +61,8 @@ test_that("the layers keep Bootstrap's order and values", {
     blockr.core::chr_xtr(stack, 2L)
   )
 
-  expect_identical(z, unname(bootstrap[sub("^menu$", "popover", layers)]))
+  renamed <- layers %in% names(bootstrap_name)
+  names <- ifelse(renamed, bootstrap_name[layers], layers)
+
+  expect_identical(z, unname(bootstrap[names]))
 })
