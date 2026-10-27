@@ -959,33 +959,37 @@ joins and no fill.
 
 The navbar is blockr.dock's: the board's toolbar, 48px high, `bg-surface`,
 a `border-default` rule under it, every control 30px, tokens only. The dock
-sets out what goes where:
+draws it from a list of items, by default these, in this order:
 
-1. On the left, the logo, the dock's.
-2. After it, the part the board's session management plugin draws (its
+1. The logo, the dock's.
+2. The part the board's session management plugin draws (its
    `preserve_board` plugin): blockr.session's workflow name and save menu,
    the dock's own Import and Export, or nothing on a board without such a
    plugin. The dock takes nothing for granted there.
-3. On the right, the view menu (the current view's name with a chevron) and
-   a 20px `border-default` rule, the dock's.
-4. The read-only indicator on a locked board, the dock's.
-5. The board options (the side panel icon), the dock's.
-6. Last, the items an app adds to the navbar through the dock, in the order
-   the app gives them, such as a help menu or blockr.session's account
-   avatar.
+3. A spacer, which takes the free width and so puts the rest on the right.
+4. The view menu (the current view's name with a chevron) and a 20px
+   `border-default` rule after it, the dock's.
+5. The read-only indicator on a locked board, the dock's.
+6. The board options (the side panel icon), the dock's.
+
+An app adds items of its own through `serve()`, such as a help menu or
+blockr.session's account avatar, and they follow the board options in the
+order it gives them. It can also reorder the items or drop any of them, the
+dock's included.
 
 The plugin's part and the app's items have to fit the bar: one row of 30px
 controls, no field labels, tokens only, their menus from blockr.ui. Where
 the bar runs short, the plugin's part gives way first: the plugin cuts its
 own text short, and a cut-off name gets its tooltip.
 
-- The logo is drawn in blockr's own green, and it is the board's busy
-  indicator. It has no menu. While blocks compute, its seven squares fade
-  and fill again in turn, in the order the R is drawn, and the moment the
-  work ends the logo is whole again. It waits `--blockr-dock-spinner-delay`
-  (500ms) first, so a short update shows nothing, and under reduced motion
-  it slows rather than stops. While it is busy, its label "Computing" is the
-  light tooltip.
+- The logo is drawn in blockr's own green, `--blockr-logo`
+  ([Logo](#foundations)), and it is the board's busy indicator. It has no
+  menu. While blocks compute, its seven squares fade and fill again in turn,
+  in the order the R is drawn, and the moment the work ends the logo is
+  whole again. It waits the `spinner_delay_ms` option (200ms by default)
+  first, so a short update shows nothing, and under reduced motion it slows
+  rather than stops. While it is busy, its label "Computing" is the light
+  tooltip.
 - The board option "Views as tabs", under Theme options, off by default
   and saved with the workflow, puts the views on a second line under a
   `border-default` rule, one tab per view, the current one in weight 600
