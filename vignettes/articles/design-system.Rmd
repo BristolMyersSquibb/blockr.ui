@@ -914,8 +914,8 @@ joins and no fill.
 - A fold (something opens in place: a table section, an outline chapter, a
   settings section) points down when open and right when closed, rotating
   −90°.
-- A menu or select (something floats: Select, a pill, the navbar's view menu,
-  a split button) points down and flips up (180°) while its menu is open.
+- A menu or select (something floats: Select, a pill, the navbar's workflow
+  name, Save and view menu) points down and flips up (180°) while its menu is open.
 - A "go to" arrow (an options page, back, the next page of rows) points right
   or left and does not rotate.
 - Every rotation uses `--blockr-transition`.
@@ -957,23 +957,66 @@ joins and no fill.
 
 ### The navbar
 
-The board's toolbar: 48px high, `bg-surface`, a `border-default` rule under
-it, every control 30px, tokens only.
+The navbar is blockr.dock's: the board's toolbar, 48px high, `bg-surface`,
+a `border-default` rule under it, every control 30px, tokens only. The dock
+draws it from a list of items, by default these, in this order:
 
-- Left: the logo, then the workflow's name, then its save state as 12px
-  `text-muted` text ("Not saved", "Saved just now"), then one quiet "…"
-  workflow menu (save as, copy link, history, new). No split buttons.
-- The workflow's name is its ID: chosen in a dialog at the first save, unique,
-  like a file name (spaces allowed). It is shown in the body face, weight 600,
-  never monospace. There is no separate title.
-- Right: the view menu as a quiet button (current view marked by weight 600,
-  no fill), the board options gear, and the account avatar last: a 28px circle
-  with the count's accent fill (`border-accent` at 14%) and a
-  `text-accent-strong` initial.
-- Hover on every navbar control is `bg-hover`. The spinner's label is the
-  light tooltip.
+1. The logo, the dock's.
+2. The part the board's session management plugin draws (its
+   `preserve_board` plugin): blockr.session's workflow name and save menu,
+   the dock's own Import and Export, or nothing on a board without such a
+   plugin. The dock takes nothing for granted there.
+3. A spacer, which takes the free width and so puts the rest on the right.
+4. The view menu (the current view's name with a chevron) and a 20px
+   `border-default` rule after it, the dock's.
+5. The read-only indicator on a locked board, the dock's.
+6. The board options (the side panel icon), the dock's.
 
-Drawn in the [design system page](design-system/index.html#actions).
+An app adds items of its own through `serve()`, such as a help menu or
+blockr.session's account avatar, and they follow the board options in the
+order it gives them. It can also reorder the items or drop any of them, the
+dock's included.
+
+The plugin's part and the app's items have to fit the bar: one row of 30px
+controls, no field labels, tokens only, their menus from blockr.ui. Where
+the bar runs short, the plugin's part gives way first: the plugin cuts its
+own text short, and a cut-off name gets its tooltip.
+
+- The logo is drawn in blockr's own green, `--blockr-logo`
+  ([Logo](#foundations)), and it is the board's busy indicator. It has no
+  menu. While blocks compute, its seven squares fade and fill again in turn,
+  in the order the R is drawn, and the moment the work ends the logo is
+  whole again. It waits the `spinner_delay_ms` option (200ms by default)
+  first, so a short update shows nothing, and under reduced motion it slows
+  rather than stops. While it is busy, its label "Computing" is the light
+  tooltip.
+- The board option "Views as tabs", under Theme options, off by default
+  and saved with the workflow, puts the views on a second line under a
+  `border-default` rule, one tab per view, the current one in weight 600
+  over a 2px `border-accent` line. Its row at the foot of the view menu,
+  "Show views as tabs", sets the same option and shows a check while it is
+  on. The view menu then shows only its chevron and moves to the end of the
+  tab line, for managing views.
+- Every chevron is the one from [Chevrons](#chevrons): muted, `text-default`
+  on hover, turned while its menu is open. Hover on every navbar control is
+  `bg-hover`.
+
+
+In the drawing, blockr.session is the plugin, and the app adds help and
+blockr.session's avatar:
+
+- The workflow's name is its ID: chosen in a dialog at the first save,
+  unique, like a file name (spaces allowed). It is shown in the body face,
+  weight 600, never monospace, with a chevron. It opens the workflow
+  switcher: the saved workflows, then New workflow. There is no separate
+  title.
+- Save is the word in `text-muted` with a chevron. It opens the save menu:
+  Save (`Mod+S`), Save as new workflow… (`Mod+Shift+S`), Download, then the
+  versions once there is one. No save state is shown as text.
+- The account avatar is a 28px circle with the accent fill (`border-accent`
+  at 14%) and a `text-accent-strong` initial.
+
+Drawn in the [design system page](design-system/index.html#navbar).
 
 ---
 
