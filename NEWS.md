@@ -1,5 +1,24 @@
 # blockr.ui (development version)
 
+* `Blockr.Select.multi()` is now the multi-select that was on trial in
+  blockr.dplyr as `Blockr.Pick`. It takes the same config and returns the
+  same handle, so callers need no change. The field shows the picks as text
+  ("Placebo, Xanomeline High Dose", or "5 of 48" with the names muted)
+  instead of as tags. The open list has the picks on top under "Selected",
+  and its head has the count, All and None. The picks are reported once,
+  when the list closes, not on every tick. They drag into order in the list
+  unless the caller passes `reorderable: false`, as the tags did. New
+  options: `all: false` drops All, `min` and `minHint` hold back None and the
+  last untick, `countLabel` names what is counted, and an option can carry a
+  `group` and `keywords`. `Blockr.Select.menu()` with `mode: 'multi'` is the
+  same list hung under a word, and its handle gains `setOptions()` for new
+  choices while it is open. The new `Blockr.Select.list()` puts the list in
+  place, always open, and reports after a pause in the picking (`delay`,
+  1 s); a long one folds the options not picked (`fold`, `addLabel`).
+  `singleLine` and `maxTagChars` went with the tags and are ignored.
+  `Blockr.Pick` is kept for one release as another name for `multi`, `list`
+  and `menu`.
+
 * A `Blockr.menu()` can carry a tool, `config.tool` (`{ icon, label,
   onSelect }`), at the end of its caption line in the top right corner: an
   icon button named by its tooltip that opens the menu's list somewhere

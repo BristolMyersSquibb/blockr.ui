@@ -10,8 +10,18 @@
 
 /* --- Blockr.Select (blockr-select.js) --- */
 
-/** Option entry: a bare value string, or {value, label} for a muted label. */
-type BlockrSelectOption = string | { value: string; label?: string };
+/**
+ * Option entry: a bare value string, or {value, label} for a muted label. A
+ * multi also reads `display` (shown in place of the value), `group` (heads
+ * the unpicked rows) and `keywords` (matched by the filter).
+ */
+type BlockrSelectOption = string | {
+  value: string;
+  label?: string;
+  display?: string;
+  group?: string;
+  keywords?: string;
+};
 
 interface BlockrSelectConfigBase {
   options?: BlockrSelectOption[];
@@ -67,41 +77,48 @@ interface BlockrSelectSingleConfig extends BlockrSelectConfigBase {
 interface BlockrSelectMultiConfig extends BlockrSelectConfigBase {
   /** Initial values (copied, not aliased). */
   selected?: string[];
-  /** Tags can be drag-reordered (default true). */
+  /** The picks drag into order in the list (default true). */
   reorderable?: boolean;
+  /** `false` drops the All button from the list head (default true). */
+  all?: boolean;
   /**
-   * Keep the tags on one row and collapse the overflow into a "+N" chip,
-   * instead of wrapping and growing the control (default false).
+   * The fewest picks the caller accepts (default 0). None is disabled where
+   * it would leave fewer, and the last picks do not untick.
    */
-  singleLine?: boolean;
+  min?: number;
+  /** Why None or a tick is refused under `min` (default "At least one is needed"). */
+  minHint?: string;
+  /** The word after the count in the list head: "3 of 12 <countLabel>" (default "selected"). */
+  countLabel?: string;
+  /** list() only: ms after the last pick before it reports (default 1000). */
+  delay?: number;
   /**
-   * Shorten tag labels longer than this many characters, cutting the MIDDLE so
-   * both ends survive; the full value stays on the tag's title (default 0, off).
+   * list() only: fold the unpicked rows of a list longer than this under
+   * "+ Add …" (default 12; `false` never folds).
    */
-  maxTagChars?: number;
-  /** Receives a copy of the selected values, in tag order. */
-  onChange?: (value: string[]) => void;
-}
-
-/** Internal union as consumed by createSelect (mode picks the shape). */
-interface BlockrSelectConfig extends BlockrSelectConfigBase {
-  selected?: string | string[] | null;
-  allowEmpty?: boolean;
-  reorderable?: boolean;
-  singleLine?: boolean;
-  maxTagChars?: number;
-  /** `any` so both per-mode signatures are assignable under strict variance. */
-  onChange?: (value: any) => void;
-  title?: string;
+  fold?: number | false;
+  /** list() only: the fold's word, "+ <addLabel> (77)" (default "Add"). */
+  addLabel?: string;
+  /** Lead each option with its label, the value muted after it. */
   labelFirst?: boolean;
+  /** The filter box's prompt (default "Filter"). */
   searchPlaceholder?: string;
+  /** A menu's title. */
+  title?: string;
   onClose?: () => void;
+  /**
+   * Receives a copy of the picks, in pick order: once when a dropdown
+   * closes with them changed, or after a pause in a list in place.
+   */
+  onChange?: (value: string[]) => void;
 }
 
 /** Blockr.Select.menu(): the list alone, hung under a word or a pill. */
 interface BlockrSelectMenuConfig extends BlockrSelectConfigBase {
-  /** 'multi' keeps the menu open across picks; picks show in its head. */
+  /** 'multi' keeps the menu open across picks and reports them when it closes. */
   mode?: 'single' | 'multi';
+  /** Single only: '' survives as "nothing selected". */
+  allowEmpty?: boolean;
   selected?: string | string[] | null;
   /** Names the setting the menu sets (the word that opened it names only the value). */
   title?: string;
@@ -162,8 +179,10 @@ interface BlockrSelectSingleHandle extends BlockrSelectHandleBase {
 }
 
 interface BlockrSelectMultiHandle extends BlockrSelectHandleBase {
-  /** Copy of the selected values, in tag order. */
+  /** Copy of the picks, in pick order. */
   getValue(): string[];
+  /** list() only: report a pending change now rather than after the pause. */
+  flush(): void;
 }
 
 interface BlockrSelectStatic {
@@ -175,6 +194,11 @@ interface BlockrSelectStatic {
     container: HTMLElement,
     config: BlockrSelectMultiConfig
   ): BlockrSelectMultiHandle;
+  /** The multi list in place: always open, reports after a pause in the picking. */
+  list(
+    container: HTMLElement,
+    config: BlockrSelectMultiConfig
+  ): BlockrSelectMultiHandle;
   /**
    * The dropdown on its own, hung under `anchor`. Opens immediately and
    * destroys itself on close.
@@ -182,15 +206,17 @@ interface BlockrSelectStatic {
   menu(
     anchor: HTMLElement,
     config: BlockrSelectMenuConfig
-  ): { close: () => void };
+  ): {
+    close: () => void;
+    setOptions: (opts: BlockrSelectOption[] | null | undefined, sel?: string | string[] | null) => void;
+  };
   /**
    * Capability flag read by the packages that paint the words a menu opens
    * from: a build without it has a single-only menu.
    */
   menuMulti: boolean;
-  /** Exposed for tests. */
-  fitCount(widths: number[], avail: number, gap: number, chipWidth: number): number;
-  midTruncate(value: string, cap: number): string;
+  /** The field's text for a set of picks; exposed for tests. */
+  summary(sel: string[], total: number, placeholder: string): { lead: string; rest: string; empty: boolean };
 }
 
 /* --- Blockr.layer, the dismiss stack (blockr-ui.js) --- */
@@ -475,6 +501,8 @@ interface BlockrNamespace {
   portal(panel: HTMLElement, anchor: HTMLElement, gone: () => void): BlockrPortalHandle;
   /** Blockr.Select (blockr-select.js). */
   Select?: BlockrSelectStatic;
+  /** Blockr.Select's multi forms under the name they had on trial in blockr.dplyr; kept for one release. */
+  Pick?: Pick<BlockrSelectStatic, 'multi' | 'list' | 'menu' | 'summary'>;
   /** Blockr.Input, the code field with completions (blockr-input.js). */
   Input?: BlockrInputStatic;
   /** Design-system checkbox factory (blockr-ui.js). */

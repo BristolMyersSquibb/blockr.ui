@@ -103,7 +103,7 @@ test('the controls set no native title', (newWindow) => {
   const host = () => { const d = doc.createElement('div'); doc.body.appendChild(d); return d; };
   const opts = [{ value: 'AGE', label: 'Age' }, { value: 'SEX', label: 'Sex' }];
   const one = win.Blockr.Select.single(host(), { options: opts, selected: 'AGE' });
-  win.Blockr.Select.multi(host(), { options: opts, selected: ['AGE', 'SEX'], maxTagChars: 2 });
+  win.Blockr.Select.multi(host(), { options: opts, selected: ['AGE', 'SEX'] });
   one.el.querySelector('.blockr-select__control').click();
 
   const input = doc.createElement('input');

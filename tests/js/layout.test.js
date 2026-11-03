@@ -49,7 +49,8 @@ test('a multi menu keeps rows in view under 30 picks', async (page) => {
     const options = Array.from({ length: 40 }, (_, i) => `COLUMN_${i}`);
     Blockr.Select.menu(word, { mode: 'multi', options, selected: options.slice(0, 30), title: 'Columns' });
     const panel = document.querySelector('body > .blockr-select__dropdown');
-    // Between the sticky head, which holds the tags, and the bottom border.
+    // Between the sticky head, which holds the filter box and the count, and
+    // the bottom border.
     const top = panel.querySelector('.blockr-select__head').getBoundingClientRect().bottom;
     const bottom = panel.getBoundingClientRect().top + panel.clientTop + panel.clientHeight;
     return Array.from(panel.querySelectorAll('.blockr-select__option'), (row) => row.getBoundingClientRect())
