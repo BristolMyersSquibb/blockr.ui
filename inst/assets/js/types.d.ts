@@ -79,11 +79,7 @@ interface BlockrSelectMultiConfig extends BlockrSelectConfigBase {
    * both ends survive; the full value stays on the tag's title (default 0, off).
    */
   maxTagChars?: number;
-  /**
-   * Receives a copy of the selected values, in tag order: once when the list
-   * closes with picks changed (not on Escape, which puts them back), and at
-   * once for a tag removed or moved while the list is closed.
-   */
+  /** Receives a copy of the selected values, in tag order. */
   onChange?: (value: string[]) => void;
 }
 
@@ -104,10 +100,7 @@ interface BlockrSelectConfig extends BlockrSelectConfigBase {
 
 /** Blockr.Select.menu(): the list alone, hung under a word or a pill. */
 interface BlockrSelectMenuConfig extends BlockrSelectConfigBase {
-  /**
-   * 'multi' keeps the menu open across picks; picks show in its head and
-   * reach onChange once, as the menu closes (not on Escape).
-   */
+  /** 'multi' keeps the menu open across picks; picks show in its head. */
   mode?: 'single' | 'multi';
   selected?: string | string[] | null;
   /** Names the setting the menu sets (the word that opened it names only the value). */

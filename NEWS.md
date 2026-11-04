@@ -7,13 +7,6 @@
   closes the menu and runs the tool instead of the row. The dock's "+" menu
   uses it for a block's options before adding.
 
-* A multi select (`Blockr.Select.multi()`, and `Blockr.Select.menu()` with
-  `mode: 'multi'`) reports its picks once, when its list closes by a click
-  outside, Tab or the chevron, instead of on every pick. A block that
-  recomputes on each change now recomputes once per visit to the list.
-  Escape puts back the picks the list opened with and reports nothing. A tag
-  removed or dragged while the list is closed still reports at once.
-
 * `Blockr.menu()` takes `multi: true`: a pick ticks or unticks its row and
   the menu stays open, with a tick in a slot every row keeps. When the menu
   closes by a click outside or Tab with the ticks changed, `onChange` gets
