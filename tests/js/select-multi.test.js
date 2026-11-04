@@ -4,8 +4,7 @@
  *
  * Runs blockr-select.js on blockr-ui.js in happy-dom, with a fake clock
  * owning setTimeout so a test says `tick(1000)` instead of waiting out the
- * report delay. These began as blockr.dplyr's tests of Blockr.Pick, the name
- * the multi had on trial there.
+ * report delay.
  */
 'use strict';
 
@@ -45,8 +44,8 @@ function mount(form, config) {
   const handle = win.Blockr.Select[form](doc.getElementById('host'), Object.assign({
     onChange: (v) => changes.push(json(v))
   }, config));
-  const panel = () => doc.querySelector('.blockr-pick__panel');
-  const btn = (text) => Array.from(panel().querySelectorAll('.blockr-pick__bulk-btn'))
+  const panel = () => doc.querySelector('.blockr-select__panel');
+  const btn = (text) => Array.from(panel().querySelectorAll('.blockr-select__bulk-btn'))
     .find((b) => b.textContent.startsWith(text));
   const api = {
     win, doc, handle, changes,
@@ -74,7 +73,7 @@ function mount(form, config) {
       input.value = q;
       input.dispatchEvent(new win.Event('input'));
     },
-    count: () => panel().querySelector('.blockr-pick__count').textContent
+    count: () => panel().querySelector('.blockr-select__count').textContent
   };
   return api;
 }
@@ -261,7 +260,7 @@ test('All picks every option, past the rows the list shows', () => {
 
 /** A key on the filter box. */
 const key = (p, k) => {
-  const input = p.doc.querySelector('.blockr-pick__panel .blockr-select__search');
+  const input = p.doc.querySelector('.blockr-select__panel .blockr-select__search');
   input.dispatchEvent(new p.win.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
 };
 
@@ -294,7 +293,7 @@ test('an open menu takes new choices, keeping the picks made in it', () => {
   const menu = win.Blockr.Select.menu(anchor, {
     mode: 'multi', options: OPTS, selected: ['CR', 'PD'], onChange: (v) => changes.push(json(v))
   });
-  const row = (v) => win.document.querySelector(`.blockr-pick__panel .blockr-select__option[data-value="${v}"]`);
+  const row = (v) => win.document.querySelector(`.blockr-select__panel .blockr-select__option[data-value="${v}"]`);
   row('SD').click();
   // R redrew the word: PD is gone from the data.
   menu.setOptions(['CR', 'NE', 'SD'], ['CR']);
@@ -328,7 +327,7 @@ test('the picks drag into order by default, and report the order on close', () =
   const p = mount('multi', { options: OPTS, selected: ['CR', 'PD', 'SD'] });
   p.open();
   assert.strictEqual(p.row('CR').getAttribute('draggable'), 'true');
-  assert.ok(p.row('CR').querySelector('.blockr-pick__grip'), 'a pick shows its grip');
+  assert.ok(p.row('CR').querySelector('.blockr-select__grip'), 'a pick shows its grip');
   assert.strictEqual(p.row('NE').getAttribute('draggable'), null, 'a row not picked does not drag');
   drag(p, 'SD', 'CR', 'before');
   assert.deepStrictEqual(p.value(), ['SD', 'CR', 'PD']);
@@ -340,7 +339,7 @@ test('reorderable: false leaves the picks in place', () => {
   const p = mount('multi', { options: OPTS, selected: ['CR', 'PD'], reorderable: false });
   p.open();
   assert.strictEqual(p.row('CR').getAttribute('draggable'), null);
-  assert.strictEqual(p.row('CR').querySelector('.blockr-pick__grip'), null);
+  assert.strictEqual(p.row('CR').querySelector('.blockr-select__grip'), null);
 });
 
 test('with a filter typed the picks do not drag', () => {
@@ -350,16 +349,17 @@ test('with a filter typed the picks do not drag', () => {
   assert.strictEqual(p.row('CR').getAttribute('draggable'), null);
 });
 
-test('the field shows up to two picks by name, then a count and the names muted', () => {
-  const face = (p) => [p.doc.querySelector('.blockr-pick__lead').textContent,
-    p.doc.querySelector('.blockr-pick__rest').textContent];
+test('the field shows up to two picks by name, then a count and the names muted, never All', () => {
+  const face = (p) => [p.doc.querySelector('.blockr-select__lead').textContent,
+    p.doc.querySelector('.blockr-select__rest').textContent];
   assert.deepStrictEqual(face(mount('multi', { options: OPTS })), ['None', '']);
   assert.deepStrictEqual(face(mount('multi', { options: OPTS, placeholder: 'Pick columns' })),
     ['Pick columns', '']);
   assert.deepStrictEqual(face(mount('multi', { options: OPTS, selected: ['PD', 'CR'] })), ['PD, CR', '']);
   assert.deepStrictEqual(face(mount('multi', { options: OPTS, selected: ['PD', 'CR', 'SD'] })),
     ['3 of 5', 'PD, CR, SD']);
-  assert.deepStrictEqual(face(mount('multi', { options: OPTS, selected: OPTS.slice() })), ['All 5', '']);
+  assert.deepStrictEqual(face(mount('multi', { options: OPTS, selected: OPTS.slice() })),
+    ['5 of 5', 'CR, NE, PD, PR, SD'], 'never "All": the picks are a list of values');
 });
 
 test('Escape closes a dropdown and reports, like any other close', () => {
@@ -368,7 +368,7 @@ test('Escape closes a dropdown and reports, like any other close', () => {
   p.tickRow('NE');
   // Escape reaches the dismiss stack on the document.
   p.doc.dispatchEvent(new p.win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-  assert.ok(!p.doc.querySelector('.blockr-pick').classList.contains('blockr-select--open'));
+  assert.ok(!p.doc.querySelector('.blockr-select--multi').classList.contains('blockr-select--open'));
   assert.deepStrictEqual(p.changes, [['NE']]);
 });
 
@@ -376,7 +376,7 @@ test('typing on the closed field opens it with the letter as the filter', () => 
   const p = mount('multi', { options: OPTS });
   const control = p.doc.querySelector('.blockr-select__control');
   control.dispatchEvent(new p.win.KeyboardEvent('keydown', { key: 'p', bubbles: true, cancelable: true }));
-  const rows = Array.from(p.doc.querySelectorAll('.blockr-pick__panel .blockr-select__option'))
+  const rows = Array.from(p.doc.querySelectorAll('.blockr-select__panel .blockr-select__option'))
     .map((r) => r.getAttribute('data-value'));
   assert.deepStrictEqual(rows, ['PD', 'PR']);
 });
@@ -389,7 +389,7 @@ test('options with a group show under its name, and the filter matches groups an
   ];
   const p = mount('multi', { options: opts, selected: ['HGB'] });
   p.open();
-  const heads = () => Array.from(p.doc.querySelectorAll('.blockr-pick__group, .blockr-pick__subgroup'))
+  const heads = () => Array.from(p.doc.querySelectorAll('.blockr-select__group, .blockr-select__subgroup'))
     .map((h) => h.textContent);
   assert.deepStrictEqual(heads(), ['Selected', 'Chemistry']);
   p.filter('liver');
@@ -402,7 +402,7 @@ test('options with a group show under its name, and the filter matches groups an
 test('a long list in place folds what is not picked until it is opened', () => {
   const many = Array.from({ length: 20 }, (_, i) => `v${i}`);
   const p = mount('list', { options: many, selected: ['v3'], addLabel: 'Add columns' });
-  const unfold = () => p.doc.querySelector('.blockr-pick__unfold');
+  const unfold = () => p.doc.querySelector('.blockr-select__unfold');
   assert.strictEqual(unfold().textContent, '+ Add columns (19)');
   assert.strictEqual(p.row('v0'), null);
   unfold().click();
@@ -410,10 +410,26 @@ test('a long list in place folds what is not picked until it is opened', () => {
   assert.strictEqual(unfold().textContent, 'Show only the picks');
 });
 
-test('Blockr.Pick, the name on trial, reaches the same widget', () => {
-  const p = mount('multi', { options: OPTS });
-  const { Pick, Select } = p.win.Blockr;
-  assert.strictEqual(Pick.multi, Select.multi);
-  assert.strictEqual(Pick.list, Select.list);
-  assert.strictEqual(Pick.menu, Select.menu);
+test('before its options load, the field names the picks and shows no count', () => {
+  // A filter that fetches its values on the first open starts with the
+  // picks alone, which would otherwise read as every value.
+  const lead = (p) => p.doc.querySelector('.blockr-select__lead').textContent;
+  assert.strictEqual(lead(mount('multi', { options: [], selected: ['hurricane', 'tropical storm'] })),
+    'hurricane, tropical storm');
+  const p = mount('multi', { options: [], selected: ['a', 'b', 'c'] });
+  assert.strictEqual(lead(p), 'a, b, c');
+  p.handle.updateOptions(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']);
+  assert.strictEqual(lead(p), '3 of 9');
+});
+
+test('the field\'s tooltip names every pick with its label', () => {
+  const p = mount('multi', {
+    options: [{ value: 'AGE', label: 'Age' }, { value: 'SEX', label: 'Sex' }],
+    selected: ['AGE', 'SEX']
+  });
+  const tip = p.win.Blockr.tooltip.text(p.doc.querySelector('.blockr-select__control'));
+  assert.match(tip, /AGE/);
+  assert.match(tip, /Age/);
+  assert.match(tip, /SEX/);
+  assert.match(tip, /Sex/);
 });

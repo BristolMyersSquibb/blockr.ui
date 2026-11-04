@@ -685,9 +685,11 @@ selected row, the active group's front tab.
 
 - The field shows the picks as text, each once: one or two by name
   ("Placebo, Xanomeline High Dose"), more as a count with the names muted
-  after it ("5 of 48 AGE, SEX, …"), all of them as "All 48". Nothing picked
-  shows the placeholder, "None" by default. The list is the only place to
-  change the picks.
+  after it ("5 of 48 AGE, SEX, …"). It never says "All": the picks are a
+  list of values, and a value that turns up in the data later is not among
+  them. Until the options are loaded the names alone show. Nothing picked
+  shows the placeholder, "None" by default. The tooltip lists every pick
+  with its label. The list is the only place to change the picks.
 - The open list has the picks on top under "Selected", in pick order, then
   the other options under "Other", in their own order. A tick moves a row up,
   an untick moves it back to its place, both sliding. Options with a group

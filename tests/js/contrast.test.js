@@ -122,7 +122,7 @@ const states = {
       B.setRequiredEmpty(/** @type {HTMLElement} */ (required.parentElement), true);
       B.Select.single(required, { options, allowEmpty: true, placeholder: 'Pick a column', label: 'Weight', bordered: true });
     }, OPTS);
-    await shows(page, '.blockr-pick__rest');
+    await shows(page, '.blockr-select__rest');
     await shows(page, '.blockr-expr-confirm:not([style*="none"])');
   },
 
@@ -202,9 +202,9 @@ const states = {
     }, OPTS);
     // The filter box is in the list, so the field takes the focus and the
     // key that opens it.
-    await page.focus('.blockr-pick .blockr-select__control');
+    await page.focus('.blockr-select--multi .blockr-select__control');
     await page.keyboard.press('ArrowDown');
-    await shows(page, '.blockr-pick__group');
+    await shows(page, '.blockr-select__group');
     await shows(page, '.blockr-select__option--highlighted');
   },
 
@@ -217,8 +217,8 @@ const states = {
         { options, mode: 'multi', selected: ['COL1', 'COL2'], title: 'Columns', labelFirst: true });
     }, columns);
     await page.keyboard.press('ArrowDown');
-    await shows(page, '.blockr-pick__bulk .blockr-pick__bulk-btn');
-    await shows(page, '.blockr-pick__group');
+    await shows(page, '.blockr-select__bulk .blockr-select__bulk-btn');
+    await shows(page, '.blockr-select__group');
     await shows(page, '.blockr-select__search--menu:not(.blockr-select__search--offscreen)');
     await shows(page, '.blockr-select__option--highlighted');
   },

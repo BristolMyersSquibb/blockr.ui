@@ -501,8 +501,6 @@ interface BlockrNamespace {
   portal(panel: HTMLElement, anchor: HTMLElement, gone: () => void): BlockrPortalHandle;
   /** Blockr.Select (blockr-select.js). */
   Select?: BlockrSelectStatic;
-  /** Blockr.Select's multi forms under the name they had on trial in blockr.dplyr; kept for one release. */
-  Pick?: Pick<BlockrSelectStatic, 'multi' | 'list' | 'menu' | 'summary'>;
   /** Blockr.Input, the code field with completions (blockr-input.js). */
   Input?: BlockrInputStatic;
   /** Design-system checkbox factory (blockr-ui.js). */

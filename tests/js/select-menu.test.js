@@ -95,7 +95,7 @@ test('title, filter box and the count with All and None share one head, in that 
     'the panel is marked, so CSS can hand its top padding to the head');
   assert.deepStrictEqual(
     [...head.children].map((c) => c.className.split(' ')[0]),
-    ['blockr-select__menu-title', 'blockr-select__search', 'blockr-pick__bulk']
+    ['blockr-select__menu-title', 'blockr-select__search', 'blockr-select__bulk']
   );
   // The rows come after the head, never inside it: a re-render rebuilds only
   // what follows, so the box being typed into is never touched.
@@ -226,7 +226,7 @@ test('a multi menu has its picks on top and ticked, and no control', (newWindow)
   assert.strictEqual(win.document.querySelectorAll('.blockr-select__control').length, 0);
   assert.deepStrictEqual(optionTexts(win), ['AEDECOD', 'AESOC', 'AETOXGR'], 'the picks first, in pick order');
   assert.deepStrictEqual(ticked(win), ['AEDECOD', 'AESOC']);
-  assert.strictEqual(dropdown(win).querySelector('.blockr-pick__count').textContent, '2 of 3 selected');
+  assert.strictEqual(dropdown(win).querySelector('.blockr-select__count').textContent, '2 of 3 selected');
   m.close();
   win.close();
 });
@@ -258,7 +258,7 @@ test('None empties a multi menu and it reports [] on close', async (newWindow) =
     mode: 'multi', options: ['AESOC', 'AEDECOD'], selected: ['AESOC', 'AEDECOD'],
     onChange: (v) => picked.push(v)
   });
-  const none = [...dropdown(win).querySelectorAll('.blockr-pick__bulk-btn')]
+  const none = [...dropdown(win).querySelectorAll('.blockr-select__bulk-btn')]
     .find((b) => b.textContent === 'None');
   none.dispatchEvent(new win.Event('click', { bubbles: true }));
   assert.deepStrictEqual(ticked(win), []);

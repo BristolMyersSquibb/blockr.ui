@@ -32,9 +32,9 @@
  * a block's sentence), open from the start and gone when it closes.
  *
  * The public surface is described in types.d.ts (BlockrSelect*). Other
- * packages read the markup (blockr.dm reads .blockr-select__dropdown and
- * .blockr-pick__*, blockr.extra reads .blockr-select__value) and several
- * style it, so the class names are part of that surface.
+ * packages read the markup (blockr.dm reads .blockr-select__dropdown,
+ * blockr.extra reads .blockr-select__value) and several style it, so the
+ * class names are part of that surface.
  *
  * Depends on: blockr-ui.js (Blockr.uid, removeNode, place, layer, tooltip)
  * and Blockr.icons, which controls_dep() writes into the page.
@@ -61,7 +61,7 @@
    * clicked in the muted half of the row and bolds a string that is nowhere
    * on screen. blockr.docs design-system/pinned-controls.md.
    *
-   * A multi row puts the lead in its own span (`blockr-pick__name`), which
+   * A multi row puts the lead in its own span (`blockr-select__name`), which
    * ellipsizes on its own so the label and the grip keep their room, and
    * shows an option's `display` in place of its value.
    *
@@ -77,7 +77,7 @@
     const trail = labelFirst && lbl ? val : lbl;
     if (multi) {
       const name = document.createElement('span');
-      name.className = 'blockr-pick__name';
+      name.className = 'blockr-select__name';
       name.textContent = String(lead);
       el.appendChild(name);
     } else {
@@ -144,14 +144,18 @@
   };
 
   /**
-   * The field's text for a set of picks.
-   * @param {string[]} sel @param {number} total @param {string} placeholder
+   * The field's text for a set of picks: one or two by name, more as a count
+   * with the names after it. Never "All": the picks are a list of values,
+   * and a value that turns up in the data later is not among them. `total`
+   * is null while the options are not loaded (a list that fetches its values
+   * on the first open), and then the names alone show, since a count against
+   * the picks themselves would read as every value.
+   * @param {string[]} sel @param {number | null} total @param {string} placeholder
    * @returns {{ lead: string, rest: string, empty: boolean }}
    */
   const summary = (sel, total, placeholder) => {
     if (!sel.length) return { lead: placeholder, rest: '', empty: true };
-    if (total > 1 && sel.length === total) return { lead: `All ${total}`, rest: '', empty: false };
-    if (sel.length <= 2) return { lead: sel.join(', '), rest: '', empty: false };
+    if (sel.length <= 2 || total == null) return { lead: sel.join(', '), rest: '', empty: false };
     return { lead: `${sel.length} of ${total.toLocaleString()}`, rest: sel.join(', '), empty: false };
   };
 
@@ -687,10 +691,10 @@
 
     // --- DOM ---------------------------------------------------------------
 
-    const root = div('blockr-select blockr-select--multi blockr-pick');
+    const root = div('blockr-select blockr-select--multi');
     if (config.bordered === true) root.classList.add('blockr-select--bordered');
     if (headless && !inline) root.classList.add('blockr-select--headless');
-    if (inline) root.classList.add('blockr-pick--inline');
+    if (inline) root.classList.add('blockr-select--list');
 
     // The field: the picks as text and the chevron. It takes focus itself,
     // since the filter box is in the list.
@@ -702,11 +706,11 @@
     control.setAttribute('aria-expanded', 'false');
     if (label) control.setAttribute('aria-label', label);
     const face = document.createElement('span');
-    face.className = 'blockr-select__value blockr-pick__face';
+    face.className = 'blockr-select__value blockr-select__face';
     const faceLead = document.createElement('span');
-    faceLead.className = 'blockr-pick__lead';
+    faceLead.className = 'blockr-select__lead';
     const faceRest = document.createElement('span');
-    faceRest.className = 'blockr-pick__rest';
+    faceRest.className = 'blockr-select__rest';
     face.append(faceLead, faceRest);
     control.appendChild(face);
     const arrow = document.createElement('span');
@@ -723,23 +727,23 @@
     input.setAttribute('placeholder', config.searchPlaceholder || 'Filter');
     if (label) input.setAttribute('aria-label', label);
 
-    const list = div(inline ? 'blockr-pick__panel blockr-pick__panel--inline'
-      : 'blockr-select__dropdown blockr-select__dropdown--multi blockr-select__dropdown--menu blockr-pick__panel');
+    const list = div(inline ? 'blockr-select__panel blockr-select__panel--list'
+      : 'blockr-select__dropdown blockr-select__dropdown--multi blockr-select__dropdown--menu blockr-select__panel');
     const head = div('blockr-select__head');
     if (headless && !inline && config.title) head.appendChild(div('blockr-select__menu-title', config.title));
     head.appendChild(input);
     // "3 of 12 selected", then All and None.
-    const bulk = div('blockr-pick__bulk');
+    const bulk = div('blockr-select__bulk');
     const count = document.createElement('span');
-    count.className = 'blockr-pick__count';
+    count.className = 'blockr-select__count';
     const allBtn = document.createElement('button');
     allBtn.type = 'button';
-    allBtn.className = 'blockr-pick__bulk-btn';
+    allBtn.className = 'blockr-select__bulk-btn';
     const noneBtn = document.createElement('button');
     noneBtn.type = 'button';
-    noneBtn.className = 'blockr-pick__bulk-btn';
+    noneBtn.className = 'blockr-select__bulk-btn';
     const btns = document.createElement('span');
-    btns.className = 'blockr-pick__bulk-btns';
+    btns.className = 'blockr-select__bulk-btns';
     if (showAll) btns.appendChild(allBtn);
     btns.appendChild(noneBtn);
     bulk.append(count, btns);
@@ -775,6 +779,11 @@
     // still count, so the head never reads "2 of 1".
     const total = () => (st.serverSearch && st.serverTotal) ||
       st.options.length + st.selected.filter((v) => !find(v)).length;
+    // The count the field may show: none while a pick is missing from the
+    // options (not loaded yet, or gone from the data), where the total would
+    // be a guess.
+    const knownTotal = () => (st.serverSearch && st.serverTotal) ||
+      (st.selected.every((v) => !!find(v)) ? st.options.length : null);
 
     /**
      * The two groups the list shows: the picks (in pick order, each from the
@@ -803,18 +812,19 @@
 
     const renderFace = () => {
       if (headless) return;
-      const s = summary(st.selected, total(), placeholder);
+      const s = summary(st.selected, knownTotal(), placeholder);
       faceLead.textContent = s.lead;
       faceRest.textContent = s.rest;
       face.classList.toggle('blockr-select__value--placeholder', s.empty);
-      if (st.selected.length > 2) {
-        Blockr.tooltip.set(control, st.selected.map((v) => {
-          const o = find(v);
-          return { name: v, label: o ? optLabel(o) : '' };
-        }));
-      } else {
-        Blockr.tooltip.set(control, st.selected.join(', '), { overflow: true });
-      }
+      // The tooltip names every pick with its label, one per line, as the
+      // tags did.
+      const named = st.selected.map((v) => {
+        const o = find(v);
+        return { name: v, label: o ? optLabel(o) : '' };
+      });
+      if (named.length > 1) Blockr.tooltip.set(control, named);
+      else if (named.length === 1) Blockr.tooltip.set(control, named[0], { overflow: true });
+      else Blockr.tooltip.clear(control);
     };
 
     const renderBulk = () => {
@@ -837,17 +847,17 @@
       noneBtn.setAttribute('aria-disabled', short ? 'true' : 'false');
       if (short) Blockr.tooltip.set(noneBtn, minHint);
       else Blockr.tooltip.clear(noneBtn);
-      bulk.classList.toggle('blockr-pick__bulk--search', st.serverSearch);
+      bulk.classList.toggle('blockr-select__bulk--search', st.serverSearch);
     };
 
     /** @param {BlockrSelectOption} opt @param {number} i @param {boolean} picked */
     const optionRow = (opt, i, picked) => {
       const val = optValue(opt);
-      const row = div('blockr-select__option blockr-pick__option');
+      const row = div('blockr-select__option blockr-select__option--multi');
       if (st.keyboard && i === st.highlight) row.classList.add('blockr-select__option--highlighted');
       if (picked) row.classList.add('blockr-select__option--selected');
       if (picked && locked()) {
-        row.classList.add('blockr-pick__option--locked');
+        row.classList.add('blockr-select__option--locked');
         row.setAttribute('aria-disabled', 'true');
       }
       row.setAttribute('role', 'option');
@@ -865,7 +875,7 @@
       if (picked && reorderable && !st.query && !st.disabled) {
         row.setAttribute('draggable', 'true');
         const grip = document.createElement('span');
-        grip.className = 'blockr-pick__grip';
+        grip.className = 'blockr-select__grip';
         grip.setAttribute('aria-hidden', 'true');
         grip.innerHTML = Blockr.icons.grip || '';
         row.appendChild(grip);
@@ -934,11 +944,11 @@
       st.highlight = Math.max(0, Math.min(st.highlight, rows.length - 1));
       let i = 0;
       if (g.picked.length) {
-        listbox.appendChild(heading('blockr-pick__group', 'Selected', 'selected'));
+        listbox.appendChild(heading('blockr-select__group', 'Selected', 'selected'));
         for (const o of g.picked) listbox.appendChild(optionRow(o, i++, true));
         // Named groups head the rest themselves.
         if ((g.rest.length && !optGroup(g.rest[0])) || st.loading) {
-          listbox.appendChild(heading('blockr-pick__group', 'Other', 'other'));
+          listbox.appendChild(heading('blockr-select__group', 'Other', 'other'));
         }
       }
       if (st.loading) listbox.appendChild(div('blockr-select__empty', 'Loading…'));
@@ -948,7 +958,7 @@
           const og = optGroup(o);
           if (og && og !== grp) {
             grp = og;
-            listbox.appendChild(heading('blockr-pick__subgroup', og, `sub:${og}`));
+            listbox.appendChild(heading('blockr-select__subgroup', og, `sub:${og}`));
           }
           listbox.appendChild(optionRow(o, i++, false));
         }
@@ -956,7 +966,7 @@
       if (g.folded) {
         const more = document.createElement('button');
         more.type = 'button';
-        more.className = 'blockr-pick__unfold';
+        more.className = 'blockr-select__unfold';
         more.textContent = `+ ${config.addLabel || 'Add'} (${g.folded.toLocaleString()})`;
         more.addEventListener('click', () => {
           const before = positions();
@@ -968,7 +978,7 @@
       } else if (inline && st.unfolded && !st.query && st.options.length > foldAfter) {
         const less = document.createElement('button');
         less.type = 'button';
-        less.className = 'blockr-pick__unfold';
+        less.className = 'blockr-select__unfold';
         less.textContent = 'Show only the picks';
         less.addEventListener('click', () => { st.unfolded = false; renderList(); });
         listbox.appendChild(less);
@@ -1154,7 +1164,7 @@
     });
     list.addEventListener('click', (e) => {
       const t = /** @type {Element} */ (e.target);
-      if (t.closest('.blockr-pick__grip')) return;
+      if (t.closest('.blockr-select__grip')) return;
       const row = t.closest('.blockr-select__option');
       if (row) {
         const val = row.getAttribute('data-value');
@@ -1243,13 +1253,13 @@
       /** @type {'before' | 'after'} */
       let side = 'after';
       const clear = () => {
-        listbox.querySelectorAll('.blockr-pick__option--drop-before, .blockr-pick__option--drop-after')
-          .forEach((r) => r.classList.remove('blockr-pick__option--drop-before', 'blockr-pick__option--drop-after'));
+        listbox.querySelectorAll('.blockr-select__option--drop-before, .blockr-select__option--drop-after')
+          .forEach((r) => r.classList.remove('blockr-select__option--drop-before', 'blockr-select__option--drop-after'));
       };
       const dragEnd = () => {
         clear();
-        listbox.querySelectorAll('.blockr-pick__option--dragging')
-          .forEach((r) => r.classList.remove('blockr-pick__option--dragging'));
+        listbox.querySelectorAll('.blockr-select__option--dragging')
+          .forEach((r) => r.classList.remove('blockr-select__option--dragging'));
         dragValue = null;
         overRow = null;
       };
@@ -1262,7 +1272,7 @@
         const dt = /** @type {DataTransfer} */ (e.dataTransfer);
         dt.effectAllowed = 'move';
         dt.setData('text/plain', /** @type {string} */ (dragValue));
-        row.classList.add('blockr-pick__option--dragging');
+        row.classList.add('blockr-select__option--dragging');
       });
       // A row (or the name inside it) accepts the drop from the moment the
       // pointer enters it, not only from its next dragover.
@@ -1282,7 +1292,7 @@
           clear();
           overRow = row;
           side = s;
-          row.classList.add(`blockr-pick__option--drop-${s}`);
+          row.classList.add(`blockr-select__option--drop-${s}`);
         }
       });
       listbox.addEventListener('dragend', dragEnd);
@@ -1462,7 +1472,4 @@
     // The field's text for a set of picks; exposed for tests.
     summary
   };
-  // The name the multi-select had while it was on trial in blockr.dplyr.
-  // Kept for one release, for callers that still look for it.
-  Blockr.Pick = { multi, list: inPlace, menu: createMenu, summary };
 })();

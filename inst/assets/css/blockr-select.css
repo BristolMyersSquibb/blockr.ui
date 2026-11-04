@@ -390,40 +390,38 @@
 
 /* =========================================================================
    Multi (blockr-select.js createMulti): the field shows the picks as text,
-   the list has them on top and a head with the count, All and None. The
-   classes are blockr-pick*, the name the multi had on trial in blockr.dplyr;
-   other packages style and test them.
+   the list has them on top and a head with the count, All and None.
    ========================================================================= */
 
 /* The field: the picks as one line of text. "5 of 48" leads, the names
    follow muted and ellipsize first. In a flex row the select would grow to
    fit the names instead; min-width: 0 keeps it to the row. */
-.blockr-pick {
+.blockr-select--multi {
   min-width: 0;
 }
-.blockr-pick .blockr-select__control {
+.blockr-select--multi .blockr-select__control {
   flex-wrap: nowrap;
 }
-.blockr-pick .blockr-select__control:focus-visible {
+.blockr-select--multi .blockr-select__control:focus-visible {
   outline: var(--blockr-focus-outline);
   outline-offset: var(--blockr-focus-offset);
 }
-.blockr-pick__face,
-.blockr-select--open .blockr-pick__face {
+.blockr-select__face,
+.blockr-select--open .blockr-select__face {
   display: block;
   min-width: 0;
 }
-.blockr-pick__rest {
+.blockr-select__rest {
   margin-left: 8px;
   font-size: var(--blockr-font-size-sm);
   color: var(--blockr-color-text-muted);
 }
-.blockr-pick__rest:empty {
+.blockr-select__rest:empty {
   display: none;
 }
 
 /* The head under the filter box: the count, then All and None. */
-.blockr-pick__bulk {
+.blockr-select__bulk {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -434,21 +432,21 @@
   font-size: var(--blockr-font-size-sm);
   color: var(--blockr-color-text-muted);
 }
-.blockr-pick__bulk-btns {
+.blockr-select__bulk-btns {
   display: flex;
   flex-wrap: wrap;
   gap: 0 12px;
   flex-shrink: 0;
 }
 /* In a narrow column the count gives way first, then the buttons wrap. */
-.blockr-pick__count {
+.blockr-select__count {
   flex: 1 1 0;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.blockr-pick__bulk-btn {
+.blockr-select__bulk-btn {
   padding: 0;
   border: 0;
   background: none;
@@ -456,17 +454,17 @@
   color: var(--blockr-color-text-accent);
   cursor: pointer;
 }
-.blockr-pick__bulk-btn:hover:not(:disabled):not([aria-disabled="true"]) {
+.blockr-select__bulk-btn:hover:not(:disabled):not([aria-disabled="true"]) {
   text-decoration: underline;
 }
-.blockr-pick__bulk-btn:disabled,
-.blockr-pick__bulk-btn[aria-disabled="true"] {
+.blockr-select__bulk-btn:disabled,
+.blockr-select__bulk-btn[aria-disabled="true"] {
   color: var(--blockr-color-text-disabled);
   cursor: default;
 }
 
 /* "Selected" and "Other" over the two groups of rows. */
-.blockr-pick__group {
+.blockr-select__group {
   padding: 8px 10px 2px;
   font-size: var(--blockr-font-size-xs);
   font-weight: var(--blockr-font-weight-semibold);
@@ -479,78 +477,78 @@
 }
 
 /* A row: tick, name, meta, and the grip on a draggable pick. */
-.blockr-pick__option {
+.blockr-select__option--multi {
   display: flex;
   align-items: center;
 }
-.blockr-pick__option .blockr-select__tick {
+.blockr-select__option--multi .blockr-select__tick {
   flex-shrink: 0;
 }
-.blockr-pick__name {
+.blockr-select__name {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 /* The meta ("86", "pool · 12") keeps its width until the name is down to
    a few letters, then gives way too. */
-.blockr-pick__option .blockr-select__opt-label {
+.blockr-select__option--multi .blockr-select__opt-label {
   flex-shrink: 0;
 }
-@container blockr-pick (max-width: 140px) {
-  .blockr-pick__option .blockr-select__opt-label {
+@container blockr-select (max-width: 140px) {
+  .blockr-select__option--multi .blockr-select__opt-label {
     display: none;
   }
 }
 /* Narrower still (a squeezed dock column): the names keep the room. The
    rows still drag without their grip; the ticks say the count. */
-@container blockr-pick (max-width: 120px) {
-  .blockr-pick__option .blockr-pick__grip,
-  .blockr-pick__bulk .blockr-pick__count {
+@container blockr-select (max-width: 120px) {
+  .blockr-select__option--multi .blockr-select__grip,
+  .blockr-select__bulk .blockr-select__count {
     display: none;
   }
-  .blockr-pick__bulk-btns {
+  .blockr-select__bulk-btns {
     flex-shrink: 1;
     min-width: 0;
   }
 }
-.blockr-pick__panel--inline {
-  container: blockr-pick / inline-size;
+.blockr-select__panel--list {
+  container: blockr-select / inline-size;
 }
 /* A short list in place keeps its filter box off screen; while the box
    has the keyboard, the list shows the focus. */
-.blockr-pick__panel--inline:has(.blockr-select__search--offscreen:focus-visible) {
+.blockr-select__panel--list:has(.blockr-select__search--offscreen:focus-visible) {
   outline: var(--blockr-focus-outline);
   outline-offset: var(--blockr-focus-offset);
 }
 
 /* A pick that may not untick (`min`). */
-.blockr-pick__option--locked {
+.blockr-select__option--locked {
   cursor: default;
 }
-.blockr-pick__grip {
+.blockr-select__grip {
   display: flex;
   margin-left: auto;
   padding-left: 8px;
   color: var(--blockr-color-text-muted);
   cursor: grab;
 }
-.blockr-pick__grip svg {
+.blockr-select__grip svg {
   width: 14px;
   height: 14px;
 }
-.blockr-pick__option--dragging {
+.blockr-select__option--dragging {
   opacity: 0.4;
 }
-.blockr-pick__option--drop-before {
+.blockr-select__option--drop-before {
   box-shadow: inset 0 2px 0 var(--blockr-color-border-accent);
 }
-.blockr-pick__option--drop-after {
+.blockr-select__option--drop-after {
   box-shadow: inset 0 -2px 0 var(--blockr-color-border-accent);
 }
 
 /* Group names over the unpicked rows ("Chemistry", "ECG"), quieter than
    "Selected" and "Other", which name the two parts of the list. */
-.blockr-pick__subgroup {
+.blockr-select__subgroup {
   padding: 8px 10px 2px;
   font-size: var(--blockr-font-size-xs);
   font-weight: var(--blockr-font-weight-semibold);
@@ -558,7 +556,7 @@
 }
 
 /* "+ Add panels (77)" under the picks of a folded list, and the way back. */
-.blockr-pick__unfold {
+.blockr-select__unfold {
   display: block;
   width: 100%;
   padding: 6px 10px;
@@ -570,7 +568,7 @@
   color: var(--blockr-color-text-accent);
   cursor: pointer;
 }
-.blockr-pick__unfold:hover {
+.blockr-select__unfold:hover {
   text-decoration: underline;
 }
 
@@ -578,29 +576,29 @@
    when the caller asks for `bordered`, flush otherwise (a sidebar is its
    own frame). A caller caps the height on the root (max-height); the rows
    scroll under the head. */
-.blockr-pick--inline {
+.blockr-select--list {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-.blockr-pick__panel--inline {
+.blockr-select__panel--list {
   display: flex;
   flex-direction: column;
   min-height: 0;
   padding: 0 4px 4px;
   background: var(--blockr-color-bg-surface);
 }
-.blockr-pick__panel--inline .blockr-select__head {
+.blockr-select__panel--list .blockr-select__head {
   background: var(--blockr-color-bg-surface);
 }
-.blockr-pick__panel--inline .blockr-select__listbox {
+.blockr-select__panel--list .blockr-select__listbox {
   overflow-y: auto;
   min-height: 0;
 }
-.blockr-select--bordered.blockr-pick--inline .blockr-pick__panel--inline {
+.blockr-select--bordered.blockr-select--list .blockr-select__panel--list {
   border: 1px solid var(--blockr-color-border-default);
   border-radius: var(--blockr-radius-lg);
 }
-.blockr-pick__panel--inline .blockr-select__option--selected {
+.blockr-select__panel--list .blockr-select__option--selected {
   font-weight: inherit;
 }

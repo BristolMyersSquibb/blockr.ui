@@ -56,7 +56,7 @@ const ticked = (win, sel) => rowsIn(dropdown(win, sel))
   .filter((r) => r.querySelector('.blockr-select__tick svg'))
   .map((r) => r.getAttribute('data-value'));
 /* A multi's field: the picks as text. */
-const faceText = (sel) => sel.el.querySelector('.blockr-pick__face').textContent;
+const faceText = (sel) => sel.el.querySelector('.blockr-select__face').textContent;
 
 /* Arrays built inside the window have that realm's Array prototype, which
  * deepStrictEqual counts as a difference. JSON is what goes on the wire. */

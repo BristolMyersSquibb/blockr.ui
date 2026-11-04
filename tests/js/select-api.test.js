@@ -97,7 +97,7 @@ test('disabled multi: never opens, nothing drags, and setDisabled flips it', (ne
   });
   const control = sel.el.querySelector('.blockr-select__control');
   assert.strictEqual(control.tabIndex, -1, 'not a tab stop');
-  assert.strictEqual(sel.el.querySelector('.blockr-pick__face').textContent, 'a, b', 'the picks stay');
+  assert.strictEqual(sel.el.querySelector('.blockr-select__face').textContent, 'a, b', 'the picks stay');
   control.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
   assert.ok(!sel.el.classList.contains('blockr-select--open'));
   sel.setDisabled(false);
