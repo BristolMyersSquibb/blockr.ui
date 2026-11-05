@@ -115,3 +115,22 @@ test_that("tabular_output renders the result through the HTML table", {
     expect_match(html, "blockr-table-container")
   })
 })
+
+test_that("each output sends the table's dependencies with its first render", {
+  df <- data.frame(x = c(30, 10, 20))
+  dep_names <- function(out) vapply(out$deps, `[[`, "", "name")
+
+  server <- function(input, output, session) {
+    output$first <- html_table_render(df, session, page_size = 2L)
+    output$second <- html_table_render(df, session, page_size = 2L)
+  }
+
+  shiny::testServer(server, {
+    expect_true("blockr-table-preview" %in% dep_names(output$first))
+    expect_true("blockr-table-preview" %in% dep_names(output$second))
+    # A later render of the same output leaves them off; the browser has them.
+    session$setInputs(first_table_page = 2)
+    expect_match(as.character(output$first$html), "data-current-page=\"2\"")
+    expect_length(output$first$deps, 0L)
+  })
+})

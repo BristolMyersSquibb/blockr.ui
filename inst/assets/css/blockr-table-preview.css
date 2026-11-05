@@ -137,6 +137,13 @@
       color: var(--blockr-color-text-muted, #6b7280);
     }
 
+    /* The type tag on its own line under the name, aligned as the header
+       is (right on a numeric column). Older markup wraps it in
+       .blockr-type-row, which does the same. */
+    .blockr-table th > .blockr-type-label {
+      display: block;
+    }
+
     /* No rules in the body: the hover wash carries the eye along a row. */
     .blockr-table tbody tr {
       transition: background-color var(--blockr-transition, 0.15s ease);

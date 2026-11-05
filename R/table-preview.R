@@ -201,7 +201,7 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
             )
           )
         ),
-        c(list(table_preview_dep()), table_preview_tooltip_dep())
+        table_deps()
       )
     )
   }
@@ -281,120 +281,104 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     )
   )
 
-  # Build header row
-  header_cells <- vector("list", n_cols + 1L)
-  header_cells[[1L]] <- shiny::tags$th(class = "blockr-row-number", "")
-  for (j in seq_along(col_names)) {
-    col_name <- col_names[j]
+  # The header and the body are written as one HTML string rather than as
+  # htmltools tags: a 5 x 50 page is some 2,000 tags, and building, walking
+  # and printing them cost more than everything else in a render. The string
+  # has no indentation, which also keeps stray whitespace out of the cells.
+  esc <- function(x) htmltools::htmlEscape(x)
+  esc_attr <- function(x) htmltools::htmlEscape(x, attribute = TRUE)
 
-    # NULL unless this column is the sorted one ("none" has no state)
-    sorted <- if (!is.null(sort_col) && sort_col == col_name) {
-      sort_states[[sort_dir]]
-    }
-    header_class <- paste(
-      c("blockr-sortable",
-        if (!is.null(sorted)) paste0("blockr-sort-", sort_dir)),
-      collapse = " "
-    )
-    sort_icon_class <- paste(
-      c("blockr-sort-icon",
-        if (!is.null(sorted)) paste0("blockr-sort-icon-", sort_dir)),
-      collapse = " "
-    )
+  # The sorted column, if any ("none" has no state).
+  sorted_j <- if (!is.null(sort_col) && sort_dir %in% names(sort_states)) {
+    match(sort_col, col_names)
+  } else {
+    NA_integer_
+  }
+  is_sorted <- !is.na(sorted_j) & seq_len(n_cols) == sorted_j
+  sorted <- if (!is.na(sorted_j)) sort_states[[sort_dir]]
 
-    # The label sits under the name and is cut by the layout (CSS ellipsis);
-    # a cut-off label shows whole in its tooltip.
-    # A column without a label keeps an empty line when others have one, so
-    # every name sits level.
-    label_tag <- if (has_labels && nzchar(col_labels[j])) {
-      shiny::tags$span(
-        class = "blockr-col-label",
-        `data-blockr-tooltip` = col_labels[j],
-        `data-blockr-tooltip-overflow` = NA,
-        col_labels[j]
-      )
-    } else if (has_labels) {
-      shiny::tags$span(
-        class = "blockr-col-label blockr-col-label--empty",
-        `aria-hidden` = "true",
-        shiny::HTML("&nbsp;")
-      )
-    }
-
-    th_style <- sprintf("width: %dpx;", col_widths_px[j])
-
+  header_class <- paste0(
+    "blockr-sortable",
+    ifelse(is_sorted, paste0(" blockr-sort-", sort_dir), ""),
     # A numeric column's header follows its numbers to the right.
-    if (col_is_numeric[j]) {
-      header_class <- paste(header_class, "blockr-th-numeric")
-    }
+    ifelse(col_is_numeric, " blockr-th-numeric", "")
+  )
+  sort_icon_class <- paste0(
+    "blockr-sort-icon",
+    ifelse(is_sorted, paste0(" blockr-sort-icon-", sort_dir), "")
+  )
+  sort_attrs <- ifelse(
+    is_sorted,
+    paste0(' aria-sort="', sorted$aria, '" data-blockr-tooltip="',
+           esc_attr(sorted$tip), '"'),
+    ""
+  )
 
-    # The sort cue (sort bars, see blockr-table-preview.css) sits on the
-    # name's line: after the name, or before it on a right-aligned numeric
-    # column so the name stays flush over its numbers. Hidden at rest on an
-    # unsorted column, shown muted on hover as what a click would do.
-    header_cells[[j + 1L]] <- shiny::tags$th(
-      class = header_class,
-      style = th_style,
-      `data-column` = col_name,
-      `aria-sort` = sorted$aria,
-      `data-blockr-tooltip` = sorted$tip,
-      shiny::tags$span(
-        class = "blockr-col-head",
-        shiny::tags$span(class = "blockr-col-name", col_name),
-        shiny::tags$span(class = sort_icon_class, `aria-hidden` = "true")
-      ),
-      label_tag,
-      shiny::tags$span(
-        class = "blockr-type-row",
-        shiny::tags$span(class = "blockr-type-label", col_types[j])
-      )
+  # The label sits under the name and is cut by the layout (CSS ellipsis);
+  # a cut-off label shows whole in its tooltip. A column without a label
+  # keeps an empty line when others have one, so every name sits level.
+  label_html <- if (!has_labels) {
+    character(n_cols)
+  } else {
+    ifelse(
+      nzchar(col_labels),
+      paste0('<span class="blockr-col-label" data-blockr-tooltip="',
+             esc_attr(col_labels), '" data-blockr-tooltip-overflow>',
+             esc(col_labels), "</span>"),
+      paste0('<span class="blockr-col-label blockr-col-label--empty" ',
+             'aria-hidden="true">&nbsp;</span>')
     )
   }
 
-  # Build body rows
-  body_rows <- vector("list", n_showing)
+  # The sort cue (sort bars, see blockr-table-preview.css) sits on the
+  # name's line: after the name, or before it on a right-aligned numeric
+  # column so the name stays flush over its numbers. Hidden at rest on an
+  # unsorted column, shown muted on hover as what a click would do.
+  header_html <- paste0(
+    '<thead><tr><th class="blockr-row-number"></th>',
+    paste0(
+      '<th class="', header_class, '" style="width: ', col_widths_px,
+      'px;" data-column="', esc_attr(col_names), '"', sort_attrs, ">",
+      '<span class="blockr-col-head"><span class="blockr-col-name">',
+      esc(col_names), '</span><span class="', sort_icon_class,
+      '"></span></span>', label_html,
+      '<span class="blockr-type-label">', esc(col_types), "</span></th>",
+      collapse = ""
+    ),
+    "</tr></thead>"
+  )
+
+  # Body cells: `<td>value</td>`. Numeric alignment comes from a rule per
+  # column (below), not a class per cell. A value cut off by the column width
+  # shows whole in its tooltip, which blockr-table-preview.js gives a cell
+  # from its text when the pointer first reaches it.
   start_row_num <- (page - 1L) * page_size
-
-  for (i in seq_len(n_showing)) {
-    row_cells <- vector("list", n_cols + 1L)
-    row_cells[[1L]] <- shiny::tags$td(
-      class = "blockr-row-number",
-      start_row_num + i
-    )
-
-    for (j in seq_along(col_names)) {
-      is_na <- col_na[[j]][i]
-      is_neg <- col_neg[[j]][i]
-
-      cell_class <- if (col_is_numeric[j]) {
-        if (is_neg) "blockr-td-numeric blockr-negative" else "blockr-td-numeric"
-      } else {
-        NULL
-      }
-
-      content <- if (is_na) {
-        # .noWS: htmltools pretty-prints nested tags with newline + indent,
-        # and those literal characters render under the cell's white-space
-        # rule - every NA cell became three lines tall, ballooning its
-        # whole row.
-        shiny::tags$span(class = "blockr-na", "NA", .noWS = "outside")
-      } else {
-        formatted[[j]][i]
-      }
-
-      # A value cut off by the column width shows whole in the tooltip;
-      # one that fits has none.
-      cell_tip <- if (!is_na) formatted[[j]][i] else NULL
-      row_cells[[j + 1L]] <- shiny::tags$td(
-        class = cell_class,
-        `data-blockr-tooltip` = cell_tip,
-        `data-blockr-tooltip-overflow` = if (!is_na) NA,
-        content
+  cells <- lapply(seq_len(n_cols), function(j) {
+    ifelse(
+      col_na[[j]],
+      '<td><span class="blockr-na">NA</span></td>',
+      paste0(
+        ifelse(col_neg[[j]], '<td class="blockr-negative">', "<td>"),
+        esc(formatted[[j]]), "</td>"
       )
-    }
-
-    body_rows[[i]] <- do.call(shiny::tags$tr, row_cells)
+    )
+  })
+  body_html <- if (n_showing > 0L) {
+    paste0(
+      '<tr><td class="blockr-row-number">', start_row_num + seq_len(n_showing),
+      "</td>", do.call(paste0, cells), "</tr>",
+      collapse = ""
+    )
+  } else {
+    ""
   }
+
+  # Right-aligned tabular numbers for the numeric columns, one rule for the
+  # table, scoped by its id. Runs of adjacent numeric columns become one
+  # range selector. The row-number column is child 1.
+  table_id <- table_dom_id(sort_input_id, has_ids = !is.null(sort_input) ||
+                             !is.null(ns))
+  num_style <- numeric_column_style(table_id, which(col_is_numeric) + 1L)
 
   # Build pagination info. `total_rows` is NA for remote/lazy tables (counting
   # them is deliberately avoided); then the range omits the total and the next
@@ -477,35 +461,82 @@ build_html_table <- function(dat, total_rows, sort_state = NULL, ns = NULL,
     )
   )
 
+  # Fixed layout from the FIRST paint: the ths carry explicit widths, so
+  # content changes (sort, page) cannot reflow the columns. Width stays 100%
+  # via the class: per CSS, a fixed table's used width is max(100%, sum of
+  # columns), so narrow tables still fill the panel and wide ones
+  # overflow-scroll.
+  table_html <- paste0(
+    num_style,
+    '<div class="blockr-table-wrapper">',
+    '<table class="blockr-table" style="table-layout: fixed;">',
+    header_html, "<tbody>", body_html, "</tbody></table></div>"
+  )
+
   htmltools::attachDependencies(
     shiny::tagList(
       shiny::tags$div(
+        id = table_id,
         class = "blockr-table-container",
         `data-sort-input` = sort_input_id,
         `data-page-input` = page_input_id,
         `data-current-page` = page,
         `data-max-page` = max_page,
-        shiny::tags$div(
-          class = "blockr-table-wrapper",
-          shiny::tags$table(
-            class = "blockr-table",
-            # Fixed layout from the FIRST paint: the ths carry explicit
-            # widths, so content changes (sort, page) cannot reflow the
-            # columns. Width stays 100% via the class: per CSS, a fixed
-            # table's used width is max(100%, sum of columns), so narrow
-            # tables still fill the panel and wide ones overflow-scroll.
-            style = "table-layout: fixed;",
-            shiny::tags$thead(
-              do.call(shiny::tags$tr, header_cells)
-            ),
-            do.call(shiny::tags$tbody, body_rows)
-          )
-        ),
+        shiny::HTML(table_html),
         footer
       )
     ),
-    c(list(table_preview_dep()), table_preview_tooltip_dep())
+    table_deps()
   )
+}
+
+# The container's id, which scopes the table's column rule. Derived from the
+# sort input, which is unique per preview when the caller passes ids; the
+# legacy shared default gets a counter, so two such tables on one page
+# never share a rule.
+table_dom_id <- function(sort_input_id, has_ids) {
+  id <- paste0("blockr-tbl-", gsub("[^A-Za-z0-9_-]", "-", sort_input_id))
+  if (has_ids) {
+    return(id)
+  }
+  table_state$n <- table_state$n + 1L
+  paste0(id, "-", table_state$n)
+}
+
+table_state <- new.env(parent = emptyenv())
+table_state$n <- 0L
+
+# A <style> right-aligning the body cells of the given columns (1-based
+# child positions) in the table with id `table_id`, or "" for none.
+numeric_column_style <- function(table_id, pos) {
+  if (!length(pos)) {
+    return("")
+  }
+  # Split into runs of consecutive positions.
+  run <- cumsum(c(1L, diff(pos) != 1L))
+  sel <- vapply(split(pos, run), function(p) {
+    if (length(p) == 1L) {
+      sprintf(":nth-child(%d)", p)
+    } else {
+      sprintf(":nth-child(n+%d):nth-child(-n+%d)", p[1L], p[length(p)])
+    }
+  }, character(1))
+  paste0(
+    "<style>#", table_id, " td:is(", paste(sel, collapse = ","),
+    "){text-align:right;font-variant-numeric:tabular-nums}</style>"
+  )
+}
+
+# The table's dependencies, built once per process: building them reads the
+# package version and the icon files.
+table_deps <- function() {
+  if (is.null(table_state$deps)) {
+    table_state$deps <- c(
+      list(table_preview_dep()),
+      table_preview_tooltip_dep()
+    )
+  }
+  table_state$deps
 }
 
 #' Table-preview assets
