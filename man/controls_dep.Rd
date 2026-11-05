@@ -28,8 +28,8 @@ For \code{small_icon()}, the icon's \verb{<svg>} element, as
 }
 \description{
 The JavaScript and CSS of the controls blockr blocks are built from:
-\code{Blockr.Select} (single, multi and menu), \code{Blockr.Input} (the code field
-with column and function completions), the Enter button of a field that
+\code{Blockr.Select} (single, multi, list and menu), \code{Blockr.Input} (the code
+field with column and function completions), the Enter button of a field that
 commits on Enter, the required-empty cue, the checkbox, the segmented
 control, the gear tray, the tooltip (\code{Blockr.tooltip}), the menus of
 actions (\code{Blockr.menu} for those built in JavaScript, \code{Blockr.actionMenu}

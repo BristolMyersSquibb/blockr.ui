@@ -89,30 +89,31 @@ test('disabled: marked, not a tab stop, does not open, and setDisabled flips it'
   win.close();
 });
 
-test('disabled multi: tags stay, their x is disabled and nothing is draggable', (newWindow) => {
+test('disabled multi: never opens, nothing drags, and setDisabled flips it', (newWindow) => {
   const win = newWindow();
   const seen = [];
   const sel = win.Blockr.Select.multi(host(win), {
     options: MANY, selected: ['a', 'b'], disabled: true, onChange: (v) => seen.push(v)
   });
-  const tags = [...sel.el.querySelectorAll('.blockr-select__tag')];
-  assert.strictEqual(tags.length, 2);
-  assert.ok(tags.every((t) => !t.hasAttribute('draggable')));
-  const x = tags[0].querySelector('.blockr-select__tag-remove');
-  assert.ok(x.disabled);
-  x.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
-  assert.strictEqual(sel.el.querySelectorAll('.blockr-select__tag').length, 2, 'the tag stays');
-  assert.deepStrictEqual(seen, []);
+  const control = sel.el.querySelector('.blockr-select__control');
+  assert.strictEqual(control.tabIndex, -1, 'not a tab stop');
+  assert.strictEqual(sel.el.querySelector('.blockr-select__face').textContent, 'a, b', 'the picks stay');
+  control.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  assert.ok(!sel.el.classList.contains('blockr-select--open'));
   sel.setDisabled(false);
-  assert.ok(sel.el.querySelector('.blockr-select__tag').hasAttribute('draggable'));
-  assert.ok(!sel.el.querySelector('.blockr-select__tag-remove').disabled);
+  assert.strictEqual(control.tabIndex, 0);
+  control.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+  assert.ok(sel.el.classList.contains('blockr-select--open'));
+  assert.strictEqual(win.document.querySelectorAll('.blockr-select__option[draggable="true"]').length, 2,
+    'the picks drag once it is enabled');
+  assert.deepStrictEqual(seen, []);
   win.close();
 });
 
-test('a menu hands back close and nothing else', (newWindow) => {
+test('a menu hands back close and setOptions, nothing else', (newWindow) => {
   const win = newWindow();
   const m = win.Blockr.Select.menu(host(win), { options: MANY });
-  assert.deepStrictEqual(Object.keys(m), ['close']);
+  assert.deepStrictEqual(Object.keys(m), ['close', 'setOptions']);
   m.close();
   win.close();
 });

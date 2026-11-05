@@ -28,7 +28,12 @@ const host = (win) => {
 const single = (win, cfg) => win.Blockr.Select.single(host(win), cfg || {});
 const multi = (win, cfg) => win.Blockr.Select.multi(host(win), cfg || {});
 
-const search = (sel) => sel.el.querySelector('.blockr-select__search');
+/* A single keeps its combobox input in the control. A multi's is the filter
+ * box in the list head, so it is there only while the list is open. */
+const listId = (sel) => sel.el.querySelector('[aria-controls]').getAttribute('aria-controls');
+const search = (sel) => sel.el.querySelector('.blockr-select__search') ||
+  sel.el.ownerDocument.getElementById(listId(sel))
+    .closest('.blockr-select__dropdown').querySelector('.blockr-select__search');
 const control = (sel) => sel.el.querySelector('.blockr-select__control');
 const face = (sel) => sel.el.querySelector('.blockr-select__value');
 const isOpen = (sel) => sel.el.classList.contains('blockr-select--open');
@@ -36,8 +41,7 @@ const isOpen = (sel) => sel.el.classList.contains('blockr-select--open');
 /* The list is portalled to <body> while open, so find it by the id the
  * combobox input points at, not by walking down from the root. It sits in
  * the panel, the floating surface that is portalled and shown. */
-const dropdown = (win, sel) =>
-  win.document.getElementById(search(sel).getAttribute('aria-controls'));
+const dropdown = (win, sel) => win.document.getElementById(listId(sel));
 const panel = (win, sel) => dropdown(win, sel).closest('.blockr-select__dropdown');
 
 const rowsIn = (dd) => [...dd.querySelectorAll('.blockr-select__option')];
@@ -51,8 +55,8 @@ const emptyTexts = (win, sel) =>
 const ticked = (win, sel) => rowsIn(dropdown(win, sel))
   .filter((r) => r.querySelector('.blockr-select__tick svg'))
   .map((r) => r.getAttribute('data-value'));
-const tags = (sel) =>
-  [...sel.el.querySelectorAll('.blockr-select__tag')].map((t) => t.getAttribute('data-value'));
+/* A multi's field: the picks as text. */
+const faceText = (sel) => sel.el.querySelector('.blockr-select__face').textContent;
 
 /* Arrays built inside the window have that realm's Array prototype, which
  * deepStrictEqual counts as a difference. JSON is what goes on the wire. */
@@ -113,15 +117,15 @@ test('a single select opens on a click on its control and closes on the next', (
   win.close();
 });
 
-test('a multi select opens on a click and keeps focus in its search input', (newWindow) => {
+test('a multi select opens on a click with focus in its filter box, and closes on the next', (newWindow) => {
   const win = newWindow();
   const sel = multi(win, { options: ABC });
   click(win, control(sel));
   assert.ok(isOpen(sel));
   assert.strictEqual(win.document.activeElement, search(sel));
+  assert.ok(panel(win, sel).contains(search(sel)), 'the filter box is in the list head');
   click(win, control(sel));
-  assert.ok(isOpen(sel), 'a second click on a multi does not toggle it shut');
-  assert.strictEqual(win.document.activeElement, search(sel));
+  assert.ok(!isOpen(sel), 'the field toggles, as a single one does');
   win.close();
 });
 
@@ -138,24 +142,6 @@ test('a click on the chevron of an open select closes it, single or multi', (new
   win.close();
 });
 
-test('an open multi stays open on a click anywhere in its control but the chevron', (newWindow) => {
-  const win = newWindow();
-  const sel = multi(win, { options: ABC, selected: ['a', 'b'] });
-  click(win, control(sel));
-  for (const el of [
-    sel.el.querySelector('.blockr-select__tags'),
-    sel.el.querySelector('.blockr-select__tag-label'),
-    search(sel)
-  ]) {
-    click(win, el);
-    assert.ok(isOpen(sel), el.className);
-  }
-  click(win, control(sel).querySelector('.blockr-select__arrow'));
-  assert.ok(!isOpen(sel));
-  assert.strictEqual(win.document.activeElement, search(sel), 'focus stays on the combobox');
-  win.close();
-});
-
 test('a multi select ends on the chevron, as a single one does', (newWindow) => {
   const win = newWindow();
   const one = single(win, { options: ABC });
@@ -165,34 +151,12 @@ test('a multi select ends on the chevron, as a single one does', (newWindow) => 
     assert.ok(last.classList.contains('blockr-select__arrow'), 'the chevron comes last');
     assert.ok(last.querySelector('svg'));
   }
-  // A pick redraws the tags in their own row, never after the chevron.
+  // A pick redraws the field's text, never after the chevron.
   click(win, control(many));
   clickRow(win, many, 'c');
   assert.ok(control(many).lastElementChild.classList.contains('blockr-select__arrow'));
   win.close();
 });
-
-test('a click on a tag\'s x while closed removes it without opening', (newWindow) => {
-  const win = newWindow();
-  const seen = [];
-  const sel = multi(win, { options: ABC, selected: ['a', 'b'], onChange: (v) => seen.push(v) });
-  click(win, sel.el.querySelector('.blockr-select__tag[data-value="a"] .blockr-select__tag-remove'));
-  assert.deepStrictEqual(tags(sel), ['b']);
-  assert.deepStrictEqual(json(seen), [['b']]);
-  assert.ok(!isOpen(sel));
-  win.close();
-});
-
-for (const key of ['Enter', ' ', 'ArrowDown', 'ArrowUp']) {
-  test(`the keyboard opens the list with ${JSON.stringify(key)}`, (newWindow) => {
-    const win = newWindow();
-    const sel = single(win, { options: ABC, selected: 'c' });
-    search(sel).focus();
-    press(win, search(sel), key);
-    assert.ok(isOpen(sel));
-    win.close();
-  });
-}
 
 test('Escape closes', (newWindow) => {
   const win = newWindow();
@@ -320,11 +284,11 @@ test('a menu is open from creation and tears itself down a tick after closing', 
 
 /* --- the list ------------------------------------------------------------- */
 
-test('a multi lists every option and ticks the picks', (newWindow) => {
+test('a multi lists every option, the picks on top, and ticks them', (newWindow) => {
   const win = newWindow();
   const sel = multi(win, { options: ABC, selected: ['b', 'd'] });
   click(win, control(sel));
-  assert.deepStrictEqual(rows(win, sel), ABC);
+  assert.deepStrictEqual(rows(win, sel), ['b', 'd', 'a', 'c', 'e'], 'the picks on top');
   assert.deepStrictEqual(ticked(win, sel), ['b', 'd']);
   const marked = rowsIn(dropdown(win, sel))
     .filter((r) => r.getAttribute('aria-selected') === 'true')
@@ -381,7 +345,7 @@ test('numeric values are stringified for the filter', (newWindow) => {
 
 test('typing into a closed select opens it', (newWindow) => {
   const win = newWindow();
-  const sel = multi(win, { options: ABC });
+  const sel = single(win, { options: ABC });
   type(win, search(sel), 'b');
   assert.ok(isOpen(sel));
   win.close();
@@ -392,7 +356,7 @@ test('typing into a closed select opens it', (newWindow) => {
  * unfiltered. The rewrite keeps it. */
 test('typing into a closed select keeps the typed letter as the filter', (newWindow, t) => {
   const win = newWindow();
-  const sel = multi(win, { options: ABC });
+  const sel = single(win, { options: ABC });
   type(win, search(sel), 'b');
   assert.strictEqual(search(sel).value, 'b');
   assert.deepStrictEqual(rows(win, sel), ['b']);
@@ -618,6 +582,9 @@ test('opened with the mouse, Enter shows the keyboard row instead of picking', (
   assert.strictEqual(highlighted(win, sel), 'a');
   assert.deepStrictEqual(seen, [], 'nothing picked');
   press(win, search(sel), 'Enter');
+  assert.deepStrictEqual(values(sel), ['a']);
+  assert.deepStrictEqual(seen, [], 'a multi reports when it closes');
+  press(win, search(sel), 'Tab');
   // onChange hands over an array from the page's realm; compare its content.
   assert.deepStrictEqual(JSON.parse(JSON.stringify(seen)), [['a']]);
   win.close();
@@ -634,24 +601,6 @@ test('Enter on an empty list picks nothing', (newWindow) => {
   assert.deepStrictEqual(seen, []);
   win.close();
 });
-
-test('Backspace in an empty search input removes the last tag', (newWindow) => {
-  const win = newWindow();
-  const seen = [];
-  const sel = multi(win, { options: ABC, selected: ['a', 'b'], onChange: (v) => seen.push(v) });
-  click(win, control(sel));
-  type(win, search(sel), 'c');
-  press(win, search(sel), 'Backspace');
-  assert.deepStrictEqual(tags(sel), ['a', 'b'], 'with text in the box, Backspace edits the text');
-  type(win, search(sel), '');
-  press(win, search(sel), 'Backspace');
-  assert.deepStrictEqual(tags(sel), ['a']);
-  assert.deepStrictEqual(json(seen), [['a']]);
-  assert.deepStrictEqual(ticked(win, sel), ['a'], 'its row is unticked');
-  win.close();
-});
-
-/* --- picking -------------------------------------------------------------- */
 
 test('single: a pick closes, shows the value, and reports only a change', (newWindow) => {
   const win = newWindow();
@@ -691,7 +640,7 @@ test('single: while open, the search box shows the pick as its placeholder', (ne
   win.close();
 });
 
-test('multi: a pick appends, keeps the query and the list open, and reports a copy', (newWindow) => {
+test('multi: a pick appends, keeps the query and the list open, and reports a copy on close', (newWindow) => {
   const win = newWindow();
   const seen = [];
   const sel = multi(win, { options: ABC, selected: ['a'], onChange: (v) => seen.push(v) });
@@ -702,7 +651,10 @@ test('multi: a pick appends, keeps the query and the list open, and reports a co
   assert.strictEqual(search(sel).value, 'c');
   assert.deepStrictEqual(rows(win, sel), ['c']);
   assert.deepStrictEqual(ticked(win, sel), ['c']);
-  assert.deepStrictEqual(tags(sel), ['a', 'c']);
+  assert.deepStrictEqual(values(sel), ['a', 'c']);
+  assert.deepStrictEqual(seen, [], 'nothing reported while the list is open');
+  clickOutside(win);
+  assert.strictEqual(faceText(sel), 'a, c');
   assert.deepStrictEqual(json(seen), [['a', 'c']]);
   seen[0].push('zzz');
   assert.deepStrictEqual(values(sel), ['a', 'c'], 'the caller got a copy');
@@ -716,64 +668,25 @@ test('multi: one search serves several picks, a ticked row unticks, closing clea
   const sel = multi(win, { options: LAB, onChange: (v) => seen.push(v) });
   click(win, control(sel));
   type(win, search(sel), 'blood');
-  const matches = ['Blood glucose', 'Blood urea nitrogen', 'Occult blood'];
   clickRow(win, sel, 'Blood glucose');
   clickRow(win, sel, 'Occult blood');
-  // Enter picks the keyboard row, and the rows have not moved under it.
+  assert.strictEqual(search(sel).value, 'blood');
+  // The picks move up, the rest stay in their order.
+  assert.deepStrictEqual(rows(win, sel), ['Blood glucose', 'Occult blood', 'Blood urea nitrogen']);
+  // The keyboard row follows the last pick; one down is the next match,
+  // and Enter picks it.
   press(win, search(sel), 'ArrowDown');
   press(win, search(sel), 'Enter');
-  assert.strictEqual(search(sel).value, 'blood');
-  assert.deepStrictEqual(rows(win, sel), matches);
   assert.deepStrictEqual(values(sel), ['Blood glucose', 'Occult blood', 'Blood urea nitrogen']);
   clickRow(win, sel, 'Occult blood');
   assert.deepStrictEqual(values(sel), ['Blood glucose', 'Blood urea nitrogen']);
   assert.deepStrictEqual(ticked(win, sel), ['Blood glucose', 'Blood urea nitrogen']);
-  assert.strictEqual(seen.length, 4);
+  assert.strictEqual(seen.length, 0);
   clickOutside(win);
   assert.ok(!isOpen(sel));
+  assert.deepStrictEqual(json(seen), [['Blood glucose', 'Blood urea nitrogen']], 'one report');
+  click(win, control(sel));
   assert.strictEqual(search(sel).value, '');
-  win.close();
-});
-
-test('multi: the search placeholder shows only while there are no tags', (newWindow) => {
-  const win = newWindow();
-  const sel = multi(win, { options: ABC, placeholder: 'Columns' });
-  assert.strictEqual(search(sel).getAttribute('placeholder'), 'Columns');
-  sel.setValue(['a']);
-  assert.strictEqual(search(sel).getAttribute('placeholder'), '');
-  sel.setValue([]);
-  assert.strictEqual(search(sel).getAttribute('placeholder'), 'Columns');
-  win.close();
-});
-
-test('multi: removing a tag by its x reports a copy', (newWindow) => {
-  const win = newWindow();
-  const seen = [];
-  const sel = multi(win, { options: ABC, selected: ['a', 'b', 'c'], onChange: (v) => seen.push(v) });
-  click(win, sel.el.querySelector('.blockr-select__tag[data-value="b"] .blockr-select__tag-remove'));
-  assert.deepStrictEqual(tags(sel), ['a', 'c']);
-  assert.deepStrictEqual(json(seen), [['a', 'c']]);
-  seen[0].length = 0;
-  assert.deepStrictEqual(values(sel), ['a', 'c']);
-  win.close();
-});
-
-test('multi: a tag\'s x is a tab stop and removes on Enter or Space, keeping focus in the control', (newWindow) => {
-  const win = newWindow();
-  const seen = [];
-  const sel = multi(win, { options: ABC, selected: ['a', 'b', 'c'], onChange: (v) => seen.push(v) });
-  const xOf = (v) => sel.el.querySelector(`.blockr-select__tag[data-value="${v}"] .blockr-select__tag-remove`);
-  assert.strictEqual(xOf('a').tabIndex, 0, 'reachable by Tab');
-  xOf('b').focus();
-  const enter = press(win, xOf('b'), 'Enter');
-  assert.ok(enter.defaultPrevented, 'the native click does not fire a second time');
-  assert.deepStrictEqual(tags(sel), ['a', 'c']);
-  assert.strictEqual(win.document.activeElement, search(sel), 'focus stays in the control');
-  assert.ok(!isOpen(sel), 'and the list stays closed');
-  xOf('c').focus();
-  press(win, xOf('c'), ' ');
-  assert.deepStrictEqual(tags(sel), ['a']);
-  assert.deepStrictEqual(json(seen), [['a', 'c'], ['a']]);
   win.close();
 });
 
@@ -790,32 +703,6 @@ test('a bare select in a row is reached by Tab, so the row can show its focus', 
   assert.ok(!isOpen(sel), 'focus alone does not open it');
   win.close();
 });
-
-test('multi menu: picks are tags in the head, above the filter box, and the prompt survives', (newWindow) => {
-  const win = newWindow();
-  const seen = [];
-  const nine = ABC.concat(['f', 'g', 'h', 'i']);
-  win.Blockr.Select.menu(host(win), {
-    mode: 'multi', options: nine, selected: ['b'], searchPlaceholder: 'Filter columns',
-    onChange: (v) => seen.push(v)
-  });
-  const dd = win.document.querySelector('.blockr-select__dropdown');
-  const tagsEl = dd.querySelector('.blockr-select__tags');
-  const box = dd.querySelector('.blockr-select__search');
-  assert.ok(tagsEl && box, 'both in the panel');
-  assert.ok(tagsEl.compareDocumentPosition(box) & win.Node.DOCUMENT_POSITION_FOLLOWING, 'tags first');
-  click(win, dd.querySelector('.blockr-select__option[data-value="d"]'));
-  assert.deepStrictEqual(json(seen), [['b', 'd']]);
-  assert.deepStrictEqual(
-    [...dd.querySelectorAll('.blockr-select__tag')].map((t) => t.getAttribute('data-value')),
-    ['b', 'd']
-  );
-  assert.strictEqual(box.getAttribute('placeholder'), 'Filter columns');
-  assert.ok(dd.style.display === 'block', 'still open');
-  win.close();
-});
-
-/* --- reconciling ---------------------------------------------------------- */
 
 test('setOptions on a single falls back to the first option unless sel is known', (newWindow) => {
   const win = newWindow();
@@ -873,7 +760,6 @@ test('setOptions redraws an open list', (newWindow) => {
   sel.setOptions(['a', 'x', 'y']);
   assert.deepStrictEqual(rows(win, sel), ['a', 'x', 'y']);
   assert.deepStrictEqual(ticked(win, sel), ['a']);
-  assert.deepStrictEqual(tags(sel), ['a']);
   win.close();
 });
 
@@ -891,7 +777,7 @@ test('updateOptions swaps the list without touching the pick', (newWindow) => {
   const many = multi(win, { options: ABC, selected: ['a', 'b'] });
   many.updateOptions(['x']);
   assert.deepStrictEqual(values(many), ['a', 'b']);
-  assert.deepStrictEqual(tags(many), ['a', 'b']);
+  assert.strictEqual(faceText(many), 'a, b', 'the field keeps showing them');
   many.updateOptions(['x'], 'z');
   assert.deepStrictEqual(values(many), ['z'], 'a scalar is wrapped');
   many.updateOptions(['x'], ['q', 'r']);
@@ -925,7 +811,7 @@ test('setValue reconciles like setOptions and never reports', (newWindow) => {
   const many = multi(win, { options: ABC, selected: ['a'], onChange: (v) => seen.push(v) });
   many.setValue(['c', 'nope', 'a']);
   assert.deepStrictEqual(values(many), ['c', 'a']);
-  assert.deepStrictEqual(tags(many), ['c', 'a']);
+  assert.strictEqual(faceText(many), 'c, a');
   assert.deepStrictEqual(seen, []);
   win.close();
 });
@@ -950,60 +836,6 @@ test('the initial selection is copied, not aliased', (newWindow) => {
   win.close();
 });
 
-/* --- tags ----------------------------------------------------------------- */
-
-test('a tag shows the value and, muted, its label; full text on hover', (newWindow) => {
-  const win = newWindow();
-  const sel = multi(win, { options: LABELLED, selected: ['AVAL', 'BASE'] });
-  const labels = [...sel.el.querySelectorAll('.blockr-select__tag-label')];
-  assert.strictEqual(labels[0].textContent, 'AVALAnalysis Value');
-  assert.strictEqual(labels[0].querySelector('.blockr-select__opt-label').textContent, 'Analysis Value');
-  assert.strictEqual(win.Blockr.tooltip.text(labels[0]), 'AVAL · Analysis Value');
-  assert.strictEqual(labels[1].textContent, 'BASE');
-  assert.strictEqual(win.Blockr.tooltip.text(labels[1]), 'BASE');
-  const x = sel.el.querySelector('.blockr-select__tag[data-value="AVAL"] .blockr-select__tag-remove');
-  assert.strictEqual(x.getAttribute('aria-label'), 'Remove AVAL');
-  win.close();
-});
-
-test('a tag\'s x names itself in a tooltip, unless it is disabled', (newWindow) => {
-  const win = newWindow();
-  const sel = multi(win, { options: LABELLED, selected: ['AVAL'] });
-  const x = () => sel.el.querySelector('.blockr-select__tag-remove');
-  assert.strictEqual(win.Blockr.tooltip.text(x()), 'Remove AVAL');
-  x().focus();
-  assert.strictEqual(win.document.querySelector('.blockr-tooltip').textContent, 'Remove AVAL',
-    'keyboard focus shows it');
-  sel.setDisabled(true);
-  assert.strictEqual(win.Blockr.tooltip.text(x()), '', 'a disabled x never shows, nor its tooltip');
-  sel.setDisabled(false);
-  assert.strictEqual(win.Blockr.tooltip.text(x()), 'Remove AVAL');
-  win.close();
-});
-
-test('a tag for a value the list does not carry still shows the value', (newWindow) => {
-  const win = newWindow();
-  const sel = multi(win, { options: ABC, selected: [] });
-  sel.updateOptions(ABC, ['zz']);
-  const label = sel.el.querySelector('.blockr-select__tag-label');
-  assert.strictEqual(label.textContent, 'zz');
-  assert.strictEqual(win.Blockr.tooltip.text(label), 'zz');
-  win.close();
-});
-
-test('maxTagChars cuts the middle of a long value and keeps it whole on hover', (newWindow) => {
-  const win = newWindow();
-  const sel = multi(win, {
-    options: [{ value: 'Xanomeline High Dose', label: 'Arm' }],
-    selected: ['Xanomeline High Dose'], maxTagChars: 12
-  });
-  const label = sel.el.querySelector('.blockr-select__tag-label');
-  assert.strictEqual(label.textContent, 'Xanome… Dose');
-  assert.strictEqual(win.Blockr.tooltip.text(label), 'Xanomeline High Dose · Arm');
-  assert.deepStrictEqual(values(sel), ['Xanomeline High Dose']);
-  win.close();
-});
-
 test('labelFirst leads the rows with the label', (newWindow) => {
   const win = newWindow();
   win.Blockr.Select.menu(host(win), { options: LABELLED, labelFirst: true });
@@ -1011,146 +843,6 @@ test('labelFirst leads the rows with the label', (newWindow) => {
   assert.deepStrictEqual(texts, ['Analysis ValueAVAL', 'Change from BaselineCHG', 'BASE']);
   win.close();
 });
-
-/* Drag events, the way a browser delivers them: dragstart on the tag under
- * the pointer, dragover on whichever tag it crosses (with the pointer's x
- * against the tag's midpoint, which is 0 here), then drop. MouseEvent, not
- * DragEvent: happy-dom's DragEvent carries no clientX. */
-const drag = (win, sel, from, to, side) => {
-  const tagEl = (v) => sel.el.querySelector(`.blockr-select__tag[data-value="${v}"]`);
-  const dt = { effectAllowed: '', dropEffect: '', setData() {} };
-  const start = new win.MouseEvent('dragstart', { bubbles: true });
-  Object.defineProperty(start, 'dataTransfer', { value: dt });
-  tagEl(from).dispatchEvent(start);
-  assert.ok(tagEl(from).classList.contains('blockr-select__tag--dragging'));
-  const over = new win.MouseEvent('dragover', {
-    bubbles: true, cancelable: true, clientX: side === 'before' ? -1 : 1
-  });
-  Object.defineProperty(over, 'dataTransfer', { value: dt });
-  tagEl(to).dispatchEvent(over);
-  assert.ok(over.defaultPrevented, 'dragover is accepted');
-  assert.ok(tagEl(to).classList.contains(`blockr-select__tag--drop-${side}`));
-  const drop = new win.MouseEvent('drop', { bubbles: true, cancelable: true });
-  Object.defineProperty(drop, 'dataTransfer', { value: dt });
-  tagEl(to).dispatchEvent(drop);
-};
-
-test('reorderable: dragging a tag before or after another reorders and reports', (newWindow) => {
-  const win = newWindow();
-  const seen = [];
-  const sel = multi(win, { options: ABC, selected: ['a', 'b', 'c'], onChange: (v) => seen.push(v) });
-  assert.ok(sel.el.querySelectorAll('.blockr-select__tag[draggable="true"]').length === 3);
-  drag(win, sel, 'a', 'c', 'after');
-  assert.deepStrictEqual(tags(sel), ['b', 'c', 'a']);
-  drag(win, sel, 'a', 'b', 'before');
-  assert.deepStrictEqual(tags(sel), ['a', 'b', 'c']);
-  assert.deepStrictEqual(json(seen), [['b', 'c', 'a'], ['a', 'b', 'c']]);
-  assert.strictEqual(sel.el.querySelector('.blockr-select__tag--dragging'), null, 'indicators cleared');
-  assert.strictEqual(sel.el.querySelector('.blockr-select__tag--drop-before, .blockr-select__tag--drop-after'), null);
-  win.close();
-});
-
-test('reorderable: false leaves the tags in place', (newWindow) => {
-  const win = newWindow();
-  const seen = [];
-  const sel = multi(win, { options: ABC, selected: ['a', 'b'], reorderable: false, onChange: (v) => seen.push(v) });
-  assert.strictEqual(sel.el.querySelectorAll('.blockr-select__tag[draggable]').length, 0);
-  win.close();
-});
-
-/* A layout for the single-line fit: the tag row is 200px wide, every tag
- * 60px, the chip 24px, the gap 3px. Three tags need 186px and fit; five need
- * the chip, which pushes the count down to two (2 * 60 + 3 + 3 + 24 = 150).
- * Same numbers as the fitCount tests, fed through the DOM this time. */
-const stubLayout = (win) => {
-  // happy-dom shares prototypes between windows: restore them afterwards.
-  const widthDesc = Object.getOwnPropertyDescriptor(win.HTMLElement.prototype, 'clientWidth');
-  const rect = win.Element.prototype.getBoundingClientRect;
-  Object.defineProperty(win.HTMLElement.prototype, 'clientWidth', {
-    configurable: true,
-    get() { return this.classList.contains('blockr-select__tags') ? 200 : 0; }
-  });
-  win.Element.prototype.getBoundingClientRect = function () {
-    const w = this.classList.contains('blockr-select__tag') ? 60
-      : this.classList.contains('blockr-select__more') ? 24 : 0;
-    return { width: w, height: 0, left: 0, right: w, top: 0, bottom: 0, x: 0, y: 0 };
-  };
-  return () => {
-    Object.defineProperty(win.HTMLElement.prototype, 'clientWidth', widthDesc);
-    win.Element.prototype.getBoundingClientRect = rect;
-  };
-};
-
-test('singleLine: tags past the first row hide behind a +N chip that lists them', (newWindow, t) => {
-  const win = newWindow();
-  t.after(stubLayout(win));
-  const three = multi(win, { options: ABC, selected: ['a', 'b', 'c'], singleLine: true });
-  const hiddenIn = (sel) =>
-    [...sel.el.querySelectorAll('.blockr-select__tag--hidden')].map((t) => t.getAttribute('data-value'));
-  const chipOf = (sel) => {
-    const chip = sel.el.querySelector('.blockr-select__more');
-    return chip && chip.style.display !== 'none' ? { text: chip.textContent, title: win.Blockr.tooltip.text(chip) } : null;
-  };
-  assert.deepStrictEqual(hiddenIn(three), []);
-  assert.strictEqual(chipOf(three), null);
-
-  const five = multi(win, { options: ABC, selected: ABC, singleLine: true });
-  assert.deepStrictEqual(hiddenIn(five), ['c', 'd', 'e']);
-  assert.deepStrictEqual(chipOf(five), { text: '+3', title: 'c\nd\ne' });
-  assert.deepStrictEqual(values(five), ABC, 'hidden is not removed');
-
-  // Widening (or narrowing) refits: a removal gives room back.
-  click(win, five.el.querySelector('.blockr-select__tag[data-value="d"] .blockr-select__tag-remove'));
-  assert.deepStrictEqual(hiddenIn(five), ['c', 'e']);
-  assert.deepStrictEqual(chipOf(five), { text: '+2', title: 'c\ne' });
-  win.close();
-});
-
-test('singleLine: the chip expands the control until a click elsewhere', (newWindow, t) => {
-  const win = newWindow();
-  t.after(stubLayout(win));
-  const sel = multi(win, { options: ABC, selected: ABC, singleLine: true });
-  const hidden = () => sel.el.querySelectorAll('.blockr-select__tag--hidden').length;
-  assert.strictEqual(hidden(), 3);
-  click(win, sel.el.querySelector('.blockr-select__more'));
-  assert.ok(sel.el.classList.contains('blockr-select--expanded'));
-  assert.strictEqual(hidden(), 0, 'every tag is reachable');
-  assert.ok(!isOpen(sel), 'the chip does not open the list');
-  clickOutside(win);
-  assert.ok(!sel.el.classList.contains('blockr-select--expanded'));
-  assert.strictEqual(hidden(), 3);
-  win.close();
-});
-
-test('singleLine: Escape closes the list first, then collapses the tags', (newWindow, t) => {
-  const win = newWindow();
-  t.after(stubLayout(win));
-  const sel = multi(win, { options: ABC, selected: ABC, singleLine: true });
-  const expanded = () => sel.el.classList.contains('blockr-select--expanded');
-  click(win, sel.el.querySelector('.blockr-select__more'));
-  press(win, win.document.body, 'Escape');
-  assert.ok(expanded(), 'the control is in the page: an Escape pressed elsewhere leaves it');
-  click(win, control(sel));
-  assert.ok(isOpen(sel));
-  press(win, search(sel), 'Escape');
-  assert.ok(!isOpen(sel), 'the list is on top, so it goes first');
-  assert.ok(expanded());
-  press(win, search(sel), 'Escape');
-  assert.ok(!expanded(), 'then the tags collapse');
-  win.close();
-});
-
-test('singleLine: a control without a width yet leaves every tag visible', (newWindow) => {
-  const win = newWindow();
-  const sel = multi(win, { options: ABC, selected: ABC, singleLine: true });
-  assert.ok(sel.el.classList.contains('blockr-select--single-line'));
-  assert.strictEqual(sel.el.querySelectorAll('.blockr-select__tag--hidden').length, 0);
-  const chip = sel.el.querySelector('.blockr-select__more');
-  assert.ok(chip === null || chip.style.display === 'none');
-  win.close();
-});
-
-/* --- lifecycle ------------------------------------------------------------ */
 
 test('destroy closes, removes the portalled list and the root, and unhooks the document', (newWindow) => {
   const win = newWindow();
@@ -1164,7 +856,7 @@ test('destroy closes, removes the portalled list and the root, and unhooks the d
   let closed = 0;
   const container = host(win);
   const sel = win.Blockr.Select.multi(container, {
-    options: ABC, selected: ['a'], singleLine: true, onClose: () => { closed++; }
+    options: ABC, selected: ['a'], onClose: () => { closed++; }
   });
   click(win, control(sel));
   const dd = dropdown(win, sel);

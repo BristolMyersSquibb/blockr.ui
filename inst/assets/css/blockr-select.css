@@ -71,18 +71,8 @@
 }
 .blockr-select--disabled .blockr-select__value,
 .blockr-select--disabled .blockr-select__arrow,
-.blockr-select--disabled .blockr-select__tag,
-.blockr-select--disabled .blockr-select__tag .blockr-select__opt-label,
 .blockr-select--disabled .blockr-select__search::placeholder {
   color: var(--blockr-color-text-disabled);
-}
-.blockr-select--disabled .blockr-select__tag {
-  cursor: default;
-}
-/* The x keeps its space (nothing moves) but never shows; the button is
-   disabled, so it is not a tab stop either. */
-.blockr-select--disabled .blockr-select__tag:hover .blockr-select__tag-remove {
-  opacity: 0;
 }
 
 /* --- Value display (single mode) --- */
@@ -115,26 +105,6 @@
 
 .blockr-select--open .blockr-select__arrow {
   transform: rotate(180deg);
-}
-
-/* A click on an open multi's chevron closes the list, while anywhere else in
-   the control a click only opens it (blockr-select.js). So while the list
-   is open the chevron takes clicks itself, over a 24px square centred on
-   it, the least a target inside a field may be (design system, Shape and
-   size). The square is an invisible ::after, so the chevron does not move. */
-.blockr-select--multi.blockr-select--open .blockr-select__arrow {
-  position: relative;
-  pointer-events: auto;
-}
-
-.blockr-select--multi.blockr-select--open .blockr-select__arrow::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 24px;
-  height: 24px;
-  transform: translate(-50%, -50%);
 }
 
 /* A bare select sits in a row, whose field it is: its chevron is 10px, as
@@ -176,83 +146,10 @@
   position: absolute;
 }
 
-/* In multi mode when closed, take the search input out of flow as well.
-   Left in flow it holds a trailing flex slot (min-width) plus one `gap`
-   gutter, so once the tags leave less than that free, the empty input alone
-   wraps to a second row and inflates the control even though the tags fit on
-   one. Zeroing its width is not enough — the gutter still counts — hence
-   position: absolute, matching the single-mode rule above.
-   Gated on a tag existing: while nothing is selected this input is the ONLY
-   element that renders the placeholder (multi mode builds no
-   `.blockr-select__value`), so collapsing it when empty blanks the control. */
-.blockr-select--multi:not(.blockr-select--open)
-  .blockr-select__tags:has(.blockr-select__tag) .blockr-select__search {
-  position: absolute;
-  width: 0;
-  min-width: 0;
-  padding: 0;
-  opacity: 0;
-}
-
-/* --- Tags container (multi mode) ---
-   Grows to fill the control, which puts the chevron at the end as in a
-   single select, however many rows the tags wrap onto. */
-.blockr-select__tags {
-  display: flex;
-  flex: 1;
-  flex-wrap: wrap;
-  gap: 3px;
-  align-items: center;
-  /* As a flex item of the control, min-width: auto would content-size this
-     past the control, defeating the tags' max-width: 100% cap below. */
-  min-width: 0;
-  max-width: 100%;
-}
-
-/* --- Single-line modifier ---------------------------------------------------
-   Tags stay on one row and the overflow collapses into a "+N" chip
-   (blockr-select.js `fitTags`), so the control keeps its height whatever is
-   selected. Used by the auto-generated parameter bands, where a wrapping
-   select sets the height of the whole grid row. */
-.blockr-select--single-line .blockr-select__control {
-  flex-wrap: nowrap;
-  overflow: hidden;
-}
-.blockr-select--single-line .blockr-select__tags {
-  flex-wrap: nowrap;
-  overflow: hidden;
-}
-.blockr-select--single-line .blockr-select__tag {
-  flex: 0 0 auto;
-}
-/* Clicking the chip wraps the control open so every tag is reachable.
-   Collapses again on the next outside click. */
-.blockr-select--single-line.blockr-select--expanded .blockr-select__control,
-.blockr-select--single-line.blockr-select--expanded .blockr-select__tags {
-  flex-wrap: wrap;
-  overflow: visible;
-}
-
-/* The overflow count. Not a tag: it carries no remove button, and clicking it
-   expands the control (see the modifier above) rather than opening the
-   dropdown. */
-.blockr-select__more {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  box-sizing: border-box;
-  padding: 0 8px;
-  border-radius: var(--blockr-radius-sm);
-  background: var(--blockr-color-bg-accent-subtle);
-  border: 1px solid var(--blockr-color-border-accent-subtle);
-  font-size: var(--blockr-font-size-sm);
-  color: var(--blockr-color-text-accent-strong);
-  cursor: pointer;
-  user-select: none;
-}
-
-/* --- Individual tag --- */
+/* --- Tag ---
+   The select draws no tags since its multi shows the picks as text, but the
+   look stays here for the tags other packages draw from these classes (the
+   assistant's focus chip). Design system, Tags. */
 .blockr-select__tag {
   display: inline-flex;
   align-items: center;
@@ -325,56 +222,6 @@
   margin-left: 8px;
 }
 
-/* Tags the single-line fit dropped. After `.blockr-select__tag`, whose
-   `display: inline-flex` would otherwise win on source order. */
-.blockr-select__tag--hidden {
-  display: none;
-}
-
-/* --- Drag states --- */
-.blockr-select__tag[draggable="true"] {
-  cursor: grab;
-}
-
-.blockr-select__tag--dragging {
-  opacity: 0.4;
-}
-
-/* Drop indicator: a centered vertical bar between tags */
-.blockr-select__tag {
-  position: relative;
-}
-
-.blockr-select__tag--drop-before {
-  margin-left: 8px;
-}
-
-.blockr-select__tag--drop-before::before {
-  content: "";
-  position: absolute;
-  left: -6px;
-  top: 2px;
-  bottom: 2px;
-  width: 2px;
-  background: var(--blockr-color-bg-accent);
-  border-radius: 1px;
-}
-
-.blockr-select__tag--drop-after {
-  margin-right: 8px;
-}
-
-.blockr-select__tag--drop-after::after {
-  content: "";
-  position: absolute;
-  right: -6px;
-  top: 2px;
-  bottom: 2px;
-  width: 2px;
-  background: var(--blockr-color-bg-accent);
-  border-radius: 1px;
-}
-
 /* --- Dropdown ---
    Shown only while portalled to <body>, where Blockr.place (blockr-ui.js)
    gives it a fixed position 4px under the control, or above it near the
@@ -409,7 +256,8 @@
   padding: 4px;
 }
 
-/* The menu's head: title, tags and filter box in one element that stays put
+/* The menu's head: title and filter box (and a multi's count, All and
+   None) in one element that stays put
    while the rows scroll under it. The panel gives up its top padding to the
    head (a sticky box cannot leave its container's content box, so a
    negative margin would not get it there), so nothing shows between the
@@ -436,20 +284,6 @@
   font-weight: var(--blockr-font-weight-semibold);
   color: var(--blockr-color-text-muted);
   padding: 8px 10px 4px;
-}
-
-/* The picks, in the panel's own head (multi menus). The control that would
-   hold them is never mounted, so they sit between the title and the filter
-   box. Inset to 9px so a tag's left edge lands on the same column as the
-   title and, within a pixel, an option's text -- the head and the list read
-   as one column rather than two boxes. */
-.blockr-select__tags--menu {
-  padding: 2px 9px 6px;
-  /* Three rows of 24px tags, then they scroll on their own: the head is
-     sticky and the panel stops at 320px, so uncapped picks would push every
-     row out of reach. */
-  max-height: calc(3 * 24px + 2 * 3px);
-  overflow-y: auto;
 }
 
 /* Inset by the panel's own padding again, so the box sits inside the panel
@@ -552,4 +386,219 @@
   color: var(--blockr-color-text-muted);
   font-style: italic;
   text-align: center;
+}
+
+/* =========================================================================
+   Multi (blockr-select.js createMulti): the field shows the picks as text,
+   the list has them on top and a head with the count, All and None.
+   ========================================================================= */
+
+/* The field: the picks as one line of text. "5 of 48" leads, the names
+   follow muted and ellipsize first. In a flex row the select would grow to
+   fit the names instead; min-width: 0 keeps it to the row. */
+.blockr-select--multi {
+  min-width: 0;
+}
+.blockr-select--multi .blockr-select__control {
+  flex-wrap: nowrap;
+}
+.blockr-select--multi .blockr-select__control:focus-visible {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}
+.blockr-select__face,
+.blockr-select--open .blockr-select__face {
+  display: block;
+  min-width: 0;
+}
+.blockr-select__rest {
+  margin-left: 8px;
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-muted);
+}
+.blockr-select__rest:empty {
+  display: none;
+}
+
+/* The head under the filter box: the count, then All and None. */
+.blockr-select__bulk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 10px 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--blockr-color-border-default);
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-muted);
+}
+.blockr-select__bulk-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+  flex-shrink: 0;
+}
+/* In a narrow column the count gives way first, then the buttons wrap. */
+.blockr-select__count {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blockr-select__bulk-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--blockr-color-text-accent);
+  cursor: pointer;
+}
+.blockr-select__bulk-btn:hover:not(:disabled):not([aria-disabled="true"]) {
+  text-decoration: underline;
+}
+.blockr-select__bulk-btn:disabled,
+.blockr-select__bulk-btn[aria-disabled="true"] {
+  color: var(--blockr-color-text-disabled);
+  cursor: default;
+}
+
+/* "Selected" and "Other" over the two groups of rows. */
+.blockr-select__group {
+  padding: 8px 10px 2px;
+  font-size: var(--blockr-font-size-xs);
+  font-weight: var(--blockr-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--blockr-color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A row: tick, name, meta, and the grip on a draggable pick. */
+.blockr-select__option--multi {
+  display: flex;
+  align-items: center;
+}
+.blockr-select__option--multi .blockr-select__tick {
+  flex-shrink: 0;
+}
+.blockr-select__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The meta ("86", "pool · 12") keeps its width until the name is down to
+   a few letters, then gives way too. */
+.blockr-select__option--multi .blockr-select__opt-label {
+  flex-shrink: 0;
+}
+@container blockr-select (max-width: 140px) {
+  .blockr-select__option--multi .blockr-select__opt-label {
+    display: none;
+  }
+}
+/* Narrower still (a squeezed dock column): the names keep the room. The
+   rows still drag without their grip; the ticks say the count. */
+@container blockr-select (max-width: 120px) {
+  .blockr-select__option--multi .blockr-select__grip,
+  .blockr-select__bulk .blockr-select__count {
+    display: none;
+  }
+  .blockr-select__bulk-btns {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+}
+.blockr-select__panel--list {
+  container: blockr-select / inline-size;
+}
+/* A short list in place keeps its filter box off screen; while the box
+   has the keyboard, the list shows the focus. */
+.blockr-select__panel--list:has(.blockr-select__search--offscreen:focus-visible) {
+  outline: var(--blockr-focus-outline);
+  outline-offset: var(--blockr-focus-offset);
+}
+
+/* A pick that may not untick (`min`). */
+.blockr-select__option--locked {
+  cursor: default;
+}
+.blockr-select__grip {
+  display: flex;
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--blockr-color-text-muted);
+  cursor: grab;
+}
+.blockr-select__grip svg {
+  width: 14px;
+  height: 14px;
+}
+.blockr-select__option--dragging {
+  opacity: 0.4;
+}
+.blockr-select__option--drop-before {
+  box-shadow: inset 0 2px 0 var(--blockr-color-border-accent);
+}
+.blockr-select__option--drop-after {
+  box-shadow: inset 0 -2px 0 var(--blockr-color-border-accent);
+}
+
+/* Group names over the unpicked rows ("Chemistry", "ECG"), quieter than
+   "Selected" and "Other", which name the two parts of the list. */
+.blockr-select__subgroup {
+  padding: 8px 10px 2px;
+  font-size: var(--blockr-font-size-xs);
+  font-weight: var(--blockr-font-weight-semibold);
+  color: var(--blockr-color-text-muted);
+}
+
+/* "+ Add panels (77)" under the picks of a folded list, and the way back. */
+.blockr-select__unfold {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  font-size: var(--blockr-font-size-sm);
+  color: var(--blockr-color-text-accent);
+  cursor: pointer;
+}
+.blockr-select__unfold:hover {
+  text-decoration: underline;
+}
+
+/* In place: the dropdown's panel without the float. Bordered like a field
+   when the caller asks for `bordered`, flush otherwise (a sidebar is its
+   own frame). A caller caps the height on the root (max-height); the rows
+   scroll under the head. */
+.blockr-select--list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.blockr-select__panel--list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0 4px 4px;
+  background: var(--blockr-color-bg-surface);
+}
+.blockr-select__panel--list .blockr-select__head {
+  background: var(--blockr-color-bg-surface);
+}
+.blockr-select__panel--list .blockr-select__listbox {
+  overflow-y: auto;
+  min-height: 0;
+}
+.blockr-select--bordered.blockr-select--list .blockr-select__panel--list {
+  border: 1px solid var(--blockr-color-border-default);
+  border-radius: var(--blockr-radius-lg);
+}
+.blockr-select__panel--list .blockr-select__option--selected {
+  font-weight: inherit;
 }

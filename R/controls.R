@@ -1,8 +1,8 @@
 #' Shared block controls
 #'
 #' The JavaScript and CSS of the controls blockr blocks are built from:
-#' `Blockr.Select` (single, multi and menu), `Blockr.Input` (the code field
-#' with column and function completions), the Enter button of a field that
+#' `Blockr.Select` (single, multi, list and menu), `Blockr.Input` (the code
+#' field with column and function completions), the Enter button of a field that
 #' commits on Enter, the required-empty cue, the checkbox, the segmented
 #' control, the gear tray, the tooltip (`Blockr.tooltip`), the menus of
 #' actions (`Blockr.menu` for those built in JavaScript, `Blockr.actionMenu`
