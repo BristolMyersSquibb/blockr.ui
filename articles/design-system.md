@@ -146,10 +146,9 @@ active field.
 `border-accent-subtle` edge; its hover is `bg-accent-subtle-hover` with
 `border-accent`. It is the main button’s look, and every selected or
 “on” state borrows it: a selected segment, an icon tile, a pressed icon
-button, the open gear, a tag that is cutting rows, an “on” badge, the
-“+N” overflow, the ↵ button, a selected row and the active group’s front
-tab (these two without the edge). Hovering a selected thing keeps its
-look.
+button, the open gear, a tag that is cutting rows, an “on” badge, the ↵
+button, a selected row and the active group’s front tab (these two
+without the edge). Hovering a selected thing keeps its look.
 
 ### Status
 
@@ -513,7 +512,7 @@ A field says how many columns it needs.
 |-------|---------------|--------------------------------------------------|
 | small | 1             | number, checkbox (two when its label needs them) |
 | large | 2             | select, text field, segmented control            |
-| full  | the whole row | tags (multi-select), expression                  |
+| full  | the whole row | multi-select, expression                         |
 
 Columns line up across sections at every width. A section with few
 fields leaves room on the right; fields do not stretch to fill it. At
@@ -666,7 +665,7 @@ page](https://bristolmyerssquibb.github.io/blockr.ui/articles/design-system/inde
 | One of two or three fixed, short values | Segmented control |
 | One of four or more, or of anything from the data (columns, measures, levels) at any count | Select |
 | The same, inside a row | Pill that opens a menu |
-| Several from a list, from the data or from a fixed set | Select, multi, with tags |
+| Several from a list, from the data or from a fixed set | Select, multi |
 | Kind of output (chart type) | Icon tiles, with group headings where types are grouped |
 | How a value is edited (builder or code) | Pressed icon button |
 | A number or a name | Field that commits on Enter or blur |
@@ -711,21 +710,42 @@ the open gear, a selected row, the active group’s front tab.
 - A screen reader names it by its field’s label, which the caller passes
   as `label`; a menu uses its title.
 
-### Select, multi, with tags
+### Select, multi
 
-- The picks sit as tags in the control. The dropdown lists every option
-  and ticks the picks; a click on a ticked row unticks it. Tags can be
-  dragged to reorder.
-- A pick keeps the dropdown open and keeps the filter text, so one
-  search serves several picks (“blood”, then each blood test). The
-  filter clears when the dropdown closes.
-- A tag’s × appears on the tag under the pointer or with keyboard focus,
-  never on every tag at once, and turns `text-danger` on its own hover.
-  Its space stays reserved, so nothing moves.
-- The “+N” overflow stands in for hidden tags: tag geometry in the
-  accent tint; a click expands the field.
+- The field shows the picks as text, each once: one or two by name
+  (“Placebo, Xanomeline High Dose”), more as a count with the names
+  muted after it (“5 of 48 AGE, SEX, …”). It never says “All”: the picks
+  are a list of values, and a value that turns up in the data later is
+  not among them. Until the options are loaded the names alone show.
+  Nothing picked shows the placeholder, “None” by default. The tooltip
+  lists every pick with its label. The list is the only place to change
+  the picks.
+- The open list has the picks on top under “Selected”, in pick order,
+  then the other options under “Other”, in their own order. A tick moves
+  a row up, an untick moves it back to its place, both sliding. Options
+  with a group show under the group’s name instead of “Other”.
+- The list head has the filter box, then the count (“3 of 12 selected”)
+  with All and None. With a filter typed they read “All 4 shown” and
+  “None shown” and act on the matching rows. While only part of the
+  values are loaded (server search), All waits for a search.
+- A pick keeps the list open and keeps the filter text, so one search
+  serves several picks (“blood”, then each blood test). The filter
+  clears when the list closes.
+- The picks are reported once, when the list closes: a click outside,
+  Tab, the chevron or Escape. Escape reports too, since people press it
+  just to close the list.
+- The picks drag into order under “Selected”, each with a grip at its
+  end; a caller opts out with `reorderable: false`. With a filter typed
+  nothing drags.
+- A caller can set the fewest picks it accepts (`min`). None is then
+  disabled where it would leave fewer, and the last picks do not untick;
+  a tooltip says why.
+- In place (`Blockr.Select.list()`) the same list is the control, always
+  open, and reports after a pause in the picking (1 s). A long list in
+  place folds the options not picked under “+ Add …” until the filter is
+  used or the fold is opened.
 - The same control serves data-driven lists and fixed sets (such as the
-  summary table’s statistics). Fixed options stay hidden until opened.
+  summary table’s statistics).
 
 ### Checkbox
 
@@ -1179,12 +1199,13 @@ the viewport edge.
 
 A menu lines up with the trigger’s left edge, or its right edge when the
 trigger is in the header row. Height up to 320px, then the list scrolls
-under its sticky titles and filter box. A multi menu’s tags take up to
-three rows and scroll on their own past that, so the list keeps room
-under many picks. A filter box (30px) appears above 8 options. It is
-part of the menu, not a field: 13px, and no focus ring, since it holds
-focus the whole time the menu is open. A `Select.menu` names the role it
-sets in its title, because the word that opened it names only the value.
+under its sticky titles and filter box. A multi menu’s head adds the
+count with All and None; its picks are rows like the rest, so the list
+keeps room under many picks. A filter box (30px) appears above 8
+options. It is part of the menu, not a field: 13px, and no focus ring,
+since it holds focus the whole time the menu is open. A `Select.menu`
+names the role it sets in its title, because the word that opened it
+names only the value.
 
 **Content.** Long lists render up to 200 options and end with a count
 row that asks you to type; server-searched lists say how many values
@@ -1199,7 +1220,8 @@ Space picks too; opened from the keyboard, the menu starts on its first
 row, and the down arrow on its trigger opens it. Escape closes and
 returns focus to the trigger; an outside click closes, and so does Tab,
 after stopping at the menu’s tool where there is one. A pick closes the
-menu; a multi pick keeps it open and keeps the filter text.
+menu; a multi pick keeps it open and keeps the filter text, and the
+picks are reported when it closes.
 
 ### The block’s “…” menu
 
@@ -1292,10 +1314,10 @@ buttons, which you act on, keep 4px corners.
 ### Tags
 
 24px, radius 4, 1px `border-default`, 8px side padding. Inside a field
-(a multi Select, a row) a tag takes `bg-hover`, a step darker than the
-field, and its name is 13px `text-default` mixed 80% with `bg-field`, so
-the tags do not outshout the rest of the block. A column label after the
-name is 12px, the same mix at 70%, since `text-muted` is under 4.5:1 on
+(a row) a tag takes `bg-hover`, a step darker than the field, and its
+name is 13px `text-default` mixed 80% with `bg-field`, so the tags do
+not outshout the rest of the block. A column label after the name is
+12px, the same mix at 70%, since `text-muted` is under 4.5:1 on
 `bg-hover`. The crossfilter’s “Filter by” tags sit on the surface:
 `bg-surface`, `text-default`, and `bg-hover` while their card is open.
 The × follows [Controls](#controls). The accent tint on a tag means the
@@ -1377,8 +1399,8 @@ in names, an exhibit in labels.
   (Select’s `labelFirst`). The word belongs to the exhibit, which speaks
   in labels.
 - A tooltip that shows both has the name, then the label muted, like the
-  control. The “+N” overflow lists the hidden tags that way, one per
-  line.
+  control. A multi field with three or more picks lists them that way,
+  one per line.
 - An aggregate reads “Mean of Age”, on a chart, in a table and in a rank
   table header.
 - Code and decode pairs (PARAMCD and PARAM) follow the same rule: where
