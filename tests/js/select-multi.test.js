@@ -433,3 +433,20 @@ test('the field\'s tooltip names every pick with its label', () => {
   assert.match(tip, /SEX/);
   assert.match(tip, /Sex/);
 });
+
+test('a single pick shows its label in the tooltip while the field fits', () => {
+  // Nothing is cut off in happy-dom, so keyboard focus shows a tooltip at
+  // once, unless it waits for the field to be cut off.
+  const card = (p) => {
+    p.doc.querySelector('.blockr-select__control').focus();
+    return p.doc.querySelector('.blockr-tooltip');
+  };
+  const labelled = mount('multi', {
+    options: [{ value: 'ARM', label: 'Description of Planned Arm' }], selected: ['ARM']
+  });
+  const tip = card(labelled);
+  assert.ok(tip, 'shown while the field fits');
+  assert.strictEqual(tip.querySelector('.blockr-tooltip__meta').textContent, 'Description of Planned Arm');
+  // A pick without a label would only repeat the field.
+  assert.strictEqual(card(mount('multi', { options: ['CR', 'PD'], selected: ['CR'] })), null);
+});

@@ -817,13 +817,14 @@
       faceRest.textContent = s.rest;
       face.classList.toggle('blockr-select__value--placeholder', s.empty);
       // The tooltip names every pick with its label, one per line, as the
-      // tags did.
+      // tags did. A lone pick without a label would only repeat the field,
+      // so its tooltip waits until the field is cut off.
       const named = st.selected.map((v) => {
         const o = find(v);
         return { name: v, label: o ? optLabel(o) : '' };
       });
       if (named.length > 1) Blockr.tooltip.set(control, named);
-      else if (named.length === 1) Blockr.tooltip.set(control, named[0], { overflow: true });
+      else if (named.length === 1) Blockr.tooltip.set(control, named[0], { overflow: !named[0].label });
       else Blockr.tooltip.clear(control);
     };
 
