@@ -2,10 +2,21 @@ Package: blockr.ui
 Title: User Interface Components for the 'blockr' Ecosystem
 Version: 0.2.0
 Authors@R:
-    person(given = "David",
-           family = "Granjon",
-           role = c("aut", "cre"),
-           email = "david@cynkra.com")
+    c(person(given = "Nicolas",
+             family = "Bennett",
+             role = c("aut", "cre"),
+             email = "nicolas@cynkra.com"),
+      person(given = "David",
+             family = "Granjon",
+             role = c("aut"),
+             email = "david@cynkra.com"),
+      person(given = "Christoph",
+             family = "Sax",
+             role = c("aut"),
+             email = "christoph@cynkra.com"),
+      person(family = "Bristol Myers Squibb",
+             role = "fnd")
+    )
 Description: User-interface primitives shared across the 'blockr'
     ecosystem.
 URL: https://bristolmyerssquibb.github.io/blockr.ui/

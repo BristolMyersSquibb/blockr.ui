@@ -17,11 +17,18 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: David Granjon \email{david@cynkra.com}
+\strong{Maintainer}: Nicolas Bennett \email{nicolas@cynkra.com}
 
 Authors:
 \itemize{
+  \item Nicolas Bennett \email{nicolas@cynkra.com}
   \item David Granjon \email{david@cynkra.com}
+  \item Christoph Sax \email{christoph@cynkra.com}
+}
+
+Other contributors:
+\itemize{
+  \item  Bristol Myers Squibb [funder]
 }
 
 }
