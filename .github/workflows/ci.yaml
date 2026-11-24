@@ -26,12 +26,10 @@ jobs:
       - run: npm test
       - run: npx -y -p typescript@~6.0.0 tsc
 
+  # Lists no downstream until the js-state of a package imports blockr.ui.
+  # The job stays for revdep / revdep-all, a required check, which passes with
+  # none.
   revdep:
     uses: BristolMyersSquibb/blockr.ci/.github/workflows/revdep.yaml@main
-    with:
-      revdep-packages: |
-        BristolMyersSquibb/blockr.dock
-      revdep-test-upstream: true
-      revdep-test-filter: tokens-revdep
     secrets:
       BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}
