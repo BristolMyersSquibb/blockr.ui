@@ -1,227 +1,24 @@
-# blockr.ui (development version)
+# blockr.ui 0.2.0
 
-* `Blockr.Select.multi()` shows each pick once. The field shows the picks
-  as text instead of tags: one or two by name ("Placebo, Xanomeline High
-  Dose"), more as "5 of 48" with the names muted, and its tooltip lists
-  every pick with its label. The open list has the picks on top under
-  "Selected", and its head has the count, All and None. A pick is removed in
-  the list. The picks are reported once, when the list closes, not on every
-  tick. They drag into order in the list unless the caller passes
-  `reorderable: false`, as the tags did. Config and handle are unchanged.
-  New options: `all: false` drops All, `min` and `minHint` hold back None
-  and the last untick, `countLabel` names what is counted, and an option can
-  carry a `group` and `keywords`. `Blockr.Select.menu()` with
-  `mode: 'multi'` is the same list hung under a word, and its handle gains
-  `setOptions()` for new choices while it is open. The new
-  `Blockr.Select.list()` puts the list in place, always open, and reports
-  after a pause in the picking (`delay`, 1 s); a long one folds the options
-  not picked (`fold`, `addLabel`). `singleLine` and `maxTagChars` went with
-  the tags and are ignored.
-
-* A `Blockr.menu()` can carry a tool, `config.tool` (`{ icon, label,
-  onSelect }`), at the end of its caption line in the top right corner: an
-  icon button named by its tooltip that opens the menu's list somewhere
-  fuller (#94). Tab moves to it from the filter box, and a click closes the
-  menu and hands `onSelect` what was typed in the filter box. The menu for
-  the dock's block actions uses it to open the block browser in the
-  sidebar, with the new `open` icon, a box with an arrow out of its corner.
-  The spec's "Picking a block" now keeps the browser and its form for a
-  block's and a link's IDs, which cannot be changed after adding.
-
-* The new token `--blockr-logo` is the blockr logo's green, `#089e76`, which
-  the design spec now names as the third colour allowed outside the palette
-  (#95). Like the block category colours, it is the same under every theme
-  and in the dark scheme, and it clears 3:1 on the surface in both.
-
-* The new `Blockr.menu.delegate(selector, config)` opens and closes the
-  menu of every trigger that matches `selector`, including triggers added
-  to the page later, such as the "…" buttons on the dock's block cards
-  (#79). A click and the down arrow act as on a trigger wired with
-  `Blockr.menu.bind()`, so a menu opened from the keyboard starts on its
-  first row. A function `config` is read on each open and is given the
-  trigger. Nothing marks a trigger before its first open, so its markup
-  carries `aria-haspopup="menu"` and `aria-expanded="false"`.
-
-* The new `base_dep()` is the stylesheet for a page that does not load
-  Bootstrap (#85): a reset of the browser's defaults, Open Sans (bundled:
-  latin, latin-ext, greek, and math for operators such as ≤, ≥ and ≠), and
-  the look of the markup Shiny's own inputs emit (`form-group`,
-  `form-control`, `checkbox`, `btn`). It brings `theme_dep()` along, whose
-  `--bs-btn-*` values its buttons read, so they look the same with or
-  without Bootstrap.
-
-* The new `dropdown()` builds a panel that opens under its toggle and stays
-  open while it is worked in (a search field, a list edited in place), as
-  the navbar's menus need, which are Bootstrap dropdowns today. Its script,
-  `Blockr.dropdown` in `controls_dep()`, moves the open panel to the page
-  body and places it as a menu is placed, so no panel's overflow clips it.
-
-* The theme layer draws `.btn-outline-primary` as the main kind and
-  `.btn-outline-danger` as the destructive one, so they look the same with
-  or without Bootstrap. With Bootstrap, the Download and Delete buttons of
-  blockr.session's workflow manager lose its blue and red outlines, and
-  blockr.dock's "Add panel" turns from secondary to main.
-
-* The words beside a radio button are no longer drawn as a field's label,
-  12px and muted, but as text, as a checkbox's are.
-
-* The theme layer, `theme_dep()`, draws Shiny's `checkboxInput()` and
-  `checkboxGroupInput()`, inline or not, and bslib's `input_switch()` as the
-  design system's checkbox, so R code keeps calling them and on/off looks
-  the same everywhere.
-
-* Rows in a menu of actions (`Blockr.menu`, `action_menu()`) take radius 4,
-  like the rows of a Select list, instead of 6.
-
-* A new layer, `--blockr-z-overlay` (1000, Bootstrap's `$zindex-dropdown`),
-  for an overlay that belongs to the content but is fixed on `<body>`, such
-  as a drag ghost or a drop line: above the content, under the navbar and
-  everything that floats.
-
-* The small icons gain `"eye"`, `"dots"`, `"minus"`, `"info"`, `"warning"`,
-  `"maximize"` and `"restore"`, the icons blockr.dock and blockr.extra still
-  took from Font Awesome, through `shiny::icon()` or dockViewR's defaults
-  (#85).
-
-* The new `shiny_input_batch_dep()` dependency skips the empty input messages
-  Shiny has sent after every deferred input since 1.7.5: its batcher never
-  records that a send is queued, so each deferred `setInput` queues one, and
-  all but the first go out empty. The server runs a full input cycle for each,
-  and on a dock board the dock's own messages queue behind them. Attach it
-  once at the page level. Reported upstream as rstudio/shiny#4436.
-
-* The small icons ship as files, one SVG per icon in `assets/icons`, which
-  `small_icon()` and `Blockr.icons` are built from (#80). JavaScript that
-  runs without R, such as a package's test harness, reads them there: an
-  icon is its file without its comment, which carries the icon's note, and
-  without the whitespace between tags.
-
-* The block's mark is drawn here, in the design system's four sizes (#65).
-  In R, `block_mark()` builds it from a block's glyph and category as the
-  `.blockr-block-mark` class: 24px, or 32, 20 and 16px through its `--32`,
-  `--20` and `--16` modifiers, with the glyph half the mark plus 2px and the
-  corners a quarter of it. For a place that needs an image, such as the DAG's
-  canvas, `block_mark_svg()` draws the same mark as an SVG or its `data:`
-  URI. The category colours are tokens, `--blockr-category-<category>`, with
-  the spec's fixed Okabe-Ito values, and blockr.ui owns them in place of
-  blockr.dock's `blk_color()`. In R, `category_color()` reads them. A
-  `Blockr.menu` row's `mark` takes the block's `category` and draws the same
-  mark at 24px, in place of the menu's own `.blockr-menu__mark` class and its
-  `--blockr-menu-mark` property.
-
-* The new `small_icon()` draws the design system's small icons in markup
-  built in R (#64), from the list `Blockr.icons` is now built from:
-  `controls_dep()` writes the list into the page ahead of `blockr-ui.js`,
-  so R and JavaScript draw one copy of each. The icons are no longer part
-  of `blockr-ui.js`, so a page that loads that file on its own, as a test
-  harness might, has none. Every icon is hidden from screen readers, and
-  the plus is a 1.25px stroke now, as blockr.dock's views menu draws it, in
-  place of Bootstrap's filled path. The set gains `grip`, the drag handle
-  of that menu's page rows.
-
-* The warning border, `--blockr-color-border-warning`, is amber-600
-  (`#d97706`) in the light scheme, a new step of the amber ramp, up from
-  amber-500: a warning border, and a status dot drawn in one, now clears 3:1
-  on white (WCAG 1.4.11). A test holds icons and status borders to 3:1 on the
-  surface in both schemes.
-
-* Escape and a click outside go through one dismiss stack, `Blockr.layer()`
-  (#49). Every control that opens something registers it as a layer: the
-  Select's list and its expanded tags, the code field's completions, both
-  menus of actions, the tooltip, a dirty `Blockr.textCommit()` field and the
-  gear tray. Escape closes the top layer only, and a click, read on
-  pointerdown, closes the layers above the one it lands in, so a Select in
-  the gear tray or a menu over a modal closes alone. While a tooltip shows,
-  the next Escape hides it and leaves what is under it open. The
-  `Blockr.onDocClick()` registry is gone; a package's own floating UI
-  registers with `Blockr.layer()` instead.
-
-* The design system's menu of actions, `Blockr.menu()`, joins
-  `controls_dep()`: rows with an icon, label and meta text, dividers, group
-  titles, a head (a name with a badge and a line of text), current, disabled
-  and destructive rows, placed with `Blockr.place()` and driven from the
-  keyboard. A trigger is wired with `Blockr.menu.bind()`. Its classes also
-  style menus built elsewhere.
-
-* A `Blockr.tooltip` line can carry a `badge`.
-
-* The new `action_menu()` builds a menu of actions opened by a button:
-  downloads, Rename, Remove. Its rows are `menu_item()`s wrapping a
-  `downloadLink()`, an `actionLink()` or any link or button, with
-  `menu_section()` titles and `menu_divider()` rules between them. A row
-  does one thing and the menu closes; unlike `Blockr.Select.menu()` it sets
-  no value. Open, the list sits on the page body, so no panel's overflow
-  clips it.
-
-* The new `tool_button()` is the design system's 26px icon button, named
-  by a tooltip.
-
-* The new `gear_tray()` with `tray_section()` draws the gear and its tray
-  for a block whose UI is written in R. The tray lays out Shiny's own inputs
-  at the design system's sizes.
-
-* The dropdown of a selectize input, as `selectInput()` draws it, is a layer
-  on the dismiss stack while it is open, so Escape closes it before the gear
-  tray, modal or panel around it.
-
-* An element built in R can carry its tooltip as a `data-blockr-tooltip`
-  attribute, and a badge after the name as `data-blockr-tooltip-badge`
-  (#63); `Blockr.tooltip` shows it as the light card, in place of the native
-  `title` box.
-
-* Text marked `data-blockr-editable` shows the text cursor and a tooltip
-  naming the gesture, "Double-click to edit" unless the attribute names
-  another.
-
-* The new `shortcut()` writes a keyboard hint once for every platform:
-  `shortcut("Mod+Shift+S")` reads ⌘⇧S on a Mac and Ctrl+Shift+S elsewhere.
-  It fits the meta slot of a `menu_item()`.
-
-* The table preview draws its header in the table style: the sort cue sits
-  on the name's line, a numeric column's header sits over its numbers, and
-  a sorted header states its order in a tooltip and in `aria-sort`. A label
-  or value cut off by its column shows whole in the light card rather than
-  a native `title`.
-
-* With `theme_dep()` in the page, Bootstrap's buttons take the design
-  system's kinds: `.btn-primary` is the main button, `.btn-default` (Shiny's
-  `actionButton()` and `downloadButton()`), `.btn-secondary` and
-  `.btn-light` the secondary one, `.btn-link` the quiet one and
-  `.btn-danger` the destructive one. Markup built for blockr uses the
-  `.blockr-btn` classes, in three sizes.
-
-* The design tokens are rewritten around the vocabulary of the design spec:
-  a colour palette, meaning tokens for text, backgrounds, borders and status,
-  type, radii, control heights and shadows. Every name defined before keeps
-  its old value.
-
-* The tokens include a stacking scale, `--blockr-z-sticky` up to
-  `--blockr-z-toast`, at Bootstrap's own z-index values. Anything that floats
-  over the page takes one of these layers; inside a component, a z-index only
-  orders siblings, from -1 to 3.
-
-* The `theme_dep()` dependency also attaches `blockr-tokens-dark.css`, which
-  restates the tokens under `data-bs-theme="dark"`, the attribute that
-  blockr.core's dark-mode board option sets. In dark, Bootstrap's body
-  background and text colour follow the tokens too.
-
-* The `theme_dep()` function returns two dependencies in a `tagList()`, the
-  tokens and the theme layer, so a component can carry the tokens without
-  restyling the rest of the page.
-
-* The `controls_dep()` dependency carries the controls blockr blocks are
-  built from, moved here from blockr.dplyr: `Blockr.Select`, the Enter
-  button, the required-empty cue, the checkbox, the segmented control, the
-  gear tray and `Blockr.place`, with the stylesheets they draw with. It
-  brings the tokens but not the theme layer, which an app attaches with
-  `theme_dep()`. The dependency names are the ones blockr.dplyr used, so a
-  page carries one copy of each; while blockr.dplyr still ships its own
-  copies, that copy is blockr.dplyr's, as htmltools keeps the higher version
-  of a name.
-
-* `controls_dep()` also carries `Blockr.Input`, the code field with column
-  and function completions, moved here from blockr.dplyr under its old
-  dependency names (`blockr-input-js`, `blockr-input-css`).
+* The widgets, the R helpers and the table preview are gone, with the
+  stylesheets, icons and dependencies that they draw with (#107).
+  The widgets on `window.Blockr`, such as `Blockr.Select` and `Blockr.menu()`,
+  go with their types.
+  The R helpers that draw into Shiny UIs go: `action_menu()` with
+  `menu_item()`, `menu_section()` and `menu_divider()`, `block_mark()` with
+  `block_mark_svg()` and `category_color()`, `dropdown()`, `gear_tray()` with
+  `tray_section()`, `shortcut()`, `small_icon()` and `tool_button()`.
+  The table preview goes with `html_table_display`, `html_table_render()`,
+  `html_table_result()`, `table_page()`, `build_html_table()`,
+  `column_widths_px()`, `apply_table_sort()`, `table_preview_dep()` and
+  `table_preview_css()`.
+  The dependencies `theme_dep()`, `controls_dep()`, `base_dep()`,
+  `shiny_has_perf_dep()` and `shiny_input_batch_dep()` go, with the design
+  tokens and the theme and base stylesheets.
+  The small icons and the design system's article go as well, while the files
+  of Open Sans stay.
+  The package no longer imports blockr.core, dplyr, htmltools, pillar, rlang or
+  shiny.
 
 # blockr.ui 0.0.1
 
