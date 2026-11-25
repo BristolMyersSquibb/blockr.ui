@@ -73,6 +73,8 @@ beforeAll(async () => {
       "}",
       "",
     ].join("\n"),
+    "srcts/fonts/open-sans-latin-normal.woff2": "wOF2 of the test",
+    "srcts/fonts/OFL.txt": "Copyright 2020 The Open Sans Project Authors\n\nSIL OPEN FONT LICENSE Version 1.1\n",
     "inst/js/gone.js": "",
   });
   written = await build(root);
@@ -87,7 +89,7 @@ async function named(pattern: RegExp): Promise<string[]> {
   return (await readdir(out)).filter((file) => pattern.test(file)).sort();
 }
 
-test("writes React's file, React's entry points, React Aria's files, the file of blockr.ui's components and its stylesheet, with the import map, what each imports up front and the licenses", async () => {
+test("writes React's file, React's entry points, React Aria's files, the file of blockr.ui's components, its stylesheet and its fonts, with the import map, what each imports up front and the licenses", async () => {
   const react = await named(/^react-[0-9a-f]{8}\.js$/);
   const shared = await named(/^react-aria-[0-9A-Z]{8}\.js$/);
   expect(react).toHaveLength(1);
@@ -99,6 +101,7 @@ test("writes React's file, React's entry points, React Aria's files, the file of
     "blockr-ui.css",
     "blockr-ui.js",
     "import-map.json",
+    "open-sans-latin-normal.woff2",
     "preload.json",
     ...react,
     ...shared,
@@ -168,6 +171,13 @@ test("writes blockr.ui's stylesheet, which Tailwind CSS builds from srcts/index.
   expect(css).toContain("@layer theme {\n  :root {\n    --bk-spacing: .25rem;\n  }\n}");
   expect(css).toContain(".bk\\:flex {\n  display: flex;\n}");
   expect(await readFile(join(out, "LICENSES"), "utf8")).toContain(`tailwindcss ${version}, in blockr-ui.css\n`);
+});
+
+test("copies the files of Open Sans beside the stylesheet, as they stand, with their license in LICENSES", async () => {
+  expect(await readFile(join(out, "open-sans-latin-normal.woff2"), "utf8")).toBe("wOF2 of the test");
+  expect(await readFile(join(out, "LICENSES"), "utf8")).toContain(
+    "Open Sans, by The Open Sans Project Authors, in open-sans-latin-normal.woff2\n\nCopyright 2020 The Open Sans Project Authors\n\nSIL OPEN FONT LICENSE Version 1.1\n",
+  );
 });
 
 test("writes the entries of the page's import map, each import by the file in inst/js that it resolves to", async () => {
@@ -253,6 +263,20 @@ test("fails for a package that comes with no license, naming the files that hold
     ]);
     await expect(licenses(other, dir, bundled)).rejects.toThrow(
       "The code of quiet in a.js and b.js comes with no license: its directory in node_modules holds no license file.",
+    );
+  } finally {
+    await rm(other, { recursive: true, force: true });
+  }
+});
+
+test("fails for the files of Open Sans without their license, naming the files", async () => {
+  const other = await mkdtemp(join(tmpdir(), "blockr-ui-licenses-"));
+  try {
+    await write(other, { "srcts/fonts/open-sans-latin-normal.woff2": "wOF2 of the test" });
+    const dir = join(other, "inst", "js");
+    const bundled = new Map([[join(dir, "open-sans-latin-normal.woff2"), [join(other, "srcts", "fonts")]]]);
+    await expect(licenses(other, dir, bundled)).rejects.toThrow(
+      "srcts/fonts holds the work of other projects in open-sans-latin-normal.woff2, but no OFL.txt, which would hold their license.",
     );
   } finally {
     await rm(other, { recursive: true, force: true });

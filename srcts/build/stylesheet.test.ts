@@ -7,6 +7,7 @@
 // which blockr.ui's own stylesheet imports, and which blockr.ui ships in inst/types as `@blockr/ui/preset.css`
 // (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.4#the-build-preset).
 
+import { existsSync } from "node:fs";
 import { cp, mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
@@ -134,17 +135,18 @@ test("sets the defaults that both modes share under :root, and the colours and t
   expect(outside.filter((property) => property.startsWith("--bk-"))).toEqual([]);
 });
 
-test("writes a face for each file of Open Sans that blockr.ui ships, at its URL from inst/js, with Open Sans first in the sans face", async () => {
+test("writes a face for each file of Open Sans that blockr.ui ships, which reads the file beside the stylesheet, with Open Sans first in the sans face", async () => {
   const css = postcss.parse(await readFile(shipped, "utf8"));
-  const fonts = join(repo, "inst", "assets", "fonts");
-  const files = (await readdir(fonts)).filter((file) => file.endsWith(".woff2"));
+  const files = (await readdir(join(repo, "srcts", "fonts"))).filter((file) => file.endsWith(".woff2"));
   const faces: Record<string, string>[] = [];
   css.walkAtRules("font-face", (face) => {
     faces.push(declarations(face));
   });
 
+  // R serves the files beside the stylesheet with it, where the build copies the files of Open Sans.
   const urls = faces.map((face) => /url\("?([^")]+)"?\)/.exec(face.src ?? "")?.[1] ?? "");
-  expect(urls.map((url) => resolve(dirname(shipped), url)).sort()).toEqual(files.map((file) => join(fonts, file)).sort());
+  expect([...urls].sort()).toEqual([...files].sort());
+  for (const url of urls) expect(existsSync(resolve(dirname(shipped), url)), url).toBe(true);
   for (const [i, face] of faces.entries()) {
     expect(face["font-family"]?.replaceAll('"', "")).toBe("Open Sans");
     expect(face["font-style"]).toBe(urls[i]?.endsWith("-italic.woff2") ? "italic" : "normal");

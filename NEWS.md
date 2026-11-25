@@ -67,6 +67,8 @@
   `:root[data-bk-mode="dark"]`.
   The stylesheet also writes the faces of Open Sans, the default of
   `--bk-font-sans`, in place of `inst/assets/fonts/open-sans.css`.
+  The files of Open Sans move from `inst/assets/fonts` into `inst/js`, beside
+  the stylesheet, and `inst/js/LICENSES` holds their licence.
 
 * The build preset ships its Tailwind half as `@blockr/ui/preset.css`, which a
   package's stylesheet imports after Tailwind's theme and utilities, under the
