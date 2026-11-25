@@ -1,7 +1,7 @@
 {
   "name": "@blockr/ui",
   "private": true,
-  "description": "The components of blockr.ui's client, Lucide's icons, and the build preset with which a package builds its modules against them, as the R package blockr.ui ships them.",
+  "description": "The components of blockr.ui's client, Lucide's icons, and the build preset with which a package builds its modules and its stylesheet against them, as the R package blockr.ui ships them.",
   "type": "module",
   "exports": {
     ".": {
@@ -15,7 +15,8 @@
     "./icons": {
       "types": "./icons/index.d.ts",
       "default": "./icons/index.js"
-    }
+    },
+    "./preset.css": "./preset.css"
   },
   "dependencies": {
     "lucide": "1.75.0"

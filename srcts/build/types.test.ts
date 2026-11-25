@@ -2,8 +2,9 @@
 
 // What the build ships in inst/types, which a package's build resolves as `@blockr/ui`:
 // the declarations of blockr.ui's components and of the build preset, each bundled,
-// the entry of Lucide's icons, `@blockr/ui/icons`,
+// the entry of Lucide's icons, `@blockr/ui/icons`, the Tailwind half of the preset,
 // and the package.json that names them, with React and React Aria as its peers and lucide as its dependency.
+// How a package's stylesheet builds against the Tailwind half is in ./stylesheet.test.ts.
 
 import { copyFile, cp, mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -48,10 +49,12 @@ async function files(dir: string): Promise<string[]> {
     .sort();
 }
 
-test("writes the declarations of the components and of the build preset, each bundled, and the package.json that names them", async () => {
+test("writes the declarations of the components and of the build preset, each bundled, the preset's stylesheet as it stands, and the package.json that names them", async () => {
+  const presetCss = "@theme inline reference {\n  --spacing: var(--bk-spacing);\n}\n";
   await write(root, {
     "srcts/index.ts": "export function greet(name: string): string {\n  return `Hello, ${name}`;\n}\n",
     "srcts/build/index.ts": 'import { join } from "node:path";\n\nexport function where(dir: string): string {\n  return join(dir, "inst");\n}\n',
+    "srcts/build/preset.css": presetCss,
     "inst/types/gone.d.ts": "",
   });
 
@@ -65,7 +68,9 @@ test("writes the declarations of the components and of the build preset, each bu
     "inst/types/index.d.ts",
     "inst/types/index.js",
     "inst/types/package.json",
+    "inst/types/preset.css",
   ]);
+  expect(await readFile(join(root, "inst/types/preset.css"), "utf8")).toBe(presetCss);
   expect(await files(join(root, "inst", "types"))).toEqual(written.map((file) => relative("inst/types", file)));
   expect(JSON.parse(await readFile(join(root, "inst/types/package.json"), "utf8"))).toEqual(TYPES_PACKAGE);
   expect(await readFile(join(root, "inst/types/index.d.ts"), "utf8")).toContain("export declare function greet(name: string): string;");

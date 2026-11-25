@@ -1,0 +1,145 @@
+/*
+ * The Tailwind half of the build preset, which blockr.ui ships to packages as `@blockr/ui/preset.css`
+ * (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.4#the-build-preset).
+ * A package's stylesheet imports Tailwind's theme and utilities under the package's own prefix, and then this file, as core's would:
+ *
+ *   @layer theme;
+ *   @import "tailwindcss/theme.css" layer(theme) prefix(bc);
+ *   @import "tailwindcss/utilities.css" source(none);
+ *   @import "@blockr/ui/preset.css";
+ *
+ * It then names the files that Tailwind scans for its classes with `@source`.
+ * The stylesheet of blockr.ui does the same under the prefix `bk` (../index.css),
+ * so that this one file maps the classes of every package, blockr.ui's own included.
+ * Those imports leave out preflight, Tailwind's reset of the whole page,
+ * so that nothing that one package loads styles another package's elements.
+ * They also keep the utilities outside any cascade layer,
+ * so that a page's other CSS, such as Bootstrap's, which sits outside any layer too, does not win over them.
+ *
+ * Each name of Tailwind's theme that has a theme variable reads that variable, through `@theme inline reference`.
+ * So a package's classes compile to reads of blockr.ui's variables, whatever the package's prefix:
+ * core's `bc:bg-popover` writes `background-color: var(--bk-color-popover)`,
+ * and its `bc:shadow-md` writes `--tw-shadow: var(--bk-shadow-md)`.
+ * With `inline`, a class writes the variable in place of the name of the theme.
+ * With `reference`, Tailwind writes none of these names into a package's stylesheet as a variable of its own.
+ * Under blockr.ui's prefix, it would otherwise write `--bk-color-popover: var(--bk-color-popover)`, a variable that refers to itself.
+ * So the stylesheet of blockr.ui alone sets the theme variables, with their defaults
+ * (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#where-the-values-are-set).
+ *
+ * The theme keeps no step of the colours, faces, sizes of text, radii and shadows that the theme variables lack.
+ * Tailwind skips a class of a step that it does not know, so such a class writes nothing,
+ * rather than a fixed value that neither a theme nor the mode reaches.
+ */
+@theme inline reference {
+  /*
+   * The colours by job, which take shadcn/ui's names, with warning and success beside destructive
+   * (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#colours).
+   * Tailwind's palette goes, since its colours follow neither a theme nor the mode,
+   * so that a class of the palette, such as `bc:bg-blue-600`, writes nothing.
+   * Black and white come back, for what must stand out on any colour:
+   * the backdrop behind a modal, black at 40%, and the rings of a colour field's thumbs and swatches.
+   * The classes `bg-transparent` and `bg-current` read no colour of the theme.
+   */
+  --color-*: initial;
+  --color-black: #000;
+  --color-white: #fff;
+  --color-background: var(--bk-color-background);
+  --color-foreground: var(--bk-color-foreground);
+  --color-card: var(--bk-color-card);
+  --color-card-foreground: var(--bk-color-card-foreground);
+  --color-popover: var(--bk-color-popover);
+  --color-popover-foreground: var(--bk-color-popover-foreground);
+  --color-primary: var(--bk-color-primary);
+  --color-primary-foreground: var(--bk-color-primary-foreground);
+  --color-primary-text: var(--bk-color-primary-text);
+  --color-secondary: var(--bk-color-secondary);
+  --color-secondary-foreground: var(--bk-color-secondary-foreground);
+  --color-muted: var(--bk-color-muted);
+  --color-muted-foreground: var(--bk-color-muted-foreground);
+  --color-accent: var(--bk-color-accent);
+  --color-accent-foreground: var(--bk-color-accent-foreground);
+  --color-destructive: var(--bk-color-destructive);
+  --color-destructive-foreground: var(--bk-color-destructive-foreground);
+  --color-destructive-text: var(--bk-color-destructive-text);
+  --color-warning: var(--bk-color-warning);
+  --color-warning-foreground: var(--bk-color-warning-foreground);
+  --color-warning-text: var(--bk-color-warning-text);
+  --color-success: var(--bk-color-success);
+  --color-success-foreground: var(--bk-color-success-foreground);
+  --color-success-text: var(--bk-color-success-text);
+  --color-border: var(--bk-color-border);
+  --color-input: var(--bk-color-input);
+  --color-ring: var(--bk-color-ring);
+
+  /*
+   * The face of every UI's text, and that of its code.
+   * Tailwind's serif face goes.
+   */
+  --font-*: initial;
+  --font-sans: var(--bk-font-sans);
+  --font-mono: var(--bk-font-mono);
+
+  /*
+   * The four sizes of text, from a pill's or a hint's up to a dialog's title.
+   * Each keeps the line height that Tailwind gives its step, a ratio to the size, so that the line height follows the size.
+   * Tailwind's other sizes go.
+   */
+  --text-*: initial;
+  --text-xs: var(--bk-text-xs);
+  --text-xs--line-height: calc(1 / 0.75);
+  --text-sm: var(--bk-text-sm);
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-base: var(--bk-text-base);
+  --text-base--line-height: calc(1.5 / 1);
+  --text-lg: var(--bk-text-lg);
+  --text-lg--line-height: calc(1.75 / 1.125);
+
+  /*
+   * The radius scale, which derives every step from `--bk-radius`, as shadcn/ui derives its steps from `--radius`
+   * (https://github.com/shadcn-ui/ui/blob/bfa64ff4d1cb7317d2403ecb176df6826d4caffc/apps/v4/content/docs/%28root%29/theming.mdx?plain=1#L93-L117).
+   * The step `radius-lg` is the base, and each other step is a multiple of it,
+   * from 0.6 of it for `radius-sm` to 2.6 of it for `radius-4xl`.
+   * So a theme sets one value and every corner follows.
+   * Tailwind's other steps go: `radius-xs`, and the bare `--radius` that the class `rounded` reads.
+   * A pill's `rounded-full` derives from no variable, and neither does `rounded-none`.
+   */
+  --radius-*: initial;
+  --radius-sm: calc(var(--bk-radius) * 0.6);
+  --radius-md: calc(var(--bk-radius) * 0.8);
+  --radius-lg: var(--bk-radius);
+  --radius-xl: calc(var(--bk-radius) * 1.4);
+  --radius-2xl: calc(var(--bk-radius) * 1.8);
+  --radius-3xl: calc(var(--bk-radius) * 2.2);
+  --radius-4xl: calc(var(--bk-radius) * 2.6);
+
+  /*
+   * The three shadows, for a thumb, for what floats over the page, such as a menu, and for a dialog.
+   * A class writes the variable into Tailwind's `--tw-shadow`, which keeps a ring on the same element.
+   * Under `@theme static`, it would write the shadow's literal offsets and colours there instead,
+   * which follow neither a theme nor the mode.
+   * Tailwind's other steps go: `shadow-2xs`, `shadow-xs`, `shadow-xl` and `shadow-2xl`,
+   * and the bare `--shadow` and `--shadow-inner` that the classes `shadow` and `shadow-inner` read.
+   * The class `shadow-none` reads no variable.
+   */
+  --shadow-*: initial;
+  --shadow-sm: var(--bk-shadow-sm);
+  --shadow-md: var(--bk-shadow-md);
+  --shadow-lg: var(--bk-shadow-lg);
+
+  /*
+   * The unit of every padding, margin, gap and size, as `bc:px-2` pads by twice it.
+   */
+  --spacing: var(--bk-spacing);
+
+  /*
+   * The layer that every overlay stacks on, which `bc:z-overlay` gives.
+   */
+  --z-index-overlay: var(--bk-z-index-overlay);
+}
+
+/*
+ * The dark variant, as in `bc:dark:bg-card`, applies in dark mode, which the attribute `data-bk-mode` on the page's root gives.
+ * Core's board option `dark_mode` sets it.
+ * Every job carries both modes, so the variant serves only what a package writes beyond the jobs.
+ */
+@custom-variant dark (&:where(:root[data-bk-mode="dark"], :root[data-bk-mode="dark"] *));

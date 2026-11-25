@@ -20,6 +20,13 @@
 //   so the file leaves its imports of React's entry points and of React Aria's packages imports.
 //   The vendor check of ./vendor-check.ts fails the build,
 //   where the file would bundle a package from node_modules.
+// - The stylesheet of blockr.ui, blockr-ui.css, holds the theme variables with their defaults,
+//   the faces of Open Sans and the classes of blockr.ui's components, unminified.
+//   Tailwind CSS builds it from srcts/index.css, through the Tailwind half of the build preset, ./preset.css.
+//   R puts it on every page from the start, apart from the JS, which loads with the first module that imports it.
+// - The files of Open Sans, whose faces the stylesheet writes, go beside it, as they stand, from srcts/fonts.
+//   R serves the other files in a stylesheet's directory with the stylesheet,
+//   so each face reads its file by its name alone.
 // - The entries of the page's import map go into import-map.json,
 //   each import by the file in inst/js that it resolves to.
 //   R puts them into the import map in the head of the page that it serves.
@@ -30,14 +37,20 @@
 // - The licenses of what the files in inst/js hold from other projects go into LICENSES beside them.
 //   It has a line for each package from node_modules, with its version,
 //   its author where its package.json names one, and the files that hold its code.
+//   Tailwind CSS counts as a package of the stylesheet, since it writes it.
+//   Each project whose work a directory of srcts holds gets a line too, as COPIED names it,
+//   such as Open Sans, whose files srcts/fonts holds.
 //   The text of a license follows the lines that share it.
 //   The build fails for a package that npm installs without a license file,
-//   so that no code ships without its license.
+//   and for a directory that COPIED names without its license file,
+//   so that no code or font ships without its license.
 // - The components, srcts/index.ts, and the build preset, srcts/build, go into inst/types,
 //   which a package's build resolves as `@blockr/ui` and `@blockr/ui/build`:
 //   their declarations, each bundled, and the package.json that names them.
 //   The icons of Lucide's package lucide go there too, as `@blockr/ui/icons`:
 //   an ES module that re-exports each of them, and its declarations.
+//   The Tailwind half of the preset goes there as it stands,
+//   which a package's stylesheet imports as `@blockr/ui/preset.css`.
 //
 // The build owns inst/js and inst/types and empties them first,
 // so that nothing is left of a file that is gone.
@@ -45,10 +58,12 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import tailwindcss from "@tailwindcss/postcss";
 import * as esbuild from "esbuild";
+import postcss from "postcss";
 import ts from "typescript";
 import { COMPONENTS, IMPORTS, importFile, REACT_ARIA, REACT_ENTRIES } from "../import-map/index.ts";
 import { staticImports } from "./preload.ts";
@@ -208,6 +223,36 @@ async function components(root: string, out: string): Promise<esbuild.Metafile |
   return result.metafile;
 }
 
+// Builds a stylesheet with Tailwind CSS, unminified,
+// resolving its imports and the files that its `@source` names from the stylesheet's directory.
+export async function stylesheet(file: string): Promise<string> {
+  const plugin = tailwindcss({ base: dirname(file), optimize: { minify: false } });
+  const result = await postcss([plugin]).process(await readFile(file, "utf8"), { from: file });
+  return result.css;
+}
+
+// Builds blockr.ui's stylesheet, srcts/index.css, into blockr-ui.css in `out`,
+// and returns the file's path.
+// It writes nothing where srcts holds no such file.
+async function styles(root: string, out: string): Promise<string | undefined> {
+  const source = join(root, "srcts", "index.css");
+  if (!existsSync(source)) return undefined;
+  const file = join(out, importFile(COMPONENTS).replace(/\.js$/, ".css"));
+  await writeFile(file, await stylesheet(source));
+  return file;
+}
+
+// Copies the files of Open Sans in srcts/fonts into `out`, beside blockr.ui's stylesheet, which writes their faces,
+// and returns their paths.
+// It copies nothing where srcts holds no such directory.
+async function fonts(root: string, out: string): Promise<string[]> {
+  const dir = join(root, "srcts", "fonts");
+  if (!existsSync(dir)) return [];
+  const files = (await readdir(dir)).filter((file) => file.endsWith(".woff2")).sort();
+  for (const file of files) await copyFile(join(dir, file), join(out, file));
+  return files.map((file) => join(out, file));
+}
+
 export async function build(root: string): Promise<string[]> {
   const out = join(root, "inst", "js");
 
@@ -216,6 +261,8 @@ export async function build(root: string): Promise<string[]> {
   await mkdir(out, { recursive: true });
 
   const own = await components(root, out);
+  const css = await styles(root, out);
+  const faces = await fonts(root, out);
   const react = await reactFile(out);
   const modules = await reactModules(out, react.file);
   const aria = await reactAria(out);
@@ -225,6 +272,8 @@ export async function build(root: string): Promise<string[]> {
     ...[react.file, ...modules].map((file) => join(out, file)),
     ...outputs(aria, repo),
     ...(own === undefined ? [] : outputs(own, root)),
+    ...(css === undefined ? [] : [css]),
+    ...faces,
   ].map((file) => relative(root, file));
 
   // The entries of the import map that the page R serves holds, as R reads them:
@@ -247,11 +296,15 @@ export async function build(root: string): Promise<string[]> {
   written.push(relative(root, preload));
 
   // What each file holds from other projects, by the file's path.
-  const bundled = new Map([
+  // Tailwind CSS counts for the stylesheet, which the Tailwind in blockr.ui's node_modules writes,
+  // and srcts/fonts for each file of Open Sans, which COPIED names.
+  const bundled = new Map<string, readonly string[]>([
     [join(out, react.file), react.sources],
     ...licensedSources(aria, repo),
     ...(own === undefined ? [] : licensedSources(own, root)),
+    ...faces.map((file) => [file, [join(root, "srcts", "fonts")]] as const),
   ]);
+  if (css !== undefined) bundled.set(css, [join(repo, "node_modules", "tailwindcss")]);
   written.push(...(await licenses(root, out, bundled)));
   return written.sort();
 }
@@ -301,11 +354,18 @@ function listing(items: readonly string[]): string {
   return `${items.slice(0, -1).join(", ")} and ${items.at(-1) ?? ""}`;
 }
 
+// The directories of srcts that hold the work of other projects, by their paths in srcts.
+// For each, the lines that LICENSES names the projects by, and the file in the directory that holds their license.
+// The files of Open Sans come from Google Fonts, under the SIL Open Font License,
+// which asks that its text ship with the fonts.
+const COPIED = new Map([["fonts", { projects: ["Open Sans, by The Open Sans Project Authors"], license: "OFL.txt" }]]);
+
 // Writes the licenses of what the files in `dir` hold from other projects into `dir`, as LICENSES,
 // and returns its path from `root`.
-// For each file, `bundled` gives the directories of the packages from node_modules that it holds,
-// by the file's path.
-// It fails for a package whose directory holds no license file.
+// For each file, `bundled` gives what it holds, by the file's path:
+// the directories of packages from node_modules, and the directories of srcts that COPIED names.
+// It fails for a package whose directory holds no license file,
+// and for a directory of srcts that holds no file of the license that COPIED names.
 // Where the files hold nothing from other projects, it writes nothing.
 export async function licenses(
   root: string,
@@ -318,26 +378,38 @@ export async function licenses(
   }
   if (holders.size === 0) return [];
 
+  const src = join(root, "srcts");
   const entries = await Promise.all(
     [...holders].map(async ([source, files]) => {
       const held = listing(files.sort());
+      const copied = COPIED.get(relative(src, source));
+      if (copied !== undefined) {
+        const license = join(source, copied.license);
+        if (!existsSync(license)) {
+          throw new Error(`${relative(root, source)} holds the work of other projects in ${held}, but no ${copied.license}, which would hold their license.`);
+        }
+        const text = (await readFile(license, "utf8")).replace(/\r\n/g, "\n").trimEnd();
+        return copied.projects.map((project) => ({ line: `${project}, in ${held}`, text }));
+      }
       const manifest = JSON.parse(await readFile(join(source, "package.json"), "utf8")) as Manifest;
       const texts = await licenseTexts(source);
       if (texts.length === 0) {
         throw new Error(`The code of ${manifest.name} in ${held} comes with no license: its directory in node_modules holds no license file.`);
       }
       const author = authorName(manifest);
-      return {
-        line: `${manifest.name} ${manifest.version}${author === undefined ? "" : `, by ${author}`}, in ${held}`,
-        text: texts.join("\n\n"),
-      };
+      return [
+        {
+          line: `${manifest.name} ${manifest.version}${author === undefined ? "" : `, by ${author}`}, in ${held}`,
+          text: texts.join("\n\n"),
+        },
+      ];
     }),
   );
 
-  // Each license once, after the lines of the packages that share it,
-  // in the order of the packages' names.
+  // Each license once, after the lines of the packages and projects that share it,
+  // in the order of their names.
   const byLicense = new Map<string, string[]>();
-  for (const { line, text } of entries.sort((a, b) => (a.line < b.line ? -1 : 1))) {
+  for (const { line, text } of entries.flat().sort((a, b) => (a.line < b.line ? -1 : 1))) {
     byLicense.set(text, [...(byLicense.get(text) ?? []), line]);
   }
   const file = join(dir, "LICENSES");
@@ -362,7 +434,8 @@ function packageVersion(name: string): string {
 
 // The package that inst/types is: blockr.ui's components, as `@blockr/ui`,
 // and the build preset, as `@blockr/ui/build`, each with its declarations and bundled,
-// and Lucide's icons, as `@blockr/ui/icons` (iconsEntry()).
+// Lucide's icons, as `@blockr/ui/icons` (iconsEntry()),
+// and the Tailwind half of the preset, as `@blockr/ui/preset.css`.
 // The components bundle leaves React and React Aria imports, as blockr-ui.js does.
 // So the package names React and React Aria's three packages as its peers,
 // at the versions that blockr.ui's files hold.
@@ -379,12 +452,13 @@ export const TYPES_PACKAGE = {
   name: "@blockr/ui",
   private: true,
   description:
-    "The components of blockr.ui's client, Lucide's icons, and the build preset with which a package builds its modules against them, as the R package blockr.ui ships them.",
+    "The components of blockr.ui's client, Lucide's icons, and the build preset with which a package builds its modules and its stylesheet against them, as the R package blockr.ui ships them.",
   type: "module",
   exports: {
     ".": { types: "./index.d.ts", default: "./index.js" },
     "./build": { types: "./build/index.d.ts", default: "./build/index.js" },
     "./icons": { types: "./icons/index.d.ts", default: "./icons/index.js" },
+    "./preset.css": "./preset.css",
   },
   dependencies: {
     lucide: packageVersion("lucide"),
@@ -405,7 +479,9 @@ const BUNDLED = [
 
 // Writes inst/types: the declarations of the sources that BUNDLED names,
 // each file's beside where its source sits in srcts, those sources bundled,
-// the entry of Lucide's icons (iconsEntry()), and the package.json that names them.
+// the entry of Lucide's icons (iconsEntry()),
+// the Tailwind half of the build preset, srcts/build/preset.css, as it stands,
+// and the package.json that names them.
 // The declarations follow tsconfig.node.json, since the build preset runs in Node.
 export async function types(root: string): Promise<string[]> {
   const src = join(root, "srcts");
@@ -469,6 +545,14 @@ export async function types(root: string): Promise<string[]> {
   written.push(...outputs(result.metafile, root).map((file) => relative(root, file)));
   written.push(...(await licenses(root, dir, licensedSources(result.metafile, root))));
   written.push(...(await iconsEntry(root, dir)));
+
+  // A package's Tailwind compiles the preset's stylesheet with the package's own,
+  // so the file ships as it stands.
+  const presetCss = join(src, "build", "preset.css");
+  if (existsSync(presetCss)) {
+    await copyFile(presetCss, join(dir, "preset.css"));
+    written.push(relative(root, join(dir, "preset.css")));
+  }
 
   const manifest = join(dir, "package.json");
   await writeJson(manifest, TYPES_PACKAGE);

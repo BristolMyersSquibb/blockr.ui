@@ -74,6 +74,35 @@
   Beside the preset, `@blockr/ui/build` holds `staticImports()` and the vendor
   check, as core's preset does.
 
+* The package's stylesheet, `inst/js/blockr-ui.css`, holds the theme
+  variables under the prefix `bk`, such as `--bk-color-popover` and
+  `--bk-spacing`, each with its default for light mode and for dark mode
+  (#109).
+  Every UI draws with them, and a frontend restyles the page by setting them.
+  The defaults keep the look of the design tokens of blockr.ui 0.0.1.
+  They sit in Tailwind's theme layer, so that a frontend's values, which it
+  sets outside any layer, win over them whichever stylesheet loads first.
+  What both modes share sits under `:root`, and the colours and the shadows of
+  each mode under `:root[data-bk-mode="light"]` and
+  `:root[data-bk-mode="dark"]`.
+  The stylesheet also writes the faces of Open Sans, the default of
+  `--bk-font-sans`, in place of `inst/assets/fonts/open-sans.css`.
+  The files of Open Sans move from `inst/assets/fonts` into `inst/js`, beside
+  the stylesheet, and `inst/js/LICENSES` holds their licence.
+
+* The build preset ships its Tailwind half as `@blockr/ui/preset.css`, which a
+  package's stylesheet imports after Tailwind's theme and utilities, under the
+  package's own prefix (#109).
+  It maps each name of Tailwind's theme that has a theme variable onto that
+  variable, so that core's `bc:bg-popover` writes
+  `background-color: var(--bk-color-popover)`.
+  It derives every step of the radius scale from `--bk-radius`, and keys the
+  dark variant on `data-bk-mode="dark"` on the page's root.
+  It drops Tailwind's palette, but for black and white.
+  It drops as well the steps of the faces, the sizes of text, the radii and the
+  shadows that the theme variables lack, so that a class of such a step, such
+  as `bc:shadow-2xl`, writes nothing.
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
