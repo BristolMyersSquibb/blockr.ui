@@ -1,5 +1,11 @@
 # blockr.ui 0.2.0
 
+* The vignette "Migration notes for app scripts" lists each change that an app
+  script of blockr.ui 0.0.1 needs to run on version 0.2.0 (#117).
+  It is written so that an AI can apply it to a script.
+  A script drops the line that picks the table preview, and core's plain table
+  draws every table output in its place.
+
 * The widgets, the R helpers and the table preview are gone, with the
   stylesheets, icons and dependencies that they draw with (#107).
   The widgets on `window.Blockr`, such as `Blockr.Select` and `Blockr.menu()`,
