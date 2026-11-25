@@ -18,6 +18,8 @@ export default defineConfig({
     // and longer while the other test files run beside it.
     testTimeout: 60_000,
     hookTimeout: 60_000,
+    // Unmounts every React root after each test, and empties the page.
+    setupFiles: ["./srcts/testing/setup.ts"],
     // Every run measures the coverage of the tests, `npm test` included.
     // The typescript job of blockr.ci uploads coverage/lcov.info to Codecov.
     // The lcov reporter writes that file, and an HTML report beside it in coverage/lcov-report.
@@ -25,7 +27,8 @@ export default defineConfig({
     // V8 counts all the code that runs, TypeScript's compiler included.
     // With `include` set, a source in srcts that no test imports counts as uncovered.
     // Vitest leaves out the test files by itself.
-    // The `exclude` option leaves out the helpers of the tests, in srcts/testing.
+    // Vitest leaves out the setup file by itself.
+    // The `exclude` option leaves out the other helpers of the tests, in srcts/testing.
     coverage: {
       enabled: true,
       provider: "istanbul",

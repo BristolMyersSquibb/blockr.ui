@@ -21,6 +21,7 @@
     "@vitest/coverage-istanbul": "^5.0.5",
     "esbuild": "^0.28.2",
     "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "happy-dom": "^21.0.4",
     "jiti": "^2.7.0",
     "postcss": "^8.5.33",
@@ -30,6 +31,7 @@
     "vitest": "^5.0.5"
   },
   "dependencies": {
+    "@internationalized/date": "3.12.4",
     "lucide": "1.75.0",
     "react": "19.3.1",
     "react-aria": "3.53.1",

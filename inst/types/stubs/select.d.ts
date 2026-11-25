@@ -1,0 +1,18 @@
+export type Act = (fn: () => void) => Promise<void>;
+export declare function listed(field: HTMLElement, act: Act): Promise<string[]>;
+export declare function picked(field: HTMLElement, act: Act, ...labels: string[]): Promise<void>;
+export declare function selectButton(el: ParentNode, label: string): HTMLButtonElement;
+export declare function selectShows(button: HTMLElement): string;
+export declare function labelled(el: ParentNode, label: string): HTMLInputElement;
+export declare function listFromField(field: HTMLElement): HTMLElement | null;
+export declare function optionLabels(field: HTMLElement): string[];
+export declare function optionFromLabel(field: HTMLElement, label: string): HTMLElement;
+export declare function pickedLabels(field: HTMLElement): string[];
+export declare function listNote(field: HTMLElement): string | null;
+export declare function markedLabel(field: HTMLElement): string | null;
+export declare function chipLabels(field: HTMLElement): string[];
+export declare function chipFromLabel(field: HTMLElement, label: string): HTMLElement;
+export declare function removeChip(field: HTMLElement, act: Act, label: string): Promise<void>;
+export declare function clearButton(field: HTMLElement): HTMLButtonElement | null;
+export declare function cleared(field: HTMLElement, act: Act): Promise<void>;
+export declare function notAvailable(el: ParentNode): string[];

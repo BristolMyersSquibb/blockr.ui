@@ -61,7 +61,7 @@ function declarations(node: Container): Record<string, string> {
   return found;
 }
 
-// The rules of a stylesheet, wherever they sit.
+// The rules of a stylesheet, wherever they sit, but for the steps of a motion, such as `from`, inside @keyframes.
 // Its layers are walked from the outside in, so that the innermost layer around a rule names it last.
 function styleRules(root: Root): StyleRule[] {
   const layers = new Map<Rule, string>();
@@ -70,9 +70,15 @@ function styleRules(root: Root): StyleRule[] {
       layers.set(rule, layer.params);
     });
   });
+  const steps = new Set<Rule>();
+  root.walkAtRules("keyframes", (keyframes) => {
+    keyframes.walkRules((rule) => {
+      steps.add(rule);
+    });
+  });
   const rules: StyleRule[] = [];
   root.walkRules((rule) => {
-    rules.push({ layer: layers.get(rule), selectors: rule.selectors, declarations: declarations(rule) });
+    if (!steps.has(rule)) rules.push({ layer: layers.get(rule), selectors: rule.selectors, declarations: declarations(rule) });
   });
   return rules;
 }
@@ -162,16 +168,23 @@ test("writes blockr.ui's classes outside any cascade layer, reading the theme va
 
   // Tailwind writes no theme variable of its own,
   // as `--bk-color-popover: var(--bk-color-popover)`, a variable that refers to itself.
-  // It writes those of its theme that the theme variables do not cover, such as the weights of the faces.
+  // It writes those of its theme that the theme variables do not cover and blockr.ui's components use:
+  // the weights of the faces, the letter spacing and the timing of transitions
+  // (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#fonts-sizes-radii-shadows-and-spacing).
   const written = rules.filter((rule) => !ROOTS.some((root) => selects(rule, root)));
   const variables = written.flatMap((rule) => Object.keys(rule.declarations)).filter((property) => property.startsWith("--bk-"));
-  expect(variables).toEqual(["--bk-font-weight-bold"]);
+  expect(variables).toContain("--bk-font-weight-bold");
+  const listed = new Set<string>(themeVariables.variables);
+  expect(variables.filter((name) => listed.has(name))).toEqual([]);
+  for (const name of variables) expect(name).toMatch(/^--bk-(font-weight|tracking|default-transition)-/);
 
-  // Every rule outside the theme variables' is a class of blockr.ui's, under bk:,
-  // or Tailwind's own, which registers the properties of its utilities.
+  // Every rule outside the theme variables' selects a class of blockr.ui's, under bk:,
+  // as `td:first-child .bk\:[td:first-child_&]:rounded-s-full` selects the cell of a calendar's range,
+  // or is Tailwind's own, which registers the properties of its utilities.
+  // So no rule styles an element of the page that is not blockr.ui's.
   for (const rule of written) {
     if (rule.layer === "theme" || rule.layer === "properties") continue;
-    for (const selector of rule.selectors) expect(selector).toMatch(/^\.bk\\:/);
+    for (const selector of rule.selectors) expect(selector).toMatch(/\.bk\\:/);
   }
 });
 

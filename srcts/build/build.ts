@@ -20,6 +20,11 @@
 //   so the file leaves its imports of React's entry points and of React Aria's packages imports.
 //   The vendor check of ./vendor-check.ts fails the build,
 //   where the file would bundle a package from node_modules.
+// - The vendor file of blockr.ui, vendor-<hash>.js, holds the libraries that its components draw with
+//   beside React and React Aria, minified: those that srcts/vendor/index.ts names,
+//   the functions of @internationalized/date and the icons of Lucide that the components draw.
+//   The file of the components imports them from it by its name,
+//   as a package's own files import the libraries that it bundles from its vendor file.
 // - The stylesheet of blockr.ui, blockr-ui.css, holds the theme variables with their defaults,
 //   the faces of Open Sans and the classes of blockr.ui's components, unminified.
 //   Tailwind CSS builds it from srcts/index.css, through the Tailwind half of the build preset, ./preset.css.
@@ -49,8 +54,8 @@
 //   The build fails for a package that npm installs without a license file,
 //   and for a directory that COPIED names without its license file,
 //   so that no code or font ships without its license.
-// - The components, srcts/index.ts, and the build preset, srcts/build, go into inst/types,
-//   which a package's build resolves as `@blockr/ui` and `@blockr/ui/build`:
+// - The components, srcts/index.ts, the build preset, srcts/build, and what blockr.ui ships for tests, srcts/stubs,
+//   go into inst/types, which a package's build and its tests resolve as `@blockr/ui`, `@blockr/ui/build` and `@blockr/ui/stubs`:
 //   their declarations, each bundled, and the package.json that names them.
 //   The icons of Lucide's package lucide go there too, as `@blockr/ui/icons`:
 //   an ES module that re-exports each of them, and its declarations.
@@ -100,6 +105,17 @@ function vendorOptions(out: string) {
   } satisfies esbuild.BuildOptions;
 }
 
+// Writes the one file that a build gave, without writing it itself, into `out`,
+// under the name given with a hash of its content, as react-3f2a9c1d.js, and returns the file's name.
+// The hash keeps a browser from running an old copy from its cache,
+// since what imports the file imports it by that name.
+async function writeHashed(out: string, name: string, result: esbuild.BuildResult): Promise<string> {
+  const text = result.outputFiles?.[0]?.text ?? "";
+  const file = `${name}-${createHash("sha256").update(text).digest("hex").slice(0, 8)}.js`;
+  await writeFile(join(out, file), text);
+  return file;
+}
+
 // Fails where esbuild warned, which it prints.
 function failOnWarnings(result: esbuild.BuildResult): void {
   if (result.warnings.length > 0) throw new Error("esbuild warned, as printed above");
@@ -147,9 +163,7 @@ async function reactFile(out: string): Promise<{ file: string; sources: string[]
   });
   failOnWarnings(result);
 
-  const text = result.outputFiles[0]?.text ?? "";
-  const file = `react-${createHash("sha256").update(text).digest("hex").slice(0, 8)}.js`;
-  await writeFile(join(out, file), text);
+  const file = await writeHashed(out, "react", result);
   return { file, sources: [...licensedSources(result.metafile, repo).values()].flat() };
 }
 
@@ -211,15 +225,61 @@ async function reactAria(out: string): Promise<esbuild.Metafile> {
   return result.metafile;
 }
 
+// The file in srcts that names the libraries that blockr.ui's components draw with beside React and React Aria,
+// which the build bundles into blockr.ui's vendor file.
+function vendorEntry(root: string): string {
+  return join(root, "srcts", "vendor", "index.ts");
+}
+
+// Bundles the libraries that srcts/vendor/index.ts names, minified, into blockr.ui's vendor file in `out`,
+// as vendor-3f2a9c1d.js, and returns its name, what it imports up front and what it holds from other projects.
+// The file leaves its imports of React's entry points imports, as React Aria's files do.
+// It writes nothing where srcts holds no such file.
+async function vendor(root: string, out: string): Promise<{ file: string; imports: string[]; sources: string[] } | undefined> {
+  const entry = vendorEntry(root);
+  if (!existsSync(entry)) return undefined;
+  const result = await esbuild.build({
+    ...vendorOptions(out),
+    absWorkingDir: root,
+    write: false,
+    entryPoints: [entry],
+    plugins: [{ name: "blockr.ui-react-imports", setup: leaveReact }],
+  });
+  failOnWarnings(result);
+
+  const file = await writeHashed(out, "vendor", result);
+  return {
+    file,
+    imports: Object.values(staticImports([result.metafile])).flat(),
+    sources: [...licensedSources(result.metafile, root).values()].flat(),
+  };
+}
+
+// Leaves each import of srcts/vendor/index.ts an import of blockr.ui's vendor file, `file`,
+// by its name beside the file that imports it.
+// The vendor file has no side effects, so a file that uses none of its names keeps no import of it.
+function vendorImports(file: string, root: string): esbuild.Plugin {
+  const entry = vendorEntry(root);
+  return {
+    name: "blockr.ui-vendor-imports",
+    setup(build) {
+      build.onResolve({ filter: /^\.\.?\// }, (args) =>
+        resolve(args.resolveDir, args.path) === entry ? { path: `./${file}`, external: true, sideEffects: false } : undefined,
+      );
+    },
+  };
+}
+
 // Bundles blockr.ui's components, srcts/index.ts, into blockr-ui.js in `out`, unminified,
 // with the build preset and the vendor check, as a package bundles its modules.
+// Each import of srcts/vendor/index.ts stays an import of blockr.ui's vendor file, `vendored`, where there is one.
 // It writes nothing where srcts holds no such file.
-async function components(root: string, out: string): Promise<esbuild.Metafile | undefined> {
+async function components(root: string, out: string, vendored: string | undefined): Promise<esbuild.Metafile | undefined> {
   const entry = join(root, "srcts", "index.ts");
   if (!existsSync(entry)) return undefined;
   const result = await esbuild.build({
     ...preset,
-    plugins: [...preset.plugins, vendorCheck],
+    plugins: [...(vendored === undefined ? [] : [vendorImports(vendored, root)]), ...preset.plugins, vendorCheck],
     absWorkingDir: root,
     outdir: out,
     entryPoints: [{ in: entry, out: importFile(COMPONENTS).replace(/\.js$/, "") }],
@@ -283,7 +343,8 @@ export async function build(root: string): Promise<string[]> {
   await rm(out, { recursive: true, force: true });
   await mkdir(out, { recursive: true });
 
-  const own = await components(root, out);
+  const lib = await vendor(root, out);
+  const own = await components(root, out, lib?.file);
   const css = await styles(root, out);
   const faces = await fonts(root, out);
   const react = await reactFile(out);
@@ -292,7 +353,7 @@ export async function build(root: string): Promise<string[]> {
   const metafiles = [aria, ...(own === undefined ? [] : [own])];
 
   const written = [
-    ...[react.file, ...modules].map((file) => join(out, file)),
+    ...[react.file, ...modules, ...(lib === undefined ? [] : [lib.file])].map((file) => join(out, file)),
     ...outputs(aria, repo),
     ...(own === undefined ? [] : outputs(own, root)),
     ...(css === undefined ? [] : [css]),
@@ -314,6 +375,7 @@ export async function build(root: string): Promise<string[]> {
   const imported: Record<string, readonly string[]> = {
     ...staticImports(metafiles),
     ...Object.fromEntries(modules.map((file) => [file, [`./${react.file}`]])),
+    ...(lib === undefined || lib.imports.length === 0 ? {} : { [lib.file]: lib.imports }),
   };
   await writeJson(preload, Object.fromEntries(Object.entries(imported).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))));
   written.push(relative(root, preload));
@@ -328,6 +390,7 @@ export async function build(root: string): Promise<string[]> {
   // and srcts/fonts for each file of Open Sans, which COPIED names.
   const bundled = new Map<string, readonly string[]>([
     [join(out, react.file), react.sources],
+    ...(lib === undefined ? [] : [[join(out, lib.file), lib.sources] as const]),
     ...licensedSources(aria, repo),
     ...(own === undefined ? [] : licensedSources(own, root)),
     ...faces.map((file) => [file, [join(root, "srcts", "fonts")]] as const),
@@ -339,7 +402,11 @@ export async function build(root: string): Promise<string[]> {
 
 // What each file of a build holds from other projects, by the file's path:
 // the directory of each package from node_modules whose code it holds.
-// The metafile gives each path from `dir`, the working directory of the build.
+// The metafile gives each path from `dir`, the working directory of the build,
+// which may lead out of it, as ../../@internationalized/date/dist/import.mjs where `dir` sits inside node_modules.
+// So each path is read whole, and the package is the one in the last node_modules on it,
+// whose name starts with neither a dot nor a slash, as no npm package's does,
+// so that a directory such as node_modules/.tmp, which the tests build in, is no package.
 // An input whose code the build left out counts for none,
 // such as the empty module of client-only, which React Aria imports.
 function licensedSources(metafile: esbuild.Metafile, dir: string): Map<string, string[]> {
@@ -347,8 +414,8 @@ function licensedSources(metafile: esbuild.Metafile, dir: string): Map<string, s
   for (const [output, { inputs }] of Object.entries(metafile.outputs)) {
     const sources = new Set(
       Object.entries(inputs).flatMap(([input, { bytesInOutput }]) => {
-        const found = /^(.*node_modules\/(?:@[^/]+\/)?[^/]+)\//.exec(input)?.[1];
-        return found === undefined || bytesInOutput === 0 ? [] : [resolve(dir, found)];
+        const found = /^(.*\/node_modules\/(?:@[^/]+\/)?[^./][^/]*)\//.exec(resolve(dir, input))?.[1];
+        return found === undefined || bytesInOutput === 0 ? [] : [found];
       }),
     );
     if (sources.size > 0) bundled.set(resolve(dir, output), [...sources]);
@@ -461,7 +528,8 @@ function packageVersion(name: string): string {
 }
 
 // The package that inst/types is: blockr.ui's components, as `@blockr/ui`,
-// and the build preset, as `@blockr/ui/build`, each with its declarations and bundled,
+// the build preset, as `@blockr/ui/build`, and what blockr.ui ships for tests, as `@blockr/ui/stubs`,
+// each with its declarations and bundled,
 // Lucide's icons, as `@blockr/ui/icons` (iconsEntry()),
 // and the Tailwind half of the preset, as `@blockr/ui/preset.css`.
 // The components bundle leaves React and React Aria imports, as blockr-ui.js does.
@@ -476,6 +544,12 @@ function packageVersion(name: string): string {
 // since `@blockr/ui/icons` re-exports its icons.
 // So npm installs lucide with `@blockr/ui`, and a package's build bundles from there the icons that it imports.
 // It is no peer, since no package imports lucide itself, which the preset refuses.
+// The dates of the components read and write their strings with @internationalized/date,
+// which the bundle leaves an import too, so the package names it as its dependency in the same way,
+// at the version that blockr.ui's vendor file holds.
+// The stubs act through vitest, on which every package's tests run.
+// The bundle leaves vitest an import, which resolves to the vitest of the package that runs the tests,
+// so the package names no vitest.
 export const TYPES_PACKAGE = {
   name: "@blockr/ui",
   private: true,
@@ -486,9 +560,11 @@ export const TYPES_PACKAGE = {
     ".": { types: "./index.d.ts", default: "./index.js" },
     "./build": { types: "./build/index.d.ts", default: "./build/index.js" },
     "./icons": { types: "./icons/index.d.ts", default: "./icons/index.js" },
+    "./stubs": { types: "./stubs/index.d.ts", default: "./stubs/index.js" },
     "./preset.css": "./preset.css",
   },
   dependencies: {
+    "@internationalized/date": packageVersion("@internationalized/date"),
     lucide: packageVersion("lucide"),
   },
   peerDependencies: {
@@ -499,10 +575,12 @@ export const TYPES_PACKAGE = {
 };
 
 // The sources in srcts that the types package bundles, each as the entry that it names:
-// the components as `@blockr/ui` and the build preset as `@blockr/ui/build`.
+// the components as `@blockr/ui`, the build preset as `@blockr/ui/build`
+// and what blockr.ui ships for tests as `@blockr/ui/stubs`.
 const BUNDLED = [
   { name: "index", source: "index.ts" },
   { name: "build/index", source: join("build", "index.ts") },
+  { name: "stubs/index", source: join("stubs", "index.ts") },
 ];
 
 // Writes inst/types: the declarations of the sources that BUNDLED names,
@@ -564,8 +642,8 @@ export async function types(root: string): Promise<string[]> {
     jsx: "automatic",
     // The peers and the dependencies that the package.json names stay imports,
     // with their subpaths, such as react/jsx-runtime.
-    // So do Node's own modules, which the build preset reads.
-    external: [...imported, ...imported.map((name) => `${name}/*`), "node:*"],
+    // So do Node's own modules, which the build preset reads, and vitest, which the stubs act through.
+    external: [...imported, ...imported.map((name) => `${name}/*`), "node:*", "vitest"],
     logLevel: "warning",
     metafile: true,
   });

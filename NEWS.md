@@ -1,5 +1,50 @@
 # blockr.ui 0.2.0
 
+* The components of core's React SDK move to `@blockr/ui` with their names and
+  their props, so that a UI that draws with one changes only its import, from
+  `@blockr/core/react` to `@blockr/ui` (#114).
+  The one rename is `Stack`, which becomes `FormLayout`, since a stack is a
+  group of blocks in blockr.
+  Each component draws with the theme variables alone, in place of the colours
+  of Tailwind's palette and of core's theme, and writes its classes under
+  `bk:`.
+  Its fixed sizes, such as a field's height of 30 pixels, are multiples of the
+  spacing, and its overlays stack at `--bk-z-index-overlay` in React Aria's
+  portal.
+  Each draws Lucide's icons where React Aria's Tailwind starter kit draws them,
+  in place of those that core drew itself.
+  The parts of React Aria that core's React SDK passed on as they are, such as
+  `Autocomplete`, `Text` and `Focusable`, stay so.
+
+* An input takes the value that it shows and submits through its prop `bound`,
+  of the interface `Bound`, which `@blockr/ui` exports with the type `Json`
+  (#114).
+  The interface names no host, no block and no board option, and leaves out the
+  `release()` of core's binding.
+  Core's `useValue()` returns one.
+  An input without a `bound` takes React Aria's value props instead.
+
+* The entry `@blockr/ui/stubs` offers what the tests of blockr.ui and of
+  packages act on the components with (#114).
+  Its `stubBound()` makes a stub of `Bound`, which holds a value, records each
+  value that an input commits, types and flushes, and refuses a submit with an
+  error where a test asks it to.
+  A component that a test draws takes the stub through `useStubBound()`, which
+  draws the component again as the stub's value or error changes.
+  The helpers that act on the components as a user does come from core's
+  tests, such as `type()`, which types into a field one keystroke at a time,
+  and `picked()`, which picks rows of a select by their labels.
+  Loading the entry makes happy-dom do as a browser does where the components
+  need it.
+
+* The build writes blockr.ui's vendor file, `vendor-<hash>.js`, with what its
+  components draw with beside React and React Aria: functions of
+  `@internationalized/date` and the icons of Lucide that they draw (#114).
+  The file of the components imports them from it, so that it holds the
+  package's own code alone.
+  The package `@blockr/ui` in `inst/types` names `@internationalized/date` as
+  its dependency, as it names `lucide`.
+
 * The entry `@blockr/ui/icons` offers every icon of Lucide's package `lucide`
   1.75.0, under the names that `lucide` exports, with their aliases and the
   type `IconNode` (#113).

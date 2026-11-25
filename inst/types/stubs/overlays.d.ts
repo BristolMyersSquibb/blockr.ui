@@ -1,0 +1,11 @@
+export declare function openDialog(): HTMLElement;
+export declare function openMenu(label: string): HTMLElement;
+export declare function menuItem(menu: ParentNode, label: string): HTMLElement;
+export declare function menuItems(menu: ParentNode): string[];
+export declare function itemDescribed(item: Element): string[];
+export declare function menuGroup(menu: ParentNode, title: string): HTMLElement;
+export declare function inert(el: Element): boolean;
+export declare function shownTip(): string | null;
+export declare function tipOnFocus(el: HTMLElement): Promise<string | null>;
+export declare function pointTo(el: Element): void;
+export declare function pointerPress(el: HTMLElement): Promise<void>;

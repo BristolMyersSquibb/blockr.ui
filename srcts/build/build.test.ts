@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 // What blockr.ui's build writes into inst/js: React's file and React's entry points,
-// React Aria's files, the file of blockr.ui's components and its stylesheet, the entries of the page's import map,
+// React Aria's files, the file of blockr.ui's components, its vendor file and its stylesheet, the entries of the page's import map,
 // what each file imports up front, the list of theme variables, and the licenses of what the files hold from other projects.
 // The tests build a package of their own, whose srcts holds the components and the stylesheet.
 
@@ -54,13 +54,17 @@ beforeAll(async () => {
       'import { createElement } from "react";',
       'import { Button } from "react-aria-components";',
       'import { label } from "./label.ts";',
+      'import { parseDate } from "./vendor/index.ts";',
       "",
       "export function Hello() {",
       "  return createElement(Button, null, label);",
       "}",
       "",
+      'export const day = parseDate("2026-11-25");',
+      "",
     ].join("\n"),
     "srcts/label.ts": 'export const label = "Hello";\n',
+    "srcts/vendor/index.ts": 'export { parseDate, parseTime } from "@internationalized/date";\n',
     "srcts/index.css": [
       "@layer theme;",
       '@import "tailwindcss/theme.css" layer(theme) prefix(bk);',
@@ -90,11 +94,13 @@ async function named(pattern: RegExp): Promise<string[]> {
   return (await readdir(out)).filter((file) => pattern.test(file)).sort();
 }
 
-test("writes React's file, React's entry points, React Aria's files, the file of blockr.ui's components, its stylesheet and its fonts, with the import map, what each imports up front and the licenses", async () => {
+test("writes React's file, React's entry points, React Aria's files, the file of blockr.ui's components, its vendor file, its stylesheet and its fonts, with the import map, what each imports up front and the licenses", async () => {
   const react = await named(/^react-[0-9a-f]{8}\.js$/);
   const shared = await named(/^react-aria-[0-9A-Z]{8}\.js$/);
+  const vendor = await named(/^vendor-[0-9a-f]{8}\.js$/);
   expect(react).toHaveLength(1);
   expect(shared.length).toBeGreaterThan(0);
+  expect(vendor).toHaveLength(1);
 
   // The build empties inst/js first.
   const files = [
@@ -107,6 +113,7 @@ test("writes React's file, React's entry points, React Aria's files, the file of
     "theme-variables.json",
     ...react,
     ...shared,
+    ...vendor,
     ...REACT_ENTRIES.map(importFile),
     ...REACT_ARIA.map(importFile),
   ].sort();
@@ -154,14 +161,29 @@ test("writes the whole of React Aria's three packages into React Aria's files, m
   }
 });
 
-test("writes blockr.ui's own code into the file of its components, unminified, which imports React and React Aria through the import map", async () => {
+test("writes blockr.ui's own code into the file of its components, unminified, which imports React and React Aria through the import map, and its libraries from its vendor file", async () => {
   const code = await readFile(join(out, "blockr-ui.js"), "utf8");
+  const [vendor = ""] = await named(/^vendor-[0-9a-f]{8}\.js$/);
 
   expect(minified(code)).toBe(false);
   expect(code).toContain('var label = "Hello";');
   expect(code).toMatch(/^function Hello\(\) \{\n {2}return createElement\(Button, null, label\);\n\}$/m);
-  expect(importedPackages(code)).toEqual(["react", "react-aria-components"]);
+  expect(importedPackages(code)).toEqual([`./${vendor}`, "react", "react-aria-components"].sort());
   expect(code).not.toContain("react-aria-Button");
+});
+
+test("writes the libraries that srcts/vendor/index.ts names into blockr.ui's vendor file, minified, with their license in LICENSES", async () => {
+  const [vendor = ""] = await named(/^vendor-[0-9a-f]{8}\.js$/);
+  const code = await readFile(join(out, vendor), "utf8");
+  // The package's exports name no package.json, so the test reads it from node_modules.
+  const { version } = JSON.parse(await readFile(join(repo, "node_modules", "@internationalized", "date", "package.json"), "utf8")) as { version: string };
+
+  expect(minified(code)).toBe(true);
+  expect(importedPackages(code)).toEqual([]);
+  const module = (await import(pathToFileURL(join(out, vendor)).href)) as Record<string, unknown>;
+  expect(Object.keys(module).sort()).toEqual(["parseDate", "parseTime"]);
+  // React Aria's files hold their own copy, which the same line names.
+  expect(await readFile(join(out, "LICENSES"), "utf8")).toMatch(new RegExp(`^@internationalized/date ${version}, in .*${vendor.replace(".", "\\.")}$`, "m"));
 });
 
 test("writes blockr.ui's stylesheet, which Tailwind CSS builds from srcts/index.css, unminified, with Tailwind's license in LICENSES", async () => {
@@ -213,8 +235,11 @@ test("lists what each file imports up front, so that a page that imports React a
   for (const name of REACT_ENTRIES) expect(preload[importFile(name)]).toEqual([`./${react}`]);
   expect(preload[react]).toBeUndefined();
 
-  // The file of the components imports React and React Aria by their names in the import map.
-  expect(preload["blockr-ui.js"]?.sort()).toEqual(["react", "react-aria-components"]);
+  // The file of the components imports React and React Aria by their names in the import map,
+  // and blockr.ui's vendor file, which imports nothing, by its name beside it.
+  const [vendor = ""] = await named(/^vendor-[0-9a-f]{8}\.js$/);
+  expect(preload["blockr-ui.js"]?.sort()).toEqual([`./${vendor}`, "react", "react-aria-components"].sort());
+  expect(preload[vendor]).toBeUndefined();
 
   // React Aria's files import each other and React, and nothing beyond.
   for (const file of [...REACT_ARIA.map(importFile), ...shared]) {
