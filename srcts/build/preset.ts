@@ -21,16 +21,22 @@ import type { BuildOptions, OnResolveResult, Plugin, PluginBuild } from "esbuild
 import { IMPORTS } from "../import-map/index.ts";
 import type { ReactAria } from "../import-map/index.ts";
 
-// The versions of React Aria's three packages that blockr.ui is written for,
-// which React Aria's files in inst/js hold.
+// The versions that blockr.ui is written for.
+// React Aria's files in inst/js hold React Aria's three packages at their versions.
 // A package's build imports React Aria at these versions alone,
 // so that the package builds against the React Aria that runs on the page.
+// Every package's stylesheet is written by this version of Tailwind CSS.
+// The properties that Tailwind registers for its utilities, such as --tw-blur, carry no prefix,
+// so every package's stylesheet registers them, and stylesheets that two versions of Tailwind wrote could register them differently
+// (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.4#the-list-of-theme-variables).
+// Tailwind writes its version at the top of each stylesheet that it compiles, where themeCheck() reads it (./theme-check.ts).
 // The package.json of blockr.ui pins the same versions, which its build checks (./build.ts).
 export const VERSIONS = {
   "react-aria-components": "1.22.1",
   "react-aria": "3.53.1",
   "react-stately": "3.51.0",
-} as const satisfies Record<ReactAria, string>;
+  tailwindcss: "4.3.3",
+} as const satisfies Record<ReactAria | "tailwindcss", string>;
 
 // The imports of React's entry points, such as react/jsx-runtime and react-dom/client.
 const REACT = /^react(-dom)?(\/.*)?$/;

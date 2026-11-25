@@ -24,6 +24,11 @@
 //   the faces of Open Sans and the classes of blockr.ui's components, unminified.
 //   Tailwind CSS builds it from srcts/index.css, through the Tailwind half of the build preset, ./preset.css.
 //   R puts it on every page from the start, apart from the JS, which loads with the first module that imports it.
+//   The build runs the check of the Tailwind half, themeCheck() of ./theme-check.ts,
+//   on the stylesheet and on the files that Tailwind scanned for it.
+//   So a component that names a colour of Tailwind's palette fails the build.
+// - The list of theme variables, from ./theme-variables.ts, goes into theme-variables.json,
+//   which the R function theme_variables() reads.
 // - The files of Open Sans, whose faces the stylesheet writes, go beside it, as they stand, from srcts/fonts.
 //   R serves the other files in a stylesheet's directory with the stylesheet,
 //   so each face reads its file by its name alone.
@@ -68,6 +73,8 @@ import ts from "typescript";
 import { COMPONENTS, IMPORTS, importFile, REACT_ARIA, REACT_ENTRIES } from "../import-map/index.ts";
 import { staticImports } from "./preload.ts";
 import { installedVersion, leaveReact, preset, VERSIONS } from "./preset.ts";
+import { themeError, themeProblems } from "./theme-check.ts";
+import { themeVariables } from "./theme-variables.ts";
 import { vendorCheck } from "./vendor-check.ts";
 
 // The repo of blockr.ui,
@@ -105,8 +112,8 @@ function outputs(metafile: esbuild.Metafile, dir: string): string[] {
 }
 
 // Fails where the node_modules of `dir`, as blockr.ui's repo,
-// hold another version of React Aria's packages than VERSIONS names.
-// The build writes React Aria from there into inst/js,
+// hold another version of React Aria's packages or of Tailwind CSS than VERSIONS names.
+// The build writes React Aria and the stylesheet from there into inst/js,
 // and the preset checks every package's build against VERSIONS, so the two must agree.
 export function checkVersions(dir: string): void {
   const wrong = Object.entries(VERSIONS).flatMap(([name, version]) => {
@@ -225,20 +232,36 @@ async function components(root: string, out: string): Promise<esbuild.Metafile |
 
 // Builds a stylesheet with Tailwind CSS, unminified,
 // resolving its imports and the files that its `@source` names from the stylesheet's directory.
-export async function stylesheet(file: string): Promise<string> {
+// It returns the stylesheet and the files that Tailwind scanned for classes, by their paths.
+// Tailwind reports each of those files to PostCSS as a dependency of the stylesheet,
+// beside each stylesheet that the stylesheet imports, so that a tool that watches files rebuilds it.
+export async function stylesheet(file: string): Promise<{ css: string; scanned: string[] }> {
   const plugin = tailwindcss({ base: dirname(file), optimize: { minify: false } });
   const result = await postcss([plugin]).process(await readFile(file, "utf8"), { from: file });
-  return result.css;
+  const scanned = result.messages
+    .filter((message) => message.type === "dependency")
+    .map((message) => (message as { file?: unknown }).file)
+    .filter((path): path is string => typeof path === "string" && !path.endsWith(".css"));
+  return { css: result.css, scanned: [...new Set(scanned)].sort() };
 }
 
 // Builds blockr.ui's stylesheet, srcts/index.css, into blockr-ui.css in `out`,
 // and returns the file's path.
+// It runs the check of the Tailwind half on the stylesheet and on the files that Tailwind scanned for it,
+// as every package's build runs it on its own (./theme-check.ts).
+// In blockr.ui's build, the check lets the code name classes under bk:, which blockr.ui alone writes,
+// and the stylesheet read the variables that it sets itself.
+// Those are the variables of Tailwind's theme that blockr.ui's classes read under its prefix, such as --bk-font-weight-bold.
 // It writes nothing where srcts holds no such file.
 async function styles(root: string, out: string): Promise<string | undefined> {
   const source = join(root, "srcts", "index.css");
   if (!existsSync(source)) return undefined;
   const file = join(out, importFile(COMPONENTS).replace(/\.js$/, ".css"));
-  await writeFile(file, await stylesheet(source));
+  const { css, scanned } = await stylesheet(source);
+  const code = await Promise.all(scanned.map(async (path) => ({ name: relative(root, path), text: await readFile(path, "utf8") })));
+  const problems = themeProblems([{ name: relative(root, file), text: css }], code, true);
+  if (problems.length > 0) throw themeError(problems);
+  await writeFile(file, css);
   return file;
 }
 
@@ -294,6 +317,11 @@ export async function build(root: string): Promise<string[]> {
   };
   await writeJson(preload, Object.fromEntries(Object.entries(imported).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))));
   written.push(relative(root, preload));
+
+  // The list of theme variables, which theme_variables() in R reads.
+  const list = join(out, "theme-variables.json");
+  await writeJson(list, themeVariables);
+  written.push(relative(root, list));
 
   // What each file holds from other projects, by the file's path.
   // Tailwind CSS counts for the stylesheet, which the Tailwind in blockr.ui's node_modules writes,

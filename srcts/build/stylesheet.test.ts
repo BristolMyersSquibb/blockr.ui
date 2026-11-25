@@ -3,6 +3,8 @@
 // What blockr.ui's stylesheet holds, as the build writes it into inst/js/blockr-ui.css:
 // the theme variables with their defaults for light mode and for dark mode, and the faces of Open Sans
 // (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#the-defaults).
+// The tests compare it with the list of theme variables, which blockr.ui declares in ./theme-variables.ts
+// (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.4#the-list-of-theme-variables).
 // And how the classes of a package read the theme variables through the Tailwind half of the build preset,
 // which blockr.ui's own stylesheet imports, and which blockr.ui ships in inst/types as `@blockr/ui/preset.css`
 // (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.4#the-build-preset).
@@ -16,56 +18,32 @@ import tailwindcss from "@tailwindcss/postcss";
 import postcss from "postcss";
 import type { Container, Root, Rule } from "postcss";
 import { afterAll, beforeAll, expect, test } from "vitest";
+import { themeProblems } from "./theme-check.ts";
+import { themeVariables } from "./theme-variables.ts";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const shipped = join(repo, "inst", "js", "blockr-ui.css");
 
-// The theme variables, which The theme variables lists
-// (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#which-theme-variables-blockrui-declares):
-// the colours by job and the shadows, which take a value for each mode,
-// and the faces, the sizes of text, the radius, the spacing and the layer of the overlays, which both modes share.
-const COLOURS = [
-  "background",
-  "foreground",
-  "card",
-  "card-foreground",
-  "popover",
-  "popover-foreground",
-  "primary",
-  "primary-foreground",
-  "primary-text",
-  "secondary",
-  "secondary-foreground",
-  "muted",
-  "muted-foreground",
-  "accent",
-  "accent-foreground",
-  "destructive",
-  "destructive-foreground",
-  "destructive-text",
-  "warning",
-  "warning-foreground",
-  "warning-text",
-  "success",
-  "success-foreground",
-  "success-text",
-  "border",
-  "input",
-  "ring",
-];
-const SHADOWS = ["sm", "md", "lg"];
-const TEXT = ["xs", "sm", "base", "lg"];
-const BY_MODE = [...COLOURS.map((job) => `--bk-color-${job}`), ...SHADOWS.map((step) => `--bk-shadow-${step}`)];
-const SHARED = [
-  "--bk-font-sans",
-  "--bk-font-mono",
-  ...TEXT.map((step) => `--bk-text-${step}`),
-  "--bk-radius",
-  "--bk-spacing",
-  "--bk-z-index-overlay",
-];
+// The list of theme variables, which blockr.ui's stylesheet holds whole:
+// the variables, the families of the fonts whose faces it writes, and the attribute on the page's root that holds the mode.
+const { variables, fonts, modeAttribute } = themeVariables;
 
-const ROOTS = [":root", ':root[data-bk-mode="light"]', ':root[data-bk-mode="dark"]'];
+// The variables that take a value for each mode, the colours by job and the shadows,
+// and those that both modes share: the faces, the sizes of text, the radius, the spacing and the layer of the overlays
+// (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#which-theme-variables-blockrui-declares).
+const BY_MODE: readonly string[] = variables.filter((name) => /^--bk-(color|shadow)-/.test(name));
+const SHARED: readonly string[] = variables.filter((name) => !BY_MODE.includes(name));
+
+// The names that the variables give the jobs of the colours, the sizes of text and the shadows, which their classes name,
+// as `primary` for --bk-color-primary, which `bc:bg-primary` reads.
+function steps(prefix: string): string[] {
+  return variables.filter((name) => name.startsWith(prefix)).map((name) => name.slice(prefix.length));
+}
+const COLOURS = steps("--bk-color-");
+const TEXT = steps("--bk-text-");
+const SHADOWS = steps("--bk-shadow-");
+
+const ROOTS = [":root", `:root[${modeAttribute}="light"]`, `:root[${modeAttribute}="dark"]`];
 
 // A rule of a stylesheet: the name of the cascade layer that it sits in, if any,
 // its selectors, and its declarations, each value by its property.
@@ -118,7 +96,7 @@ async function compile(text: string, from: string): Promise<Root> {
   return postcss.parse(result.css);
 }
 
-test("sets the defaults that both modes share under :root, and the colours and the shadows of each mode under its attribute, all inside Tailwind's theme layer", async () => {
+test("sets each variable of the list, those that both modes share under :root, and the colours and the shadows of each mode under the mode attribute, all inside Tailwind's theme layer", async () => {
   const rules = styleRules(postcss.parse(await readFile(shipped, "utf8")));
   const [shared, light, dark] = ROOTS.map((selector) => ruleFor(rules, selector));
 
@@ -129,13 +107,17 @@ test("sets the defaults that both modes share under :root, and the colours and t
   expect(light?.declarations["color-scheme"]).toBe("light");
   expect(dark?.declarations["color-scheme"]).toBe("dark");
 
+  // The three rules set the whole list, and no other variable of blockr.ui's.
+  const set = new Set([shared, light, dark].flatMap((rule) => Object.keys(rule?.declarations ?? {})).filter((property) => property.startsWith("--bk-")));
+  expect([...set].sort()).toEqual([...variables].sort());
+
   // No rule outside the layer sets a theme variable,
   // so that a frontend's value, which it sets outside any layer, wins over each default, whichever stylesheet loads first.
   const outside = rules.filter((rule) => rule.layer !== "theme").flatMap((rule) => Object.keys(rule.declarations));
   expect(outside.filter((property) => property.startsWith("--bk-"))).toEqual([]);
 });
 
-test("writes a face for each file of Open Sans that blockr.ui ships, which reads the file beside the stylesheet, with Open Sans first in the sans face", async () => {
+test("writes a face for each file of the fonts of the list, Open Sans, which reads the file beside the stylesheet, with Open Sans first in the sans face", async () => {
   const css = postcss.parse(await readFile(shipped, "utf8"));
   const files = (await readdir(join(repo, "srcts", "fonts"))).filter((file) => file.endsWith(".woff2"));
   const faces: Record<string, string>[] = [];
@@ -147,8 +129,8 @@ test("writes a face for each file of Open Sans that blockr.ui ships, which reads
   const urls = faces.map((face) => /url\("?([^")]+)"?\)/.exec(face.src ?? "")?.[1] ?? "");
   expect([...urls].sort()).toEqual([...files].sort());
   for (const url of urls) expect(existsSync(resolve(dirname(shipped), url)), url).toBe(true);
+  expect([...new Set(faces.map((face) => face["font-family"]?.replaceAll('"', "")))]).toEqual([...fonts]);
   for (const [i, face] of faces.entries()) {
-    expect(face["font-family"]?.replaceAll('"', "")).toBe("Open Sans");
     expect(face["font-style"]).toBe(urls[i]?.endsWith("-italic.woff2") ? "italic" : "normal");
     expect(face["font-weight"]).toBe("300 800");
   }
@@ -261,34 +243,77 @@ test("a package's classes read the theme variables under the package's own prefi
   expect(variables).toEqual([]);
 });
 
-test("a class of a step that the theme variables lack writes nothing, while black, white, a pill's radius and no shadow stay", async () => {
-  const lacking = [
-    "bc:bg-blue-600",
-    "bc:text-gray-900",
-    "bc:bg-red-500/10",
-    "bc:font-serif",
-    "bc:text-xl",
-    "bc:rounded",
-    "bc:rounded-xs",
-    "bc:shadow",
-    "bc:shadow-xs",
-    "bc:shadow-2xl",
-    "bc:shadow-inner",
-  ];
-  const kept = ["bc:bg-black/40", "bc:ring-white", "bc:rounded-full", "bc:rounded-none", "bc:shadow-none", "bc:bg-transparent"];
-  const rules = await packageRules([...lacking, ...kept]);
-  const written = rules.flatMap((rule) => rule.selectors);
+// The forms of a radius: for the whole box, for each side and for each corner, as rounded, rounded-t and rounded-tl.
+const SIDES = ["", "-s", "-e", "-t", "-r", "-b", "-l", "-ss", "-se", "-ee", "-es", "-tl", "-tr", "-br", "-bl"];
 
-  for (const name of lacking) expect(written).not.toContain(selector(name));
+// The utilities that read a colour, one of which each colour of the palette takes in turn below.
+const COLOURED = [
+  "bg",
+  "text",
+  "border",
+  "border-x",
+  "ring",
+  "ring-offset",
+  "inset-ring",
+  "outline",
+  "decoration",
+  "fill",
+  "stroke",
+  "accent",
+  "caret",
+  "from",
+  "via",
+  "to",
+  "shadow",
+  "inset-shadow",
+  "drop-shadow",
+  "text-shadow",
+];
+
+// A class under core's prefix for each colour of Tailwind's palette and each step of its faces, sizes of text, radii and shadows,
+// as the theme of the Tailwind in node_modules holds them.
+async function tailwindClasses(): Promise<string[]> {
+  const theme = await readFile(join(repo, "node_modules", "tailwindcss", "theme.css"), "utf8");
+  const names = (pattern: RegExp): string[] => [...theme.matchAll(pattern)].map(([, name = ""]) => name);
+  return [
+    ...names(/--color-([a-z]+-\d+):/g).map((colour, i) => `bc:${COLOURED[i % COLOURED.length] ?? "bg"}-${colour}`),
+    ...names(/--font-([a-z]+):/g).map((face) => `bc:font-${face}`),
+    ...names(/--text-([a-z0-9]+):/g).map((size) => `bc:text-${size}`),
+    ...names(/--radius(-[a-z0-9]+)?:/g).flatMap((step) => SIDES.map((side) => `bc:rounded${side}${step}`)),
+    ...names(/--shadow(-[a-z0-9]+)?:/g).map((step) => `bc:shadow${step}`),
+  ];
+}
+
+test("themeCheck() fails exactly the classes that write nothing, of each colour of Tailwind's palette and each step of its faces, sizes of text, radii and shadows", async () => {
+  // Black and white stay, for what must stand out on any colour, and so do the classes that read no variable.
+  const kept = ["bc:bg-black/40", "bc:ring-white", "bc:bg-transparent", "bc:bg-current", "bc:rounded-full", "bc:rounded-none", "bc:shadow-none"];
+  const classes = [...(await tailwindClasses()), ...kept];
+  const rules = await packageRules(classes);
+  const written = new Set(rules.flatMap((rule) => rule.selectors));
+  // Each class on a line of its own, so that the line of a problem gives the class.
+  const code = { name: "view.tsx", text: classes.map((name) => `"${name}"`).join("\n") };
+  const failed = new Set(themeProblems([], [code], false).map(({ line }) => classes[line - 1]));
+
+  // A class that writes a rule and that the check fails, or one that writes none and that the check passes.
+  expect(classes.filter((name) => written.has(selector(name)) === failed.has(name))).toEqual([]);
+  expect(classes.filter((name) => /-\d+$/.test(name)).every((name) => failed.has(name))).toBe(true);
   for (const name of kept) expect(written).toContain(selector(name));
   expect(ruleFor(rules, selector("bc:ring-white")).declarations).toEqual({ "--tw-ring-color": "#fff" });
   expect(ruleFor(rules, selector("bc:rounded-full")).declarations["border-radius"]).not.toContain("var(");
 });
 
-test("a package's dark variant applies under data-bk-mode=\"dark\" on the page's root", async () => {
-  const rules = await packageRules(["bc:dark:bg-card"]);
+test("the preset reads each variable of the list, and no other variable of blockr.ui's", async () => {
+  const preset = (await readFile(join(repo, "srcts", "build", "preset.css"), "utf8")).replace(/\/\*[\s\S]*?\*\//g, "");
+  const read = new Set([...preset.matchAll(/var\((--bk-[\w-]+)/g)].map(([, name = ""]) => name));
 
-  expect(ruleFor(rules, '.bc\\:dark\\:bg-card:where(:root[data-bk-mode="dark"], :root[data-bk-mode="dark"] *)').declarations).toEqual({
+  expect([...read].sort()).toEqual([...variables].sort());
+});
+
+test("a package's dark variant applies under the mode attribute of the list, data-bk-mode=\"dark\", on the page's root", async () => {
+  const rules = await packageRules(["bc:dark:bg-card"]);
+  const dark = `:root[${modeAttribute}="dark"]`;
+
+  expect(ruleFor(rules, `.bc\\:dark\\:bg-card:where(${dark}, ${dark} *)`).declarations).toEqual({
     "background-color": "var(--bk-color-card)",
   });
 });

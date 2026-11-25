@@ -2,7 +2,7 @@
 
 // What blockr.ui's build writes into inst/js: React's file and React's entry points,
 // React Aria's files, the file of blockr.ui's components and its stylesheet, the entries of the page's import map,
-// what each file imports up front, and the licenses of what the files hold from other projects.
+// what each file imports up front, the list of theme variables, and the licenses of what the files hold from other projects.
 // The tests build a package of their own, whose srcts holds the components and the stylesheet.
 
 import { createRequire } from "node:module";
@@ -14,6 +14,7 @@ import { afterAll, beforeAll, expect, test } from "vitest";
 import { importFile, IMPORTS, REACT_ARIA, REACT_ENTRIES } from "../import-map/index.ts";
 import { build, checkVersions, licenses } from "./build.ts";
 import { VERSIONS } from "./preset.ts";
+import { themeVariables } from "./theme-variables.ts";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -103,6 +104,7 @@ test("writes React's file, React's entry points, React Aria's files, the file of
     "import-map.json",
     "open-sans-latin-normal.woff2",
     "preload.json",
+    "theme-variables.json",
     ...react,
     ...shared,
     ...REACT_ENTRIES.map(importFile),
@@ -180,6 +182,10 @@ test("copies the files of Open Sans beside the stylesheet, as they stand, with t
   );
 });
 
+test("writes the list of theme variables into theme-variables.json, which theme_variables() in R reads", async () => {
+  expect(JSON.parse(await readFile(join(out, "theme-variables.json"), "utf8"))).toEqual(themeVariables);
+});
+
 test("writes the entries of the page's import map, each import by the file in inst/js that it resolves to", async () => {
   const map = JSON.parse(await readFile(join(out, "import-map.json"), "utf8")) as unknown;
 
@@ -249,6 +255,35 @@ test("fails where the file of blockr.ui's components would bundle a package from
   }
 });
 
+test("fails where a component of blockr.ui names a colour of Tailwind's palette, through themeCheck(), which passes its classes under bk:", async () => {
+  // The package sits under the repo, so that Tailwind finds its theme in the repo's node_modules.
+  const scratch = join(repo, "node_modules", ".tmp");
+  await mkdir(scratch, { recursive: true });
+  const other = await mkdtemp(join(scratch, "blockr-ui-build-"));
+  try {
+    await write(other, {
+      "srcts/index.ts": 'export const classes = "bk:flex bk:bg-blue-600";\n',
+      "srcts/index.css": [
+        "@layer theme;",
+        '@import "tailwindcss/theme.css" layer(theme) prefix(bk);',
+        '@import "tailwindcss/utilities.css" source(none);',
+        '@source "./**/*.ts";',
+        "",
+      ].join("\n"),
+    });
+    await expect(build(other)).rejects.toThrow(
+      new Error(
+        [
+          "The build fails themeCheck() of @blockr/ui/build:",
+          "srcts/index.ts:1: bk:bg-blue-600 names blue-600 of Tailwind's palette, which the build preset drops, so the class writes nothing. Draw with the colour of a job, such as primary or muted-foreground, which a theme and the mode reach.",
+        ].join("\n"),
+      ),
+    );
+  } finally {
+    await rm(other, { recursive: true, force: true });
+  }
+});
+
 test("fails for a package that comes with no license, naming the files that hold its code", async () => {
   const other = await mkdtemp(join(tmpdir(), "blockr-ui-licenses-"));
   try {
@@ -283,7 +318,7 @@ test("fails for the files of Open Sans without their license, naming the files",
   }
 });
 
-test("fails where blockr.ui's node_modules hold other versions of React Aria than the preset checks", async () => {
+test("fails where blockr.ui's node_modules hold other versions of React Aria or of Tailwind CSS than the preset checks", async () => {
   const other = await mkdtemp(join(tmpdir(), "blockr-ui-versions-"));
   try {
     await write(
@@ -296,12 +331,15 @@ test("fails where blockr.ui's node_modules hold other versions of React Aria tha
       checkVersions(other);
     }).not.toThrow();
 
-    await write(other, { "node_modules/react-stately/package.json": '{ "name": "react-stately", "version": "3.50.0" }\n' });
+    await write(other, {
+      "node_modules/react-stately/package.json": '{ "name": "react-stately", "version": "3.50.0" }\n',
+      "node_modules/tailwindcss/package.json": '{ "name": "tailwindcss", "version": "4.2.0" }\n',
+    });
     await rm(join(other, "node_modules", "react-aria"), { recursive: true });
     expect(() => {
       checkVersions(other);
     }).toThrow(
-      `The node_modules of blockr.ui hold no react-aria, where VERSIONS names ${VERSIONS["react-aria"]} and react-stately 3.50.0, where VERSIONS names ${VERSIONS["react-stately"]}.`,
+      `The node_modules of blockr.ui hold no react-aria, where VERSIONS names ${VERSIONS["react-aria"]}, react-stately 3.50.0, where VERSIONS names ${VERSIONS["react-stately"]} and tailwindcss 4.2.0, where VERSIONS names ${VERSIONS.tailwindcss}.`,
     );
   } finally {
     await rm(other, { recursive: true, force: true });
@@ -309,9 +347,12 @@ test("fails where blockr.ui's node_modules hold other versions of React Aria tha
 });
 
 test("the versions that the preset checks are those that blockr.ui's package.json pins", async () => {
-  const manifest = JSON.parse(await readFile(join(repo, "package.json"), "utf8")) as { dependencies: Record<string, string> };
+  const manifest = JSON.parse(await readFile(join(repo, "package.json"), "utf8")) as Record<
+    "dependencies" | "devDependencies",
+    Record<string, string>
+  >;
 
   for (const [name, version] of Object.entries(VERSIONS)) {
-    expect(manifest.dependencies[name]).toBe(version);
+    expect(manifest.dependencies[name] ?? manifest.devDependencies[name]).toBe(version);
   }
 });

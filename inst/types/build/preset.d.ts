@@ -3,6 +3,7 @@ export declare const VERSIONS: {
     readonly "react-aria-components": "1.22.1";
     readonly "react-aria": "3.53.1";
     readonly "react-stately": "3.51.0";
+    readonly tailwindcss: "4.3.3";
 };
 export declare function leaveReact(build: PluginBuild): void;
 export declare function installedVersion(name: string, dir: string): string | undefined;
