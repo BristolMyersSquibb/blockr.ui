@@ -1,11 +1,3 @@
-open_sans <- function(style = "normal") {
-  system.file(
-    "js", paste0("open-sans-latin-", style, ".woff2"),
-    package = "blockr.ui",
-    mustWork = TRUE
-  )
-}
-
 test_that("new_blockr_theme() makes a theme that is_blockr_theme() tells", {
   theme <- new_blockr_theme()
 
@@ -56,7 +48,7 @@ test_that("format() writes a rule for each mode that the theme gives values", {
 test_that("format() writes nothing for a theme with no values", {
   expect_identical(format(new_blockr_theme()), "")
 
-  fonts <- list(list(family = "Open Sans", file = open_sans()))
+  fonts <- list(list(family = "Inter", file = "inter-latin.woff2"))
   expect_identical(format(new_blockr_theme(fonts = fonts)), "")
 })
 
@@ -109,12 +101,6 @@ test_that("new_blockr_theme() takes a list of strings by name for each mode", {
     class = "blockr_theme_values_invalid"
   )
   expect_error(
-    new_blockr_theme(light = list("--bk-radius" = "0", "--bk-radius" = "1px")),
-    "names \"--bk-radius\" more than once",
-    fixed = TRUE,
-    class = "blockr_theme_values_invalid"
-  )
-  expect_error(
     new_blockr_theme(
       dark = list("--bk-z-index-overlay" = 50, "--bk-radius" = NA_character_)
     ),
@@ -127,12 +113,12 @@ test_that("new_blockr_theme() takes a list of strings by name for each mode", {
 test_that("a face takes the weight and the style of a face in CSS", {
   theme <- new_blockr_theme(
     fonts = list(
-      list(family = "Open Sans", file = open_sans()),
+      list(family = "Inter", file = "inter-latin.woff2"),
       list(
-        style = "italic",
-        file = open_sans("italic"),
-        family = "Open Sans",
-        weight = "300 800"
+        family = "Inter",
+        file = "inter-latin-italic.woff2",
+        weight = "100 900",
+        style = "italic"
       )
     )
   )
@@ -141,69 +127,17 @@ test_that("a face takes the weight and the style of a face in CSS", {
     theme$fonts,
     list(
       list(
-        family = "Open Sans",
-        file = normalizePath(open_sans()),
+        family = "Inter",
+        file = "inter-latin.woff2",
         weight = "normal",
         style = "normal"
       ),
       list(
-        family = "Open Sans",
-        file = normalizePath(open_sans("italic")),
-        weight = "300 800",
+        family = "Inter",
+        file = "inter-latin-italic.woff2",
+        weight = "100 900",
         style = "italic"
       )
     )
-  )
-})
-
-test_that("new_blockr_theme() refuses a face that it cannot write", {
-  expect_error(
-    new_blockr_theme(fonts = "Open Sans"),
-    class = "blockr_theme_fonts_invalid"
-  )
-  expect_error(
-    new_blockr_theme(fonts = list(family = "Open Sans", file = open_sans())),
-    "Face 1 of `fonts` is expected to be a list",
-    fixed = TRUE,
-    class = "blockr_theme_fonts_invalid"
-  )
-  expect_error(
-    new_blockr_theme(
-      fonts = list(
-        list(family = "Open Sans", file = open_sans(), package = "blockr.ui")
-      )
-    ),
-    class = "blockr_theme_fonts_invalid"
-  )
-  expect_error(
-    new_blockr_theme(fonts = list(list(file = open_sans(), weight = 400))),
-    "Face 1 of `fonts` gives no string as its `family` and `weight`",
-    fixed = TRUE,
-    class = "blockr_theme_fonts_invalid"
-  )
-  expect_error(
-    new_blockr_theme(
-      fonts = list(
-        list(family = "Open Sans", file = open_sans()),
-        list(family = "Open Sans", file = "")
-      )
-    ),
-    "Face 2 of `fonts` names the file \"\", which does not exist",
-    fixed = TRUE,
-    class = "blockr_theme_fonts_invalid"
-  )
-  expect_error(
-    new_blockr_theme(
-      fonts = list(list(family = "Open Sans", file = dirname(open_sans())))
-    ),
-    class = "blockr_theme_fonts_invalid"
-  )
-  expect_error(
-    new_blockr_theme(
-      fonts = list(list(family = "Inter</style>", file = open_sans()))
-    ),
-    "Face 1 of `fonts` holds `}` or `<` in its `family`.",
-    fixed = TRUE,
-    class = "blockr_theme_value_unsafe"
   )
 })

@@ -62,9 +62,6 @@ R writes each value into the page as it is.
 So the function refuses a value that holds \verb{\}} or \code{<},
 which would end the rule or the element that holds it.
 It checks a value no further.
-It refuses the same characters in the family, the weight and the style of a
-face, which core writes into the page as well.
-It also refuses a face whose file does not exist.
 
 The method of \code{\link[=format]{format()}} returns the text of the theme's rules,
 one for each mode that the theme gives values.

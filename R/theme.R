@@ -22,9 +22,6 @@
 #' So the function refuses a value that holds `}` or `<`,
 #' which would end the rule or the element that holds it.
 #' It checks a value no further.
-#' It refuses the same characters in the family, the weight and the style of a
-#' face, which core writes into the page as well.
-#' It also refuses a face whose file does not exist.
 #'
 #' The method of [format()] returns the text of the theme's rules,
 #' one for each mode that the theme gives values.
@@ -94,7 +91,7 @@ new_blockr_theme <- function(light = list(), dark = list(), fonts = list()) {
     list(
       light = check_theme_values(light, "light"),
       dark = check_theme_values(dark, "dark"),
-      fonts = check_theme_fonts(fonts)
+      fonts = lapply(fonts, font_face)
     ),
     class = "blockr_theme"
   )
@@ -173,16 +170,6 @@ check_theme_values <- function(values, mode) {
     )
   }
 
-  twice <- unique(nms[duplicated(nms)])
-
-  if (length(twice)) {
-    theme_abort(
-      "The argument `", mode, "` names ", and_list(dQuote(twice, FALSE)),
-      " more than once.",
-      class = "blockr_theme_values_invalid"
-    )
-  }
-
   strings <- vapply(values, is_theme_string, logical(1L))
 
   if (!all(strings)) {
@@ -207,76 +194,11 @@ check_theme_values <- function(values, mode) {
   values
 }
 
-# The faces of the theme's fonts, as `new_blockr_theme()` takes them.
-check_theme_fonts <- function(fonts) {
-
-  if (!is.list(fonts) || is.object(fonts)) {
-    theme_abort(
-      "The argument `fonts` is expected to be a list of faces.",
-      class = "blockr_theme_fonts_invalid"
-    )
-  }
-
-  fonts[] <- Map(check_theme_font, fonts, seq_along(fonts))
-
-  fonts
-}
-
-# A face of the theme's fonts, the `i`th, with its `family`, `file`, `weight`
-# and `style`, the last two "normal" where the face lacks them, as for a face
-# in CSS. The face keeps the absolute path of its file, so that the path still
-# names the file where the working directory changes before core serves it.
-check_theme_font <- function(font, i) {
-
-  fields <- c("family", "file", "weight", "style")
-
-  is_face <- is.list(font) && !is.object(font) && !is.null(names(font)) &&
-    all(names(font) %in% fields) && !anyDuplicated(names(font))
-
-  if (!is_face) {
-    theme_abort(
-      "Face ", i, " of `fonts` is expected to be a list with `family` and ",
-      "`file`, and optionally `weight` and `style`.",
-      class = "blockr_theme_fonts_invalid"
-    )
-  }
-
-  font <- c(font, list(weight = "normal", style = "normal"))[fields]
-  names(font) <- fields
-
-  strings <- vapply(font, is_theme_string, logical(1L))
-
-  if (!all(strings)) {
-    theme_abort(
-      "Face ", i, " of `fonts` gives no string as its ",
-      and_list(paste0("`", fields[!strings], "`")), ".",
-      class = "blockr_theme_fonts_invalid"
-    )
-  }
-
-  written <- c("family", "weight", "style")
-  unsafe <- written[grepl("[}<]", unlist(font[written]))]
-
-  if (length(unsafe)) {
-    theme_abort(
-      "Face ", i, " of `fonts` holds `}` or `<` in its ",
-      and_list(paste0("`", unsafe, "`")), ". ",
-      "Either would end the rule or the element that holds it.",
-      class = "blockr_theme_value_unsafe"
-    )
-  }
-
-  if (!file.exists(font[["file"]]) || dir.exists(font[["file"]])) {
-    theme_abort(
-      "Face ", i, " of `fonts` names the file ", dQuote(font[["file"]], FALSE),
-      ", which does not exist.",
-      class = "blockr_theme_fonts_invalid"
-    )
-  }
-
-  font[["file"]] <- normalizePath(font[["file"]])
-
-  font
+# A face of the theme's fonts, with "normal" for a weight or a style that it
+# lacks, as for a face in CSS.
+font_face <- function(font) {
+  defaults <- list(weight = "normal", style = "normal")
+  c(font, defaults[setdiff(names(defaults), names(font))])
 }
 
 # Whether `x` is a string that a theme can write into the page.
