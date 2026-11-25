@@ -1,0 +1,235 @@
+/*
+ * The stylesheet of blockr.ui, which Tailwind CSS builds into inst/js/blockr-ui.css,
+ * and which R puts on every page from the start, ahead of every other package's stylesheet
+ * (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.4#the-stylesheet-on-the-page).
+ * It holds the theme variables, each with its default for light mode and for dark mode,
+ * the faces of Open Sans, and the classes of blockr.ui's components, under the prefix `bk`.
+ *
+ * Every UI draws with the theme variables: blockr.ui's components, core's UIs, the frontend's own parts and the UIs of plugins and blocks
+ * (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2).
+ * A package's classes read them through the build preset (./build/preset.css),
+ * which this stylesheet imports as every package's stylesheet does, under its own prefix.
+ * Tailwind copies plain CSS as it stands, so this stylesheet holds every theme variable,
+ * whether or not a component of blockr.ui uses it.
+ */
+@layer theme;
+@import "tailwindcss/theme.css" layer(theme) prefix(bk);
+@import "tailwindcss/utilities.css" source(none);
+@import "./build/preset.css";
+@source "./**/*.{ts,tsx}";
+@source not "./build";
+@source not "./testing";
+@source not "./**/*.test.{ts,tsx}";
+
+/*
+ * The defaults of the theme variables
+ * (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#the-defaults).
+ * Each is a fixed value, for light mode and for dark mode, from today's design tokens at e14e831,
+ * so that the look roughly keeps today's.
+ * A colour takes the value of the token with the same job.
+ * A job that no token does takes a value of Tailwind's palette, as `input` takes gray-400 and gray-600.
+ * The sizes of text, the radius and the shadows take today's values, and the spacing Tailwind's.
+ *
+ * The defaults sit in Tailwind's theme layer, as plain rules.
+ * A frontend sets its own values outside any layer, under `:root[data-bk-mode="light"]` and `:root[data-bk-mode="dark"]`,
+ * so that its values win over these, whichever stylesheet loads first.
+ * An app's theme, which R writes into the page's head, wins over both
+ * (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#where-the-values-are-set).
+ * Core's board option `dark_mode` sets the attribute `data-bk-mode` on the page's root to `light` or `dark`,
+ * and R writes a line into the page's head that sets it before the first paint.
+ */
+@layer theme {
+  /*
+   * What both modes share: the faces, the sizes of text, the radius, the spacing and the layer of the overlays.
+   * The sans face is Open Sans, whose files blockr.ui ships, with its faces below.
+   * The layer of the overlays is 1100, core's on js-state:
+   * above blockr.ui's layers under the dock, which reach 1090 for its toasts,
+   * and above dockview's floating groups, at 999, and its guides, at 1099.
+   */
+  :root {
+    --bk-font-sans: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --bk-font-mono: "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+    --bk-text-xs: 0.75rem;
+    --bk-text-sm: 0.8125rem;
+    --bk-text-base: 0.875rem;
+    --bk-text-lg: 1rem;
+    --bk-radius: 0.5rem;
+    --bk-spacing: 0.25rem;
+    --bk-z-index-overlay: 1100;
+  }
+
+  /*
+   * Light mode.
+   * The card and the popover are both white, so a menu stands apart from the card that it opens from by its border and its shadow.
+   * Each `-text` is the lightest of Tailwind's shades of its hue that reaches 4.5:1 on every surface of light mode and on the colour's own tint over it.
+   * Each `-foreground` is white where white reaches 4.5:1 on the colour, and today's dark text on warning and success, where it does not.
+   * The secondary colours take those of accent, as shadcn/ui gives the two pairs one value.
+   */
+  :root[data-bk-mode="light"] {
+    color-scheme: light;
+    --bk-color-background: #f9fafb;
+    --bk-color-foreground: #111827;
+    --bk-color-card: #ffffff;
+    --bk-color-card-foreground: #111827;
+    --bk-color-popover: #ffffff;
+    --bk-color-popover-foreground: #111827;
+    --bk-color-primary: #2563eb;
+    --bk-color-primary-foreground: #ffffff;
+    --bk-color-primary-text: #1d4ed8;
+    --bk-color-secondary: #f3f4f6;
+    --bk-color-secondary-foreground: #111827;
+    --bk-color-muted: #f9fafb;
+    --bk-color-muted-foreground: #6b7280;
+    --bk-color-accent: #f3f4f6;
+    --bk-color-accent-foreground: #111827;
+    --bk-color-destructive: #dc2626;
+    --bk-color-destructive-foreground: #ffffff;
+    --bk-color-destructive-text: #b91c1c;
+    --bk-color-warning: #d97706;
+    --bk-color-warning-foreground: #111827;
+    --bk-color-warning-text: #92400e;
+    --bk-color-success: #16a34a;
+    --bk-color-success-foreground: #111827;
+    --bk-color-success-text: #166534;
+    --bk-color-border: #e5e7eb;
+    --bk-color-input: #99a1af;
+    --bk-color-ring: #2563eb;
+    --bk-shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --bk-shadow-md: 0 4px 12px rgb(0 0 0 / 0.1);
+    --bk-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  }
+
+  /*
+   * Dark mode.
+   * The popover is lighter than the card, as today's raised background is lighter than its surface,
+   * so that a menu stands apart from the card that it opens from.
+   * The accent, a hover, lays 6% of the text over the popover, the lighter of the two surfaces that a hover sits on, as today's hover does.
+   * Each `-text` takes today's text of its state, and every `-foreground` today's text on the accent fill.
+   * The shadows are darker, since a shadow barely reads on a dark page.
+   */
+  :root[data-bk-mode="dark"] {
+    color-scheme: dark;
+    --bk-color-background: #0e1219;
+    --bk-color-foreground: #f0f3f7;
+    --bk-color-card: #161b23;
+    --bk-color-card-foreground: #f0f3f7;
+    --bk-color-popover: #1e242e;
+    --bk-color-popover-foreground: #f0f3f7;
+    --bk-color-primary: #3b82f6;
+    --bk-color-primary-foreground: #0e1219;
+    --bk-color-primary-text: #60a5fa;
+    --bk-color-secondary: #2b303a;
+    --bk-color-secondary-foreground: #f0f3f7;
+    --bk-color-muted: #14181f;
+    --bk-color-muted-foreground: #8a94a3;
+    --bk-color-accent: #2b303a;
+    --bk-color-accent-foreground: #f0f3f7;
+    --bk-color-destructive: #f87171;
+    --bk-color-destructive-foreground: #0e1219;
+    --bk-color-destructive-text: #f87171;
+    --bk-color-warning: #fbbf24;
+    --bk-color-warning-foreground: #0e1219;
+    --bk-color-warning-text: #fbbf24;
+    --bk-color-success: #4ade80;
+    --bk-color-success-foreground: #0e1219;
+    --bk-color-success-text: #4ade80;
+    --bk-color-border: #232932;
+    --bk-color-input: #4a5565;
+    --bk-color-ring: #3b82f6;
+    --bk-shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+    --bk-shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
+    --bk-shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.7);
+  }
+}
+
+/*
+ * A face for each file of Open Sans that blockr.ui ships, in inst/assets/fonts with its licence, the SIL Open Font License 1.1.
+ * Each file holds the variable font, at weights 300 to 800, for one script and one style:
+ * latin, latin-ext and greek, the files that bslib's Shiny preset serves,
+ * and math, from Google Fonts, for the operators of a condition such as ≤, ≥ and ≠.
+ * Open Sans has no arrows or keyboard symbols, such as → and ⌘, so those come from the system's fonts.
+ * The browser fetches a file only once the page shows a character in its range.
+ * Where the ranges of two faces overlap, the browser tries the face declared last first.
+ * So the faces come in the order of Google Fonts' stylesheet, with math first,
+ * so that greek, latin-ext and latin win over math for a character that both cover, such as a Greek letter.
+ * Each URL is relative to inst/js/blockr-ui.css, where the build writes this stylesheet.
+ */
+@font-face {
+  font-family: "Open Sans";
+  font-style: italic;
+  font-weight: 300 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../assets/fonts/open-sans-math-italic.woff2") format("woff2");
+  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 300 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../assets/fonts/open-sans-math-normal.woff2") format("woff2");
+  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  font-style: italic;
+  font-weight: 300 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../assets/fonts/open-sans-greek-italic.woff2") format("woff2");
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  font-style: italic;
+  font-weight: 300 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../assets/fonts/open-sans-latin-ext-italic.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  font-style: italic;
+  font-weight: 300 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../assets/fonts/open-sans-latin-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 300 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../assets/fonts/open-sans-greek-normal.woff2") format("woff2");
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 300 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../assets/fonts/open-sans-latin-ext-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 300 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../assets/fonts/open-sans-latin-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

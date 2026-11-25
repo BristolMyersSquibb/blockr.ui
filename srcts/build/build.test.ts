@@ -1,9 +1,9 @@
 // @vitest-environment node
 
 // What blockr.ui's build writes into inst/js: React's file and React's entry points,
-// React Aria's files, the file of blockr.ui's components, the entries of the page's import map,
+// React Aria's files, the file of blockr.ui's components and its stylesheet, the entries of the page's import map,
 // what each file imports up front, and the licenses of what the files hold from other projects.
-// The tests build a package of their own, whose srcts holds the components.
+// The tests build a package of their own, whose srcts holds the components and the stylesheet.
 
 import { createRequire } from "node:module";
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -60,6 +60,19 @@ beforeAll(async () => {
       "",
     ].join("\n"),
     "srcts/label.ts": 'export const label = "Hello";\n',
+    "srcts/index.css": [
+      "@layer theme;",
+      '@import "tailwindcss/theme.css" layer(theme) prefix(bk);',
+      '@import "tailwindcss/utilities.css" source(none);',
+      '@source inline("bk:flex");',
+      "",
+      "@layer theme {",
+      "  :root {",
+      "    --bk-spacing: 0.25rem;",
+      "  }",
+      "}",
+      "",
+    ].join("\n"),
     "inst/js/gone.js": "",
   });
   written = await build(root);
@@ -74,7 +87,7 @@ async function named(pattern: RegExp): Promise<string[]> {
   return (await readdir(out)).filter((file) => pattern.test(file)).sort();
 }
 
-test("writes React's file, React's entry points, React Aria's files and the file of blockr.ui's components, with the import map, what each imports up front and the licenses", async () => {
+test("writes React's file, React's entry points, React Aria's files, the file of blockr.ui's components and its stylesheet, with the import map, what each imports up front and the licenses", async () => {
   const react = await named(/^react-[0-9a-f]{8}\.js$/);
   const shared = await named(/^react-aria-[0-9A-Z]{8}\.js$/);
   expect(react).toHaveLength(1);
@@ -83,6 +96,7 @@ test("writes React's file, React's entry points, React Aria's files and the file
   // The build empties inst/js first.
   const files = [
     "LICENSES",
+    "blockr-ui.css",
     "blockr-ui.js",
     "import-map.json",
     "preload.json",
@@ -143,6 +157,17 @@ test("writes blockr.ui's own code into the file of its components, unminified, w
   expect(code).toMatch(/^function Hello\(\) \{\n {2}return createElement\(Button, null, label\);\n\}$/m);
   expect(importedPackages(code)).toEqual(["react", "react-aria-components"]);
   expect(code).not.toContain("react-aria-Button");
+});
+
+test("writes blockr.ui's stylesheet, which Tailwind CSS builds from srcts/index.css, unminified, with Tailwind's license in LICENSES", async () => {
+  const css = await readFile(join(out, "blockr-ui.css"), "utf8");
+  const { version } = createRequire(import.meta.url)("tailwindcss/package.json") as { version: string };
+
+  expect(css.startsWith(`/*! tailwindcss v${version} | MIT License | https://tailwindcss.com */\n`)).toBe(true);
+  expect(minified(css)).toBe(false);
+  expect(css).toContain("@layer theme {\n  :root {\n    --bk-spacing: .25rem;\n  }\n}");
+  expect(css).toContain(".bk\\:flex {\n  display: flex;\n}");
+  expect(await readFile(join(out, "LICENSES"), "utf8")).toContain(`tailwindcss ${version}, in blockr-ui.css\n`);
 });
 
 test("writes the entries of the page's import map, each import by the file in inst/js that it resolves to", async () => {
