@@ -128,6 +128,20 @@
   The build of blockr.ui runs it on its own stylesheet,
   and on the files that Tailwind scans for it.
 
+* The new R function `new_blockr_theme()` makes an app's theme (#112).
+  The theme holds values for some of the theme variables in each mode,
+  under their full names, and the files of the fonts that it brings.
+  The function refuses a name that `theme_variables()` lacks, naming it,
+  and a value that holds `}` or `<`.
+  It returns an object of class `blockr_theme`,
+  and the new function `is_blockr_theme()` tells whether an object is one.
+  The method of `format()` for the class returns the text of the theme's
+  rules, one for each mode.
+  Core writes that text into the page's head.
+  Each rule names `:root` twice beside the mode attribute,
+  so that the app's values win over the frontend's and over blockr.ui's
+  defaults.
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
