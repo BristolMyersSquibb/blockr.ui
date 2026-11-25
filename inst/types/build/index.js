@@ -12,8 +12,7 @@ var IMPORTS = [...REACT_ENTRIES, COMPONENTS, ...REACT_ARIA];
 var VERSIONS = {
   "react-aria-components": "1.22.1",
   "react-aria": "3.53.1",
-  "react-stately": "3.51.0",
-  tailwindcss: "4.3.3"
+  "react-stately": "3.51.0"
 };
 var REACT = /^react(-dom)?(\/.*)?$/;
 var COMPILER_RUNTIME = /^react[-/]compiler-runtime$/;
@@ -79,17 +78,6 @@ var imports = {
         errors: [
           {
             text: `A module imports ${args.path}, which would bundle a second copy of React Aria. Import it from ${own ?? scope ?? ""} instead, which the page's import map names.`
-          }
-        ]
-      };
-    });
-    build.onStart(() => {
-      const installed = installedVersion("tailwindcss", workingDir(build));
-      if (installed === void 0 || installed === VERSIONS.tailwindcss) return void 0;
-      return {
-        errors: [
-          {
-            text: `The build runs Tailwind CSS ${installed}, from node_modules, but blockr.ui is written for Tailwind CSS ${VERSIONS.tailwindcss}, which every package's build runs. Install tailwindcss@${VERSIONS.tailwindcss}.`
           }
         ]
       };

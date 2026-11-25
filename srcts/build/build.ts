@@ -88,13 +88,15 @@ function outputs(metafile: esbuild.Metafile, dir: string): string[] {
 }
 
 // Fails where the node_modules of `dir`, as blockr.ui's repo,
-// hold another version of React Aria's packages or of Tailwind CSS than VERSIONS names.
+// hold another version of React Aria's packages than VERSIONS names.
 // The build writes React Aria from there into inst/js,
 // and the preset checks every package's build against VERSIONS, so the two must agree.
 export function checkVersions(dir: string): void {
   const wrong = Object.entries(VERSIONS).flatMap(([name, version]) => {
     const installed = installedVersion(name, dir);
-    return installed === version ? [] : [`${name} ${installed ?? "is missing"}, where VERSIONS names ${version}`];
+    if (installed === version) return [];
+    const held = installed === undefined ? `no ${name}` : `${name} ${installed}`;
+    return [`${held}, where VERSIONS names ${version}`];
   });
   if (wrong.length > 0) {
     throw new Error(

@@ -287,17 +287,6 @@ test("builds a module against React Aria at the versions that blockr.ui's files 
   await expect(bundle(ariaImport)).resolves.toBeDefined();
 });
 
-test("fails a build that runs another version of Tailwind CSS than blockr.ui is written for, naming both", async () => {
-  await write({ "node_modules/tailwindcss/package.json": '{ "name": "tailwindcss", "version": "4.2.0" }\n' });
-
-  await expect(bundle(`export const plain = 1;\n`)).rejects.toThrow(
-    `The build runs Tailwind CSS 4.2.0, from node_modules, but blockr.ui is written for Tailwind CSS ${VERSIONS.tailwindcss}, which every package's build runs. Install tailwindcss@${VERSIONS.tailwindcss}.`,
-  );
-
-  await write({ "node_modules/tailwindcss/package.json": JSON.stringify({ name: "tailwindcss", version: VERSIONS.tailwindcss }) });
-  await expect(bundle(`export const plain = 1;\n`)).resolves.toBeDefined();
-});
-
 test("the vendor check fails a package's build that puts code from node_modules into one of its own files, naming each npm package and the file", async () => {
   await write({
     "node_modules/@acme/pad/package.json": '{ "name": "@acme/pad", "type": "module", "main": "index.js" }\n',

@@ -234,7 +234,7 @@ test("fails for a package that comes with no license, naming the files that hold
   }
 });
 
-test("fails where blockr.ui's node_modules hold other versions of React Aria or of Tailwind CSS than the preset checks", async () => {
+test("fails where blockr.ui's node_modules hold other versions of React Aria than the preset checks", async () => {
   const other = await mkdtemp(join(tmpdir(), "blockr-ui-versions-"));
   try {
     await write(
@@ -248,11 +248,11 @@ test("fails where blockr.ui's node_modules hold other versions of React Aria or 
     }).not.toThrow();
 
     await write(other, { "node_modules/react-stately/package.json": '{ "name": "react-stately", "version": "3.50.0" }\n' });
-    await rm(join(other, "node_modules", "tailwindcss"), { recursive: true });
+    await rm(join(other, "node_modules", "react-aria"), { recursive: true });
     expect(() => {
       checkVersions(other);
     }).toThrow(
-      `The node_modules of blockr.ui hold react-stately 3.50.0, where VERSIONS names ${VERSIONS["react-stately"]} and tailwindcss is missing, where VERSIONS names ${VERSIONS.tailwindcss}.`,
+      `The node_modules of blockr.ui hold no react-aria, where VERSIONS names ${VERSIONS["react-aria"]} and react-stately 3.50.0, where VERSIONS names ${VERSIONS["react-stately"]}.`,
     );
   } finally {
     await rm(other, { recursive: true, force: true });
@@ -260,12 +260,9 @@ test("fails where blockr.ui's node_modules hold other versions of React Aria or 
 });
 
 test("the versions that the preset checks are those that blockr.ui's package.json pins", async () => {
-  const manifest = JSON.parse(await readFile(join(repo, "package.json"), "utf8")) as Record<
-    "dependencies" | "devDependencies",
-    Record<string, string>
-  >;
+  const manifest = JSON.parse(await readFile(join(repo, "package.json"), "utf8")) as { dependencies: Record<string, string> };
 
   for (const [name, version] of Object.entries(VERSIONS)) {
-    expect(manifest.dependencies[name] ?? manifest.devDependencies[name]).toBe(version);
+    expect(manifest.dependencies[name]).toBe(version);
   }
 });

@@ -44,8 +44,7 @@
   entry point inside React Aria's packages, such as
   `react-aria-components/Table`.
   It fails a build whose React Aria packages are at other versions than
-  blockr.ui's files hold, and one that runs another version of Tailwind CSS
-  than blockr.ui is written for.
+  blockr.ui's files hold.
   Beside the preset, `@blockr/ui/build` holds `staticImports()` and the vendor
   check, as core's preset does.
 

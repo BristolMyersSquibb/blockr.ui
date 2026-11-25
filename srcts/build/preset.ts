@@ -19,22 +19,16 @@ import type { BuildOptions, OnResolveResult, Plugin, PluginBuild } from "esbuild
 import { IMPORTS } from "../import-map/index.ts";
 import type { ReactAria } from "../import-map/index.ts";
 
-// The versions that blockr.ui is written for.
-// React Aria's files in inst/js hold React Aria's three packages at these versions.
+// The versions of React Aria's three packages that blockr.ui is written for,
+// which React Aria's files in inst/js hold.
 // A package's build imports React Aria at these versions alone,
 // so that the package builds against the React Aria that runs on the page.
-// A package's build runs this version of Tailwind CSS alone.
-// The properties that Tailwind registers for its utilities, such as --tw-blur, carry no prefix,
-// so every package's stylesheet registers them.
-// Stylesheets built with two versions of Tailwind could register them differently
-// (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.4#the-list-of-theme-variables).
 // The package.json of blockr.ui pins the same versions, which its build checks (./build.ts).
 export const VERSIONS = {
   "react-aria-components": "1.22.1",
   "react-aria": "3.53.1",
   "react-stately": "3.51.0",
-  tailwindcss: "4.3.3",
-} as const satisfies Record<ReactAria | "tailwindcss", string>;
+} as const satisfies Record<ReactAria, string>;
 
 // The imports of React's entry points, such as react/jsx-runtime and react-dom/client.
 const REACT = /^react(-dom)?(\/.*)?$/;
@@ -142,8 +136,6 @@ function workingDir(build: PluginBuild): string {
 // React's entry points (leaveReact()), blockr.ui's components and React Aria's three packages.
 // It fails the build where a module imports one of React Aria's packages,
 // and node_modules holds that package at another version than VERSIONS names.
-// It fails the build as well where node_modules holds Tailwind CSS at another version,
-// since the package's build runs that Tailwind.
 // An import of what lies inside React Aria's packages fails the build too,
 // with an error that names the package to import instead (INSIDE_REACT_ARIA).
 const imports: Plugin = {
@@ -169,17 +161,6 @@ const imports: Plugin = {
         errors: [
           {
             text: `A module imports ${args.path}, which would bundle a second copy of React Aria. Import it from ${own ?? scope ?? ""} instead, which the page's import map names.`,
-          },
-        ],
-      };
-    });
-    build.onStart(() => {
-      const installed = installedVersion("tailwindcss", workingDir(build));
-      if (installed === undefined || installed === VERSIONS.tailwindcss) return undefined;
-      return {
-        errors: [
-          {
-            text: `The build runs Tailwind CSS ${installed}, from node_modules, but blockr.ui is written for Tailwind CSS ${VERSIONS.tailwindcss}, which every package's build runs. Install tailwindcss@${VERSIONS.tailwindcss}.`,
           },
         ],
       };
