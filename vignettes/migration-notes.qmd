@@ -1,0 +1,78 @@
+---
+title: "Migration notes for app scripts"
+vignette: >
+  %\VignetteIndexEntry{Migration notes for app scripts}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+An app script calls blockr.ui 0.0.1 to pick its table preview, which draws the tables that blocks show.
+In version 0.2.0, the browser holds the board and draws it, as the migration notes of blockr.core describe (`vignette("migration-notes", package = "blockr.core")`).
+The packages of blockr draw their UIs there with the components of blockr.ui.
+Nothing of blockr.ui draws in R any more.
+So the table preview is gone, and so is every other function of version 0.0.1.
+
+These notes list each change that an app script of blockr.ui 0.0.1 needs to run on blockr.ui 0.2.0.
+They are written so that an AI can apply them to a script.
+A function of version 0.0.1 that is gone has no alias, so a script that still calls it stops with an error from R.
+A script follows the migration notes of blockr.core too, and those of each other blockr package that it calls.
+
+## The table preview
+
+In version 0.0.1, a script picks the table preview of blockr.ui with the blockr option `tabular_display`.
+The table preview then draws every table that a block shows:
+
+```r
+# blockr.ui 0.0.1
+library(blockr.core)
+
+options(blockr.tabular_display = blockr.ui::html_table_display)
+
+serve(new_board(blocks = c(a = new_dataset_block("iris"))))
+```
+
+In version 0.2.0, the table preview is gone, and blockr.core reads no blockr option `tabular_display`.
+So a script drops the line, and puts nothing in its place:
+
+```r
+# blockr.ui 0.2.0
+library(blockr.core)
+
+serve(new_board(blocks = c(a = new_dataset_block("iris"))))
+```
+
+A call to `options()` may set other options as well.
+The script then keeps those, and drops the entry `blockr.tabular_display` alone.
+
+A script that attaches blockr.ui, with `library(blockr.ui)`, may name the table preview without `blockr.ui::`, as `options(blockr.tabular_display = html_table_display)` does.
+Such a script drops that line the same way.
+Once the script calls nothing of blockr.ui, it drops `library(blockr.ui)` as well.
+
+In version 0.2.0, the plain table of blockr.core draws every table output.
+Another package may offer a richer table, as a renderer.
+An app draws its tables with such a renderer by naming it in the blockr option `renderers` of blockr.core (see `?blockr.core::new_renderer`).
+The package blockr.ui offers no renderer, so a script names none in place of the table preview.
+
+The table preview took the number of rows on each page from the board option `page_size` of blockr.core.
+A script that sets that board option, or the blockr option `page_size`, follows the notes of blockr.core, which say what takes their place.
+
+A board that an app saved with the table preview holds nothing of blockr.ui's.
+The board option `page_size` that it holds is blockr.core's.
+So the file needs only the conversion that the notes of blockr.core describe.
+
+## The functions that go
+
+Version 0.2.0 keeps no function of version 0.0.1.
+None of them has a successor in R, since nothing in R draws UI.
+So a script that calls one of them drops the call.
+The table gives each of them with what does its work in version 0.2.0:
+
+| Version 0.0.1 | Version 0.2.0 |
+|---|---|
+| `html_table_display` | The plain table of blockr.core, which draws every table output ([The table preview](#the-table-preview)) |
+| `html_table_render()`, `html_table_result()`, `table_page()`, `build_html_table()`, `column_widths_px()`, `apply_table_sort()`, `table_preview_dep()` and `table_preview_css()` | Nothing, since the table preview is gone |
+| `action_menu()`, `menu_item()`, `menu_section()`, `menu_divider()`, `dropdown()`, `gear_tray()`, `tray_section()`, `shortcut()` and `tool_button()` | Nothing in R, since a package draws its UI in the browser, with the components of blockr.ui |
+| `block_mark()`, `block_mark_svg()` and `category_color()` | Nothing in R, since blockr.core draws the mark of each block in the browser, in the colour of its category |
+| `small_icon()` | Nothing in R, since blockr.ui offers Lucide's icons to the UIs that packages draw in the browser |
+| `theme_dep()`, `controls_dep()` and `base_dep()` | Nothing, since the `serve()` of blockr.core puts the stylesheet of blockr.ui on every page |
+| `shiny_has_perf_dep()` and `shiny_input_batch_dep()` | Nothing, since no Shiny input or output draws the board |
