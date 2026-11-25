@@ -1,34 +1,30 @@
 Package: blockr.ui
 Title: User Interface Components for the 'blockr' Ecosystem
-Version: 0.0.1
+Version: 0.2.0
 Authors@R:
-    person(given = "David",
-           family = "Granjon",
-           role = c("aut", "cre"),
-           email = "david@cynkra.com")
+    c(person(given = "Nicolas",
+             family = "Bennett",
+             role = c("aut", "cre"),
+             email = "nicolas@cynkra.com"),
+      person(given = "David",
+             family = "Granjon",
+             role = c("aut"),
+             email = "david@cynkra.com"),
+      person(given = "Christoph",
+             family = "Sax",
+             role = c("aut"),
+             email = "christoph@cynkra.com"),
+      person(family = "Bristol Myers Squibb",
+             role = "fnd")
+    )
 Description: User-interface primitives shared across the 'blockr'
-    ecosystem, currently a paginated, sortable HTML table display for
-    block results that plugs into the tabular display extension point
-    of 'blockr.core'.
+    ecosystem.
 URL: https://bristolmyerssquibb.github.io/blockr.ui/
 BugReports: https://github.com/BristolMyersSquibb/blockr.ui/issues
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Imports:
-    blockr.core (>= 0.1.4),
-    dplyr,
-    htmltools,
-    pillar,
-    rlang,
-    shiny (>= 1.14.0)
 Suggests:
-    DBI,
-    dbplyr,
-    RSQLite,
-    testthat (>= 3.0.0),
-    withr
-Remotes:
-    BristolMyersSquibb/blockr.core
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0
