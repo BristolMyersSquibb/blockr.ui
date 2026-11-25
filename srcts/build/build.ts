@@ -47,6 +47,8 @@
 // - The components, srcts/index.ts, and the build preset, srcts/build, go into inst/types,
 //   which a package's build resolves as `@blockr/ui` and `@blockr/ui/build`:
 //   their declarations, each bundled, and the package.json that names them.
+//   The icons of Lucide's package lucide go there too, as `@blockr/ui/icons`:
+//   an ES module that re-exports each of them, and its declarations.
 //   The Tailwind half of the preset goes there as it stands,
 //   which a package's stylesheet imports as `@blockr/ui/preset.css`.
 //
@@ -432,6 +434,7 @@ function packageVersion(name: string): string {
 
 // The package that inst/types is: blockr.ui's components, as `@blockr/ui`,
 // and the build preset, as `@blockr/ui/build`, each with its declarations and bundled,
+// Lucide's icons, as `@blockr/ui/icons` (iconsEntry()),
 // and the Tailwind half of the preset, as `@blockr/ui/preset.css`.
 // The components bundle leaves React and React Aria imports, as blockr-ui.js does.
 // So the package names React and React Aria's three packages as its peers,
@@ -441,16 +444,24 @@ function packageVersion(name: string): string {
 // A package's tests then run blockr.ui's components on one copy of React and of React Aria,
 // the copy that its own code imports as well.
 // A package's build leaves its imports of all of them to the page's import map, through the preset.
+// The package names lucide as its dependency, at the version that blockr.ui pins,
+// since `@blockr/ui/icons` re-exports its icons.
+// So npm installs lucide with `@blockr/ui`, and a package's build bundles from there the icons that it imports.
+// It is no peer, since no package imports lucide itself, which the preset refuses.
 export const TYPES_PACKAGE = {
   name: "@blockr/ui",
   private: true,
   description:
-    "The components of blockr.ui's client, and the build preset with which a package builds its modules and its stylesheet against them, as the R package blockr.ui ships them.",
+    "The components of blockr.ui's client, Lucide's icons, and the build preset with which a package builds its modules and its stylesheet against them, as the R package blockr.ui ships them.",
   type: "module",
   exports: {
     ".": { types: "./index.d.ts", default: "./index.js" },
     "./build": { types: "./build/index.d.ts", default: "./build/index.js" },
+    "./icons": { types: "./icons/index.d.ts", default: "./icons/index.js" },
     "./preset.css": "./preset.css",
+  },
+  dependencies: {
+    lucide: packageVersion("lucide"),
   },
   peerDependencies: {
     react: packageVersion("react"),
@@ -468,6 +479,7 @@ const BUNDLED = [
 
 // Writes inst/types: the declarations of the sources that BUNDLED names,
 // each file's beside where its source sits in srcts, those sources bundled,
+// the entry of Lucide's icons (iconsEntry()),
 // the Tailwind half of the build preset, srcts/build/preset.css, as it stands,
 // and the package.json that names them.
 // The declarations follow tsconfig.node.json, since the build preset runs in Node.
@@ -512,7 +524,7 @@ export async function types(root: string): Promise<string[]> {
     );
   }
 
-  const peers = Object.keys(TYPES_PACKAGE.peerDependencies);
+  const imported = [...Object.keys(TYPES_PACKAGE.peerDependencies), ...Object.keys(TYPES_PACKAGE.dependencies)];
   const result = await esbuild.build({
     absWorkingDir: root,
     entryPoints: bundled.map(({ name, file }) => ({ in: file, out: name })),
@@ -522,15 +534,17 @@ export async function types(root: string): Promise<string[]> {
     platform: "neutral",
     target: "es2022",
     jsx: "automatic",
-    // The peers that the package.json names stay imports, with their subpaths, such as react/jsx-runtime.
+    // The peers and the dependencies that the package.json names stay imports,
+    // with their subpaths, such as react/jsx-runtime.
     // So do Node's own modules, which the build preset reads.
-    external: [...peers, ...peers.map((name) => `${name}/*`), "node:*"],
+    external: [...imported, ...imported.map((name) => `${name}/*`), "node:*"],
     logLevel: "warning",
     metafile: true,
   });
   failOnWarnings(result);
   written.push(...outputs(result.metafile, root).map((file) => relative(root, file)));
   written.push(...(await licenses(root, dir, licensedSources(result.metafile, root))));
+  written.push(...(await iconsEntry(root, dir)));
 
   // A package's Tailwind compiles the preset's stylesheet with the package's own,
   // so the file ships as it stands.
@@ -545,6 +559,45 @@ export async function types(root: string): Promise<string[]> {
   written.push(relative(root, manifest));
 
   return written.sort();
+}
+
+// The names under which lucide exports its icons, with their aliases, in order:
+// each name whose value is an icon's shape, a list of SVG elements.
+// So they leave out what lucide exports beside its icons:
+// `icons`, the object that holds all of them, and its functions, such as createIcons().
+// An alias names the same shape as the icon's own name, as TriangleAlert does TriangleExclamationPoint.
+// Lucide keeps the old name of an icon that it renames as an alias.
+export async function iconNames(): Promise<string[]> {
+  const lucide = (await import("lucide")) as Record<string, unknown>;
+  return Object.keys(lucide)
+    .filter((name) => Array.isArray(lucide[name]))
+    .sort();
+}
+
+// Writes the entry `@blockr/ui/icons` into `dir`, the directory of the types package,
+// and gives its files by their paths from `root`.
+// The entry is an ES module that re-exports each icon of lucide under the names that iconNames() gives,
+// and its declarations, which export the type IconNode as well, the shape of an icon.
+// The entry holds no icon itself.
+// A package's build bundles from lucide the icons that the package imports, through the preset (./preset.ts).
+// The entry names each icon on a line of its own,
+// so that the diff of a bump of lucide shows the icons that it adds, renames or drops.
+async function iconsEntry(root: string, dir: string): Promise<string[]> {
+  const header = `// Each icon of lucide ${packageVersion("lucide")}, as blockr.ui offers them as @blockr/ui/icons.\n`;
+  const icons = `export {\n${(await iconNames()).map((name) => `  ${name},\n`).join("")}} from "lucide";\n`;
+  const files = {
+    "index.js": header + icons,
+    "index.d.ts": `${header}${icons}export type { IconNode } from "lucide";\n`,
+  };
+
+  await mkdir(join(dir, "icons"), { recursive: true });
+  return Promise.all(
+    Object.entries(files).map(async ([name, text]) => {
+      const file = join(dir, "icons", name);
+      await writeFile(file, text);
+      return relative(root, file);
+    }),
+  );
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

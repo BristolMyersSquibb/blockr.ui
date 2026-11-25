@@ -4,8 +4,9 @@
 
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { Pin } from "lucide";
 import { expect, test, vi } from "vitest";
-import { importFile, REACT_ENTRIES } from "../import-map/index.ts";
+import { COMPONENTS, importFile, REACT_ENTRIES } from "../import-map/index.ts";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -72,5 +73,18 @@ test("React Aria's files draw on the React of React's file, and keep their state
   await vi.waitFor(() => {
     expect(button?.textContent).toBe("on");
   });
+  drawn.unmount();
+});
+
+test("The file of the components draws an icon on the React of React's file, as the markup of iconMarkup() has it", async () => {
+  const ui = await shipped<typeof import("../index.ts")>(importFile(COMPONENTS));
+  const drawn = draw(react.createElement(ui.Icon, { icon: Pin }));
+  const markup = document.createElement("div");
+  markup.innerHTML = ui.iconMarkup(Pin);
+
+  await vi.waitFor(() => {
+    expect(drawn.el.innerHTML).toBe(markup.innerHTML);
+  });
+  expect(drawn.el.querySelectorAll("svg > path")).toHaveLength(Pin.length);
   drawn.unmount();
 });

@@ -1,5 +1,25 @@
 # blockr.ui 0.2.0
 
+* The entry `@blockr/ui/icons` offers every icon of Lucide's package `lucide`
+  1.75.0, under the names that `lucide` exports, with their aliases and the
+  type `IconNode` (#113).
+  It leaves out `icons`, the object that holds all of them, and the functions
+  of `lucide`, such as `createIcons()`.
+  The component `Icon` of `@blockr/ui` draws an icon, 14 pixels wide unless
+  given a `size`, in the colour of the text around it.
+  It hides the icon from screen readers unless given a `label`.
+  The function `iconMarkup()` writes the same drawing as SVG markup, which is
+  what a board action's icon is.
+  The package `@blockr/ui` in `inst/types` names `lucide` as its dependency, so
+  npm installs `lucide` with it.
+
+* The build preset bundles the icons that a module imports from
+  `@blockr/ui/icons`, for which the page's import map names no entry (#113).
+  A package bundles them into its vendor file, since the vendor check fails a
+  build that puts them into one of the package's own files.
+  The preset fails a build that imports one of Lucide's packages itself, such
+  as `lucide` or `lucide-react`, with an error that names `@blockr/ui/icons`.
+
 * The vignette "Migration notes for app scripts" lists each change that an app
   script of blockr.ui 0.0.1 needs to run on version 0.2.0 (#117).
   It is written so that an AI can apply it to a script.

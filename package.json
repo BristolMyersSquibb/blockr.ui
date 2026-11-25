@@ -30,6 +30,7 @@
     "vitest": "^5.0.5"
   },
   "dependencies": {
+    "lucide": "1.75.0",
     "react": "19.3.1",
     "react-aria": "3.53.1",
     "react-aria-components": "1.22.1",
