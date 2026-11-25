@@ -20,6 +20,34 @@
   The package no longer imports blockr.core, dplyr, htmltools, pillar, rlang or
   shiny.
 
+* The package ships the one copy of React and of React Aria that a page runs,
+  which its client's build writes into `inst/js` from TypeScript in `srcts/`
+  (#108).
+  React's file holds React and ReactDOM, and an ES module beside it stands for
+  each of React's entry points, such as `react.js`.
+  React Aria's files hold the whole of `react-aria-components`, `react-aria`
+  and `react-stately`, each as an entry of its own, with the code that they
+  share in files of its own.
+  The file of the components, `blockr-ui.js`, holds the package's own code.
+  The build lists the entries of the page's import map in
+  `inst/js/import-map.json`, and what each file imports up front in
+  `inst/js/preload.json`.
+
+* The package ships the build preset `@blockr/ui/build`, with which a package
+  builds its modules against blockr.ui (#108).
+  It ships in `inst/types`, as the npm package `@blockr/ui`, where core's
+  `install_js_types()` finds it.
+  The preset leaves each import of React's entry points, of `@blockr/ui` and of
+  React Aria's three packages an import, which the page's import map resolves.
+  It fails a build that imports an entry point of React that the import map
+  does not name, a package under `@react-aria/` or `@react-stately/`, or an
+  entry point inside React Aria's packages, such as
+  `react-aria-components/Table`.
+  It fails a build whose React Aria packages are at other versions than
+  blockr.ui's files hold.
+  Beside the preset, `@blockr/ui/build` holds `staticImports()` and the vendor
+  check, as core's preset does.
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard

@@ -1,0 +1,23 @@
+{
+  "name": "@blockr/ui",
+  "private": true,
+  "description": "The components of blockr.ui's client, and the build preset with which a package builds its modules against them, as the R package blockr.ui ships them.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./build": {
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
+    }
+  },
+  "peerDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-aria-components": "1.22.1",
+    "react-aria": "3.53.1",
+    "react-stately": "3.51.0"
+  }
+}
