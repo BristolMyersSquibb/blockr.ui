@@ -10,6 +10,9 @@
 // as in `esbuild.build({ ...preset, plugins: [...preset.plugins, vendorCheck], ... })`.
 // The preset's plugins leave it out, since a package builds its vendor file with the preset as well,
 // and the check would fail that build.
+// The code of Lucide's package lucide reaches a build only through @blockr/ui/icons,
+// since the preset fails a build that imports one of Lucide's packages itself.
+// So the check names that entry for lucide's code, since the package imported the entry.
 // The file imports no npm package, as ./preset.ts does.
 
 import type { Metafile, Plugin } from "esbuild";
@@ -20,7 +23,10 @@ export const vendorCheck: Plugin = {
     build.initialOptions.metafile = true;
     build.onEnd((result) => ({
       errors: bundledPackages(result.metafile).map(({ name, file }) => ({
-        text: `The build put code of ${name}, from node_modules, into ${file}. Bundle ${name} into the package's vendor file instead, and import it from there.`,
+        text:
+          name === "lucide"
+            ? `The build put icons of @blockr/ui/icons into ${file}. Bundle the icons that the package imports into its vendor file instead, and import them from there.`
+            : `The build put code of ${name}, from node_modules, into ${file}. Bundle ${name} into the package's vendor file instead, and import it from there.`,
       })),
     }));
   },

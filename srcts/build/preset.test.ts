@@ -1,13 +1,15 @@
 // What a package's build makes of its module with the build preset that blockr.ui ships as `@blockr/ui/build`:
 // a module that holds none of React, of blockr.ui's components and of React Aria,
 // but imports them, as the page that R serves resolves them through its import map.
+// It holds the icons that it imports from `@blockr/ui/icons`, for which the import map names no entry.
 // Here the tests resolve those imports to React and React Aria in node_modules,
 // and to the source of the components, as vitest.config.ts sets out.
 
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import * as esbuild from "esbuild";
+import * as lucide from "lucide";
 import { act, createElement } from "react";
 import type { ReactElement } from "react";
 import { createRoot } from "react-dom/client";
@@ -151,6 +153,52 @@ test("refuses an entry of blockr.ui that the import map does not name", async ()
   await expect(bundle(`import * as stubs from "@blockr/ui/stubs";\n\nexport default stubs;\n`)).rejects.toThrow(
     `A module imports @blockr/ui/stubs, which the page's import map does not name. It names ${IMPORTS.join(", ")}.`,
   );
+});
+
+// Installs blockr.ui's types into the package's node_modules as `@blockr/ui`, as core's install_js_types() does.
+// The package's build resolves `@blockr/ui/icons` there,
+// and the lucide whose icons the entry re-exports in the repo's node_modules.
+async function installTypes(): Promise<void> {
+  await cp(join(repo, "inst", "types"), join(root, "node_modules", "@blockr", "ui"), { recursive: true });
+}
+
+// The modules of lucide whose code a bundle holds, which esbuild names in a comment above the code of each,
+// by their paths from the package.
+// Here lucide sits in the repo's node_modules, as ../../lucide from the package.
+function lucideModules(code: string): string[] {
+  return [...code.matchAll(/^\/\/ .*\blucide\/dist\/esm\/(.*)$/gm)].map((m) => m[1] ?? "").sort();
+}
+
+test("bundles the icons that a module imports from @blockr/ui/icons, for which the import map names no entry, and no others", async () => {
+  await installTypes();
+  const file = await bundle(`import { Pin, TriangleAlert } from "@blockr/ui/icons";\n\nexport const shapes = [Pin, TriangleAlert];\n`);
+  const code = await readFile(file, "utf8");
+
+  expect(IMPORTS).not.toContain("@blockr/ui/icons");
+  expect(importedPackages(code)).toEqual([]);
+  expect(lucideModules(code)).toEqual(["icons/pin.mjs", "icons/triangle-exclamation-point.mjs"]);
+  const { shapes } = (await import(pathToFileURL(file).href)) as { shapes: unknown[] };
+  expect(shapes).toEqual([lucide.Pin, lucide.TriangleAlert]);
+});
+
+// A package of Lucide's, a file inside one, and a package of icons beyond lucide's.
+// The preset refuses each before esbuild resolves it,
+// so lucide-react and @lucide/lab fail alike, though npm does not install them here.
+test.each(["lucide", "lucide-react", "lucide/dist/esm/icons/pin.mjs", "@lucide/lab"])(
+  "refuses an import of Lucide's packages, %s, naming @blockr/ui/icons instead",
+  async (name) => {
+    await expect(bundle(`import * as icons from "${name}";\n\nexport default icons;\n`)).rejects.toThrow(
+      `A module imports ${name}. Import Lucide's icons from @blockr/ui/icons instead, which offers each icon of the Lucide that blockr.ui pins, and draw them with Icon from @blockr/ui.`,
+    );
+  },
+);
+
+test("refuses a module's import of lucide beside its import of @blockr/ui/icons, whose own import of lucide passes", async () => {
+  await installTypes();
+
+  await expect(
+    bundle(`import { Pin } from "@blockr/ui/icons";\nimport { X } from "lucide";\n\nexport const shapes = [Pin, X];\n`),
+  ).rejects.toThrow("A module imports lucide. Import Lucide's icons from @blockr/ui/icons instead");
 });
 
 // The React Compiler's runtime as npm installs it,

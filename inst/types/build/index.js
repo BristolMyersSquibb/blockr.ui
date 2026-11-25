@@ -20,6 +20,9 @@ var COMPILER_RUNTIME_MODULE = `import { __COMPILER_RUNTIME } from "react";
 export const { c } = __COMPILER_RUNTIME;
 `;
 var BLOCKR_UI = /^@blockr\/ui(\/.*)?$/;
+var ICONS = "@blockr/ui/icons";
+var LUCIDE = /^(?:lucide(?:-[^/]+)?|@lucide\/[^/]+)(?:\/.*)?$/;
+var RESOLVING_ICONS = /* @__PURE__ */ Symbol("resolving @blockr/ui/icons");
 var REACT_ARIA_PACKAGE = /^(react-aria-components|react-aria|react-stately)$/;
 var INSIDE_REACT_ARIA = /^(?:(react-aria-components|react-aria|react-stately)|@(react-aria|react-stately))\//;
 function leaveNamed(path) {
@@ -58,8 +61,31 @@ function workingDir(build) {
 var imports = {
   name: "blockr.ui-imports",
   setup(build) {
+    const icons = /* @__PURE__ */ new Set();
     leaveReact(build);
-    build.onResolve({ filter: BLOCKR_UI }, (args) => leaveNamed(args.path));
+    build.onResolve({ filter: /^@blockr\/ui\/icons$/ }, async (args) => {
+      if (args.pluginData === RESOLVING_ICONS) return void 0;
+      const resolved = await build.resolve(args.path, {
+        kind: args.kind,
+        importer: args.importer,
+        resolveDir: args.resolveDir,
+        pluginData: RESOLVING_ICONS
+      });
+      if (resolved.errors.length > 0) return { errors: resolved.errors };
+      icons.add(resolved.path);
+      return { path: resolved.path, external: resolved.external, namespace: resolved.namespace, sideEffects: resolved.sideEffects };
+    });
+    build.onResolve({ filter: BLOCKR_UI }, (args) => args.path === ICONS ? void 0 : leaveNamed(args.path));
+    build.onResolve({ filter: LUCIDE }, (args) => {
+      if (icons.has(args.importer)) return void 0;
+      return {
+        errors: [
+          {
+            text: `A module imports ${args.path}. Import Lucide's icons from ${ICONS} instead, which offers each icon of the Lucide that blockr.ui pins, and draw them with Icon from @blockr/ui.`
+          }
+        ]
+      };
+    });
     build.onResolve({ filter: REACT_ARIA_PACKAGE }, (args) => {
       const name = args.path;
       const installed = installedVersion(name, args.resolveDir || workingDir(build));
@@ -119,7 +145,7 @@ var vendorCheck = {
     build.initialOptions.metafile = true;
     build.onEnd((result) => ({
       errors: bundledPackages(result.metafile).map(({ name, file }) => ({
-        text: `The build put code of ${name}, from node_modules, into ${file}. Bundle ${name} into the package's vendor file instead, and import it from there.`
+        text: name === "lucide" ? `The build put icons of @blockr/ui/icons into ${file}. Bundle the icons that the package imports into its vendor file instead, and import them from there.` : `The build put code of ${name}, from node_modules, into ${file}. Bundle ${name} into the package's vendor file instead, and import it from there.`
       }))
     }));
   }
