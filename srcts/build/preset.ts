@@ -6,6 +6,8 @@
 // The module leaves its imports of React's entry points, of blockr.ui's components and of React Aria's three packages imports,
 // which the page that R serves resolves through its import map (../import-map/index.ts).
 // So the module's bundle holds none of them.
+// The icons of @blockr/ui/icons are the exception, since the import map names no entry for them:
+// the preset bundles those that the module imports (ICONS).
 // A package's build adds its entry points and where they go,
 // as in `esbuild.build({ ...preset, entryPoints: ["srcts/head-block.tsx"], outdir: "inst/js" })`.
 // To the builds of its own files, it adds the vendor check of ./vendor-check.ts as well,
@@ -58,6 +60,24 @@ export const { c } = __COMPILER_RUNTIME;
 
 // The imports of blockr.ui's components, `@blockr/ui`, and of the other entries of blockr.ui.
 const BLOCKR_UI = /^@blockr\/ui(\/.*)?$/;
+
+// The entry of blockr.ui that offers Lucide's icons, from which the preset bundles the icons that a module imports
+// (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.3#the-icons).
+// The page's import map names no entry for it.
+// So the build of a package's file of libraries, its vendor file, holds the icons that the package draws, and no others.
+// The entry re-exports the icons of Lucide's package lucide, which npm installs with blockr.ui's types (./build.ts).
+const ICONS = "@blockr/ui/icons";
+
+// The imports of Lucide's packages, such as lucide, lucide-react and @lucide/lab, and of what lies inside one.
+// The preset fails a build that imports one, unless the import is the entry's, ICONS.
+// So every package draws the icons of the Lucide that blockr.ui pins,
+// and imports them through that one entry.
+// That keeps open serving each icon to a page once, however many packages import it
+// (https://github.com/BristolMyersSquibb/blockr/wiki/Backlog#each-icon-once-on-the-page).
+const LUCIDE = /^(?:lucide(?:-[^/]+)?|@lucide\/[^/]+)(?:\/.*)?$/;
+
+// Marks the call with which the preset has esbuild resolve ICONS.
+const RESOLVING_ICONS = Symbol("resolving @blockr/ui/icons");
 
 // The imports of React Aria's three packages, each by its name.
 const REACT_ARIA_PACKAGE = /^(react-aria-components|react-aria|react-stately)$/;
@@ -138,11 +158,43 @@ function workingDir(build: PluginBuild): string {
 // and node_modules holds that package at another version than VERSIONS names.
 // An import of what lies inside React Aria's packages fails the build too,
 // with an error that names the package to import instead (INSIDE_REACT_ARIA).
+// It bundles the icons that a module imports from ICONS,
+// and fails the build where a module imports one of Lucide's packages itself (LUCIDE).
 const imports: Plugin = {
   name: "blockr.ui-imports",
   setup(build) {
+    // The files that ICONS resolved to in this build, which alone may import Lucide's packages.
+    // Esbuild resolves what a file imports only after it has resolved the file,
+    // so the set holds the file by then.
+    const icons = new Set<string>();
+
     leaveReact(build);
-    build.onResolve({ filter: BLOCKR_UI }, (args) => leaveNamed(args.path));
+    // Resolves an import of ICONS as esbuild does, from node_modules, and keeps the file in `icons`.
+    // To learn the file, the handler calls build.resolve(), which runs the handlers again.
+    // In that call, marked by RESOLVING_ICONS, every handler leaves the import to esbuild.
+    build.onResolve({ filter: /^@blockr\/ui\/icons$/ }, async (args) => {
+      if (args.pluginData === RESOLVING_ICONS) return undefined;
+      const resolved = await build.resolve(args.path, {
+        kind: args.kind,
+        importer: args.importer,
+        resolveDir: args.resolveDir,
+        pluginData: RESOLVING_ICONS,
+      });
+      if (resolved.errors.length > 0) return { errors: resolved.errors };
+      icons.add(resolved.path);
+      return { path: resolved.path, external: resolved.external, namespace: resolved.namespace, sideEffects: resolved.sideEffects };
+    });
+    build.onResolve({ filter: BLOCKR_UI }, (args) => (args.path === ICONS ? undefined : leaveNamed(args.path)));
+    build.onResolve({ filter: LUCIDE }, (args) => {
+      if (icons.has(args.importer)) return undefined;
+      return {
+        errors: [
+          {
+            text: `A module imports ${args.path}. Import Lucide's icons from ${ICONS} instead, which offers each icon of the Lucide that blockr.ui pins, and draw them with Icon from @blockr/ui.`,
+          },
+        ],
+      };
+    });
     build.onResolve({ filter: REACT_ARIA_PACKAGE }, (args) => {
       const name = args.path as ReactAria;
       const installed = installedVersion(name, args.resolveDir || workingDir(build));
