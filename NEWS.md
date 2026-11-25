@@ -103,6 +103,31 @@
   shadows that the theme variables lack, so that a class of such a step, such
   as `bc:shadow-2xl`, writes nothing.
 
+* The package declares the list of theme variables,
+  which is what its stylesheet provides every other package (#110).
+  The list holds the names of the theme variables, such as
+  `--bk-color-primary`, the font Open Sans and the mode attribute,
+  `data-bk-mode`.
+  The build preset `@blockr/ui/build` exports it as `themeVariables`,
+  and the build writes it into `inst/js/theme-variables.json`.
+  The new R function `theme_variables()` reads that file
+  and returns the names of the theme variables.
+  Adding to the list takes a minor release of blockr.ui,
+  and removing or renaming takes a major.
+  The package now imports jsonlite.
+
+* The build preset holds `themeCheck()`, which a package's build runs on the
+  stylesheets that it writes and on its code (#110).
+  It fails a build whose stylesheet reads a variable under `--bk-` that the
+  list of theme variables lacks,
+  or whose stylesheet another version of Tailwind CSS than 4.3.3 wrote.
+  It fails a build whose code names a colour of Tailwind's palette,
+  or a step of the faces, the sizes of text, the radii or the shadows that the
+  theme variables lack, under any prefix, since such a class writes nothing.
+  It fails another package's build whose code names a class under `bk:`.
+  The build of blockr.ui runs it on its own stylesheet,
+  and on the files that Tailwind scans for it.
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
