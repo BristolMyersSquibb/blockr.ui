@@ -1,0 +1,12 @@
+{
+  "imports": {
+    "react": "react.js",
+    "react/jsx-runtime": "react-jsx-runtime.js",
+    "react-dom": "react-dom.js",
+    "react-dom/client": "react-dom-client.js",
+    "@blockr/ui": "blockr-ui.js",
+    "react-aria-components": "react-aria-components.js",
+    "react-aria": "react-aria.js",
+    "react-stately": "react-stately.js"
+  }
+}

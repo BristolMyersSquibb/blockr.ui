@@ -1,0 +1,6 @@
+# These files are what `npm run build` writes from srcts/.
+# GitHub collapses a file marked as generated in the diff of a pull request.
+# It also leaves such a file out of the repository's languages.
+# The sources in srcts/ are what to review.
+inst/js/** linguist-generated=true
+inst/types/** linguist-generated=true
