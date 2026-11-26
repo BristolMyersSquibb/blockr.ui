@@ -1,5 +1,15 @@
 # blockr.ui 0.2.0
 
+* The vignette "The design system" describes the new kit for the authors of
+  the UIs of blockr's packages and of frontends, in place of the design
+  system's article that went with the widgets (#116).
+  It covers the theme variables, with the job of each and its defaults in both
+  modes, the components with their icons and `bound`, how a package builds
+  against blockr.ui through the build preset, and how an app gives the page a
+  theme of its own with `new_blockr_theme()`.
+  Its table of the defaults reads them from the package's stylesheet, so that
+  the two never disagree.
+
 * The components of core's React SDK move to `@blockr/ui` with their names and
   their props, so that a UI that draws with one changes only its import, from
   `@blockr/core/react` to `@blockr/ui` (#114).
