@@ -1900,10 +1900,14 @@ var ENDS = "bk:flex bk:min-w-0 bk:flex-1 bk:items-center bk:overflow-x-auto bk:[
 var POPOVER2 = "bk:p-3";
 
 // srcts/inputs/dropzone.tsx
-import { composeRenderProps as composeRenderProps18, DropZone as AriaDropZone } from "react-aria-components";
+import { composeRenderProps as composeRenderProps18, DropZone as AriaDropZone, TextContext, useSlottedContext } from "react-aria-components";
 import { jsx as jsx20 } from "react/jsx-runtime";
-function DropZone({ className, ...props }) {
-  return /* @__PURE__ */ jsx20(AriaDropZone, { ...props, className: composeRenderProps18(className, (given) => `${ZONE} ${given ?? ""}`) });
+function DropZone({ className, children, ...props }) {
+  return /* @__PURE__ */ jsx20(AriaDropZone, { ...props, className: composeRenderProps18(className, (given) => `${ZONE} ${given ?? ""}`), children: composeRenderProps18(children, (drawn) => /* @__PURE__ */ jsx20(Labelled, { children: drawn })) });
+}
+function Labelled({ children }) {
+  const label = useSlottedContext(TextContext, "label");
+  return /* @__PURE__ */ jsx20(TextContext, { value: { ...label, className: styles.label }, children });
 }
 var ZONE = "bk:box-border bk:flex bk:min-h-20 bk:flex-col bk:items-center bk:justify-center bk:gap-2 bk:rounded-lg bk:border bk:border-dashed bk:border-input bk:p-4 bk:text-center bk:font-sans bk:text-sm bk:outline-none bk:data-focus-visible:outline-2 bk:data-focus-visible:outline-offset-1 bk:data-focus-visible:outline-ring bk:data-drop-target:border-solid bk:data-drop-target:border-primary bk:data-drop-target:bg-accent bk:data-drop-target:text-accent-foreground bk:data-disabled:opacity-50";
 

@@ -249,6 +249,27 @@ describe("the drop zone", () => {
 
     expect(dropped).toEqual(["sales.csv"]);
   });
+
+  test("draws its label as a field's label, beside the classes given to it", async () => {
+    const { el } = await draw(
+      <>
+        <DropZone className="plain">
+          <Text slot="label">Drop a file</Text>
+        </DropZone>
+        <DropZone className="given">
+          {() => (
+            <Text slot="label" className="bk:sr-only">
+              Drop a file
+            </Text>
+          )}
+        </DropZone>
+        <Label>Name</Label>
+      </>,
+    );
+    const label = classes(el, "label");
+
+    expect([classes(el, '.plain [slot="label"]'), classes(el, '.given [slot="label"]')]).toEqual([label, [...label, "bk:sr-only"]]);
+  });
 });
 
 describe("the file trigger", () => {

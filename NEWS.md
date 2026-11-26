@@ -22,6 +22,8 @@
   Each draws in the class with which blockr.ui's inputs draw that part.
   Outside a field, a `Label` names what points at it through
   `aria-labelledby`, such as a group of controls.
+  A `DropZone` draws the `Text` in its slot "label", which names the zone, as a
+  field's label.
 
 * An input takes the value that it shows and submits through its prop `bound`,
   of the interface `Bound`, which `@blockr/ui` exports with the type `Json`

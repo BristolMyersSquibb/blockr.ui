@@ -6,18 +6,33 @@
 // user drops on it, such as a file, and holds what it shows, such as a
 // FileTrigger with a Button that picks a file the browser's way, and a Text
 // in the slot "label", which names the zone.
+// It draws that Text in the class of a field's label, as blockr.ui's Label
+// draws it.
 // It marks itself while the user drags something over it that it takes.
 // A drop zone takes no `bound`: its caller sends a file on itself, as a
 // block's UI sends one to R through the request of its block class that
 // receives it
 // (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.1.7#the-contract).
 
-import type { ReactElement } from "react";
-import { composeRenderProps, DropZone as AriaDropZone } from "react-aria-components";
+import type { ReactElement, ReactNode } from "react";
+import { composeRenderProps, DropZone as AriaDropZone, TextContext, useSlottedContext } from "react-aria-components";
 import type { DropZoneProps } from "react-aria-components";
+import { styles } from "../styles/index.ts";
 
-export function DropZone({ className, ...props }: DropZoneProps): ReactElement {
-  return <AriaDropZone {...props} className={composeRenderProps(className, (given) => `${ZONE} ${given ?? ""}`)} />;
+export function DropZone({ className, children, ...props }: DropZoneProps): ReactElement {
+  return (
+    <AriaDropZone {...props} className={composeRenderProps(className, (given) => `${ZONE} ${given ?? ""}`)}>
+      {composeRenderProps(children, (drawn) => <Labelled>{drawn}</Labelled>)}
+    </AriaDropZone>
+  );
+}
+
+// React Aria's DropZone gives the Text in its slot "label" an id through
+// React Aria's TextContext, and names the zone by that id.
+// Here the zone passes that context on with the class of a label added.
+function Labelled({ children }: { readonly children: ReactNode }): ReactElement {
+  const label = useSlottedContext(TextContext, "label");
+  return <TextContext value={{ ...label, className: styles.label }}>{children}</TextContext>;
 }
 
 // The zone is a box with a dashed border, the outline of a field, which takes
