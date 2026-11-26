@@ -21,8 +21,9 @@
 // calendar, each of a date, a time or a range in the forms that R reads
 // (./dates.ts).
 // The other parts take no `bound`: the tags, the list box, the field of
-// tokens, the form and the layout of its controls, the field, the drop zone,
-// a colour's swatch and the thumb of a part of a picker, and the buttons,
+// tokens, the form and the layout of its controls, the field, the label, the
+// description and the error of a field, the drop zone, a colour's swatch and
+// the thumb of a part of a picker, and the buttons,
 // React Aria's Button, which blockr.ui's menus and dialogs open from, and the
 // button inside a field.
 // React Aria's FileTrigger, which picks a file the browser's way from the
@@ -52,7 +53,7 @@ export { DatePicker, DateRangePicker } from "./datepicker.tsx";
 export type { DatePickerProps, DateRangePickerProps } from "./datepicker.tsx";
 export { DropZone } from "./dropzone.tsx";
 export { Form } from "./form.tsx";
-export { Field, FormLayout } from "./inputs.tsx";
+export { Description, Field, FieldError, FormLayout, Label } from "./inputs.tsx";
 export { ListBox, ListBoxItem } from "./listbox.tsx";
 export { NumberField } from "./numberfield.tsx";
 export type { NumberFieldProps } from "./numberfield.tsx";

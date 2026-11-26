@@ -16,6 +16,13 @@
   The parts of React Aria that core's React SDK passed on as they are, such as
   `Autocomplete`, `Text` and `Focusable`, stay so.
 
+* The package exports `Label`, `Description` and `FieldError`, the parts that
+  draw the label, the description and the error of a field, after React Aria's
+  Tailwind starter kit (#128).
+  Each draws in the class with which blockr.ui's inputs draw that part.
+  Outside a field, a `Label` names what points at it through
+  `aria-labelledby`, such as a group of controls.
+
 * An input takes the value that it shows and submits through its prop `bound`,
   of the interface `Bound`, which `@blockr/ui` exports with the type `Json`
   (#114).

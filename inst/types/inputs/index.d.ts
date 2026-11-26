@@ -20,7 +20,7 @@ export { DatePicker, DateRangePicker } from "./datepicker.tsx";
 export type { DatePickerProps, DateRangePickerProps } from "./datepicker.tsx";
 export { DropZone } from "./dropzone.tsx";
 export { Form } from "./form.tsx";
-export { Field, FormLayout } from "./inputs.tsx";
+export { Description, Field, FieldError, FormLayout, Label } from "./inputs.tsx";
 export { ListBox, ListBoxItem } from "./listbox.tsx";
 export { NumberField } from "./numberfield.tsx";
 export type { NumberFieldProps } from "./numberfield.tsx";

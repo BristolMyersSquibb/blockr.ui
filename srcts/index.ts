@@ -12,6 +12,8 @@
 // Beside them are the parts of React Aria that core's React SDK exported as they are,
 // such as `Autocomplete`, `Text` and `Focusable`, and `Icon` and `iconMarkup()`,
 // which draw an icon of Lucide's from @blockr/ui/icons.
+// Later, blockr.ui added `Label`, `Description` and `FieldError`, the parts that draw the label,
+// the description and the error of a field, after the starter kit.
 
 export { Icon, iconMarkup } from "./icon/index.ts";
 export {
@@ -35,12 +37,15 @@ export {
   DateField,
   DatePicker,
   DateRangePicker,
+  Description,
   DropZone,
   Field,
   FieldButton,
+  FieldError,
   FileTrigger,
   Form,
   FormLayout,
+  Label,
   ListBox,
   ListBoxItem,
   NumberField,
