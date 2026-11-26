@@ -13,8 +13,9 @@
 // Label, the Description and the FieldError of React Aria's Tailwind starter
 // kit
 // (https://github.com/adobe/react-spectrum/blob/react-aria-components%401.22.1/starters/tailwind/src/Field.tsx).
-// Each takes the props of its part of React Aria, and draws in the class with
-// which blockr.ui's inputs draw that part.
+// Each takes the props of its part of React Aria.
+// The inputs of blockr.ui draw their labels, descriptions and errors with
+// them, as the fields of the starter kit do.
 // Each input sits in a file of its own beside this one.
 // React Aria gives their parts ids, which React makes anew for each mount.
 

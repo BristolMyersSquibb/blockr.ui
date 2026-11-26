@@ -30,9 +30,6 @@ import {
   DateField as AriaDateField,
   DateInput as AriaDateInput,
   DateSegment,
-  FieldError,
-  Label,
-  Text,
   TimeField as AriaTimeField,
 } from "react-aria-components";
 import type {
@@ -46,7 +43,7 @@ import type { Bound } from "./bound.ts";
 import { styles } from "../styles/index.ts";
 import { useBoundDate } from "./bounddate.ts";
 import { dateFits, readDate, readTime, takesTime, timeFits, writeDate, writeTime } from "./dates.ts";
-import { NotAvailable, Refusal } from "./inputs.tsx";
+import { Description, FieldError, Label, NotAvailable, Refusal } from "./inputs.tsx";
 
 export interface DateFieldProps<T extends DateValue> extends AriaDateFieldProps<T> {
   // What the starter kit adds.
@@ -219,16 +216,14 @@ function FieldParts({
 }: Pick<DrawnDateProps<DateValue>, "label" | "description" | "errorMessage" | "missing" | "onKey">): ReactElement {
   return (
     <>
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <Segments onKey={onKey}>
         <DateInput className={BOX} />
       </Segments>
       {/* React Aria names the description of the field only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
       {missing === null || missing === undefined ? null : <NotAvailable values={[missing]} />}
     </>
   );

@@ -24,11 +24,11 @@
 // closes on Escape needs.
 
 import type { ReactElement } from "react";
-import { composeRenderProps, FieldError, Input, Label, Text, TextArea, TextField as AriaTextField } from "react-aria-components";
+import { composeRenderProps, Input, TextArea, TextField as AriaTextField } from "react-aria-components";
 import type { TextFieldProps as AriaTextFieldProps, ValidationResult } from "react-aria-components";
 import type { Bound } from "./bound.ts";
 import { styles } from "../styles/index.ts";
-import { Refusal, useTyped } from "./inputs.tsx";
+import { Description, FieldError, Label, Refusal, useTyped } from "./inputs.tsx";
 
 export interface TextFieldProps extends AriaTextFieldProps {
   // What the starter kit adds.
@@ -82,7 +82,7 @@ function BoundText({ bound, onChange, onKeyDown, onBlur, ...props }: DrawnProps 
 function Drawn({ label, description, errorMessage, placeholder, lines = 1, className, ...props }: DrawnProps): ReactElement {
   return (
     <AriaTextField {...props} className={composeRenderProps(className, (given) => `${styles.field} ${given ?? ""}`)}>
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       {lines > 1 ? (
         <TextArea rows={lines} placeholder={placeholder} className={styles.box} />
       ) : (
@@ -90,10 +90,8 @@ function Drawn({ label, description, errorMessage, placeholder, lines = 1, class
       )}
       {/* React Aria names the description of the field only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
     </AriaTextField>
   );
 }

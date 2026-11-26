@@ -36,7 +36,6 @@ import { useContext, useLayoutEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import {
   composeRenderProps,
-  Label,
   Slider as AriaSlider,
   SliderFill,
   SliderOutput,
@@ -47,10 +46,9 @@ import {
 } from "react-aria-components";
 import type { SliderProps as AriaSliderProps } from "react-aria-components";
 import type { Bound } from "./bound.ts";
-import { styles } from "../styles/index.ts";
 import type { Json } from "./bound.ts";
 import { jsonEqual } from "./json.ts";
-import { NotAvailable, Refusal } from "./inputs.tsx";
+import { Label, NotAvailable, Refusal } from "./inputs.tsx";
 import { inRange } from "./numberfield.tsx";
 
 type Value = number | number[];
@@ -186,7 +184,7 @@ function Drawn({ label, thumbLabels, fillOffset, said, invalid = false, watch, c
       data-invalid={invalid || undefined}
       className={composeRenderProps(className, (given) => `bk:group ${SLIDER} ${given ?? ""}`)}
     >
-      {label === undefined ? <span /> : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? <span /> : <Label>{label}</Label>}
       <SliderOutput className={OUTPUT}>
         {({ state }) => (said === undefined ? state.getFormattedValue() : said((value) => state.getFormattedValue(value)))}
       </SliderOutput>

@@ -25,12 +25,12 @@
 
 import { useContext, useState } from "react";
 import type { InputEventHandler, ReactElement } from "react";
-import { ColorField as AriaColorField, composeRenderProps, FieldError, Input, Label, parseColor, Text } from "react-aria-components";
+import { ColorField as AriaColorField, composeRenderProps, Input, parseColor } from "react-aria-components";
 import type { ColorFieldProps as AriaColorFieldProps, ValidationResult } from "react-aria-components";
 import type { Bound } from "./bound.ts";
 import { styles } from "../styles/index.ts";
 import { Ended, hex, valueColor } from "./colors.ts";
-import { Refusal } from "./inputs.tsx";
+import { Description, FieldError, Label, Refusal } from "./inputs.tsx";
 
 export interface ColorFieldProps extends AriaColorFieldProps {
   // What the starter kit adds.
@@ -94,14 +94,12 @@ function Drawn({ label, description, errorMessage, className, onChange, onInput,
       }}
       className={composeRenderProps(className, (given) => `${styles.field} ${given ?? ""}`)}
     >
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <Input onInput={onInput} className={styles.box} />
       {/* React Aria names the description of the field only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
     </AriaColorField>
   );
 }

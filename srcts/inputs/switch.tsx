@@ -12,11 +12,10 @@
 // was refused, where it was.
 
 import type { ReactElement, ReactNode } from "react";
-import { composeRenderProps, FieldError, SwitchButton, SwitchField, Text } from "react-aria-components";
+import { composeRenderProps, SwitchButton, SwitchField } from "react-aria-components";
 import type { SwitchFieldProps, ValidationResult } from "react-aria-components";
 import type { Bound } from "./bound.ts";
-import { styles } from "../styles/index.ts";
-import { Refusal } from "./inputs.tsx";
+import { Description, FieldError, Refusal } from "./inputs.tsx";
 
 export interface SwitchProps extends Omit<SwitchFieldProps, "children"> {
   // Its label.
@@ -58,10 +57,8 @@ function Drawn({ children, description, errorMessage, className, ...props }: Omi
       </SwitchButton>
       {/* React Aria names the description of the switch only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
     </SwitchField>
   );
 }

@@ -44,13 +44,13 @@
 
 import { useState } from "react";
 import type { ReactElement } from "react";
-import { Button, composeRenderProps, FieldError, Group, Input, Label, NumberField as AriaNumberField, Text } from "react-aria-components";
+import { Button, composeRenderProps, Group, Input, NumberField as AriaNumberField } from "react-aria-components";
 import type { NumberFieldProps as AriaNumberFieldProps, ValidationResult } from "react-aria-components";
 import { Icon } from "../icon/index.ts";
 import { styles } from "../styles/index.ts";
 import { ChevronDown, ChevronUp } from "../vendor/index.ts";
 import type { Bound } from "./bound.ts";
-import { Refusal } from "./inputs.tsx";
+import { Description, FieldError, Label, Refusal } from "./inputs.tsx";
 
 export interface NumberFieldProps extends AriaNumberFieldProps {
   // What the starter kit adds.
@@ -162,7 +162,7 @@ export function inRange(value: number, min: number | undefined, max: number | un
 function Drawn({ label, description, errorMessage, placeholder, className, onInput, ...props }: DrawnProps): ReactElement {
   return (
     <AriaNumberField {...props} className={composeRenderProps(className, (given) => `bk:group ${styles.field} ${given ?? ""}`)}>
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <Group className={FIELD}>
         <Input placeholder={placeholder} onInput={onInput} className={INPUT} />
         <div className={STEPPERS}>
@@ -176,10 +176,8 @@ function Drawn({ label, description, errorMessage, placeholder, className, onInp
       </Group>
       {/* React Aria names the description of the field only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
     </AriaNumberField>
   );
 }
