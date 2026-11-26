@@ -141,3 +141,41 @@ test_that("a face takes the weight and the style of a face in CSS", {
     )
   )
 })
+
+test_that("unset_variables() gives what a theme sets no value for, by mode", {
+  vars <- theme_variables()
+
+  expect_identical(
+    unset_variables(new_blockr_theme()),
+    list(light = vars, dark = vars)
+  )
+
+  theme <- new_blockr_theme(
+    light = list(
+      "--bk-spacing" = "0.25rem",
+      "--bk-color-primary" = "#be2bbb"
+    ),
+    dark = list("--bk-color-primary" = "#d66bd3")
+  )
+  unset <- unset_variables(theme)
+
+  expect_named(unset, c("light", "dark"))
+
+  # The names keep the order of `theme_variables()`, whatever the order in
+  # which the theme gives its values.
+  light <- c("--bk-color-primary", "--bk-spacing")
+  expect_identical(unset$light, vars[!vars %in% light])
+
+  # A value that a theme gives for light mode alone stays unset in dark mode.
+  expect_identical(unset$dark, vars[vars != "--bk-color-primary"])
+  expect_true("--bk-spacing" %in% unset$dark)
+})
+
+test_that("unset_variables() refuses what is not a theme", {
+  expect_error(
+    unset_variables(list(light = list(), dark = list())),
+    "`theme` is expected to be a theme",
+    fixed = TRUE,
+    class = "blockr_theme_invalid"
+  )
+})

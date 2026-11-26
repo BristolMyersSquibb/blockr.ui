@@ -142,6 +142,17 @@
   so that the app's values win over the frontend's and over blockr.ui's
   defaults.
 
+* A frontend gives its values as a theme too, which `new_blockr_theme()` makes,
+  and which the generic `frontend_theme()` of blockr.core returns (#111).
+  Core writes the frontend's theme into the page's head before the app's
+  theme, so that the app's values win by coming later.
+  The new R function `unset_variables()` takes a theme and gives, for light
+  mode and for dark mode, the theme variables that the theme sets no value
+  for.
+  For a frontend's theme, those are the defaults of blockr.ui that the
+  frontend keeps, which the frontend's tests list.
+  So a theme variable that a later blockr.ui adds fails those tests.
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
