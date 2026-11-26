@@ -87,11 +87,9 @@ import {
   ComboBox as AriaComboBox,
   ComboBoxStateContext,
   composeRenderProps,
-  FieldError,
   Group,
   Header,
   Input,
-  Label,
   ListBox,
   ListBoxItem,
   ListBoxSection,
@@ -100,7 +98,6 @@ import {
   Tag,
   TagGroup,
   TagList,
-  Text,
   TooltipTriggerStateContext,
   Virtualizer,
 } from "react-aria-components";
@@ -112,7 +109,7 @@ import type {
   ValidationResult,
 } from "react-aria-components";
 import { FieldButton } from "./button.tsx";
-import { NotAvailable, Refusal } from "./inputs.tsx";
+import { Description, FieldError, Label, NotAvailable, Refusal } from "./inputs.tsx";
 import { inOrder, merged } from "./items.ts";
 
 type Mode = "single" | "multiple";
@@ -280,7 +277,7 @@ function Drawn({
       allowsEmptyCollection={allowsEmptyCollection}
       className={composeRenderProps(className, (given) => `bk:group ${styles.field} ${given ?? ""}`)}
     >
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <Field
         placeholder={placeholder}
         multiple={multiple}
@@ -293,10 +290,8 @@ function Drawn({
       />
       {/* React Aria names the description of the field only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
       <Lacking multiple={multiple} marking={marking} />
       <Popover offset={4} className={LIST} style={{ zIndex: OVERLAY_Z_INDEX }}>
         <Rows empty={empty}>{children}</Rows>

@@ -21,14 +21,14 @@
 // `bound`.
 
 import type { ReactElement } from "react";
-import { composeRenderProps, FieldError, Group, Input, Label, SearchField as AriaSearchField, Text } from "react-aria-components";
+import { composeRenderProps, Group, Input, SearchField as AriaSearchField } from "react-aria-components";
 import type { SearchFieldProps as AriaSearchFieldProps, ValidationResult } from "react-aria-components";
 import type { Bound } from "./bound.ts";
 import { styles } from "../styles/index.ts";
 import { FieldButton } from "./button.tsx";
 import { Icon } from "../icon/index.ts";
 import { Search, X } from "../vendor/index.ts";
-import { Refusal, useTyped } from "./inputs.tsx";
+import { Description, FieldError, Label, Refusal, useTyped } from "./inputs.tsx";
 
 export interface SearchFieldProps extends AriaSearchFieldProps {
   // What the starter kit adds.
@@ -82,7 +82,7 @@ function BoundSearch({ bound, onChange, onKeyDown, onBlur, onClear, ...props }: 
 function Drawn({ label, description, errorMessage, placeholder, className, ...props }: DrawnProps): ReactElement {
   return (
     <AriaSearchField {...props} className={composeRenderProps(className, (given) => `bk:group ${styles.field} ${given ?? ""}`)}>
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <Group className={FIELD}>
         <span className="bk:flex bk:shrink-0 bk:text-muted-foreground">
           <Icon icon={Search} />
@@ -94,10 +94,8 @@ function Drawn({ label, description, errorMessage, placeholder, className, ...pr
       </Group>
       {/* React Aria names the description of the field only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
     </AriaSearchField>
   );
 }

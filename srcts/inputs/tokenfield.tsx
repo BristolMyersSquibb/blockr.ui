@@ -12,9 +12,10 @@
 // and the tokens it holds, which a caller turns into what it submits itself.
 
 import type { ReactElement, Ref } from "react";
-import { composeRenderProps, Label, Text, Token as AriaToken, TokenField as AriaTokenField, TokenInput } from "react-aria-components";
+import { composeRenderProps, Token as AriaToken, TokenField as AriaTokenField, TokenInput } from "react-aria-components";
 import type { TokenFieldProps as AriaTokenFieldProps, TokenFieldValue, TokenInputProps, TokenProps } from "react-aria-components";
 import { styles } from "../styles/index.ts";
+import { Description, Label } from "./inputs.tsx";
 
 export interface TokenFieldProps<T extends TokenFieldValue = TokenFieldValue> extends Omit<AriaTokenFieldProps<T>, "children"> {
   // What the starter kit adds.
@@ -34,15 +35,11 @@ export function TokenField<T extends TokenFieldValue = TokenFieldValue>({
 }: TokenFieldProps<T>): ReactElement {
   return (
     <AriaTokenField {...props} className={composeRenderProps(className, (given) => `${styles.field} ${given ?? ""}`)}>
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <TokenInput ref={inputRef} className={INPUT}>
         {children}
       </TokenInput>
-      {description === undefined ? null : (
-        <Text slot="description" className={styles.hint}>
-          {description}
-        </Text>
-      )}
+      {description === undefined ? null : <Description>{description}</Description>}
     </AriaTokenField>
   );
 }

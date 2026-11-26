@@ -14,11 +14,12 @@
 
 import { createContext, useContext } from "react";
 import type { ReactElement, ReactNode } from "react";
-import { Button, composeRenderProps, Label, Tag as AriaTag, TagGroup as AriaTagGroup, TagList, Text } from "react-aria-components";
+import { Button, composeRenderProps, Tag as AriaTag, TagGroup as AriaTagGroup, TagList, Text } from "react-aria-components";
 import type { TagGroupProps as AriaTagGroupProps, TagListProps, TagProps as AriaTagProps } from "react-aria-components";
 import { styles } from "../styles/index.ts";
 import { Icon } from "../icon/index.ts";
 import { X } from "../vendor/index.ts";
+import { Description, Label } from "./inputs.tsx";
 
 // The colours of a tag: a quiet fill with the edge of an outline, "gray", or
 // with an edge in the brand colour, "accent".
@@ -52,17 +53,13 @@ export function TagGroup<T extends object>({
 }: TagGroupProps<T>): ReactElement {
   return (
     <AriaTagGroup {...props} className={`${styles.field} ${className ?? ""}`}>
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <ColorContext.Provider value={color}>
         <TagList items={items} renderEmptyState={renderEmptyState} className="bk:flex bk:min-w-0 bk:flex-wrap bk:gap-1">
           {children}
         </TagList>
       </ColorContext.Provider>
-      {description === undefined ? null : (
-        <Text slot="description" className={styles.hint}>
-          {description}
-        </Text>
-      )}
+      {description === undefined ? null : <Description>{description}</Description>}
       {errorMessage === undefined ? null : (
         <Text slot="errorMessage" className={styles.alert}>
           {errorMessage}

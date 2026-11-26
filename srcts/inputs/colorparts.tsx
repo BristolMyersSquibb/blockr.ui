@@ -36,7 +36,6 @@ import {
   ColorWheel as AriaColorWheel,
   ColorWheelTrack,
   composeRenderProps,
-  Label,
   SliderOutput,
   SliderTrack,
 } from "react-aria-components";
@@ -47,10 +46,9 @@ import type {
   ColorThumbProps,
   ColorWheelProps as AriaColorWheelProps,
 } from "react-aria-components";
-import { styles } from "../styles/index.ts";
 import type { Bound } from "./bound.ts";
 import { Ended, useDragged } from "./colors.ts";
-import { Refusal } from "./inputs.tsx";
+import { Label, Refusal } from "./inputs.tsx";
 
 export function ColorThumb({ className, style, ...props }: ColorThumbProps): ReactElement {
   return (
@@ -168,7 +166,7 @@ function Slider({ label, className, onChangeEnd, ...props }: Omit<ColorSliderPro
       onChangeEnd={useEnd(onChangeEnd)}
       className={composeRenderProps(className, (given) => `${SLIDER} ${given ?? ""}`)}
     >
-      <Label className={styles.label}>{label}</Label>
+      <Label>{label}</Label>
       <SliderOutput className={OUTPUT} />
       <SliderTrack
         className={({ orientation, isDisabled }) =>

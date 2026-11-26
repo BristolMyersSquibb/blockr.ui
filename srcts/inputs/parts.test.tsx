@@ -1,15 +1,34 @@
 // The parts of blockr.ui that take no binding, React Aria's drawn with the theme
 // variables: the tags, the list box in place, which an Autocomplete narrows with a
-// search field, the form, the drop zone and React Aria's FileTrigger, which a
-// caller composes with a button.
+// search field, the form, the label, the description and the error of a field,
+// the drop zone and React Aria's FileTrigger, which a caller composes with a button.
 // The rest, such as the keys and the focus, is React Aria's.
 
 import { useState } from "react";
 import type { ReactElement } from "react";
 import { createRoot } from "react-dom/client";
+import { Group, Input, TextField as AriaTextField } from "react-aria-components";
 import { describe, expect, test } from "vitest";
 import { drop, find, labelled, picking, step, texts, type } from "../stubs/index.ts";
-import { Autocomplete, Button, DropZone, FileTrigger, Form, ListBox, ListBoxItem, SearchField, Tag, TagGroup, Text, TextField, useFilter } from "./index.ts";
+import {
+  Autocomplete,
+  Button,
+  Checkbox,
+  Description,
+  DropZone,
+  FieldError,
+  FileTrigger,
+  Form,
+  Label,
+  ListBox,
+  ListBoxItem,
+  SearchField,
+  Tag,
+  TagGroup,
+  Text,
+  TextField,
+  useFilter,
+} from "./index.ts";
 
 // Draws the component on the page, and unmounts it.
 async function draw(node: ReactElement): Promise<{ el: HTMLElement; unmount: () => Promise<void> }> {
@@ -33,6 +52,11 @@ const fruits = [
   { id: "banana", name: "Banana" },
   { id: "cherry", name: "Cherry" },
 ];
+
+// The classes of the element that the selector finds in `el`.
+function classes(el: ParentNode, selector: string): string[] {
+  return [...find(el, selector).classList];
+}
 
 // The labels of the rows of a list box, by the role that React Aria gives a
 // row of a list box, and of those it shows as picked.
@@ -158,6 +182,49 @@ describe("the form", () => {
   });
 });
 
+describe("the parts of a field", () => {
+  test("draw the label, the description and the error of a field that a caller composes, in the classes of those of blockr.ui's inputs", async () => {
+    const { el } = await draw(
+      <>
+        <AriaTextField isInvalid className="composed">
+          <Label>Name</Label>
+          <Input />
+          <Description>Names the block on the board.</Description>
+          <FieldError>The board holds a block of that name.</FieldError>
+        </AriaTextField>
+        <TextField label="Title" description="Heads the block." errorMessage="The title is too long." isInvalid className="drawn" />
+      </>,
+    );
+    const [composed, drawn] = [find(el, ".composed"), find(el, ".drawn")];
+    const input = labelled(el, "Name");
+    const describedBy = (input.getAttribute("aria-describedby") ?? "").split(" ");
+
+    expect(describedBy.map((id) => el.ownerDocument.getElementById(id)?.textContent)).toEqual([
+      "Names the block on the board.",
+      "The board holds a block of that name.",
+    ]);
+    for (const part of ["label", '[slot="description"]', '[slot="errorMessage"]']) {
+      expect(classes(composed, part)).toEqual(classes(drawn, part));
+    }
+  });
+
+  test("name a group of controls by a label outside a field", async () => {
+    const { el } = await draw(
+      <>
+        <Group aria-labelledby="colour">
+          <Label id="colour">Colour</Label>
+          <Checkbox>Set</Checkbox>
+        </Group>
+        <TextField label="Title" className="drawn" />
+      </>,
+    );
+    const group = find(el, '[role="group"]');
+
+    expect(el.ownerDocument.getElementById(group.getAttribute("aria-labelledby") ?? "")?.textContent).toBe("Colour");
+    expect(classes(group, "label")).toEqual(classes(find(el, ".drawn"), "label"));
+  });
+});
+
 describe("the drop zone", () => {
   test("hears a file that the user drops on it, and names itself by its label", async () => {
     const dropped: string[] = [];
@@ -181,6 +248,27 @@ describe("the drop zone", () => {
     await step(() => undefined);
 
     expect(dropped).toEqual(["sales.csv"]);
+  });
+
+  test("draws its label as a field's label, beside the classes given to it", async () => {
+    const { el } = await draw(
+      <>
+        <DropZone className="plain">
+          <Text slot="label">Drop a file</Text>
+        </DropZone>
+        <DropZone className="given">
+          {() => (
+            <Text slot="label" className="bk:sr-only">
+              Drop a file
+            </Text>
+          )}
+        </DropZone>
+        <Label>Name</Label>
+      </>,
+    );
+    const label = classes(el, "label");
+
+    expect([classes(el, '.plain [slot="label"]'), classes(el, '.given [slot="label"]')]).toEqual([label, [...label, "bk:sr-only"]]);
   });
 });
 

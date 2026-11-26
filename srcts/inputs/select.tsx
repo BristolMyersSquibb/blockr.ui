@@ -41,14 +41,11 @@ import {
   Button,
   Collection,
   composeRenderProps,
-  FieldError,
-  Label,
   ListBox,
   Popover,
   Select as AriaSelect,
   SelectStateContext,
   SelectValue,
-  Text,
   useLocale,
 } from "react-aria-components";
 import type { Key, ListBoxItemProps, SelectProps as AriaSelectProps, ValidationResult } from "react-aria-components";
@@ -59,7 +56,7 @@ import type { Bound } from "./bound.ts";
 import { strings } from "./json.ts";
 import { ComboBoxItem, ComboBoxSection, useSameValue } from "./combobox.tsx";
 import type { ComboBoxSectionProps } from "./combobox.tsx";
-import { NotAvailable, Refusal } from "./inputs.tsx";
+import { Description, FieldError, Label, NotAvailable, Refusal } from "./inputs.tsx";
 import { held, inOrder, merged } from "./items.ts";
 
 type Mode = "single" | "multiple";
@@ -225,7 +222,7 @@ function Drawn({ label, description, errorMessage, items, children, asIs = [], o
       value={value}
       className={composeRenderProps(className, (given) => `bk:group ${styles.field} ${given ?? ""}`)}
     >
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <Button className={TRIGGER}>
         {/* React Aria shows the picks that the items hold, and the values
             that they lack follow by their ids. */}
@@ -244,10 +241,8 @@ function Drawn({ label, description, errorMessage, items, children, asIs = [], o
       </Button>
       {/* React Aria names the description of the select only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
       <Popover offset={4} className={LIST}>
         <ListBox renderEmptyState={() => <p className={NOTE}>No options</p>} className={LISTBOX}>
           {items === undefined ? (typeof children === "function" ? null : children) : <Collection items={items}>{children}</Collection>}

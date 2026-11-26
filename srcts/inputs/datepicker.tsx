@@ -39,10 +39,7 @@ import {
   composeRenderProps,
   DatePicker as AriaDatePicker,
   DateRangePicker as AriaDateRangePicker,
-  FieldError,
   Group,
-  Label,
-  Text,
 } from "react-aria-components";
 import type {
   DatePickerProps as AriaDatePickerProps,
@@ -62,7 +59,7 @@ import { FieldButton } from "./button.tsx";
 import { Calendar, RangeCalendar } from "./calendar.tsx";
 import { DateInput, INLINE, Segments } from "./datefield.tsx";
 import { dateFits, rangeFits, readDate, readRange, takesTime, writeDate, writeRange } from "./dates.ts";
-import { NotAvailable, Refusal } from "./inputs.tsx";
+import { Description, FieldError, Label, NotAvailable, Refusal } from "./inputs.tsx";
 
 export interface DatePickerProps<T extends DateValue> extends AriaDatePickerProps<T> {
   // What the starter kit adds.
@@ -244,7 +241,7 @@ function DrawnPicker<T extends DateValue>({
       isInvalid={missing === null ? isInvalid : true}
       className={composeRenderProps(className, (given) => `bk:group ${styles.field} ${given ?? ""}`)}
     >
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <Group className={FIELD}>
         <Segments onKey={onKey}>
           <DateInput className={`${INLINE} bk:flex-1`} />
@@ -276,7 +273,7 @@ function DrawnRangePicker<T extends DateValue>({
       isInvalid={missing === null ? isInvalid : true}
       className={composeRenderProps(className, (given) => `bk:group ${styles.field} ${given ?? ""}`)}
     >
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <Group className={FIELD}>
         <Segments onKey={onKey}>
           <div className={ENDS}>
@@ -306,10 +303,8 @@ function PickerParts({
     <>
       {/* React Aria names the description of the picker only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
       {missing === null || missing === undefined ? null : <NotAvailable values={[missing]} />}
     </>
   );

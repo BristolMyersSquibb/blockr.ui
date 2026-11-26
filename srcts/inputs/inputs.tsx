@@ -9,11 +9,20 @@
 // Here too are the layout of a form's controls and the field, a label that
 // holds its input, so that it needs no id, as a block's UI may be mounted in
 // several places at once.
+// And here are the label, the description and the error of a field, after the
+// Label, the Description and the FieldError of React Aria's Tailwind starter
+// kit
+// (https://github.com/adobe/react-spectrum/blob/react-aria-components%401.22.1/starters/tailwind/src/Field.tsx).
+// Each takes the props of its part of React Aria.
+// The inputs of blockr.ui draw their labels, descriptions and errors with
+// them, as the fields of the starter kit do.
 // Each input sits in a file of its own beside this one.
 // React Aria gives their parts ids, which React makes anew for each mount.
 
 import { useState } from "react";
 import type { ReactElement, ReactNode } from "react";
+import { composeRenderProps, FieldError as AriaFieldError, Label as AriaLabel, Text } from "react-aria-components";
+import type { FieldErrorProps, LabelProps, TextProps } from "react-aria-components";
 import { styles } from "../styles/index.ts";
 import { Button } from "./button.tsx";
 import type { Bound, Json } from "./bound.ts";
@@ -36,6 +45,27 @@ export function Field({ label, children }: { label: string; children: ReactNode 
       {children}
     </label>
   );
+}
+
+// The label of a field, React Aria's Label.
+// Outside a field, it names what an element points at through
+// `aria-labelledby`, such as a group of controls.
+export function Label({ className, ...props }: LabelProps): ReactElement {
+  return <AriaLabel {...props} className={`${styles.label} ${className ?? ""}`} />;
+}
+
+// The description of a field, React Aria's Text in the slot "description".
+// React Aria names a field's description only where the element is there from
+// the start.
+// So a field draws its description while empty too, and it is hidden then.
+export function Description({ className, ...props }: TextProps): ReactElement {
+  return <Text {...props} slot="description" className={`${styles.hint} bk:empty:hidden ${className ?? ""}`} />;
+}
+
+// The error of a field, React Aria's FieldError, which shows only while the
+// field is invalid.
+export function FieldError({ className, ...props }: FieldErrorProps): ReactElement {
+  return <AriaFieldError {...props} className={composeRenderProps(className, (given) => `${styles.alert} ${given ?? ""}`)} />;
 }
 
 // Says below an input which of its values it lacks, such as picks that none

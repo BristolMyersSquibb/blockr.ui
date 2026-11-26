@@ -21,11 +21,11 @@
 
 import { useRef } from "react";
 import type { ReactElement, ReactNode } from "react";
-import { composeRenderProps, FieldError, Label, RadioButton, RadioField, RadioGroup as AriaRadioGroup, Text } from "react-aria-components";
+import { composeRenderProps, RadioButton, RadioField, RadioGroup as AriaRadioGroup } from "react-aria-components";
 import type { RadioFieldProps, RadioGroupProps as AriaRadioGroupProps, ValidationResult } from "react-aria-components";
 import type { Bound } from "./bound.ts";
 import { styles } from "../styles/index.ts";
-import { NotAvailable, Refusal } from "./inputs.tsx";
+import { Description, FieldError, Label, NotAvailable, Refusal } from "./inputs.tsx";
 import { ItemsContext, lacking, useItem, useItems } from "./items.ts";
 
 export interface RadioGroupProps extends Omit<AriaRadioGroupProps, "children"> {
@@ -80,14 +80,12 @@ function BoundGroup({
 function DrawnGroup({ label, description, errorMessage, children, className, ...props }: DrawnGroupProps): ReactElement {
   return (
     <AriaRadioGroup {...props} className={composeRenderProps(className, (given) => `bk:group ${styles.field} ${given ?? ""}`)}>
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <div className="bk:flex bk:gap-1.5 bk:group-data-[orientation=horizontal]:flex-row bk:group-data-[orientation=horizontal]:flex-wrap bk:group-data-[orientation=horizontal]:gap-4 bk:group-data-[orientation=vertical]:flex-col">
         {children}
       </div>
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
     </AriaRadioGroup>
   );
 }
@@ -110,9 +108,7 @@ export function Radio({ children, description, className, ...props }: RadioProps
         <span className={CIRCLE} />
         {children}
       </RadioButton>
-      <Text slot="description" className={`${styles.hint} bk:ml-6 bk:empty:hidden`}>
-        {description}
-      </Text>
+      <Description className="bk:ml-6">{description}</Description>
     </RadioField>
   );
 }

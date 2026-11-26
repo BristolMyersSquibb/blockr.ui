@@ -18,10 +18,10 @@
 // prefers reduced motion.
 
 import type { ReactElement } from "react";
-import { composeRenderProps, Label, Meter as AriaMeter, ProgressBar as AriaProgressBar } from "react-aria-components";
+import { composeRenderProps, Meter as AriaMeter, ProgressBar as AriaProgressBar } from "react-aria-components";
 import type { MeterProps as AriaMeterProps, ProgressBarProps as AriaProgressBarProps } from "react-aria-components";
 import { Icon } from "../icon/index.ts";
-import { styles } from "../styles/index.ts";
+import { Label } from "../inputs/index.ts";
 import { TriangleExclamationPoint } from "../vendor/index.ts";
 
 export interface MeterProps extends AriaMeterProps {
@@ -34,7 +34,7 @@ export function Meter({ label, className, ...props }: MeterProps): ReactElement 
       {({ percentage, valueText }) => (
         <>
           <div className="bk:flex bk:justify-between bk:gap-2">
-            <Label className={styles.label}>{label}</Label>
+            <Label>{label}</Label>
             <span className={`bk:text-sm ${percentage >= 80 ? "bk:text-destructive-text" : "bk:text-muted-foreground"}`}>
               {percentage >= 80 ? <Alert /> : null}
               {` ${valueText ?? ""}`}
@@ -59,7 +59,7 @@ export function ProgressBar({ label, className, ...props }: ProgressBarProps): R
       {({ percentage, valueText, isIndeterminate }) => (
         <>
           <div className="bk:flex bk:justify-between bk:gap-2">
-            <Label className={styles.label}>{label}</Label>
+            <Label>{label}</Label>
             <span className="bk:text-sm bk:text-muted-foreground">{valueText}</span>
           </div>
           <div className={`${TRACK} bk:overflow-hidden`}>

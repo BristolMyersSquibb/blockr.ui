@@ -36,16 +36,13 @@ import {
   CheckboxField,
   CheckboxGroup as AriaCheckboxGroup,
   composeRenderProps,
-  FieldError,
-  Label,
-  Text,
 } from "react-aria-components";
 import type { CheckboxFieldProps, CheckboxGroupProps as AriaCheckboxGroupProps, ValidationResult } from "react-aria-components";
 import type { Bound } from "./bound.ts";
 import { styles } from "../styles/index.ts";
 import { Icon } from "../icon/index.ts";
 import { Check, Minus } from "../vendor/index.ts";
-import { NotAvailable, Refusal } from "./inputs.tsx";
+import { Description, FieldError, Label, NotAvailable, Refusal } from "./inputs.tsx";
 import { held, inOrder, ItemsContext, lacking, merged, useItem, useItems } from "./items.ts";
 
 export interface CheckboxProps extends Omit<CheckboxFieldProps, "children"> {
@@ -97,10 +94,8 @@ function DrawnCheckbox({ children, description, errorMessage, className, ...prop
       </CheckboxButton>
       {/* React Aria names the description of the checkbox only where the
           element is there from the start, so it is there while empty too. */}
-      <Text slot="description" className={`${styles.hint} bk:ml-6 bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={`${styles.alert} bk:ml-6`}>{errorMessage}</FieldError>
+      <Description className="bk:ml-6">{description}</Description>
+      <FieldError className="bk:ml-6">{errorMessage}</FieldError>
     </CheckboxField>
   );
 }
@@ -171,12 +166,10 @@ function BoundGroup({
 function DrawnGroup({ label, description, errorMessage, children, className, ...props }: DrawnGroupProps): ReactElement {
   return (
     <AriaCheckboxGroup {...props} className={composeRenderProps(className, (given) => `${styles.field} ${given ?? ""}`)}>
-      {label === undefined ? null : <Label className={styles.label}>{label}</Label>}
+      {label === undefined ? null : <Label>{label}</Label>}
       <div className="bk:grid bk:gap-1.5">{children}</div>
-      <Text slot="description" className={`${styles.hint} bk:empty:hidden`}>
-        {description}
-      </Text>
-      <FieldError className={styles.alert}>{errorMessage}</FieldError>
+      <Description>{description}</Description>
+      <FieldError>{errorMessage}</FieldError>
     </AriaCheckboxGroup>
   );
 }
