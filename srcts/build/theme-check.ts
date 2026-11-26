@@ -12,12 +12,20 @@
 //    The properties that Tailwind registers for its utilities, such as --tw-blur, carry no prefix,
 //    so stylesheets that two versions of Tailwind wrote could register them differently.
 //    Plain CSS carries no such comment and passes.
-// 3. The code names a class of a colour of Tailwind's palette, such as bc:bg-blue-600,
+// 3. Another package's stylesheet sets a variable under --bk-, as `--bk-color-card: #fff`,
+//    in plain CSS or through an arbitrary property, such as bc:[--bk-radius:0].
+//    Only blockr.ui's stylesheet sets them, with their defaults.
+//    A frontend gives its values in a theme, which its method of frontend_theme() returns in R,
+//    and R writes that theme into the page's head
+//    (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#where-the-values-are-set).
+//    A value in a stylesheet would escape the frontend's tests of the defaults that it keeps,
+//    and a value on an element below :root would win there over the themes of the frontend and of the app.
+// 4. The code names a class of a colour of Tailwind's palette, such as bc:bg-blue-600,
 //    or of a step of the faces, the sizes of text, the radii or the shadows that the theme variables lack, such as bc:shadow-2xl,
 //    under any prefix.
 //    The preset drops them (./preset.css), and Tailwind skips a class that it does not know without a word,
 //    so such a class writes nothing (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.2#colours).
-// 4. Another package's code names a class under bk:, which blockr.ui alone writes, for its own components.
+// 5. Another package's code names a class under bk:, which blockr.ui alone writes, for its own components.
 //    So those classes come and go with blockr.ui's components
 //    (https://github.com/BristolMyersSquibb/blockr/wiki/Rewrite-1.7.4#prefixes).
 //
@@ -124,13 +132,15 @@ function lineOf(text: string, at: number): number {
   return text.slice(0, at).split("\n").length;
 }
 
-// What the check finds wrong in a stylesheet (1 and 2 above).
-// In blockr.ui's own build, a stylesheet may also read the variables of blockr.ui's that it sets itself,
+// What the check finds wrong in a stylesheet (1 to 3 above).
+// In blockr.ui's own build, a stylesheet sets variables of blockr.ui's,
+// and may also read those that it sets itself,
 // such as those of Tailwind's theme that blockr.ui's classes read under its prefix, as --bk-font-weight-bold.
 function stylesheetProblems(file: Checked, own: boolean): Problem[] {
   // The stylesheet with each comment blanked out, all but its line breaks, so that each line keeps its number.
   const rules = file.text.replace(CSS_COMMENT, (comment) => comment.replace(/[^\n]/g, " "));
-  const declared = own ? new Set([...rules.matchAll(DECLARED)].map(([, name = ""]) => name)) : new Set<string>();
+  const declarations = [...rules.matchAll(DECLARED)];
+  const declared = new Set(own ? declarations.map(([, name = ""]) => name) : []);
 
   const versions = [...file.text.matchAll(TAILWIND)].flatMap(({ 1: version = "", index }) =>
     version === VERSIONS.tailwindcss
@@ -154,10 +164,17 @@ function stylesheetProblems(file: Checked, own: boolean): Problem[] {
           },
         ],
   );
-  return [...versions, ...reads];
+  const sets = own
+    ? []
+    : declarations.map(({ 1: name = "", index }) => ({
+        file: file.name,
+        line: lineOf(rules, index),
+        message: `The stylesheet sets ${name}, but only blockr.ui's stylesheet sets variables under --bk-. A frontend gives its values in a theme, which its method of frontend_theme() returns in R.`,
+      }));
+  return [...versions, ...reads, ...sets];
 }
 
-// What the check finds wrong in a file of code (3 and 4 above).
+// What the check finds wrong in a file of code (4 and 5 above).
 // In blockr.ui's own build, the code may name classes under bk:.
 function codeProblems(file: Checked, own: boolean): Problem[] {
   return [...file.text.matchAll(CLASS)].flatMap(({ 0: name, 1: prefix = "", 3: part = "", index }) => {

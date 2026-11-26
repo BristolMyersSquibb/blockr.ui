@@ -3,6 +3,7 @@
 // What the check of the Tailwind half of the build preset, themeCheck() of `@blockr/ui/build`, fails a build for:
 // a stylesheet that reads a variable of blockr.ui's that the list of theme variables lacks,
 // a stylesheet that another version of Tailwind CSS wrote,
+// another package's stylesheet that sets a variable under --bk-,
 // code that names a class of Tailwind's palette or of a step that the theme variables lack, under any prefix,
 // and another package's code that names a class under bk:.
 // That the check fails exactly the classes that write nothing under the preset is in ./stylesheet.test.ts,
@@ -43,15 +44,43 @@ test("fails a stylesheet that reads a variable of blockr.ui's that the list of t
   };
   const problems = themeProblems([css], [], false);
 
-  expect(where(problems)).toEqual(["view.css:3", "view.css:4", "view.css:6"]);
+  // Line 5 fails as well, since another package's stylesheet sets no variable under --bk- (below).
+  expect(where(problems)).toEqual(["view.css:3", "view.css:4", "view.css:5", "view.css:6"]);
   expect(problems[0]?.message).toBe(
     "The stylesheet reads --bk-color-blue, which the list of theme variables lacks. Read one of the variables that themeVariables in @blockr/ui/build lists.",
   );
-  expect(problems.map(({ message }) => /reads (\S+),/.exec(message)?.[1])).toEqual(["--bk-color-blue", "--bk-color-x", "--bk-own"]);
+  expect(problems.flatMap(({ message }) => /reads (\S+),/.exec(message)?.[1] ?? [])).toEqual(["--bk-color-blue", "--bk-color-x", "--bk-own"]);
 
   // In blockr.ui's own build, the stylesheet may also read a variable that it sets itself,
   // as it reads those of Tailwind's theme that its classes use, such as --bk-font-weight-bold.
   expect(where(themeProblems([css], [], true))).toEqual(["view.css:3", "view.css:4"]);
+});
+
+test("fails another package's stylesheet that sets a variable under --bk-, in plain CSS or through an arbitrary property, but not blockr.ui's own", () => {
+  const css = {
+    name: "frontend.css",
+    text: [
+      "/* A frontend gives its values in its theme, where --bk-color-card: #fff would set one. */",
+      ':root[data-bk-mode="light"] {',
+      "  --bk-color-card: #fafafa;",
+      "  color: var(--bk-color-card-foreground);",
+      "}",
+      ".dock-panel { --bk-radius: 0.75rem; --dock-radius: calc(var(--bk-radius) * 1.5); }",
+      ".bc\\:\\[--bk-spacing\\:2px\\] { --bk-spacing: 2px; }",
+      "",
+    ].join("\n"),
+  };
+  const problems = themeProblems([css], [], false);
+
+  // A read of a theme variable and a variable of the package's own pass, as does the selector of the arbitrary property.
+  expect(where(problems)).toEqual(["frontend.css:3", "frontend.css:6", "frontend.css:7"]);
+  expect(problems.map(({ message }) => /sets (\S+),/.exec(message)?.[1])).toEqual(["--bk-color-card", "--bk-radius", "--bk-spacing"]);
+  expect(problems[0]?.message).toBe(
+    "The stylesheet sets --bk-color-card, but only blockr.ui's stylesheet sets variables under --bk-. A frontend gives its values in a theme, which its method of frontend_theme() returns in R.",
+  );
+
+  // The stylesheet of blockr.ui sets the theme variables, with their defaults.
+  expect(themeProblems([css], [], true)).toEqual([]);
 });
 
 test("fails a stylesheet that another version of Tailwind CSS wrote, naming both versions, and passes plain CSS", () => {

@@ -153,6 +153,11 @@
   frontend keeps, which the frontend's tests list.
   So a theme variable that a later blockr.ui adds fails those tests.
 
+* The check of the build preset, `themeCheck()`, fails another package's
+  build whose stylesheet sets a variable under `--bk-` (#111).
+  Only blockr.ui's stylesheet sets them, with their defaults,
+  and a frontend gives its values in its theme.
+
 # blockr.ui 0.0.1
 
 * The `shiny_has_perf_dep()` dependency strips a redundant `:has(> *)` guard
