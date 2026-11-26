@@ -13,7 +13,8 @@ A character vector of the names, each under the prefix \verb{--bk-}.
 Gives the full names of the theme variables, such as
 \code{"--bk-color-primary"}.
 The theme variables are the CSS variables through which a frontend,
-or an app's theme, gives the page the look that it likes.
+or an app's theme, which \code{\link[=new_blockr_theme]{new_blockr_theme()}} makes,
+gives the page the look that it likes.
 The stylesheet of blockr.ui gives each of them a default,
 for light mode and for dark mode.
 }

@@ -3,7 +3,8 @@
 #' Gives the full names of the theme variables, such as
 #' `"--bk-color-primary"`.
 #' The theme variables are the CSS variables through which a frontend,
-#' or an app's theme, gives the page the look that it likes.
+#' or an app's theme, which [new_blockr_theme()] makes,
+#' gives the page the look that it likes.
 #' The stylesheet of blockr.ui gives each of them a default,
 #' for light mode and for dark mode.
 #'
@@ -23,10 +24,17 @@
 #'
 #' @export
 theme_variables <- function() {
+  theme_list()[["variables"]]
+}
+
+# The list of theme variables, as the build writes it into
+# inst/js/theme-variables.json: the names of the theme variables,
+# the families of blockr.ui's fonts and the mode attribute.
+theme_list <- function() {
   file <- system.file(
     "js", "theme-variables.json",
     package = "blockr.ui",
     mustWork = TRUE
   )
-  jsonlite::read_json(file, simplifyVector = TRUE)$variables
+  jsonlite::read_json(file, simplifyVector = TRUE)
 }
