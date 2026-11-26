@@ -29,8 +29,11 @@
   Its `stubBound()` makes a stub of `Bound`, which holds a value, records each
   value that an input commits, types and flushes, and refuses a submit with an
   error where a test asks it to.
-  A component that a test draws takes the stub through `useStubBound()`, which
-  draws the component again as the stub's value or error changes.
+  A component that a test draws binds an input to the stub through
+  `useStubBound()`, as a module's UI binds one through core's `useValue()`, so
+  that the input draws again as the stub's value or error changes.
+  The stub is no `Bound` itself, so TypeScript refuses an input that takes the
+  stub in place of what the hook gives.
   The helpers that act on the components as a user does come from core's
   tests, such as `type()`, which types into a field one keystroke at a time,
   and `picked()`, which picks rows of a select by their labels.

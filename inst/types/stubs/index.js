@@ -28,6 +28,7 @@ if (typeof document !== "undefined") {
 
 // srcts/stubs/bound.ts
 import { useSyncExternalStore } from "react";
+var internals = /* @__PURE__ */ new WeakMap();
 function stubBound(value) {
   let held = value;
   let error = null;
@@ -52,7 +53,7 @@ function stubBound(value) {
     changed();
     return Promise.resolve(true);
   };
-  return {
+  const stub = {
     get value() {
       return held;
     },
@@ -62,57 +63,52 @@ function stubBound(value) {
     committed,
     typed,
     flushed,
-    get: () => pending === null ? held : pending.value,
-    commit: (next) => {
-      committed.push(next);
-      return submit(next);
-    },
-    unset: () => {
-      committed.push(void 0);
-      return submit(void 0);
-    },
-    type: (next) => {
-      typed.push(next);
-      pending = { value: next };
-    },
-    flush: () => {
-      if (pending === null) return;
-      flushed.push(pending.value);
-      void submit(pending.value);
-    },
     set: (next) => {
       held = next;
       changed();
     },
     refuse: (next) => {
       refusal = next;
+    }
+  };
+  internals.set(stub, {
+    methods: {
+      get: () => pending === null ? held : pending.value,
+      commit: (next) => {
+        committed.push(next);
+        return submit(next);
+      },
+      unset: () => {
+        committed.push(void 0);
+        return submit(void 0);
+      },
+      type: (next) => {
+        typed.push(next);
+        pending = { value: next };
+      },
+      flush: () => {
+        if (pending === null) return;
+        flushed.push(pending.value);
+        void submit(pending.value);
+      }
     },
     subscribe: (listener) => {
       listeners.add(listener);
       return () => listeners.delete(listener);
     }
-  };
+  });
+  return stub;
 }
 function useStubBound(stub) {
-  return useSyncExternalStore(stub.subscribe, () => snapshotOf(stub));
+  const own = internals.get(stub);
+  if (own === void 0) throw new Error("useStubBound() takes a stub that stubBound() made.");
+  return useSyncExternalStore(own.subscribe, () => snapshotOf(stub, own));
 }
 var snapshots = /* @__PURE__ */ new WeakMap();
-function snapshotOf(stub) {
+function snapshotOf(stub, own) {
   const last = snapshots.get(stub);
   if (last !== void 0 && Object.is(last.value, stub.value) && last.error === stub.error) return last;
-  const next = {
-    value: stub.value,
-    error: stub.error,
-    get: () => stub.get(),
-    commit: (value) => stub.commit(value),
-    unset: () => stub.unset(),
-    type: (value) => {
-      stub.type(value);
-    },
-    flush: () => {
-      stub.flush();
-    }
-  };
+  const next = { value: stub.value, error: stub.error, ...own.methods };
   snapshots.set(stub, next);
   return next;
 }
