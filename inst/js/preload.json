@@ -1,7 +1,9 @@
 {
   "blockr-ui.js": [
     "react",
-    "react/jsx-runtime"
+    "react/jsx-runtime",
+    "react-aria-components",
+    "./vendor-723651e1.js"
   ],
   "react-aria-5CIXIZAD.js": [
     "./react-aria-CMD4IYMV.js",

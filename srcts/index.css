@@ -18,6 +18,7 @@
 @import "./build/preset.css";
 @source "./**/*.{ts,tsx}";
 @source not "./build";
+@source not "./stubs";
 @source not "./testing";
 @source not "./**/*.test.{ts,tsx}";
 
@@ -234,4 +235,61 @@
   font-display: swap;
   src: url("open-sans-latin-normal.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/*
+ * The motions of blockr.ui's overlays and layout, which their classes name.
+ * - The backdrop of a sheet fades in as the sheet slides in, and a sheet that
+ *   another opens over moves back (./overlays/sheet.tsx).
+ * - A toast with a timeout fades out in its last 300 milliseconds
+ *   (./overlays/toast.tsx).
+ * - Part of a progress bar that cannot tell how far its task has come
+ *   slides across it (./layout/meter.tsx).
+ */
+@keyframes bk-sheet-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bk-sheet-scale-back {
+  to {
+    transform: translateZ(-120px);
+  }
+}
+
+@keyframes bk-toast-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+/*
+ * The fade of a toast with a timeout, in its last 300 milliseconds, from the
+ * delay that the toast's style gives, the timeout less the fade.
+ * The toast pauses it while React Aria pauses the timeout, through
+ * animation-play-state, so the fade sets each part of the animation on its
+ * own, since the shorthand `animation` would set animation-play-state back
+ * to running, and the delay too.
+ * The fade runs only where the user prefers no reduced motion.
+ */
+@utility toast-fade {
+  @media (prefers-reduced-motion: no-preference) {
+    animation-name: bk-toast-fade;
+    animation-duration: 300ms;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+  }
+}
+
+@keyframes bk-progress-slide {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 250% 0;
+  }
 }

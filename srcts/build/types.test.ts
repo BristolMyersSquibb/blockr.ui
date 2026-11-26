@@ -94,13 +94,16 @@ test("names React and React Aria's three packages as the peers of the package, a
   expect(manifest.peerDependencies).toEqual(Object.fromEntries(versions));
 });
 
-test("names lucide as the dependency of the package, at the version that blockr.ui pins", async () => {
+test("names lucide and @internationalized/date as the dependencies of the package, at the versions that blockr.ui pins", async () => {
   const manifest = JSON.parse(await readFile(join(repo, "inst/types/package.json"), "utf8")) as typeof TYPES_PACKAGE;
   const own = JSON.parse(await readFile(join(repo, "package.json"), "utf8")) as { dependencies: Record<string, string> };
-  const installed = JSON.parse(await readFile(join(repo, "node_modules/lucide/package.json"), "utf8")) as { version: string };
+  const names = ["@internationalized/date", "lucide"];
+  const installed = await Promise.all(
+    names.map(async (name) => (JSON.parse(await readFile(join(repo, "node_modules", name, "package.json"), "utf8")) as { version: string }).version),
+  );
 
-  expect(manifest.dependencies).toEqual({ lucide: own.dependencies.lucide });
-  expect(installed.version).toBe(own.dependencies.lucide);
+  expect(manifest.dependencies).toEqual(Object.fromEntries(names.map((name) => [name, own.dependencies[name]])));
+  expect(installed).toEqual(names.map((name) => own.dependencies[name]));
 });
 
 test("offers each icon of lucide as @blockr/ui/icons, under the names that lucide exports, with their aliases, but neither `icons` nor its functions", async () => {

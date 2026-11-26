@@ -1,5 +1,6 @@
 import eslint from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
+import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
@@ -14,6 +15,11 @@ export default defineConfig(
         tsconfigRootDir: import.meta.dirname,
       },
     },
+  },
+  {
+    // The rules of React's hooks, for blockr.ui's components and their hooks.
+    files: ["srcts/**/*.{ts,tsx}"],
+    extends: [reactHooks.configs.flat["recommended-latest"]],
   },
   {
     // Each directory of srcts is a module, and its index.ts names what it
