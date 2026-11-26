@@ -4,7 +4,7 @@
 \alias{new_blockr_theme}
 \alias{is_blockr_theme}
 \alias{format.blockr_theme}
-\title{An app's theme}
+\title{A theme of an app or of a frontend}
 \usage{
 new_blockr_theme(light = list(), dark = list(), fonts = list())
 
@@ -39,20 +39,21 @@ The method of \code{format()} returns a string,
 which is empty for a theme with no values.
 }
 \description{
-An app gives the page a theme of its own:
-values for some of the theme variables in each mode,
-and the files of the fonts that it brings.
-The function \code{new_blockr_theme()} makes such a theme in R.
-The app passes it to the \code{serve()} of blockr.core,
-which writes the theme into the page's head.
-The theme's values win over the frontend's values and over the defaults of
-blockr.ui, whichever stylesheet loads first.
+A theme gives the page values for some of the theme variables in each
+mode, and the files of the fonts that it brings.
+The function \code{new_blockr_theme()} makes a theme in R.
+An app passes its theme to the \code{serve()} of blockr.core.
+A frontend gives its theme through the \code{frontend_theme()} of blockr.core.
+Core writes the frontend's theme into the page's head,
+and then the app's theme.
+So the app's values win over the frontend's,
+and the values of both win over the defaults of blockr.ui.
 }
 \details{
 Each value of \code{light} holds in light mode alone,
 and each value of \code{dark} in dark mode alone.
-So a theme with values for light mode alone leaves dark mode to the
-frontend.
+So an app's theme with values for light mode alone leaves dark mode to
+the frontend.
 A value that holds in both modes, such as a face, goes into both lists.
 
 The function refuses a name that \code{\link[=theme_variables]{theme_variables()}} lacks, naming it.
@@ -67,9 +68,11 @@ The method of \code{\link[=format]{format()}} returns the text of the theme's ru
 one for each mode that the theme gives values.
 Each rule names \verb{:root} twice beside the mode,
 as in \verb{:root:root[data-bk-mode="light"]}.
-So the theme's values win over the frontend's values,
-which the frontend sets under \verb{:root[data-bk-mode="light"]} and
-\verb{:root[data-bk-mode="dark"]}.
+So the theme's values win over a stylesheet that sets a theme variable
+under \verb{:root[data-bk-mode="light"]} or \verb{:root[data-bk-mode="dark"]},
+whichever loads first.
+Core writes the rules of the frontend's theme and of the app's theme with
+this method, so the app's rules win by coming later.
 The faces of the theme's fonts are core's to write,
 since core serves their files.
 }

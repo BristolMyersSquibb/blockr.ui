@@ -249,7 +249,8 @@ function lineOf(text, at) {
 }
 function stylesheetProblems(file, own) {
   const rules = file.text.replace(CSS_COMMENT, (comment) => comment.replace(/[^\n]/g, " "));
-  const declared = own ? new Set([...rules.matchAll(DECLARED)].map(([, name = ""]) => name)) : /* @__PURE__ */ new Set();
+  const declarations = [...rules.matchAll(DECLARED)];
+  const declared = new Set(own ? declarations.map(([, name = ""]) => name) : []);
   const versions = [...file.text.matchAll(TAILWIND)].flatMap(
     ({ 1: version = "", index }) => version === VERSIONS.tailwindcss ? [] : [
       {
@@ -268,7 +269,12 @@ function stylesheetProblems(file, own) {
       }
     ]
   );
-  return [...versions, ...reads];
+  const sets = own ? [] : declarations.map(({ 1: name = "", index }) => ({
+    file: file.name,
+    line: lineOf(rules, index),
+    message: `The stylesheet sets ${name}, but only blockr.ui's stylesheet sets variables under --bk-. A frontend gives its values in a theme, which its method of frontend_theme() returns in R.`
+  }));
+  return [...versions, ...reads, ...sets];
 }
 function codeProblems(file, own) {
   return [...file.text.matchAll(CLASS)].flatMap(({ 0: name, 1: prefix = "", 3: part = "", index }) => {

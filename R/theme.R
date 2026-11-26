@@ -1,18 +1,19 @@
-#' An app's theme
+#' A theme of an app or of a frontend
 #'
-#' An app gives the page a theme of its own:
-#' values for some of the theme variables in each mode,
-#' and the files of the fonts that it brings.
-#' The function `new_blockr_theme()` makes such a theme in R.
-#' The app passes it to the `serve()` of blockr.core,
-#' which writes the theme into the page's head.
-#' The theme's values win over the frontend's values and over the defaults of
-#' blockr.ui, whichever stylesheet loads first.
+#' A theme gives the page values for some of the theme variables in each
+#' mode, and the files of the fonts that it brings.
+#' The function `new_blockr_theme()` makes a theme in R.
+#' An app passes its theme to the `serve()` of blockr.core.
+#' A frontend gives its theme through the `frontend_theme()` of blockr.core.
+#' Core writes the frontend's theme into the page's head,
+#' and then the app's theme.
+#' So the app's values win over the frontend's,
+#' and the values of both win over the defaults of blockr.ui.
 #'
 #' Each value of `light` holds in light mode alone,
 #' and each value of `dark` in dark mode alone.
-#' So a theme with values for light mode alone leaves dark mode to the
-#' frontend.
+#' So an app's theme with values for light mode alone leaves dark mode to
+#' the frontend.
 #' A value that holds in both modes, such as a face, goes into both lists.
 #'
 #' The function refuses a name that [theme_variables()] lacks, naming it.
@@ -27,9 +28,11 @@
 #' one for each mode that the theme gives values.
 #' Each rule names `:root` twice beside the mode,
 #' as in `:root:root[data-bk-mode="light"]`.
-#' So the theme's values win over the frontend's values,
-#' which the frontend sets under `:root[data-bk-mode="light"]` and
-#' `:root[data-bk-mode="dark"]`.
+#' So the theme's values win over a stylesheet that sets a theme variable
+#' under `:root[data-bk-mode="light"]` or `:root[data-bk-mode="dark"]`,
+#' whichever loads first.
+#' Core writes the rules of the frontend's theme and of the app's theme with
+#' this method, so the app's rules win by coming later.
 #' The faces of the theme's fonts are core's to write,
 #' since core serves their files.
 #'
@@ -114,13 +117,72 @@ format.blockr_theme <- function(x, ...) {
   paste(rules, collapse = "\n\n")
 }
 
+#' The theme variables that a theme sets no value for
+#'
+#' Gives, for light mode and for dark mode,
+#' the theme variables that a theme sets no value for.
+#' For a frontend's theme, which the `frontend_theme()` of blockr.core
+#' returns, those are the defaults of blockr.ui that the frontend keeps.
+#' A frontend's tests compare them with the defaults that it keeps on
+#' purpose.
+#' A minor release of blockr.ui may add a theme variable.
+#' The tests of a frontend that does not set it then fail,
+#' and name the new variable.
+#' So a frontend keeps a default only by choice.
+#'
+#' @param theme A theme, as [new_blockr_theme()] makes it.
+#'
+#' @return A list with the components `light` and `dark`,
+#' each a character vector of names of theme variables,
+#' in the order of [theme_variables()].
+#'
+#' @examples
+#' theme <- new_blockr_theme(
+#'   light = list("--bk-color-primary" = "#be2bbb"),
+#'   dark = list("--bk-color-primary" = "#d66bd3", "--bk-radius" = "0")
+#' )
+#'
+#' unset <- unset_variables(theme)
+#'
+#' # The theme variables that the theme sets
+#' setdiff(theme_variables(), unset$light)
+#' setdiff(theme_variables(), unset$dark)
+#'
+#' # A theme with no values leaves every theme variable unset
+#' identical(
+#'   unset_variables(new_blockr_theme()),
+#'   list(light = theme_variables(), dark = theme_variables())
+#' )
+#'
+#' @export
+unset_variables <- function(theme) {
+
+  if (!is_blockr_theme(theme)) {
+    theme_abort(
+      "The argument `theme` is expected to be a theme, ",
+      "as `new_blockr_theme()` makes it.",
+      class = "blockr_theme_invalid"
+    )
+  }
+
+  vars <- theme_variables()
+
+  list(
+    light = setdiff(vars, names(theme[["light"]])),
+    dark = setdiff(vars, names(theme[["dark"]]))
+  )
+}
+
 # The rule that sets the values of one mode, or none where the mode has no
-# values. Its selector names `:root` twice beside the mode attribute, which
-# gives it a specificity of (0,3,0). A frontend sets its values under `:root`
-# and the mode attribute, a specificity of (0,2,0). Both sit outside any
-# layer, while blockr.ui's defaults sit in one. So the app's values win over
-# the frontend's and over blockr.ui's defaults, whichever stylesheet loads
-# first.
+# values.
+# It sits outside any layer, while blockr.ui's defaults sit in one,
+# so its values win over the defaults.
+# Its selector names `:root` twice beside the mode attribute,
+# which gives it a specificity of (0,3,0).
+# So its values also win over a stylesheet that sets a theme variable under
+# `:root` and the mode attribute, at (0,2,0), whichever loads first.
+# Core writes the frontend's theme and then the app's theme with the same
+# selectors, so the app's values win over the frontend's by coming later.
 theme_rule <- function(values, attribute, mode) {
 
   if (!length(values)) {
