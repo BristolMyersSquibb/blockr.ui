@@ -1,0 +1,865 @@
+---
+title: "The design system"
+vignette: >
+  %\VignetteIndexEntry{The design system}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(blockr.ui)
+```
+
+The package blockr.ui is the UI kit of blockr's client, the part of blockr that runs in the browser.
+Every UI that a blockr package draws there takes its look from blockr.ui.
+That holds for core's UIs, for the frontend that draws the page, such as the dock, and for the UIs of blocks and plugins.
+They draw with the components of blockr.ui.
+The colours, faces, sizes, corners and shadows that they draw come from blockr.ui's theme variables, but for the few exceptions that [Colours](#colours) names.
+So a frontend restyles every UI on the page by setting theme variables, and so does an app.
+
+This article is for the authors of those UIs and of frontends.
+It covers four things:
+
+1. The theme variables: what each is for, its defaults, how a frontend gives values of its own, and how the frontend's tests list the defaults that it keeps.
+2. The components: what blockr.ui offers, its icons, how an input takes its value through `bound`, and how a package tests what it draws.
+3. How a package builds against blockr.ui: the build preset, the package's prefix, and the list of theme variables with its checks.
+4. How an app gives the page a theme of its own.
+
+## The theme variables
+
+The theme variables are the CSS variables that give the page its look.
+Each has a job, which says what it is for, such as the colour of a menu.
+Each has a name under the prefix `bk`, such as `--bk-color-popover`.
+Every UI draws with them, so a value that a theme sets reaches every UI at once.
+A theme is values for some of the theme variables, in light mode and in dark mode.
+
+The function `theme_variables()` lists them:
+
+```{r}
+theme_variables()
+```
+
+The list holds the colours, the two faces, four sizes of text, the radius, three shadows, the spacing and the layer of the overlays.
+It holds only what a frontend may want to set for its own look.
+The rest of how a component looks, such as the weight of its text or the timing of its transitions, belongs to the component.
+
+The classes in this section are written without a prefix, as `bg-warning/10`.
+A package writes each class under a prefix of its own, as core writes `bc:bg-warning/10` ([Prefixes](#prefixes)).
+
+### Colours
+
+The colours take the names that [shadcn/ui](https://ui.shadcn.com/docs/theming) gives their jobs, so authors of UIs on Tailwind CSS know them already.
+In these names, the text of the page is `foreground` and the brand colour is `primary`.
+The name `accent` means the fill of a hovered row, not the brand colour.
+A UI takes each colour by its job:
+
+| Variables | Job |
+|---|---|
+| `--bk-color-background`, `--bk-color-foreground` | The page, which the frontend draws behind its panels and cards, and the text on it |
+| `--bk-color-card`, `--bk-color-card-foreground` | A card or a node on the page or in a panel, such as a block's card in the dock or a node of the DAG, and its text. The colour is opaque, since a node covers the links below it |
+| `--bk-color-popover`, `--bk-color-popover-foreground` | Every overlay, such as a menu, a select's list, a popover, a dialog, a tooltip or a toast, and its text. The colour is opaque, since an overlay covers the page |
+| `--bk-color-primary`, `--bk-color-primary-foreground`, `--bk-color-primary-text` | The brand colour, for what is picked, checked, selected or current, and for the primary button; the text and icons on it; and the text of a link or of a message |
+| `--bk-color-secondary`, `--bk-color-secondary-foreground` | A filled control of lower emphasis, and its text. No component of blockr.ui fills with it yet |
+| `--bk-color-muted`, `--bk-color-muted-foreground` | A quiet fill inside a surface, such as a tag or a block of code, and secondary text, such as a hint, a placeholder or a count |
+| `--bk-color-accent`, `--bk-color-accent-foreground` | A row or a button that is hovered, pressed or focused from the keyboard, and its text |
+| `--bk-color-destructive`, `--bk-color-destructive-foreground`, `--bk-color-destructive-text` | An error, and what removes something, such as the destructive button; the text on a fill of it; and the text of an error |
+| `--bk-color-warning`, `--bk-color-warning-foreground`, `--bk-color-warning-text` | A warning; the text on a fill of it; and the text of a warning |
+| `--bk-color-success`, `--bk-color-success-foreground`, `--bk-color-success-text` | A success, such as the status dot of a block that is `ready`; the text on a fill of it; and the text of a success |
+| `--bk-color-border` | Outlines and dividers, such as the edge of a card or an overlay, the rules of a table and a menu's divider |
+| `--bk-color-input` | The edge of a field, and the outline of a checkbox, a radio button, a switch or a drop zone |
+| `--bk-color-ring` | The focus ring |
+
+Each of the four colours `primary`, `destructive`, `warning` and `success` comes with three variables:
+
+1. The colour itself draws a mark, an edge or a fill.
+   It also draws the tints of a banner, a pill or a toast, through Tailwind's opacity modifier, as `bg-warning/10`.
+2. Its `-foreground` draws text on a fill of the colour, as on the destructive button.
+3. Its `-text` draws text in the colour, on any surface and on the colour's own tint, as an error's message does.
+
+One colour cannot do all three jobs in both modes.
+White text reaches a contrast of 4.8:1 on the red of the destructive button in light mode.
+On the lighter red of dark mode, it reaches only 2.8:1.
+So the destructive button's text takes the variable `--bk-color-destructive-foreground`, whose default in dark mode is nearly black.
+
+The variable `--bk-color-input` stands out more than `--bk-color-border`.
+A field's edge alone marks the field, while a border only divides.
+In the same way, the outline alone marks a checkbox that is not checked.
+
+The hover, `accent`, differs from the quiet fill, `muted`, so that a hovered row stands out on a menu.
+Secondary text in `muted-foreground` reaches less than the contrast of 4.5:1 that text needs on `accent`.
+So a hovered row draws its secondary text in `accent-foreground` too.
+
+Two parts of the components take plain black or white rather than a theme variable, since each must stand out on any colour.
+One is the backdrop behind a modal, black at 40%, which dims whatever page lies below it.
+The other is the black and white rings around a colour field's thumbs and swatches, which show on any colour that the user picks.
+
+The theme variables hold no other colour.
+The build preset drops Tailwind's palette.
+So a class such as `bg-blue-600` writes nothing, and the check of the preset fails it ([The checks](#the-checks)).
+A UI that needs a shade between two variables mixes them in its stylesheet, as `color-mix(in oklab, var(--bk-color-primary) 15%, var(--bk-color-card))`.
+It may also tint one variable with the opacity modifier, as `bg-primary/20`.
+Both follow the theme and the mode.
+A UI writes a colour that must stay fixed on purpose, as the arbitrary value `bg-[#0072b2]`.
+The colours of data, such as the series of a chart, do not come from the theme variables.
+A package that draws data takes them from elsewhere, such as the palettes of blockr.theme.
+
+The theme variables hold no colour for the status of a block or for the category of a block class, since both are core's.
+Core draws each status in the colour of a job, as it draws the status dot of a `ready` block in `success`.
+Core keeps the colours of the categories outside every theme.
+An app sets them through core's blockr option `category_colors`.
+Where blockr's packages need a colour that no variable gives, a later version of blockr.ui adds it to the theme variables, as it added `warning` and `success` to the colours of shadcn/ui.
+
+### Fonts, sizes, radii, shadows and spacing
+
+The other theme variables take the names of Tailwind's theme:
+
+| Variables | Job |
+|---|---|
+| `--bk-font-sans`, `--bk-font-mono` | The face of every UI's text, and of its code |
+| `--bk-text-xs`, `--bk-text-sm`, `--bk-text-base`, `--bk-text-lg` | The four sizes of text, from a hint's up to a dialog's title. The line height of each size follows the size |
+| `--bk-radius` | The base of every corner |
+| `--bk-shadow-sm`, `--bk-shadow-md`, `--bk-shadow-lg` | The shadow of a thumb, such as a slider's; of what floats over the page, such as a menu or a tooltip; and of a dialog or a sheet |
+| `--bk-spacing` | The unit of every padding, margin, gap and size of a component, as `px-2` pads by twice it |
+| `--bk-z-index-overlay` | The layer that every overlay stacks on, above everything else on the page |
+
+Every corner derives from `--bk-radius`.
+The class `rounded-lg` draws the radius itself, and each other step is a multiple of it, from 0.6 of it for `rounded-sm` to 2.6 of it for `rounded-4xl`.
+So a theme sets one value, and every corner follows.
+A pill stays round under every theme, since `rounded-full` reads no variable.
+
+Each of these scales has fewer steps than Tailwind's.
+A class of a step that the theme variables lack, such as `shadow-2xl` or `text-xl`, writes nothing, and the check fails it.
+A UI draws the nearest step that the scale holds instead.
+
+The sizes of text and the spacing are theme variables too.
+So a frontend sets the type and the density of every UI.
+A component takes each of its sizes from them, so that the frontend's values reach it.
+A field's height, for one, is a multiple of the spacing.
+
+### The defaults
+
+The stylesheet of blockr.ui gives every theme variable a default, in light mode and in dark mode.
+The defaults roughly keep the look of blockr.ui 0.0.1.
+Each default is a fixed value.
+No default comes from what surrounds an element on the page.
+A page draws in the defaults wherever neither its frontend nor the app sets a value.
+
+This table shows the defaults as the stylesheet of the installed blockr.ui sets them:
+
+```{r, echo = FALSE, results = "asis"}
+# The stylesheet of blockr.ui, as its build writes it.
+css <- trimws(
+  readLines(system.file("js", "blockr-ui.css", package = "blockr.ui"))
+)
+
+# The theme variables that a rule of the stylesheet sets, with their values,
+# named by the variables.
+rule_values <- function(selector) {
+  from <- match(paste(selector, "{"), css)
+  to <- from + match("}", css[-seq_len(from)])
+  lines <- css[seq(from + 1L, to - 1L)]
+  lines <- sub(";$", "", lines[startsWith(lines, "--bk-")])
+  structure(sub("^[^:]+:\\s*", "", lines), names = sub(":.*$", "", lines))
+}
+
+both <- rule_values(":root")
+
+defaults <- list(
+  light = c(both, rule_values(":root[data-bk-mode=\"light\"]")),
+  dark = c(both, rule_values(":root[data-bk-mode=\"dark\"]"))
+)
+
+vars <- theme_variables()
+
+stopifnot(
+  all(vars %in% names(defaults$light)),
+  all(vars %in% names(defaults$dark))
+)
+
+# A value as the table shows it, after a swatch for a colour.
+shown <- function(value, var) {
+  swatch <- ifelse(
+    startsWith(var, "--bk-color-"),
+    paste0(
+      "<span style=\"display: inline-block; width: 1em; height: 1em; ",
+      "vertical-align: -0.15em; border: 1px solid #888; ",
+      "border-radius: 2px; background: ", value, ";\"></span> "
+    ),
+    ""
+  )
+  paste0(swatch, "`", value, "`")
+}
+
+cat(
+  "| Variable | Light mode | Dark mode |",
+  "|---|---|---|",
+  paste0(
+    "| `", vars, "` | ", shown(defaults$light[vars], vars),
+    " | ", shown(defaults$dark[vars], vars), " |"
+  ),
+  sep = "\n"
+)
+```
+
+In dark mode, `popover` is lighter than `card`, so a menu stands apart from the card that it opens from.
+In light mode, both are white, and a menu stands apart by its border and its shadow.
+The sans face is Open Sans.
+Its files ship with blockr.ui, and blockr.ui's stylesheet writes its faces.
+
+### Light mode and dark mode
+
+Every theme gives each variable that it sets a value for light mode and one for dark mode.
+So no theme is light or dark alone.
+Core's board option `dark_mode` switches the page between the two modes.
+It sets the attribute `data-bk-mode` on the page's root to `light` or `dark`.
+The value of `dark_mode` stays with the user, in the browser, rather than with the board.
+
+The page knows its mode before it first paints:
+
+1. R writes into the page's head a line of JavaScript, which runs as the page loads.
+2. The line reads the user's pick of `dark_mode` from the browser's storage.
+   Where the user has picked nothing, it takes the blockr option `dark_mode`.
+   Where that is not set either, it takes the mode that the user's system prefers.
+3. The line sets `data-bk-mode` before the page first paints.
+4. Once the board opens, the board option `dark_mode` reads the same three values.
+   It switches the attribute whenever the user picks the other mode.
+
+Every job has a value in both modes, so a UI that draws with the jobs needs no `dark:` variant.
+The variant, as in `dark:bg-card`, applies where `data-bk-mode` is `dark`.
+It serves only what a package draws beyond the jobs.
+
+### A frontend's values
+
+A frontend sets the theme variables whose values it wants its own, and keeps blockr.ui's defaults for the rest.
+It gives its values as a theme, which `new_blockr_theme()` makes.
+Its method of core's generic `frontend_theme()` returns that theme.
+Core's `serve()` calls `frontend_theme()` on the app's frontend as it builds the app.
+Say a frontend draws grey menus, and sets its controls closer together than blockr.ui does.
+Its method might be this:
+
+```r
+frontend_theme.my_frontend <- function(x, ...) {
+  new_blockr_theme(
+    light = list("--bk-color-popover" = "#fafafa", "--bk-spacing" = "0.22rem"),
+    dark = list("--bk-color-popover" = "#262626", "--bk-spacing" = "0.22rem")
+  )
+}
+```
+
+Each value of `light` holds in light mode alone, and each value of `dark` in dark mode alone.
+So the frontend gives the spacing, which it wants in both modes, in both lists.
+Core writes the theme into the page's head, after blockr.ui's stylesheet, as the rules that the method of `format()` returns:
+
+```{r}
+frontend <- new_blockr_theme(
+  light = list("--bk-color-popover" = "#fafafa", "--bk-spacing" = "0.22rem"),
+  dark = list("--bk-color-popover" = "#262626", "--bk-spacing" = "0.22rem")
+)
+
+cat(format(frontend))
+```
+
+Core's method of `frontend_theme()` for `frontend_plugin` returns a theme with no values.
+So a frontend that keeps every default needs no method of its own.
+Core's basic frontend and the dock keep every default, since their look is blockr.ui's.
+
+A frontend also draws its own parts with the theme variables, as the dock draws its cards, its navbar and the frame around its panels.
+So an app's theme restyles them with every other UI.
+The frontend's stylesheet takes every colour, face, size, radius and shadow of those parts from a theme variable.
+It holds no colour of its own, since the values that the frontend wants its own are in its theme.
+A part may need a value that no theme variable gives, such as a grey between two others.
+The frontend then takes the variable whose job comes closest, or it derives the value from theme variables in its stylesheet.
+
+No stylesheet of a package but blockr.ui's sets a theme variable, for two reasons:
+
+1. A value that a stylesheet sets on an element below the page's root wins there over the theme of the frontend and over the app's.
+2. A value in a stylesheet escapes the frontend's theme, which the frontend's tests read ([Which defaults a frontend keeps](#which-defaults-a-frontend-keeps)).
+
+So the check of the build preset fails a stylesheet of another package that sets a variable under `--bk-`.
+
+### Which value wins
+
+Three sources set the theme variables, each over the one before:
+
+1. The stylesheet of blockr.ui gives every variable its default.
+2. The frontend's theme sets the values that the frontend wants its own.
+3. The app's theme sets the values that the app wants its own ([An app's theme](#an-apps-theme)).
+
+The order follows from where each source sets its values:
+
+- The stylesheet of blockr.ui sets its defaults inside a cascade layer, Tailwind's `theme`.
+  R writes both themes outside any layer, so their values win over the defaults.
+- R writes the frontend's theme first and the app's theme after it.
+  The rules of the two have the same selectors, so the app's values win over the frontend's.
+- Each rule of a theme names `:root` twice beside the mode, as `:root:root[data-bk-mode="light"]`.
+  So a theme also wins over a stylesheet that sets a theme variable under `:root[data-bk-mode="light"]`, whichever loads first.
+
+Every element inherits the values from the page's root.
+So an overlay takes them too, wherever React Aria puts it on the page.
+
+### Which defaults a frontend keeps
+
+A frontend's tests tell, for each mode, which theme variables the frontend leaves at blockr.ui's defaults.
+So a frontend keeps a default only by choice.
+The function `unset_variables()` takes a theme and returns, for each mode, the theme variables that the theme sets no value for.
+For the theme of the frontend above, `unset_variables()` gives every theme variable but the two that the theme sets:
+
+```{r}
+unset <- unset_variables(frontend)
+
+setdiff(theme_variables(), unset$light)
+setdiff(theme_variables(), unset$dark)
+```
+
+A frontend's tests check that `unset_variables()` returns exactly the defaults that the frontend keeps on purpose.
+The test names each of those variables, rather than taking them from `theme_variables()`:
+
+```r
+test_that("the frontend keeps the defaults that it means to keep", {
+  expect_identical(
+    unset_variables(frontend_theme(new_my_frontend())),
+    list(
+      light = c("--bk-color-background", "--bk-color-foreground", ...),
+      dark = c("--bk-color-background", "--bk-color-foreground", ...)
+    )
+  )
+})
+```
+
+The test checks each mode on its own.
+So a value that the frontend sets for light mode alone shows up in the list for dark mode.
+
+A later version of blockr.ui may add a theme variable, in a minor release.
+Then this happens:
+
+1. Every page draws the new variable in blockr.ui's default, so nothing breaks for the users of an app.
+2. The frontend's tests fail the next time they run against that version, and they name the new variable.
+3. The frontend's author sets the variable in the frontend's theme, or adds it to the defaults that the frontend keeps.
+
+## The components
+
+A module imports the components of blockr.ui from `@blockr/ui`.
+They are [React Aria's components](https://react-aria.adobe.com/), drawn with the theme variables after React Aria's Tailwind starter kit.
+Each takes React Aria's props and those that the starter kit adds, such as `label`, `description` and `errorMessage`.
+
+| Group | Components |
+|---|---|
+| Fields | `TextField`, `NumberField`, `SearchField`, `TokenField` with `Token`, `Field`, `Form` and `FormLayout` |
+| Picks | `Select` with `SelectItem` and `SelectSection`, `ComboBox` with `ComboBoxItem` and `ComboBoxSection`, `ListBox` with `ListBoxItem`, `Autocomplete` with `useFilter`, `Checkbox`, `CheckboxGroup`, `Radio`, `RadioGroup`, `Switch`, `Slider`, `ToggleButton`, `ToggleButtonGroup`, and `TagGroup` with `Tag` |
+| Dates and times | `DateField`, `TimeField`, `DatePicker`, `DateRangePicker`, `Calendar` and `RangeCalendar` |
+| Colours | `ColorField`, `ColorPicker`, `ColorArea`, `ColorSlider`, `ColorWheel`, `ColorThumb`, `ColorSwatch`, and `ColorSwatchPicker` with `ColorSwatchPickerItem` |
+| Buttons and files | `Button`, `FieldButton`, `DropZone`, `FileTrigger` and `Text` |
+| Overlays | `Modal`, `Dialog`, `DialogTrigger`, `AlertDialog`, `Sheet`, `Popover`, `Menu` with `MenuItem`, `MenuSection` and `MenuTrigger`, `SubmenuTrigger`, `CommandPalette`, `Tooltip` with `TooltipTrigger`, `Toast` with `ToastContent`, `ToastQueue` and `ToastRegion`, `Heading`, `Keyboard` and `Focusable` |
+| Layout | `Disclosure` with `DisclosureHeader`, `DisclosurePanel` and `DisclosureGroup`, `Tabs` with `TabList`, `Tab` and `TabPanel`, `Toolbar`, `Separator`, `Breadcrumbs` with `Breadcrumb`, `Link`, `Meter` and `ProgressBar` |
+| Collections | `Table` with `TableHeader`, `TableBody`, `Column`, `Row` and `Cell`, `Tree` with `TreeItem`, `NavigationTree` with `NavigationTreeHeader`, `NavigationTreeSection`, `NavigationTreeItem`, `NavigationTreeItemContent` and `NavigationTreeItemLink`, `GridList` with `GridListHeader`, `GridListSection` and `GridListItem`, and `useDragAndDrop` with `DropIndicator` |
+| Icons | `Icon` and `iconMarkup()` ([The icons](#the-icons)) |
+
+A component draws with the theme variables alone, never with a colour of Tailwind's palette.
+It opens its overlays in React Aria's portal, at the end of the page's body.
+The overlays stack at the layer that `--bk-z-index-overlay` gives.
+A component knows no block, no host and no board option.
+An input takes its value through its prop `bound` instead ([How an input takes its value](#how-an-input-takes-its-value)).
+
+The component `FormLayout` lays out the controls of a UI one below the other.
+It only arranges them, so a block's UI uses it without a form.
+The component `Form` is React Aria's form element, with its validation.
+
+Say a block keeps the first or the last rows of its data.
+Its state holds how many rows, `n`, and from which end, `direction`.
+Its UI might draw these controls:
+
+```tsx
+import type { ReactElement } from "react";
+import { FormLayout, NumberField, ToggleButton, ToggleButtonGroup } from "@blockr/ui";
+import type { Bound } from "@blockr/ui";
+
+export function HeadControls({ n, direction }: { n: Bound; direction: Bound }): ReactElement {
+  return (
+    <FormLayout>
+      <NumberField bound={n} label="Number of rows" minValue={0} step={1} />
+      <ToggleButtonGroup bound={direction} label="Direction" disallowEmptySelection>
+        <ToggleButton id="head">Head</ToggleButton>
+        <ToggleButton id="tail">Tail</ToggleButton>
+      </ToggleButtonGroup>
+    </FormLayout>
+  );
+}
+```
+
+The block's UI binds the controls to its state with the hooks of core's React SDK (`vignette("create-block", package = "blockr.core")`):
+
+```tsx
+import type { ReactElement } from "react";
+import type { BlockHost } from "@blockr/core";
+import { reactModule, useValue } from "@blockr/core/react";
+import type { ModuleProps } from "@blockr/core/react";
+import { HeadControls } from "./head-controls.tsx";
+
+type State = { n: number; direction: "head" | "tail" };
+
+export const api = 1;
+
+function HeadBlock({ host }: ModuleProps<BlockHost<State>>): ReactElement {
+  return <HeadControls n={useValue(host, "n")} direction={useValue(host, "direction")} />;
+}
+
+export default reactModule(HeadBlock);
+```
+
+Beside its components, blockr.ui puts the whole of React Aria on the page, once.
+A module imports React Aria's other components from `react-aria-components`.
+It imports React Aria's hooks from `react-aria`, and the state that the hooks keep from `react-stately`.
+A module uses them for what no component of blockr.ui does, such as a table that draws thousands of cells without hooks in each.
+A module still draws with blockr.ui's component wherever blockr.ui has one.
+
+A module never imports a package under `@react-aria/` or `@react-stately/`, nor an entry point inside React Aria's packages, such as `react-aria-components/Table`.
+Each of them would bundle a second copy of React Aria, with React contexts of its own.
+An item of the second copy inside blockr.ui's `ComboBox`, for one, would find no combo box.
+So the build preset fails such an import ([The React half](#the-react-half)).
+
+### The icons
+
+The icons of blockr's UIs are [Lucide's](https://lucide.dev/icons/), stroked lines with round caps.
+The entry `@blockr/ui/icons` offers every icon of Lucide's package `lucide`, at the version that blockr.ui pins.
+Each icon keeps the name that `lucide` exports, such as `Pin` or `Trash`.
+Each is the icon's shape as data, which the component `Icon` draws:
+
+```tsx
+import type { ReactElement } from "react";
+import { Button, Icon } from "@blockr/ui";
+import { Pin } from "@blockr/ui/icons";
+
+export function PinButton({ onPress }: { onPress: () => void }): ReactElement {
+  return (
+    <Button variant="quiet" aria-label="Pin the panel" onPress={onPress}>
+      <Icon icon={Pin} />
+    </Button>
+  );
+}
+```
+
+The component draws the shape in the colour of the text around it.
+It draws it 14 pixels wide, unless it is given a `size`.
+It hides the icon from screen readers unless it is given a `label`.
+What holds an icon names what it does instead, as the button's `aria-label` does above.
+
+The function `iconMarkup()` writes the same drawing as SVG markup, which is what the icon of a board action is:
+
+```ts
+import { iconMarkup } from "@blockr/ui";
+import { Plus } from "@blockr/ui/icons";
+
+export const icon = iconMarkup(Plus);
+```
+
+The page's import map names no entry for `@blockr/ui/icons`.
+So the build preset bundles the icons that a package imports into the package's own build.
+The page then loads only the icons that its packages draw.
+A package draws a new icon without a change to blockr.ui, unless Lucide added the icon after the version that blockr.ui pins.
+Where Lucide renames an icon, it keeps the old name as an alias, so an import of the old name still builds.
+A module never imports one of Lucide's packages itself, such as `lucide` or `lucide-react`.
+The build preset fails a build that does.
+
+### How an input takes its value
+
+An input of blockr.ui takes the value that it shows and submits through its prop `bound`, an object of the interface `Bound`:
+
+```ts
+export interface Bound {
+  readonly value: Json | undefined;          // the value that the binding last gave the input to show
+  readonly error: string | null;             // why the last submit was refused, which the input shows below itself
+  get(): Json | undefined;                   // the value as it is held now
+  commit(value: Json): Promise<boolean>;     // submits a pick at once, and resolves with whether it was taken
+  unset(): Promise<boolean>;                 // clears the value, as for an arg without a default
+  type(value: Json | undefined): void;       // takes what the user typed, which is submitted once the user pauses
+  flush(): void;                             // submits what the user typed at once, as on Enter or as the user leaves the input
+}
+```
+
+The interface names no host, no block and no board option.
+A block's UI gets a `Bound` from core's `useValue()`, which binds a state arg of the block or the value of a board option.
+Whatever implements `Bound` keeps the rules of a binding, as core's binding does:
+
+1. The binding holds a value, and gives it to the input as `value`.
+2. The input calls `commit()` as the user picks, `type()` as the user types, and `flush()` as the user presses Enter or leaves the input.
+3. The binding waits for the user to pause before it submits what the user typed.
+4. While the user types, the binding gives the input no value that the host announces.
+5. Where the host refuses a submit, the binding gives the input the reason, as `error`, and the input shows it below itself.
+
+So every input keeps the same rules, whoever implements `Bound`.
+A number passes through wrong values as the user types, as 15 on the way to 150.
+So a number field never calls `type()`, and a pause submits nothing.
+It calls `commit()` as the user presses Enter, leaves the field or steps the number.
+
+An input without a `bound` takes React Aria's value props instead: `value` with `onChange`, or `defaultValue`.
+A search field whose text no host holds is one such input.
+
+### Testing what a package draws
+
+The entry `@blockr/ui/stubs` holds the tools with which a package's tests act on blockr.ui's components.
+Its function `stubBound()` makes a stub of `Bound`.
+The stub holds a value and records each value that an input commits, types and flushes.
+It refuses every submit with an error once a test asks it to.
+A component that a test draws binds an input to the stub through `useStubBound()`, as a block's UI binds one through core's `useValue()`.
+So a package tests its controls apart from any host:
+
+```tsx
+import type { ReactElement } from "react";
+import { expect, test } from "vitest";
+import { draw, labelled, press, step, stubBound, texts, toggleButton, type, useStubBound } from "@blockr/ui/stubs";
+import { HeadControls } from "./head-controls.tsx";
+
+test("submits the number as the user presses Enter, and the end as the user picks it", async () => {
+  const n = stubBound(6);
+  const direction = stubBound("head");
+  function Controls(): ReactElement {
+    return <HeadControls n={useStubBound(n)} direction={useStubBound(direction)} />;
+  }
+  const { el } = draw(<Controls />);
+  const field = labelled(el, "Number of rows");
+  expect(field.value).toBe("6");
+
+  await step(() => {
+    type(field, "10");
+  });
+  expect(n.committed).toEqual([]);
+  await step(() => {
+    press(field, "Enter");
+  });
+  expect(n.value).toBe(10);
+
+  await step(() => {
+    toggleButton(el, "Direction", "Tail").click();
+  });
+  expect(direction.committed).toEqual(["tail"]);
+
+  n.refuse("The table has 8 rows.");
+  await step(() => {
+    type(field, "20");
+    press(field, "Enter");
+  });
+  expect(n.value).toBe(10);
+  expect(texts(el, '[role="alert"]')).toEqual(["The table has 8 rows."]);
+});
+```
+
+The test draws the controls with `draw()` and acts on them as a user does:
+
+- The helper `type()` types into a field one keystroke at a time.
+- The helper `press()` presses a key.
+- The helper `toggleButton()` finds a toggle button by the label of its group and by its own.
+
+Each act runs in `step()`, which lets React draw what the act changed before the test reads the page.
+Other helpers pick the rows of a select, as `picked()` does.
+Others open a menu, or list the rows of a table, a tree or a grid list.
+They know where React Aria draws each part, such as a select's list at the end of the page's body.
+A change to a component and the change to its helpers ship in the same release of blockr.ui.
+
+The stub itself is no `Bound`, so TypeScript refuses to let an input take the stub directly.
+Such an input would never draw again as the stub's value changes.
+The stub takes every submit at once, with no pause.
+A test of a binding's own rules, such as the pause before a submit, binds the input through `useValue()` on core's stubs of the hosts.
+
+The tests run on Vitest, with happy-dom as their DOM.
+Loading `@blockr/ui/stubs` makes happy-dom do as a browser does where blockr.ui's components need it.
+
+## Building on blockr.ui
+
+A package builds its modules and its stylesheet against blockr.ui through the build preset, `@blockr/ui/build`.
+The preset has two halves.
+The package's call of esbuild takes the half for React, and the package's stylesheet imports the half for Tailwind CSS.
+Core's `install_js_types()` puts `@blockr/ui` into a package's `node_modules`, beside `@blockr/core`, where the package depends on blockr.ui directly or through core.
+
+### The React half
+
+A package's build spreads the options of the preset into its own call of esbuild:
+
+```ts
+import * as esbuild from "esbuild";
+import { preset } from "@blockr/ui/build";
+
+await esbuild.build({ ...preset, entryPoints: ["srcts/controls.tsx"], outdir: "inst/js" });
+```
+
+The preset bundles a module as an ES module for the browser.
+It leaves these imports to the page's import map:
+
+- React's entry points: `react`, `react/jsx-runtime`, `react-dom` and `react-dom/client`.
+- The components, `@blockr/ui`.
+- React Aria's three packages: `react-aria-components`, `react-aria` and `react-stately`.
+
+So the files of a package hold none of them.
+The page runs one copy of each, from blockr.ui's files.
+Say `srcts/controls.tsx` exports the controls and the button of the examples above.
+The build writes it into a file that starts with these lines:
+
+```js
+// srcts/head-controls.tsx
+import { FormLayout, NumberField, ToggleButton, ToggleButtonGroup } from "@blockr/ui";
+import { jsx, jsxs } from "react/jsx-runtime";
+```
+
+The preset bundles the icons that a module imports from `@blockr/ui/icons`, since the page's import map names no entry for them.
+The preset fails a build that would bundle a second copy of something that the page holds once.
+Its error names what to import instead.
+It fails a build that imports any of these:
+
+- An entry point of React that the import map does not name, such as `react-dom/server`.
+- A package under `@react-aria/` or `@react-stately/`, or an entry point inside React Aria's packages, such as `react-aria-components/Table`.
+- One of React Aria's packages at another version than the one in blockr.ui's files.
+- One of Lucide's packages, such as `lucide` or `lucide-react`.
+
+A package that builds on core spreads core's preset, `@blockr/core/build`, in place of blockr.ui's.
+Core's preset extends blockr.ui's with core's own entries, such as `@blockr/core/react`.
+
+Beside the preset, `@blockr/ui/build` holds two more parts of every package's build, whichever preset the package spreads:
+
+- The vendor check, `vendorCheck`, is a plugin of esbuild.
+  It fails a build that puts code from `node_modules` into one of the package's own files.
+  A package's own files hold its own code alone, unminified.
+  The libraries that it bundles, such as the icons that it draws, go minified into a vendor file of its own.
+  Its own files import them from there.
+- The function `staticImports()` lists what each file of a build imports up front.
+  The package writes that list into `inst/js/preload.json`.
+  R names those files in the head of the page, so that the browser fetches them as the page loads.
+
+### The Tailwind half
+
+A package that writes classes builds them with Tailwind CSS, under a prefix of its own ([Prefixes](#prefixes)).
+Its stylesheet imports Tailwind's theme and utilities under that prefix, and then the stylesheet of the preset, as core's stylesheet does under `bc`:
+
+```css
+@layer theme;
+@import "tailwindcss/theme.css" layer(theme) prefix(bc);
+@import "tailwindcss/utilities.css" source(none);
+@import "@blockr/ui/preset.css";
+@source "./**/*.{ts,tsx}";
+```
+
+The stylesheet of the preset maps each name of Tailwind's theme that has a theme variable onto that variable.
+So the package's classes compile to reads of the theme variables.
+Take a count of rows in a muted pill, written with core's prefix:
+
+```tsx
+<p className="bc:m-0 bc:rounded-md bc:bg-muted bc:px-2 bc:text-sm bc:text-muted-foreground">{rows} rows</p>
+```
+
+For it, Tailwind writes these rules:
+
+```css
+.bc\:m-0 {
+  margin: 0;
+}
+
+.bc\:rounded-md {
+  border-radius: calc(var(--bk-radius) * .8);
+}
+
+.bc\:bg-muted {
+  background-color: var(--bk-color-muted);
+}
+
+.bc\:px-2 {
+  padding-inline: calc(var(--bk-spacing) * 2);
+}
+
+.bc\:text-sm {
+  font-size: var(--bk-text-sm);
+  line-height: var(--tw-leading, calc(1.25 / .875));
+}
+
+.bc\:text-muted-foreground {
+  color: var(--bk-color-muted-foreground);
+}
+```
+
+The stylesheet of the preset does four more things:
+
+- It drops Tailwind's palette, but for black and white.
+  It also drops the steps of the faces, the sizes of text, the radii and the shadows that the theme variables lack.
+  Tailwind writes nothing for a class that it does not know, without a warning.
+  So the check fails such a class ([The checks](#the-checks)).
+- It keys the variant `dark:` on `data-bk-mode="dark"` on the page's root.
+- It leaves out Tailwind's reset of the whole page, so that nothing that one package loads styles the elements of another.
+- It keeps the utilities outside any cascade layer, so that other CSS on the page, such as Bootstrap's, does not win over them.
+
+### Prefixes
+
+Tailwind writes CSS only for the classes that it finds in the files that it scans.
+So each package builds its own classes, under a prefix of its own, as core writes `bc:flex`.
+Two stylesheets built apart that wrote the same class would override each other in the order in which they load.
+
+The prefix `bk` belongs to blockr.ui.
+Its theme variables, its classes and the mode attribute `data-bk-mode` carry it.
+The classes under `bk:` come and go with blockr.ui's components.
+So no other package writes a class under `bk:`, and the check fails another package's build that does.
+A package that writes no classes, such as one whose CSS is written by hand, runs no Tailwind.
+It reads the theme variables in its CSS, as `var(--bk-color-card)`, and runs the check on its CSS and on its code.
+
+### The list of theme variables
+
+What the stylesheet of blockr.ui provides other packages is a list, which blockr.ui declares.
+It holds the names of the theme variables, the font Open Sans and the mode attribute.
+The build preset exports the list as `themeVariables`.
+In R, `theme_variables()` returns the names of the theme variables, from a file that blockr.ui's build writes from the same list.
+So the two never disagree.
+The stylesheet of blockr.ui sets every variable of the list, whether or not one of its own components reads it.
+So another package never loses a variable that it reads.
+The classes of blockr.ui are not on the list.
+
+The list is a promise to other packages:
+
+- A minor release of blockr.ui may add to the list.
+- Only a major release removes or renames what the list holds.
+- Each major release names one version of Tailwind CSS, which every package's build runs.
+  The stylesheets of all packages register Tailwind's own properties, such as `--tw-shadow`, without a prefix.
+  Stylesheets written by two versions of Tailwind could register them differently.
+
+### The checks
+
+The function `themeCheck()` of `@blockr/ui/build` checks the stylesheets that a build wrote and the code that it wrote them from.
+It fails the build in these cases:
+
+- A stylesheet reads a variable under `--bk-` that the list lacks, in plain CSS or in an arbitrary value.
+- A stylesheet sets a variable under `--bk-`, which only blockr.ui's stylesheet may do.
+- Another version of Tailwind CSS than blockr.ui's wrote a stylesheet.
+- The code names a colour of Tailwind's palette, or a step that the theme variables lack, under any prefix.
+- The code names a class under `bk:`.
+
+A package's build compiles its stylesheet with Tailwind's plugin for PostCSS, as core's and blockr.ui's builds do.
+It then runs the check on the stylesheet and on the files that Tailwind scanned for classes:
+
+```ts
+import { readFile, writeFile } from "node:fs/promises";
+import tailwindcss from "@tailwindcss/postcss";
+import * as esbuild from "esbuild";
+import postcss from "postcss";
+import { preset, themeCheck } from "@blockr/ui/build";
+
+await esbuild.build({ ...preset, entryPoints: ["srcts/controls.tsx"], outdir: "inst/js" });
+
+const from = "srcts/index.css";
+const result = await postcss([tailwindcss({ optimize: { minify: false } })]).process(await readFile(from, "utf8"), { from });
+await writeFile("inst/js/controls.css", result.css);
+
+// Tailwind tells PostCSS of each file that it scanned for classes, as a dependency of the stylesheet.
+const scanned = result.messages.flatMap((message) =>
+  message.type === "dependency" && typeof message.file === "string" && !message.file.endsWith(".css") ? [message.file] : [],
+);
+
+await themeCheck({ stylesheets: ["inst/js/controls.css"], code: scanned });
+```
+
+For a stylesheet and a file of code that break the check, the error names each problem by its file and line:
+
+```
+The build fails themeCheck() of @blockr/ui/build:
+bad.css:1: The stylesheet reads --bk-color-blue, which the list of theme variables lacks. Read one of the variables that themeVariables in @blockr/ui/build lists.
+bad.css:2: The stylesheet sets --bk-color-card, but only blockr.ui's stylesheet sets variables under --bk-. A frontend gives its values in a theme, which its method of frontend_theme() returns in R.
+srcts/bad.tsx:1: bc:bg-blue-600 names blue-600 of Tailwind's palette, which the build preset drops, so the class writes nothing. Draw with the colour of a job, such as primary or muted-foreground, which a theme and the mode reach.
+srcts/bad.tsx:1: bk:flex is a class under bk:, which blockr.ui alone writes, for its own components. Write it under the package's own prefix.
+srcts/bad.tsx:1: bc:shadow-2xl names a step of the shadows that the theme variables lack, which the build preset drops, so the class writes nothing. Draw with a step that they hold: shadow-sm, shadow-md, shadow-lg or shadow-none.
+```
+
+## An app's theme
+
+An app may give the page a theme of its own, whose values win over the frontend's and over blockr.ui's defaults.
+So a company's design restyles the whole page, under any frontend, the frontend's own parts included.
+The app's theme sets theme variables, as a frontend's theme does, so one theme fits every frontend.
+It sets the variables whose values the app wants its own, and leaves the rest to the frontend.
+
+The theme variables name jobs, so an app's theme sets every job whose look it changes.
+A company's brand colour, for one, takes four variables in each mode:
+
+- The variable `--bk-color-primary` takes the colour itself.
+- The variable `--bk-color-primary-foreground` takes the text on it.
+- The variable `--bk-color-primary-text` takes the text of links and messages.
+- The variable `--bk-color-ring` takes the focus ring.
+
+Nothing derives the values of other jobs from the brand colour as the page draws.
+So a theme holds every value that the page draws, where its author sees and checks it.
+A package that makes themes, such as blockr.theme, may compute such values as it makes a theme.
+
+The function `new_blockr_theme()` makes the theme, from values for theme variables and the files of any fonts that the theme brings:
+
+```{r}
+theme <- new_blockr_theme(
+  light = list(
+    "--bk-color-primary" = "#be2bbb",
+    "--bk-color-primary-foreground" = "#ffffff",
+    "--bk-color-primary-text" = "#9b1f98",
+    "--bk-color-ring" = "#be2bbb",
+    "--bk-font-sans" = "Inter, sans-serif"
+  ),
+  dark = list(
+    "--bk-color-primary" = "#d66bd3",
+    "--bk-color-primary-foreground" = "#0e1219",
+    "--bk-color-primary-text" = "#e08fdd",
+    "--bk-color-ring" = "#d66bd3",
+    "--bk-font-sans" = "Inter, sans-serif"
+  ),
+  fonts = list(
+    list(family = "Inter", file = "fonts/inter-latin.woff2", weight = "100 900")
+  )
+)
+
+is_blockr_theme(theme)
+```
+
+The theme's `light` and `dark` hold the values of each mode, each under the full name of its theme variable.
+Each value holds in its own mode alone.
+So a theme with values for light mode alone leaves dark mode to the frontend.
+A value is any CSS value, which R writes into the page as it is.
+Its `fonts` hold a face for each file of a font, with the font's `family`, the path of its `file`, and the `weight` and the `style` of the face.
+The weight and the style default to `normal`, as they do for a face in CSS.
+
+The function refuses a name that `theme_variables()` lacks, and names it:
+
+```{r, error = TRUE}
+new_blockr_theme(light = list("--bk-color-primay" = "#be2bbb"))
+```
+
+So a misspelt name, or a name that a later version of blockr.ui drops, stops the app as it starts.
+The function also refuses a value that holds `}` or `<`, either of which would end the rule or the element that holds it.
+
+An app gives its theme to core's `serve()`, whose argument `theme` defaults to the blockr option `theme`:
+
+```r
+library(blockr.core)
+
+serve(new_board(), theme = theme)
+```
+
+An app's script may set the R option `blockr.theme` instead, as `options(blockr.theme = theme)` does.
+A site-wide R profile, `Rprofile.site`, can set the option too, for every app that runs on its installation of R.
+An app's script overrides it.
+The theme is an R object, so no environment variable can give it.
+The function `serve()` refuses a theme that `new_blockr_theme()` did not make, such as a string.
+Where nothing sets it, the page draws with the frontend's values and blockr.ui's defaults.
+Each method of `serve()` takes the theme, so a block that `serve()` serves alone draws in it too.
+
+Core writes the theme's rules into the page's head, after the frontend's, with the method of `format()`:
+
+```{r}
+cat(format(theme))
+```
+
+So the theme holds from the first paint.
+Every board that the app opens draws in it, since the page keeps its head.
+As `dark_mode` switches `data-bk-mode`, the browser applies the rule of the new mode.
+For each font of the theme, core serves the font's file and writes a face for it, with `@font-face` and `font-display: swap`.
+It names the file in the page's head as well, so that the browser fetches it as the page loads.
+Until the file arrives, the text draws in the next face of the stack.
+
+A theme sets values, never parts.
+So a company's logo is the frontend's to take, through an argument or a blockr option of the frontend's own.
+A theme holds for the whole page, since its rules set the page's root, from which every overlay inherits.
+The colours of the categories of block classes stay outside every theme.
+Core's blockr option `category_colors` sets them.
