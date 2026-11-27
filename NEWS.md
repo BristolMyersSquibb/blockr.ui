@@ -65,9 +65,9 @@
   went unseen.
   A package lists the setup in the `setupFiles` of its `vitest.config.ts`, and
   blockr.ui's own tests run with it too.
-  A test takes the errors that it sets off on purpose off the console with
-  `expectedErrors()` of `@blockr/ui/stubs`, which gives the messages that it
-  took.
+  A test takes the errors and the warnings that it sets off on purpose off the
+  console with `expectedErrors()` and `expectedWarnings()` of
+  `@blockr/ui/stubs`, which give the messages that they took (#138).
   A package holds an exception for the moment with `allowMessage()` of the
   setup, such as an error that another package fixes later.
   The setup gives happy-dom the element `search`, which happy-dom does not

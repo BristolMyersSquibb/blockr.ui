@@ -2,7 +2,7 @@
 // which of them the setup of the tests fails (./vitest.config.ts).
 
 import { afterEach, describe, expect, test } from "vitest";
-import { expectedErrors } from "../../stubs/index.ts";
+import { expectedErrors, expectedWarnings } from "../../stubs/index.ts";
 
 test("prints nothing", () => {
   expect(document.body.children).toHaveLength(0);
@@ -26,6 +26,11 @@ test("takes the errors that it sets off on purpose off the console", () => {
 test("prints an error other than those that it sets off on purpose", () => {
   expectedErrors(/on purpose/);
   console.error("An error that the test does not expect");
+});
+
+test("prints a warning other than those that it sets off on purpose", () => {
+  expectedWarnings(/on purpose/);
+  console.warn("A warning that the test does not expect");
 });
 
 test("prints an error that the setup of the package allows", () => {

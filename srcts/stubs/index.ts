@@ -11,8 +11,9 @@
 //   They know where React Aria draws each part, such as a select's list at
 //   the end of the page's body, so that a change to a component and the
 //   change to its helper ship in the same release of blockr.ui.
-// - The helper expectedErrors(), with which a test takes the errors that it
-//   sets off on purpose off the console (./console.ts).
+// - The helpers expectedErrors() and expectedWarnings(), with which a test
+//   takes the errors and the warnings that it sets off on purpose off the
+//   console (./console.ts).
 // Loading them makes happy-dom, the DOM that the tests run on, do as a
 // browser does where blockr.ui's components need it (./dom.ts).
 // The setup that fails a test on an error or a warning that it prints is an
@@ -23,7 +24,7 @@ import "./dom.ts";
 
 export { stubBound, useStubBound } from "./bound.ts";
 export type { StubBound } from "./bound.ts";
-export { expectedErrors } from "./console.ts";
+export { expectedErrors, expectedWarnings } from "./console.ts";
 export {
   choose,
   drop,

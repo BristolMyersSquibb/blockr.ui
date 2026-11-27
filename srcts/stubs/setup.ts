@@ -19,8 +19,9 @@
 // printed one outside a test, as the file loaded or between two tests.
 // Every message still reaches the console, so that Vitest shows it with the
 // test that fails.
-// A test names the errors that it sets off on purpose with expectedErrors()
-// (./console.ts), which takes them off the console before the setup sees them.
+// A test names the errors and the warnings that it sets off on purpose with
+// expectedErrors() and expectedWarnings() (./console.ts), which take them off
+// the console before the setup sees them.
 // A package that sets off a message that it cannot fix yet, such as an error
 // that another package fixes later, holds it as an exception with
 // allowMessage(), in a setup file of its own.

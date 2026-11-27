@@ -130,15 +130,21 @@ function snapshotOf(stub, own) {
 import { format } from "node:util";
 import { onTestFinished } from "vitest";
 function expectedErrors(...patterns) {
+  return expected("error", patterns);
+}
+function expectedWarnings(...patterns) {
+  return expected("warn", patterns);
+}
+function expected(level, patterns) {
   const taken = [];
-  const print = console.error;
-  console.error = (...args) => {
+  const print = level === "error" ? console.error : console.warn;
+  console[level] = (...args) => {
     const message = format(...args);
     if (patterns.some((pattern) => message.search(pattern) >= 0)) taken.push(message);
     else print(...args);
   };
   onTestFinished(() => {
-    console.error = print;
+    console[level] = print;
   });
   return taken;
 }
@@ -469,6 +475,7 @@ export {
   draw,
   drop,
   expectedErrors,
+  expectedWarnings,
   fieldError,
   find,
   inert,

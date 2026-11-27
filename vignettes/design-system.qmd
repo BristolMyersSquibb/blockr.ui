@@ -613,6 +613,8 @@ test("logs the error of a request that fails, and shows no rows", async () => {
 });
 ```
 
+A test names a warning that it sets off on purpose with `expectedWarnings()`, which takes the warnings that match its patterns off the console in the same way.
+
 A package may set off an error that it cannot fix yet, such as an error that another package fixes in a later release.
 The package holds such an exception in a setup file of its own, with `allowMessage()`.
 The check given to `allowMessage()` runs as the message is printed, so it can read from the stack where the message came from:
@@ -629,7 +631,7 @@ allowMessage(
 );
 ```
 
-The check of `allowMessage()` and the patterns of `expectedErrors()` read a message as the console prints it, with the values of placeholders such as `%s` filled in.
+The check of `allowMessage()` and the patterns of `expectedErrors()` and `expectedWarnings()` read a message as the console prints it, with the values of placeholders such as `%s` filled in.
 
 The setup also gives happy-dom the element `search`, which browsers draw as a plain element, but which happy-dom does not know.
 Without it, React would warn of an unknown element wherever a UI draws a `search`, and the setup would fail the test.

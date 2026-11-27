@@ -1,7 +1,8 @@
 // The setup that fails a test on an error or a warning that it prints
 // (./setup.ts), with which blockr.ui's own tests run too (../../vitest.config.ts),
-// and expectedErrors(), with which a test takes the errors that it sets off on
-// purpose off the console (./console.ts).
+// and expectedErrors() and expectedWarnings(), with which a test takes the
+// errors and the warnings that it sets off on purpose off the console
+// (./console.ts).
 // The first test runs the tests of ../testing/console in a Vitest of their own,
 // with the setup, and reads which of them the setup fails, and why.
 
@@ -11,7 +12,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { expect, test } from "vitest";
-import { draw, expectedErrors } from "./index.ts";
+import { draw, expectedErrors, expectedWarnings } from "./index.ts";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -74,6 +75,7 @@ test("fails a test that prints an error or a warning that it did not set off on 
     ["prints a warning", "failed", [`${heading}\nconsole.warn: A warning`]],
     ["takes the errors that it sets off on purpose off the console", "passed", []],
     ["prints an error other than those that it sets off on purpose", "failed", [`${heading}\nconsole.error: An error that the test does not expect`]],
+    ["prints a warning other than those that it sets off on purpose", "failed", [`${heading}\nconsole.warn: A warning that the test does not expect`]],
     // The setup of the package holds the error as an exception (../testing/console/allow.ts).
     ["prints an error that the setup of the package allows", "passed", []],
     ["prints an error after the test, in the hook", "failed", [`${heading}\nconsole.error: An error after the test`]],
@@ -94,6 +96,17 @@ test("takes only the errors that match its patterns off the console, in order, a
 
   // A pattern with the flag g matches each message from its start.
   expect([taken, others]).toEqual([["Set off on purpose, once", "Set off twice", "Set off twice again"], ["Another error"]]);
+});
+
+test("takes only the warnings that match its patterns off the console, and no error", () => {
+  // The test calls expectedWarnings() last, so that it would see the error
+  // first, and take it, if it took errors too.
+  const errors = expectedErrors(/on purpose/);
+  const warnings = expectedWarnings(/on purpose/);
+  console.warn("Warned on %s", "purpose");
+  console.error("Erred on purpose");
+
+  expect([warnings, errors]).toEqual([["Warned on purpose"], ["Erred on purpose"]]);
 });
 
 test("draws the element search as a plain HTMLElement, as browsers do, so that React warns of no unknown element", () => {
