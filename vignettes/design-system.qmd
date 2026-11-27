@@ -570,6 +570,70 @@ A test of a binding's own rules, such as the pause before a submit, binds the in
 The tests run on Vitest, with happy-dom as their DOM.
 Loading `@blockr/ui/stubs` makes happy-dom do as a browser does where blockr.ui's components need it.
 
+### Failing a test on what it prints
+
+Vitest shows what a passing test prints to the console only on request.
+So an error or a warning that a passing test sets off goes unseen.
+The setup `@blockr/ui/stubs/setup` fails a test on any error or warning that it prints, through `console.error()` or `console.warn()`.
+The messages include React's warning of an update outside `act()`.
+The helpers `step()` and `draw()` run inside `act()`, so a test that acts and draws through them sets off no such warning.
+A package lists the setup in the `setupFiles` of its `vitest.config.ts`, before its own setup files:
+
+```ts
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: {
+    environment: "happy-dom",
+    include: ["srcts/**/*.test.{ts,tsx}"],
+    setupFiles: ["@blockr/ui/stubs/setup", "./srcts/testing/setup.ts"],
+  },
+});
+```
+
+The setup checks each test after the test's own hooks have run, so a message that a hook prints fails the test too.
+A message printed outside any test, such as one that a test file prints as it loads, fails the file once its tests have run.
+Every message still reaches the console, so Vitest shows it with the test that fails.
+
+A test that sets off an error on purpose names it with `expectedErrors()`, which takes the errors that match its patterns off the console for the rest of the test.
+It gives the messages that it took, in order, so that the test can count them:
+
+```ts
+import { expect, test } from "vitest";
+import { expectedErrors } from "@blockr/ui/stubs";
+import { loadTable } from "./table.ts";
+
+test("logs the error of a request that fails, and shows no rows", async () => {
+  const taken = expectedErrors(/HTTP 503/);
+
+  const rows = await loadTable("https://example.org/unavailable");
+
+  expect(rows).toEqual([]);
+  expect(taken).toHaveLength(1);
+});
+```
+
+A package may set off an error that it cannot fix yet, such as an error that another package fixes in a later release.
+The package holds such an exception in a setup file of its own, with `allowMessage()`.
+The check given to `allowMessage()` runs as the message is printed, so it can read from the stack where the message came from:
+
+```ts
+import { allowMessage } from "@blockr/ui/stubs/setup";
+
+// React's error that drawForm() of another package calls flushSync() while
+// React draws, until that package fixes it.
+allowMessage(
+  (message) =>
+    message.startsWith("flushSync was called from inside a lifecycle method") &&
+    /\bdrawForm\b/.test(new Error().stack ?? ""),
+);
+```
+
+The check of `allowMessage()` and the patterns of `expectedErrors()` read a message as the console prints it, with the values of placeholders such as `%s` filled in.
+
+The setup also gives happy-dom the element `search`, which browsers draw as a plain element, but which happy-dom does not know.
+Without it, React would warn of an unknown element wherever a UI draws a `search`, and the setup would fail the test.
+
 ## Building on blockr.ui
 
 A package builds its modules and its stylesheet against blockr.ui through the build preset, `@blockr/ui/build`.

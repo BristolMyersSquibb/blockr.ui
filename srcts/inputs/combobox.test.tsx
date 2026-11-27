@@ -322,7 +322,9 @@ describe("a select of one item", () => {
 
     // The browser moves the focus to a button as a mouse presses it, which
     // happy-dom leaves out, so the test does that after the press.
-    field.focus();
+    await step(() => {
+      field.focus();
+    });
     await step(() => {
       button?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, button: 0 }));
       button?.focus();

@@ -55,7 +55,8 @@
 //   and for a directory that COPIED names without its license file,
 //   so that no code or font ships without its license.
 // - The components, srcts/index.ts, the build preset, srcts/build, and what blockr.ui ships for tests, srcts/stubs,
-//   go into inst/types, which a package's build and its tests resolve as `@blockr/ui`, `@blockr/ui/build` and `@blockr/ui/stubs`:
+//   go into inst/types, which a package's build and its tests resolve as `@blockr/ui`, `@blockr/ui/build` and `@blockr/ui/stubs`,
+//   with the setup of the tests, srcts/stubs/setup.ts, as `@blockr/ui/stubs/setup`:
 //   their declarations, each bundled, and the package.json that names them.
 //   The icons of Lucide's package lucide go there too, as `@blockr/ui/icons`:
 //   an ES module that re-exports each of them, and its declarations.
@@ -528,7 +529,8 @@ function packageVersion(name: string): string {
 }
 
 // The package that inst/types is: blockr.ui's components, as `@blockr/ui`,
-// the build preset, as `@blockr/ui/build`, and what blockr.ui ships for tests, as `@blockr/ui/stubs`,
+// the build preset, as `@blockr/ui/build`, what blockr.ui ships for tests, as `@blockr/ui/stubs`,
+// and the setup of the tests, as `@blockr/ui/stubs/setup`,
 // each with its declarations and bundled,
 // Lucide's icons, as `@blockr/ui/icons` (iconsEntry()),
 // and the Tailwind half of the preset, as `@blockr/ui/preset.css`.
@@ -550,6 +552,9 @@ function packageVersion(name: string): string {
 // The stubs act through vitest, on which every package's tests run.
 // The bundle leaves vitest an import, which resolves to the vitest of the package that runs the tests,
 // so the package names no vitest.
+// The setup gives happy-dom, the DOM that those tests run on, an element that happy-dom does not know.
+// So the bundle leaves happy-dom an import as well, which resolves to the happy-dom that the tests run on,
+// and the package names no happy-dom either.
 export const TYPES_PACKAGE = {
   name: "@blockr/ui",
   private: true,
@@ -561,6 +566,7 @@ export const TYPES_PACKAGE = {
     "./build": { types: "./build/index.d.ts", default: "./build/index.js" },
     "./icons": { types: "./icons/index.d.ts", default: "./icons/index.js" },
     "./stubs": { types: "./stubs/index.d.ts", default: "./stubs/index.js" },
+    "./stubs/setup": { types: "./stubs/setup.d.ts", default: "./stubs/setup.js" },
     "./preset.css": "./preset.css",
   },
   dependencies: {
@@ -575,12 +581,14 @@ export const TYPES_PACKAGE = {
 };
 
 // The sources in srcts that the types package bundles, each as the entry that it names:
-// the components as `@blockr/ui`, the build preset as `@blockr/ui/build`
-// and what blockr.ui ships for tests as `@blockr/ui/stubs`.
+// the components as `@blockr/ui`, the build preset as `@blockr/ui/build`,
+// what blockr.ui ships for tests as `@blockr/ui/stubs`
+// and the setup of the tests as `@blockr/ui/stubs/setup`.
 const BUNDLED = [
   { name: "index", source: "index.ts" },
   { name: "build/index", source: join("build", "index.ts") },
   { name: "stubs/index", source: join("stubs", "index.ts") },
+  { name: "stubs/setup", source: join("stubs", "setup.ts") },
 ];
 
 // Writes inst/types: the declarations of the sources that BUNDLED names,
@@ -642,8 +650,9 @@ export async function types(root: string): Promise<string[]> {
     jsx: "automatic",
     // The peers and the dependencies that the package.json names stay imports,
     // with their subpaths, such as react/jsx-runtime.
-    // So do Node's own modules, which the build preset reads, and vitest, which the stubs act through.
-    external: [...imported, ...imported.map((name) => `${name}/*`), "node:*", "vitest"],
+    // So do Node's own modules, which the build preset reads, vitest, which the stubs act through,
+    // and happy-dom, whose list of elements the setup adds to.
+    external: [...imported, ...imported.map((name) => `${name}/*`), "node:*", "vitest", "happy-dom", "happy-dom/*"],
     logLevel: "warning",
     metafile: true,
   });

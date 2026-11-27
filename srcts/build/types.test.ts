@@ -4,6 +4,7 @@
 // the declarations of blockr.ui's components and of the build preset, each bundled,
 // the entry of Lucide's icons, `@blockr/ui/icons`, the Tailwind half of the preset,
 // and the package.json that names them, with React and React Aria as its peers and lucide as its dependency.
+// The setup of the tests goes there as an entry of its own, `@blockr/ui/stubs/setup`.
 // How a package's stylesheet builds against the Tailwind half is in ./stylesheet.test.ts.
 
 import { copyFile, cp, mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
@@ -80,6 +81,47 @@ test("writes the declarations of the components and of the build preset, each bu
   const build = (await import(pathToFileURL(join(root, "inst/types/build/index.js")).href)) as { where: (dir: string) => string };
   expect(components.greet("you")).toBe("Hello, you");
   expect(build.where("pkg")).toBe(join("pkg", "inst"));
+}, 60_000);
+
+test("writes the setup of the tests as `@blockr/ui/stubs/setup`, apart from the stubs, leaving happy-dom, vitest and Node's own modules imports", async () => {
+  await write(root, {
+    "srcts/stubs/index.ts": "export const stubbed = true;\n",
+    "srcts/stubs/setup.ts": `import { format } from "node:util";
+import HTMLElementConfig from "happy-dom/lib/config/HTMLElementConfig.js";
+import { afterEach } from "vitest";
+
+export function known(): string {
+  return format("%d elements", Object.keys(HTMLElementConfig).length);
+}
+
+afterEach(() => undefined);
+`,
+  });
+
+  const written = await types(root);
+
+  expect(written.filter((file) => file.startsWith("inst/types/stubs/"))).toEqual([
+    "inst/types/stubs/index.d.ts",
+    "inst/types/stubs/index.js",
+    "inst/types/stubs/setup.d.ts",
+    "inst/types/stubs/setup.js",
+  ]);
+  expect(await readFile(join(root, "inst/types/stubs/setup.d.ts"), "utf8")).toContain("export declare function known(): string;");
+
+  // The setup imports happy-dom's list of elements rather than a copy of it,
+  // so that the element that the setup adds reaches the happy-dom that the
+  // tests run on.
+  const result = await esbuild.build({
+    entryPoints: [join(root, "inst/types/stubs/setup.js")],
+    bundle: true,
+    external: ["*"],
+    format: "esm",
+    metafile: true,
+    write: false,
+    logLevel: "silent",
+  });
+  const [output] = Object.values(result.metafile.outputs);
+  expect(output?.imports.map(({ path }) => path).sort()).toEqual(["happy-dom/lib/config/HTMLElementConfig.js", "node:util", "vitest"]);
 }, 60_000);
 
 test("names React and React Aria's three packages as the peers of the package, at the versions that blockr.ui's files hold", async () => {

@@ -126,6 +126,23 @@ function snapshotOf(stub, own) {
   return next;
 }
 
+// srcts/stubs/console.ts
+import { format } from "node:util";
+import { onTestFinished } from "vitest";
+function expectedErrors(...patterns) {
+  const taken = [];
+  const print = console.error;
+  console.error = (...args) => {
+    const message = format(...args);
+    if (patterns.some((pattern) => message.search(pattern) >= 0)) taken.push(message);
+    else print(...args);
+  };
+  onTestFinished(() => {
+    console.error = print;
+  });
+  return taken;
+}
+
 // srcts/stubs/inputs.ts
 import { vi } from "vitest";
 function find(el, selector, type2 = HTMLElement) {
@@ -451,6 +468,7 @@ export {
   cleared,
   draw,
   drop,
+  expectedErrors,
   fieldError,
   find,
   inert,

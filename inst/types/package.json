@@ -20,6 +20,10 @@
       "types": "./stubs/index.d.ts",
       "default": "./stubs/index.js"
     },
+    "./stubs/setup": {
+      "types": "./stubs/setup.d.ts",
+      "default": "./stubs/setup.js"
+    },
     "./preset.css": "./preset.css"
   },
   "dependencies": {
