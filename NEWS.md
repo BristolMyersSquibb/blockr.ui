@@ -59,6 +59,20 @@
   Loading the entry makes happy-dom do as a browser does where the components
   need it.
 
+* The setup `@blockr/ui/stubs/setup` fails a test on an error or a warning
+  that the test prints to the console (#133).
+  Vitest shows what a passing test prints only on request, so such a message
+  went unseen.
+  A package lists the setup in the `setupFiles` of its `vitest.config.ts`, and
+  blockr.ui's own tests run with it too.
+  A test takes the errors that it sets off on purpose off the console with
+  `expectedErrors()` of `@blockr/ui/stubs`, which gives the messages that it
+  took.
+  A package holds an exception for the moment with `allowMessage()` of the
+  setup, such as an error that another package fixes later.
+  The setup gives happy-dom the element `search`, which happy-dom does not
+  know, so that React warns of no unknown element.
+
 * The build writes blockr.ui's vendor file, `vendor-<hash>.js`, with what its
   components draw with beside React and React Aria: functions of
   `@internationalized/date` and the icons of Lucide that they draw (#114).

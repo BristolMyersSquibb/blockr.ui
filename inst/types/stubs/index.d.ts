@@ -1,6 +1,7 @@
 import "./dom.ts";
 export { stubBound, useStubBound } from "./bound.ts";
 export type { StubBound } from "./bound.ts";
+export { expectedErrors } from "./console.ts";
 export { choose, drop, fieldError, find, numberSaid, picking, press, pressAndRelease, texts, toggle, toggleButton, toggleGroup, toggles, type, } from "./inputs.ts";
 export { inert, itemDescribed, menuGroup, menuItem, menuItems, openDialog, openMenu, pointerPress, pointTo, shownTip, tipOnFocus, } from "./overlays.ts";
 export { draw, step } from "./react.ts";

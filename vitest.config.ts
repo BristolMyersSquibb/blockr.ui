@@ -18,8 +18,11 @@ export default defineConfig({
     // and longer while the other test files run beside it.
     testTimeout: 60_000,
     hookTimeout: 60_000,
+    // Fails a test on an error or a warning that it prints, with the setup that
+    // blockr.ui offers packages.
+    // That setup comes first, so that its check after each test runs last.
     // Unmounts every React root after each test, and empties the page.
-    setupFiles: ["./srcts/testing/setup.ts"],
+    setupFiles: ["./srcts/stubs/setup.ts", "./srcts/testing/setup.ts"],
     // Every run measures the coverage of the tests, `npm test` included.
     // The typescript job of blockr.ci uploads coverage/lcov.info to Codecov.
     // The lcov reporter writes that file, and an HTML report beside it in coverage/lcov-report.

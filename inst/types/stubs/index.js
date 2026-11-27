@@ -25,6 +25,19 @@ if (typeof document !== "undefined") {
     Object.defineProperty(view.Document, Symbol.hasInstance, { value: (value) => value instanceof own });
   }
 }
+if (typeof Selection !== "undefined") {
+  const property = Object.getOwnPropertyDescriptor(Selection.prototype, "collapse");
+  const collapse = property?.value;
+  if (collapse !== void 0) {
+    Object.defineProperty(Selection.prototype, "collapse", {
+      ...property,
+      value(node, offset = 0) {
+        if (node !== null && this.rangeCount > 0 && this.isCollapsed && this.anchorNode === node && this.anchorOffset === offset) return;
+        collapse.call(this, node, offset);
+      }
+    });
+  }
+}
 
 // srcts/stubs/bound.ts
 import { useSyncExternalStore } from "react";
@@ -111,6 +124,23 @@ function snapshotOf(stub, own) {
   const next = { value: stub.value, error: stub.error, ...own.methods };
   snapshots.set(stub, next);
   return next;
+}
+
+// srcts/stubs/console.ts
+import { format } from "node:util";
+import { onTestFinished } from "vitest";
+function expectedErrors(...patterns) {
+  const taken = [];
+  const print = console.error;
+  console.error = (...args) => {
+    const message = format(...args);
+    if (patterns.some((pattern) => message.search(pattern) >= 0)) taken.push(message);
+    else print(...args);
+  };
+  onTestFinished(() => {
+    console.error = print;
+  });
+  return taken;
 }
 
 // srcts/stubs/inputs.ts
@@ -438,6 +468,7 @@ export {
   cleared,
   draw,
   drop,
+  expectedErrors,
   fieldError,
   find,
   inert,

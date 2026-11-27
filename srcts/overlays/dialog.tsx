@@ -43,9 +43,41 @@ import { Icon } from "../icon/index.ts";
 import { buttons } from "../styles/index.ts";
 import { CircleExclamationPoint, Info } from "../vendor/index.ts";
 
-export function Modal({ className, ...props }: ModalOverlayProps): ReactElement {
+// Inside a ModalOverlay, React Aria's Modal warns of each prop that opens or
+// closes the modal, such as isOpen and isDismissable.
+// Only the ModalOverlay reads those props.
+// So the ModalOverlay takes them, and the Modal takes the rest.
+// React Aria's own Modal splits them so too, where it draws a ModalOverlay of
+// its own.
+// The starter kit's Modal hands every prop to both, and so warns
+// (https://github.com/adobe/react-spectrum/issues/10026).
+// The modal leaves out the prop UNSTABLE_portalContainer.
+// React Aria deprecates that prop, and names a parent UNSAFE_PortalProvider in
+// its place.
+export function Modal({
+  className,
+  isDismissable,
+  isKeyboardDismissDisabled,
+  isOpen,
+  defaultOpen,
+  onOpenChange,
+  shouldCloseOnInteractOutside,
+  isEntering,
+  isExiting,
+  ...props
+}: Omit<ModalOverlayProps, "UNSTABLE_portalContainer">): ReactElement {
   return (
-    <ModalOverlay {...props} className={OVERLAY}>
+    <ModalOverlay
+      isDismissable={isDismissable}
+      isKeyboardDismissDisabled={isKeyboardDismissDisabled}
+      isOpen={isOpen}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
+      shouldCloseOnInteractOutside={shouldCloseOnInteractOutside}
+      isEntering={isEntering}
+      isExiting={isExiting}
+      className={OVERLAY}
+    >
       <div className={CENTER}>
         <AriaModal {...props} className={composeRenderProps(className, (given) => `${MODAL} ${given ?? ""}`)} />
       </div>
