@@ -25,6 +25,19 @@ if (typeof document !== "undefined") {
     Object.defineProperty(view.Document, Symbol.hasInstance, { value: (value) => value instanceof own });
   }
 }
+if (typeof Selection !== "undefined") {
+  const property = Object.getOwnPropertyDescriptor(Selection.prototype, "collapse");
+  const collapse = property?.value;
+  if (collapse !== void 0) {
+    Object.defineProperty(Selection.prototype, "collapse", {
+      ...property,
+      value(node, offset = 0) {
+        if (node !== null && this.rangeCount > 0 && this.isCollapsed && this.anchorNode === node && this.anchorOffset === offset) return;
+        collapse.call(this, node, offset);
+      }
+    });
+  }
+}
 
 // srcts/stubs/bound.ts
 import { useSyncExternalStore } from "react";

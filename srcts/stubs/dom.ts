@@ -36,6 +36,21 @@
 //   This is happy-dom's bug #1781
 //   (https://github.com/capricorn86/happy-dom/issues/1781), and this part
 //   goes once a release of happy-dom fixes it.
+// - In happy-dom, the document fires selectionchange at once as the selection
+//   changes.
+//   It fires the event also as the selection collapses where it is collapsed
+//   already.
+//   A browser fires the event later, and only where the selection moved.
+//   While one of React Aria's date segments has the focus, the segment
+//   collapses the selection into itself on each selectionchange.
+//   In happy-dom, that collapse fires selectionchange again, at once, and the
+//   segment collapses the selection again, until the stack overflows.
+//   So a collapse to where the selection is collapsed already does nothing,
+//   and a collapse without an offset collapses to the offset 0, as in a
+//   browser.
+//   This is happy-dom's bug #2185
+//   (https://github.com/capricorn86/happy-dom/issues/2185), and this part
+//   goes once a release of happy-dom fires the event as browsers do.
 // Each part does no harm where it has done its work before, as where core's
 // stubs did the same, and outside happy-dom, none of them changes what the
 // DOM does.
@@ -66,5 +81,19 @@ if (typeof document !== "undefined") {
   if (view !== null && !(document instanceof view.Document)) {
     const own = Object.getPrototypeOf(view.Document) as typeof Document;
     Object.defineProperty(view.Document, Symbol.hasInstance, { value: (value: unknown) => value instanceof own });
+  }
+}
+
+if (typeof Selection !== "undefined") {
+  const property = Object.getOwnPropertyDescriptor(Selection.prototype, "collapse");
+  const collapse = property?.value as Selection["collapse"] | undefined;
+  if (collapse !== undefined) {
+    Object.defineProperty(Selection.prototype, "collapse", {
+      ...property,
+      value(this: Selection, node: Node | null, offset = 0) {
+        if (node !== null && this.rangeCount > 0 && this.isCollapsed && this.anchorNode === node && this.anchorOffset === offset) return;
+        collapse.call(this, node, offset);
+      },
+    });
   }
 }
