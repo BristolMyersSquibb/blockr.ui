@@ -794,8 +794,33 @@ import { ColorPicker as AriaColorPicker, Button as Button3 } from "react-aria-co
 import { Button as Button2, composeRenderProps as composeRenderProps7, Dialog as AriaDialog, Heading, Modal as AriaModal, ModalOverlay } from "react-aria-components";
 import { CircleExclamationPoint, Info } from "./vendor-723651e1.js";
 import { Fragment as Fragment5, jsx as jsx8, jsxs as jsxs6 } from "react/jsx-runtime";
-function Modal({ className, ...props }) {
-  return /* @__PURE__ */ jsx8(ModalOverlay, { ...props, className: OVERLAY, children: /* @__PURE__ */ jsx8("div", { className: CENTER, children: /* @__PURE__ */ jsx8(AriaModal, { ...props, className: composeRenderProps7(className, (given) => `${MODAL} ${given ?? ""}`) }) }) });
+function Modal({
+  className,
+  isDismissable,
+  isKeyboardDismissDisabled,
+  isOpen,
+  defaultOpen,
+  onOpenChange,
+  shouldCloseOnInteractOutside,
+  isEntering,
+  isExiting,
+  ...props
+}) {
+  return /* @__PURE__ */ jsx8(
+    ModalOverlay,
+    {
+      isDismissable,
+      isKeyboardDismissDisabled,
+      isOpen,
+      defaultOpen,
+      onOpenChange,
+      shouldCloseOnInteractOutside,
+      isEntering,
+      isExiting,
+      className: OVERLAY,
+      children: /* @__PURE__ */ jsx8("div", { className: CENTER, children: /* @__PURE__ */ jsx8(AriaModal, { ...props, className: composeRenderProps7(className, (given) => `${MODAL} ${given ?? ""}`) }) })
+    }
+  );
 }
 function Dialog({ className, ...props }) {
   return /* @__PURE__ */ jsx8(AriaDialog, { ...props, className: `${DIALOG} ${className ?? ""}` });
