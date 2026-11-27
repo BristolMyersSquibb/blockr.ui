@@ -15,10 +15,20 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}
 
-  # Lists no downstream until the js-state of a package imports blockr.ui.
-  # The job stays for revdep / revdep-all, a required check, which passes with
-  # none.
+  # Core imports blockr.ui.
+  # The dock, the assistant and the DAG draw with its components and its
+  # theme variables, so a change to blockr.ui can break their tests as well.
+  # Core's revdep check runs the three against blockr.ui's js-state.
+  # Without the three in this list, a change that breaks one of them would
+  # first fail in core's merge queue, not in blockr.ui's.
   revdep:
     uses: BristolMyersSquibb/blockr.ci/.github/workflows/revdep.yaml@main
+    with:
+      revdep-strict: |
+        BristolMyersSquibb/blockr.core@js-state
+        BristolMyersSquibb/blockr.dock@js-state
+        BristolMyersSquibb/blockr.assistant@js-state
+        BristolMyersSquibb/blockr.graph@js-state
+      image: true
     secrets:
       BLOCKR_PAT: ${{ secrets.BLOCKR_PAT }}
